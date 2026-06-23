@@ -58,6 +58,14 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/data/profiles.json
+    - assets/images/cards/doctors-cards-selection/
+    - assets/images/cards/gifted-cards-selection/
+    - assets/images/cards/guild-card-export/
+    - assets/images/cards/patricians-cards-selection/
+    - assets/images/cards/rashaar-cards-selection/
+    - assets/images/cards/strigoi-cards-selection/
+    - assets/images/cards/vatican-cards-selection/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
