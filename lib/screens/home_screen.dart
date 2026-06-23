@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -17,15 +18,18 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _kBackground,
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/bg_light.png'),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+      body: LayoutBuilder(
+        builder: (context, constraints) => Container(
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/bg_light.png'),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
           ),
-        ),
-        child: SingleChildScrollView(
+          child: SingleChildScrollView(
             child: Column(
               children: [
                 _Header(),
@@ -53,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       _MenuItem(
                         icon: Icons.settings_outlined,
-                        title: 'Options',
+                        title: 'Settings',
                         subtitle: 'Settings, preferences\nand more.',
                       ),
                     ],
@@ -63,6 +67,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
     );
   }
 }
@@ -131,24 +136,22 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _kCardBackground,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: _kCardBackground.withOpacity(0.55),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {},
-          child: Padding(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {},
+              child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
@@ -188,6 +191,8 @@ class _MenuItem extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
         ),
       ),
     );
