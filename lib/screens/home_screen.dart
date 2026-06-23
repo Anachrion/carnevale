@@ -34,32 +34,16 @@ class HomeScreen extends StatelessWidget {
               children: [
                 _Header(),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  padding: const EdgeInsets.fromLTRB(72, 80, 72, 32),
                   child: Column(
                     children: [
-                      _MenuItem(
-                        icon: Icons.style_outlined,
-                        title: 'Cards',
-                        subtitle: 'Browse all cards\nand profiles.',
-                      ),
+                      _MenuItem(icon: Icons.style_outlined, title: 'Cards'),
                       const SizedBox(height: 12),
-                      _MenuItem(
-                        icon: Icons.flag_outlined,
-                        title: 'Gangs',
-                        subtitle: 'Create, save and\nmanage your lists.',
-                      ),
+                      _MenuItem(icon: Icons.flag_outlined, title: 'Gangs'),
                       const SizedBox(height: 12),
-                      _MenuItem(
-                        icon: Icons.menu_book_outlined,
-                        title: 'Rules',
-                        subtitle: 'Learn the game\nand find answers.',
-                      ),
+                      _MenuItem(icon: Icons.menu_book_outlined, title: 'Rules'),
                       const SizedBox(height: 12),
-                      _MenuItem(
-                        icon: Icons.settings_outlined,
-                        title: 'Settings',
-                        subtitle: 'Settings, preferences\nand more.',
-                      ),
+                      _MenuItem(icon: Icons.settings_outlined, title: 'Settings'),
                     ],
                   ),
                 ),
@@ -76,28 +60,40 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset('assets/images/mask.png', height: 160),
-              const SizedBox(height: 10),
-              Text(
-                'CARNEVALE',
-                style: GoogleFonts.cinzel(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w700,
-                  color: _kDarkText,
-                  letterSpacing: 5,
-                ),
+      child: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 16, 0, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/mask.png', height: 160),
+                  const SizedBox(height: 10),
+                  Text(
+                    'CARNEVALE',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w700,
+                      color: _kDarkText,
+                      letterSpacing: 5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _GoldDivider(),
+                ],
               ),
-              const SizedBox(height: 12),
-              _GoldDivider(),
-            ],
+            ),
           ),
-        ),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: IconButton(
+              icon: const Icon(Icons.menu, color: _kDarkText, size: 28),
+              onPressed: () {},
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -127,12 +123,10 @@ class _MenuItem extends StatelessWidget {
   const _MenuItem({
     required this.icon,
     required this.title,
-    required this.subtitle,
   });
 
   final IconData icon;
   final String title;
-  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -163,28 +157,13 @@ class _MenuItem extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: _kDarkText,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontFamily: 'Georgia',
-                          fontSize: 13,
-                          color: _kSubtleText,
-                          height: 1.55,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    title,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: _kDarkText,
+                    ),
                   ),
                 ),
                 const Icon(Icons.chevron_right, color: _kGold, size: 22),
