@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/profile.dart';
 import '../services/profile_service.dart';
+import 'card_viewer_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kDarkText = Color(0xFF2C2418);
@@ -201,7 +202,7 @@ class _CardsScreenState extends State<CardsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       itemCount: _results.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) => _ProfileTile(profile: _results[i]),
+      itemBuilder: (_, i) => _ProfileTile(profile: _results[i], profiles: _results, index: i),
     );
   }
 
@@ -240,12 +241,22 @@ class _FactionChip extends StatelessWidget {
 }
 
 class _ProfileTile extends StatelessWidget {
-  const _ProfileTile({required this.profile});
+  const _ProfileTile({required this.profile, required this.profiles, required this.index});
   final Profile profile;
+  final List<Profile> profiles;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => CardViewerScreen(
+          profiles: profiles,
+          initialIndex: index,
+        )),
+      ),
+      child: ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
           decoration: BoxDecoration(
@@ -272,6 +283,7 @@ class _ProfileTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
     );
   }
 
