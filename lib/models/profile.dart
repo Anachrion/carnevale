@@ -74,6 +74,8 @@ class Profile {
   final String version;
   final List<Weapon> weapons;
   final List<SpecialRule> specialRules;
+  final String frontImage;
+  final String backImage;
 
   const Profile({
     required this.id,
@@ -95,6 +97,8 @@ class Profile {
     required this.version,
     required this.weapons,
     required this.specialRules,
+    required this.frontImage,
+    required this.backImage,
   });
 
   factory Profile.fromJson(Map<String, dynamic> j) => Profile(
@@ -117,6 +121,8 @@ class Profile {
         version: j['version'] as String,
         weapons: _parseList(j['weapons'], Weapon.fromJson),
         specialRules: _parseList(j['special_rules'], SpecialRule.fromJson),
+        frontImage: j['front_image'] as String? ?? '',
+        backImage: j['back_image'] as String? ?? '',
       );
 }
 
