@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'cards_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kCardBackground = Color(0xFFF5F2EE);
@@ -37,7 +38,11 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(72, 80, 72, 32),
                   child: Column(
                     children: [
-                      _MenuItem(icon: Icons.style_outlined, title: 'Cards'),
+                      _MenuItem(
+                        icon: Icons.style_outlined,
+                        title: 'Cards',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen())),
+                      ),
                       const SizedBox(height: 12),
                       _MenuItem(icon: Icons.flag_outlined, title: 'Gangs'),
                       const SizedBox(height: 12),
@@ -123,10 +128,12 @@ class _MenuItem extends StatelessWidget {
   const _MenuItem({
     required this.icon,
     required this.title,
+    this.onTap,
   });
 
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +151,7 @@ class _MenuItem extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
-              onTap: () {},
+              onTap: onTap,
               child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
