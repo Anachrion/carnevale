@@ -21,6 +21,16 @@ const _kFactionColors = {
   'guild':      Color(0xFF831822),
 };
 
+const _kFactionIcons = {
+  'doctors':    'assets/images/icons/doctors icon.png',
+  'gifted':     'assets/images/icons/gifted icon.png',
+  'guild':      'assets/images/icons/guild icon.png',
+  'patricians': 'assets/images/icons/patricians icon.png',
+  'rashaar':    'assets/images/icons/rashaar icon.png',
+  'strigoi':    'assets/images/icons/strigoi icon.png',
+  'vatican':    'assets/images/icons/vatican icon.png',
+};
+
 class CardsScreen extends StatefulWidget {
   const CardsScreen({super.key});
 
@@ -173,14 +183,14 @@ class _CardsScreenState extends State<CardsScreen> {
   Widget _buildFactionFilter() {
     final factions = ['guild', 'doctors', 'vatican', 'patricians', 'strigoi', 'gifted', 'rashaar'];
     return SizedBox(
-      height: 36,
+      height: 60,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          _FactionChip(label: 'All', selected: _selectedFaction == null, onTap: () => _setFaction(null)),
-          ...factions.map((f) => _FactionChip(
-                label: _factionLabel(f),
+          _AllChip(selected: _selectedFaction == null, onTap: () => _setFaction(null)),
+          ...factions.map((f) => _FactionIconChip(
+                faction: f,
                 selected: _selectedFaction == f,
                 onTap: () => _setFaction(_selectedFaction == f ? null : f),
               )),
@@ -209,9 +219,8 @@ class _CardsScreenState extends State<CardsScreen> {
   String _factionLabel(String f) => f[0].toUpperCase() + f.substring(1);
 }
 
-class _FactionChip extends StatelessWidget {
-  const _FactionChip({required this.label, required this.selected, required this.onTap});
-  final String label;
+class _AllChip extends StatelessWidget {
+  const _AllChip({required this.selected, required this.onTap});
   final bool selected;
   final VoidCallback onTap;
 
@@ -221,20 +230,54 @@ class _FactionChip extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: selected ? _kGold : Colors.white.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? _kGold : Colors.white.withOpacity(0.4)),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? _kGold : Colors.white.withOpacity(0.4),
+            width: selected ? 2 : 1,
+          ),
         ),
         child: Text(
-          label,
+          'All',
           style: GoogleFonts.cinzel(
             fontSize: 11,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
             color: selected ? Colors.white : _kDarkText,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _FactionIconChip extends StatelessWidget {
+  const _FactionIconChip({required this.faction, required this.selected, required this.onTap});
+  final String faction;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _kFactionColors[faction] ?? _kGold;
+    final iconPath = _kFactionIcons[faction]!;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: selected ? color.withOpacity(0.25) : Colors.white.withOpacity(0.5),
+          border: Border.all(
+            color: selected ? color : Colors.white.withOpacity(0.4),
+            width: selected ? 2 : 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Image.asset(iconPath, fit: BoxFit.contain),
       ),
     );
   }
