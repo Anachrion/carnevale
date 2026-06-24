@@ -22,6 +22,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
   late final Animation<double> _animation;
   late int _currentIndex;
   bool _showingFront = true;
+  int _swipeDirection = 1; // 1 = down-to-up (next), -1 = up-to-down (prev)
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
     if (index < 0 || index >= widget.profiles.length) return;
     _controller.reset();
     setState(() {
+      _swipeDirection = index > _currentIndex ? 1 : -1;
       _currentIndex = index;
       _showingFront = true;
     });
@@ -93,25 +95,61 @@ class _CardViewerScreenState extends State<CardViewerScreen>
             Center(
               child: GestureDetector(
                 onTap: _flip,
-                child: AnimatedBuilder(
-                  animation: _animation,
-                  builder: (_, __) {
-                    final angle = _animation.value * 3.14159;
-                    final showFront = angle < 1.5708;
-                    return Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()
-                        ..setEntry(3, 2, 0.001)
-                        ..rotateY(angle),
-                      child: showFront
-                          ? _CardImage(path: _current.frontImage)
-                          : Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.identity()..rotateY(3.14159),
-                              child: _CardImage(path: _current.backImage),
-                            ),
+                onVerticalDragEnd: (details) {
+                  if (details.primaryVelocity == null) return;
+                  if (details.primaryVelocity! < -200) {
+                    _goTo(_currentIndex + 1);
+                  } else if (details.primaryVelocity! > 200) {
+                    _goTo(_currentIndex - 1);
+                  }
+                },
+                onHorizontalDragEnd: (details) {
+                  if (details.primaryVelocity == null) return;
+                  if (details.primaryVelocity!.abs() > 200) _flip();
+                },
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    final isIncoming = child.key == ValueKey(_currentIndex);
+                    final begin = Offset(
+                      0,
+                      isIncoming ? _swipeDirection * 0.5 : -_swipeDirection * 0.5,
+                    );
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(begin: begin, end: Offset.zero)
+                            .animate(CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        )),
+                        child: child,
+                      ),
                     );
                   },
+                  child: KeyedSubtree(
+                    key: ValueKey(_currentIndex),
+                    child: AnimatedBuilder(
+                      animation: _animation,
+                      builder: (_, __) {
+                        final angle = _animation.value * 3.14159;
+                        final showFront = angle < 1.5708;
+                        return Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.001)
+                            ..rotateY(angle),
+                          child: showFront
+                              ? _CardImage(path: _current.frontImage)
+                              : Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()..rotateY(3.14159),
+                                  child: _CardImage(path: _current.backImage),
+                                ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
