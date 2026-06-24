@@ -270,14 +270,15 @@ class _FactionIconChip extends StatelessWidget {
         height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: selected ? color.withOpacity(0.25) : Colors.white.withOpacity(0.5),
-          border: Border.all(
-            color: selected ? color : Colors.white.withOpacity(0.4),
-            width: selected ? 2 : 1,
-          ),
+          color: selected ? color : color.withOpacity(0.5),
         ),
         padding: const EdgeInsets.all(4),
-        child: Image.asset(iconPath, fit: BoxFit.contain),
+        child: Image.asset(
+          iconPath,
+          fit: BoxFit.contain,
+          color: Colors.white,
+          colorBlendMode: BlendMode.srcIn,
+        ),
       ),
     );
   }
