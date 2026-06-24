@@ -23,6 +23,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
   late final PageController _pageController;
   late int _currentIndex;
   bool _showingFront = true;
+  int _flipSign = 1; // 1 = left-swipe rotation, -1 = right-swipe (mirror)
 
   @override
   void initState() {
@@ -47,8 +48,21 @@ class _CardViewerScreenState extends State<CardViewerScreen>
 
   void _flip() {
     if (_flipController.isAnimating) return;
+    if (_showingFront) _flipSign = 1;
     _showingFront ? _flipController.forward() : _flipController.reverse();
     setState(() => _showingFront = !_showingFront);
+  }
+
+  void _flipDirectional(double velocityX) {
+    if (_flipController.isAnimating) return;
+    if (_showingFront) {
+      _flipSign = velocityX < 0 ? 1 : -1;
+      _flipController.forward();
+      setState(() => _showingFront = false);
+    } else {
+      _flipController.reverse();
+      setState(() => _showingFront = true);
+    }
   }
 
   void _goTo(int index) {
@@ -111,17 +125,17 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                     onTap: isCurrent ? _flip : null,
                     onHorizontalDragEnd: isCurrent
                         ? (details) {
-                            if ((details.primaryVelocity ?? 0).abs() > 200) {
-                              _flip();
-                            }
+                            final v = details.primaryVelocity ?? 0;
+                            if (v.abs() < 200) return;
+                            _flipDirectional(v);
                           }
                         : null,
                     child: isCurrent
                         ? AnimatedBuilder(
                             animation: _flipAnimation,
                             builder: (_, __) {
-                              final angle = _flipAnimation.value * 3.14159;
-                              final showFront = angle < 1.5708;
+                              final angle = _flipAnimation.value * 3.14159 * _flipSign;
+                              final showFront = angle.abs() < 1.5708;
                               return Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.identity()
