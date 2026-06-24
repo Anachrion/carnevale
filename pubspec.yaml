@@ -59,6 +59,7 @@ flutter:
   assets:
     - assets/images/
     - assets/data/profiles.json
+    - assets/images/icons/
     - assets/images/cards/doctors/
     - assets/images/cards/gifted/
     - assets/images/cards/guild/
