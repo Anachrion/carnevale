@@ -18,44 +18,51 @@ class CardViewerScreen extends StatefulWidget {
 
 class _CardViewerScreenState extends State<CardViewerScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
+  late final AnimationController _flipController;
+  late final Animation<double> _flipAnimation;
+  late final PageController _pageController;
   late int _currentIndex;
   bool _showingFront = true;
-  int _swipeDirection = 1; // 1 = down-to-up (next), -1 = up-to-down (prev)
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _controller = AnimationController(
+    _pageController = PageController(initialPage: widget.initialIndex);
+    _flipController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 350),
     );
-    _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _flipController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  Profile get _current => widget.profiles[_currentIndex];
-
   void _flip() {
-    if (_controller.isAnimating) return;
-    _showingFront ? _controller.forward() : _controller.reverse();
+    if (_flipController.isAnimating) return;
+    _showingFront ? _flipController.forward() : _flipController.reverse();
     setState(() => _showingFront = !_showingFront);
   }
 
   void _goTo(int index) {
     if (index < 0 || index >= widget.profiles.length) return;
-    _controller.reset();
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onPageChanged(int index) {
+    _flipController.reset();
     setState(() {
-      _swipeDirection = index > _currentIndex ? 1 : -1;
       _currentIndex = index;
       _showingFront = true;
     });
@@ -91,67 +98,51 @@ class _CardViewerScreenState extends State<CardViewerScreen>
         onKeyEvent: _onKey,
         child: Stack(
           children: [
-            // Card image
-            Center(
-              child: GestureDetector(
-                onTap: _flip,
-                onVerticalDragEnd: (details) {
-                  if (details.primaryVelocity == null) return;
-                  if (details.primaryVelocity! < -200) {
-                    _goTo(_currentIndex + 1);
-                  } else if (details.primaryVelocity! > 200) {
-                    _goTo(_currentIndex - 1);
-                  }
-                },
-                onHorizontalDragEnd: (details) {
-                  if (details.primaryVelocity == null) return;
-                  if (details.primaryVelocity!.abs() > 200) _flip();
-                },
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) {
-                    final isIncoming = child.key == ValueKey(_currentIndex);
-                    final begin = Offset(
-                      0,
-                      isIncoming ? _swipeDirection * 0.5 : -_swipeDirection * 0.5,
-                    );
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(begin: begin, end: Offset.zero)
-                            .animate(CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOut,
-                        )),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: KeyedSubtree(
-                    key: ValueKey(_currentIndex),
-                    child: AnimatedBuilder(
-                      animation: _animation,
-                      builder: (_, __) {
-                        final angle = _animation.value * 3.14159;
-                        final showFront = angle < 1.5708;
-                        return Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()
-                            ..setEntry(3, 2, 0.001)
-                            ..rotateY(angle),
-                          child: showFront
-                              ? _CardImage(path: _current.frontImage)
-                              : Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.identity()..rotateY(3.14159),
-                                  child: _CardImage(path: _current.backImage),
-                                ),
-                        );
-                      },
-                    ),
+            PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              itemCount: widget.profiles.length,
+              onPageChanged: _onPageChanged,
+              itemBuilder: (context, index) {
+                final profile = widget.profiles[index];
+                final isCurrent = index == _currentIndex;
+                return Center(
+                  child: GestureDetector(
+                    onTap: isCurrent ? _flip : null,
+                    onHorizontalDragEnd: isCurrent
+                        ? (details) {
+                            if ((details.primaryVelocity ?? 0).abs() > 200) {
+                              _flip();
+                            }
+                          }
+                        : null,
+                    child: isCurrent
+                        ? AnimatedBuilder(
+                            animation: _flipAnimation,
+                            builder: (_, __) {
+                              final angle = _flipAnimation.value * 3.14159;
+                              final showFront = angle < 1.5708;
+                              return Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.identity()
+                                  ..setEntry(3, 2, 0.001)
+                                  ..rotateY(angle),
+                                child: showFront
+                                    ? _CardImage(path: profile.frontImage)
+                                    : Transform(
+                                        alignment: Alignment.center,
+                                        transform: Matrix4.identity()
+                                          ..rotateY(3.14159),
+                                        child:
+                                            _CardImage(path: profile.backImage),
+                                      ),
+                              );
+                            },
+                          )
+                        : _CardImage(path: profile.frontImage),
                   ),
-                ),
-              ),
+                );
+              },
             ),
             // Close button
             SafeArea(
@@ -170,8 +161,9 @@ class _CardViewerScreenState extends State<CardViewerScreen>
               right: 0,
               child: Center(
                 child: Text(
-                  '${_currentIndex + 1} / ${widget.profiles.length}  •  ←→ flip  •  ↑↓ navigate',
-                  style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 12),
+                  '${_currentIndex + 1} / ${widget.profiles.length}  •  tap/←→ flip  •  swipe ↑↓ navigate',
+                  style: TextStyle(
+                      color: Colors.white.withOpacity(0.35), fontSize: 12),
                 ),
               ),
             ),
