@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/gang.dart';
 import '../services/gang_service.dart';
+import 'gang_builder_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kDarkText = Color(0xFF2C2418);
@@ -58,7 +59,7 @@ class _GangsScreenState extends State<GangsScreen> {
     });
   }
 
-  Future<void> _createGang(String name, String faction) async {
+  Future<Gang> _createGang(String name, String faction) async {
     final gang = Gang(
       id: _service.generateId(),
       name: name,
@@ -66,7 +67,7 @@ class _GangsScreenState extends State<GangsScreen> {
       members: [],
     );
     await _service.save(gang);
-    await _load();
+    return gang;
   }
 
   Future<void> _deleteGang(String id) async {
@@ -74,13 +75,20 @@ class _GangsScreenState extends State<GangsScreen> {
     await _load();
   }
 
-  void _showCreateDialog() {
-    showModalBottomSheet(
+  void _showCreateDialog() async {
+    final gang = await showModalBottomSheet<Gang>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _CreateGangSheet(onCreate: _createGang),
     );
+    if (gang != null && mounted) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: gang)),
+      );
+      await _load();
+    }
   }
 
   @override
@@ -173,6 +181,13 @@ class _GangsScreenState extends State<GangsScreen> {
       itemBuilder: (_, i) => _GangTile(
         gang: _gangs[i],
         onDelete: () => _deleteGang(_gangs[i].id),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: _gangs[i])),
+          );
+          await _load();
+        },
       ),
     );
   }
@@ -200,9 +215,10 @@ class _GangsScreenState extends State<GangsScreen> {
 }
 
 class _GangTile extends StatelessWidget {
-  const _GangTile({required this.gang, required this.onDelete});
+  const _GangTile({required this.gang, required this.onDelete, required this.onTap});
   final Gang gang;
   final VoidCallback onDelete;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +239,7 @@ class _GangTile extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
-              onTap: () {},
+              onTap: onTap,
               onLongPress: () => _confirmDelete(context),
               child: Padding(
                 padding: const EdgeInsets.all(14),
@@ -328,7 +344,7 @@ class _GangTile extends StatelessWidget {
 
 class _CreateGangSheet extends StatefulWidget {
   const _CreateGangSheet({required this.onCreate});
-  final Future<void> Function(String name, String faction) onCreate;
+  final Future<Gang> Function(String name, String faction) onCreate;
 
   @override
   State<_CreateGangSheet> createState() => _CreateGangSheetState();
@@ -349,8 +365,8 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
     setState(() => _saving = true);
-    await widget.onCreate(name, _selectedFaction);
-    if (mounted) Navigator.of(context).pop();
+    final gang = await widget.onCreate(name, _selectedFaction);
+    if (mounted) Navigator.of(context).pop(gang);
   }
 
   @override

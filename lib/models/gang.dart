@@ -45,12 +45,14 @@ class Gang {
   final String name;
   final String faction;
   final List<GangMember> members;
+  final int pointLimit;
 
   const Gang({
     required this.id,
     required this.name,
     required this.faction,
     required this.members,
+    this.pointLimit = 100,
   });
 
   int get totalDucats => members.fold(0, (sum, m) => sum + m.totalDucats);
@@ -60,12 +62,14 @@ class Gang {
     String? name,
     String? faction,
     List<GangMember>? members,
+    int? pointLimit,
   }) =>
       Gang(
         id: id,
         name: name ?? this.name,
         faction: faction ?? this.faction,
         members: members ?? this.members,
+        pointLimit: pointLimit ?? this.pointLimit,
       );
 
   Map<String, dynamic> toJson() => {
@@ -73,6 +77,7 @@ class Gang {
         'name': name,
         'faction': faction,
         'members': members.map((m) => m.toJson()).toList(),
+        'pointLimit': pointLimit,
       };
 
   factory Gang.fromJson(Map<String, dynamic> j) => Gang(
@@ -82,5 +87,6 @@ class Gang {
         members: (j['members'] as List<dynamic>)
             .map((e) => GangMember.fromJson(e as Map<String, dynamic>))
             .toList(),
+        pointLimit: j['pointLimit'] as int? ?? 100,
       );
 }
