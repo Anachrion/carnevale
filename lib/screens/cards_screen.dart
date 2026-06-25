@@ -43,7 +43,7 @@ class _CardsScreenState extends State<CardsScreen> {
   final _service = ProfileService();
 
   List<Profile> _results = [];
-  String? _selectedFaction;
+  final Set<String> _selectedFactions = {};
   bool _loading = true;
 
   @override
@@ -70,13 +70,17 @@ class _CardsScreenState extends State<CardsScreen> {
   Future<void> _onSearch() async {
     final results = await _service.search(
       _searchController.text,
-      faction: _selectedFaction,
+      factions: _selectedFactions,
     );
     setState(() => _results = results);
   }
 
-  Future<void> _setFaction(String? faction) async {
-    _selectedFaction = faction;
+  Future<void> _toggleFaction(String faction) async {
+    if (_selectedFactions.contains(faction)) {
+      _selectedFactions.remove(faction);
+    } else {
+      _selectedFactions.add(faction);
+    }
     await _onSearch();
   }
 
@@ -188,11 +192,10 @@ class _CardsScreenState extends State<CardsScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          _AllChip(selected: _selectedFaction == null, onTap: () => _setFaction(null)),
           ...factions.map((f) => _FactionIconChip(
                 faction: f,
-                selected: _selectedFaction == f,
-                onTap: () => _setFaction(_selectedFaction == f ? null : f),
+                selected: _selectedFactions.contains(f),
+                onTap: () => _toggleFaction(f),
               )),
         ],
       ),
