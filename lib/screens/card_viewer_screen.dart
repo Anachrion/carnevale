@@ -86,8 +86,10 @@ class _CardViewerScreenState extends State<CardViewerScreen>
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     switch (event.logicalKey) {
       case LogicalKeyboardKey.arrowLeft:
+        _flipDirectional(1);
+        return KeyEventResult.handled;
       case LogicalKeyboardKey.arrowRight:
-        _flip();
+        _flipDirectional(-1);
         return KeyEventResult.handled;
       case LogicalKeyboardKey.arrowUp:
         _goTo(_currentIndex - 1);

@@ -18,11 +18,11 @@ class ProfileService {
     return _profiles!;
   }
 
-  Future<List<Profile>> search(String query, {String? faction}) async {
+  Future<List<Profile>> search(String query, {Set<String>? factions}) async {
     final all = await loadAll();
     final q = query.toLowerCase().trim();
     return all.where((p) {
-      final matchesFaction = faction == null || p.faction == faction;
+      final matchesFaction = factions == null || factions.isEmpty || factions.contains(p.faction);
       final matchesQuery = q.isEmpty || p.name.toLowerCase().contains(q);
       return matchesFaction && matchesQuery;
     }).toList();
