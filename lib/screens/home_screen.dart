@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'cards_screen.dart';
+import 'gangs_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kCardBackground = Color(0xFFF5F2EE);
@@ -44,7 +45,11 @@ class HomeScreen extends StatelessWidget {
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen())),
                       ),
                       const SizedBox(height: 12),
-                      _MenuItem(icon: Icons.flag_outlined, title: 'Gangs'),
+                      _MenuItem(
+                        icon: Icons.flag_outlined,
+                        title: 'Gangs',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GangsScreen())),
+                      ),
                       const SizedBox(height: 12),
                       _MenuItem(icon: Icons.menu_book_outlined, title: 'Rules'),
                       const SizedBox(height: 12),
