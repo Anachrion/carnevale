@@ -44,60 +44,54 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   late Gang _gang;
   List<Profile> _profiles = [];
   bool _loading = true;
+  bool _busy = false;
 
   @override
   void initState() {
     super.initState();
     _gang = widget.gang;
-    _loadProfiles();
+    _loadData();
   }
 
-  Future<void> _loadProfiles() async {
-    final all = await ProfileService().search('', factions: {_gang.faction});
+  Future<void> _loadData() async {
+    final profiles = await ProfileService().search('', factions: {_gang.faction});
     setState(() {
-      _profiles = all;
+      _profiles = profiles;
       _loading = false;
     });
   }
 
-  int _countFor(Profile p) {
-    final m = _gang.members.where((m) => m.profileId == p.id);
-    return m.isEmpty ? 0 : m.first.count;
-  }
+  bool _hasEntry(Profile p) => _gang.entries.any((e) => e.referenceId == p.id);
 
-  void _increment(Profile p) {
-    if (_gang.totalDucats + p.ducats > _gang.pointLimit) return;
-    final members = List<GangMember>.from(_gang.members);
-    final idx = members.indexWhere((m) => m.profileId == p.id);
-    if (idx >= 0) {
-      members[idx] = members[idx].copyWith(count: members[idx].count + 1);
-    } else {
-      members.add(GangMember(
-        profileId: p.id,
-        profileName: p.name,
-        faction: p.faction,
-        ducats: p.ducats,
-        count: 1,
-      ));
+  ListEntry? _entryFor(Profile p) {
+    try {
+      return _gang.entries.firstWhere((e) => e.referenceId == p.id);
+    } catch (_) {
+      return null;
     }
-    _applyUpdate(members);
   }
 
-  void _decrement(Profile p) {
-    final members = List<GangMember>.from(_gang.members);
-    final idx = members.indexWhere((m) => m.profileId == p.id);
-    if (idx < 0) return;
-    if (members[idx].count <= 1) {
-      members.removeAt(idx);
-    } else {
-      members[idx] = members[idx].copyWith(count: members[idx].count - 1);
+  Future<void> _add(Profile p) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await GangService().addEntry(_gang.id, p.id);
+      setState(() => _gang = updated);
+    } finally {
+      setState(() => _busy = false);
     }
-    _applyUpdate(members);
   }
 
-  void _applyUpdate(List<GangMember> members) {
-    setState(() => _gang = _gang.copyWith(members: members));
-    GangService().save(_gang);
+  Future<void> _remove(Profile p) async {
+    final entry = _entryFor(p);
+    if (entry == null || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await GangService().removeEntry(_gang.id, entry.id);
+      setState(() => _gang = updated);
+    } finally {
+      setState(() => _busy = false);
+    }
   }
 
   @override
@@ -180,9 +174,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   }
 
   Widget _buildPointsBar(Color factionColor) {
-    final used = _gang.totalDucats;
-    final limit = _gang.pointLimit;
-    final ratio = (used / limit).clamp(0.0, 1.0);
+    final used = _gang.totalCost;
+    final limit = _gang.points;
+    final ratio = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
     final isOver = used > limit;
     final barColor = isOver ? Colors.red.shade400 : _kGold;
 
@@ -214,10 +208,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     ),
                     Text(
                       ' / $limit ducats',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 14,
-                        color: _kSubtleText,
-                      ),
+                      style: GoogleFonts.cinzel(fontSize: 14, color: _kSubtleText),
                     ),
                     const Spacer(),
                     Text(
@@ -263,15 +254,16 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final p = _profiles[i];
-        final count = _countFor(p);
-        final canAdd = _gang.totalDucats + p.ducats <= _gang.pointLimit;
+        final inList = _hasEntry(p);
+        final canAdd = !inList && (_gang.totalCost + p.ducats <= _gang.points);
         return _ProfileBuilderTile(
           profile: p,
-          count: count,
+          inList: inList,
           factionColor: factionColor,
           canAdd: canAdd,
-          onIncrement: () => _increment(p),
-          onDecrement: () => _decrement(p),
+          busy: _busy,
+          onAdd: () => _add(p),
+          onRemove: () => _remove(p),
         );
       },
     );
@@ -281,36 +273,37 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 class _ProfileBuilderTile extends StatelessWidget {
   const _ProfileBuilderTile({
     required this.profile,
-    required this.count,
+    required this.inList,
     required this.factionColor,
     required this.canAdd,
-    required this.onIncrement,
-    required this.onDecrement,
+    required this.busy,
+    required this.onAdd,
+    required this.onRemove,
   });
 
   final Profile profile;
-  final int count;
+  final bool inList;
   final Color factionColor;
   final bool canAdd;
-  final VoidCallback onIncrement;
-  final VoidCallback onDecrement;
+  final bool busy;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    final active = count > 0;
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: active
+            color: inList
                 ? factionColor.withOpacity(0.12)
                 : _kCardBg.withOpacity(0.65),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: active ? factionColor.withOpacity(0.4) : Colors.white.withOpacity(0.3),
-              width: active ? 1.0 : 0.5,
+              color: inList ? factionColor.withOpacity(0.4) : Colors.white.withOpacity(0.3),
+              width: inList ? 1.0 : 0.5,
             ),
           ),
           child: Padding(
@@ -334,19 +327,20 @@ class _ProfileBuilderTile extends StatelessWidget {
                         '${profile.ducats} ducats',
                         style: TextStyle(
                           fontSize: 12,
-                          color: active ? factionColor : _kSubtleText,
+                          color: inList ? factionColor : _kSubtleText,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-                _Counter(
-                  count: count,
+                _ToggleButton(
+                  inList: inList,
                   canAdd: canAdd,
-                  onIncrement: onIncrement,
-                  onDecrement: onDecrement,
-                  activeColor: factionColor,
+                  busy: busy,
+                  factionColor: factionColor,
+                  onAdd: onAdd,
+                  onRemove: onRemove,
                 ),
               ],
             ),
@@ -357,87 +351,60 @@ class _ProfileBuilderTile extends StatelessWidget {
   }
 }
 
-class _Counter extends StatelessWidget {
-  const _Counter({
-    required this.count,
+class _ToggleButton extends StatelessWidget {
+  const _ToggleButton({
+    required this.inList,
     required this.canAdd,
-    required this.onIncrement,
-    required this.onDecrement,
-    required this.activeColor,
+    required this.busy,
+    required this.factionColor,
+    required this.onAdd,
+    required this.onRemove,
   });
 
-  final int count;
+  final bool inList;
   final bool canAdd;
-  final VoidCallback onIncrement;
-  final VoidCallback onDecrement;
-  final Color activeColor;
+  final bool busy;
+  final Color factionColor;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _CircleButton(
-          icon: Icons.remove,
-          enabled: count > 0,
-          color: activeColor,
-          onTap: onDecrement,
-        ),
-        SizedBox(
-          width: 32,
-          child: Text(
-            '$count',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.cinzel(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: count > 0 ? activeColor : _kSubtleText.withOpacity(0.4),
-            ),
+    if (busy) {
+      return SizedBox(
+        width: 30, height: 30,
+        child: CircularProgressIndicator(strokeWidth: 2, color: factionColor),
+      );
+    }
+    if (inList) {
+      return GestureDetector(
+        onTap: onRemove,
+        child: Container(
+          width: 30, height: 30,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: factionColor.withOpacity(0.15),
+            border: Border.all(color: factionColor.withOpacity(0.5)),
           ),
+          child: Icon(Icons.remove, size: 16, color: factionColor),
         ),
-        _CircleButton(
-          icon: Icons.add,
-          enabled: canAdd,
-          color: activeColor,
-          onTap: onIncrement,
-        ),
-      ],
-    );
-  }
-}
-
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({
-    required this.icon,
-    required this.enabled,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final bool enabled;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
+      );
+    }
     return GestureDetector(
-      onTap: enabled ? onTap : null,
+      onTap: canAdd ? onAdd : null,
       child: Container(
-        width: 30,
-        height: 30,
+        width: 30, height: 30,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: enabled ? color.withOpacity(0.15) : Colors.transparent,
+          color: canAdd ? factionColor.withOpacity(0.15) : Colors.transparent,
           border: Border.all(
-            color: enabled ? color.withOpacity(0.5) : _kSubtleText.withOpacity(0.2),
-            width: 1,
+            color: canAdd ? factionColor.withOpacity(0.5) : _kSubtleText.withOpacity(0.2),
           ),
         ),
         child: Icon(
-          icon,
+          Icons.add,
           size: 16,
-          color: enabled ? color : _kSubtleText.withOpacity(0.3),
+          color: canAdd ? factionColor : _kSubtleText.withOpacity(0.3),
         ),
       ),
     );
