@@ -373,12 +373,21 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       itemBuilder: (_, i) {
         final entry = entries[i];
         final profileIdx = _profiles.indexWhere((p) => p.cardReferenceId == entry.referenceId);
-        final entryColor = profileIdx != -1 && _profiles[profileIdx].faction == 'gifted'
+        final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
+        final entryColor = profile?.faction == 'gifted'
             ? (_kFactionColors['gifted'] ?? factionColor)
             : factionColor;
+        final role = profile == null
+            ? null
+            : profile.keywords.contains('Leader')
+                ? 'leader'
+                : profile.keywords.contains('Hero')
+                    ? 'hero'
+                    : null;
         return _EntryTile(
           entry: entry,
           factionColor: entryColor,
+          role: role,
           busy: _busy,
           onRemove: () => _removeEntry(entry),
           onTap: profileIdx == -1
@@ -679,25 +688,26 @@ class _EntryTile extends StatelessWidget {
     required this.factionColor,
     required this.busy,
     required this.onRemove,
+    this.role,
     this.onTap,
   });
 
   final ListEntry entry;
   final Color factionColor;
+  final String? role;
   final bool busy;
   final VoidCallback onRemove;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Color.lerp(factionColor, Colors.black, 0.45)!;
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
         decoration: BoxDecoration(
-          color: bgColor,
+          color: factionColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
@@ -705,14 +715,33 @@ class _EntryTile extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  entry.name,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        entry.name,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (role != null) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        role!,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white.withOpacity(0.65),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               const SizedBox(width: 8),
