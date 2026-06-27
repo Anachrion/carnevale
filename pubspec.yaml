@@ -59,15 +59,8 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/data/profiles.json
     - assets/images/icons/
-    - assets/images/cards/doctors/
-    - assets/images/cards/gifted/
-    - assets/images/cards/guild/
-    - assets/images/cards/patricians/
-    - assets/images/cards/rashaar/
-    - assets/images/cards/strigoi/
-    - assets/images/cards/vatican/
+    - assets/images/cards/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
