@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import '../models/profile.dart';
 
 class ProfileService {
@@ -7,12 +7,17 @@ class ProfileService {
   factory ProfileService() => _instance;
   ProfileService._();
 
+  static const _base = 'http://localhost:3000/api/v1';
+
   List<Profile>? _profiles;
 
   Future<List<Profile>> loadAll() async {
     if (_profiles != null) return _profiles!;
-    final raw = await rootBundle.loadString('assets/data/profiles.json');
-    final list = jsonDecode(raw) as List<dynamic>;
+    final res = await http.get(Uri.parse('$_base/profiles'));
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('API error ${res.statusCode}: ${res.body}');
+    }
+    final list = jsonDecode(res.body) as List<dynamic>;
     _profiles = list.map((e) => Profile.fromJson(e as Map<String, dynamic>)).toList()
       ..sort((a, b) => a.name.compareTo(b.name));
     return _profiles!;
@@ -32,4 +37,6 @@ class ProfileService {
     final all = await loadAll();
     return all.map((p) => p.faction).toSet().toList()..sort();
   }
+
+  void invalidateCache() => _profiles = null;
 }

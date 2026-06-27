@@ -121,9 +121,14 @@ class Profile {
         version: j['version'] as String,
         weapons: _parseList(j['weapons'], Weapon.fromJson),
         specialRules: _parseList(j['special_rules'], SpecialRule.fromJson),
-        frontImage: j['front_image'] as String? ?? '',
-        backImage: j['back_image'] as String? ?? '',
+        frontImage: _firstCardRef(j['card_references'], 'card_front'),
+        backImage: _firstCardRef(j['card_references'], 'card_back'),
       );
+}
+
+String _firstCardRef(dynamic refs, String key) {
+  if (refs is! List || refs.isEmpty) return '';
+  return (refs.first as Map<String, dynamic>)[key] as String? ?? '';
 }
 
 List<String> _parseStringList(dynamic value) {

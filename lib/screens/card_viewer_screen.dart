@@ -196,8 +196,12 @@ class _CardImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final filename = path.split('/').last;
+    if (filename.isEmpty) {
+      return const Center(child: Icon(Icons.broken_image, color: Colors.white38, size: 64));
+    }
     return Image.asset(
-      path.startsWith('assets/') ? path : 'assets/$path',
+      'assets/images/cards/$filename',
       fit: BoxFit.contain,
       height: MediaQuery.of(context).size.height * 0.8,
       errorBuilder: (_, __, ___) => const Center(
