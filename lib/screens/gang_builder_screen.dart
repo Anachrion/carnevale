@@ -682,7 +682,7 @@ class _TabButton extends StatelessWidget {
   }
 }
 
-class _EntryTile extends StatelessWidget {
+class _EntryTile extends StatefulWidget {
   const _EntryTile({
     required this.entry,
     required this.factionColor,
@@ -700,78 +700,131 @@ class _EntryTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<_EntryTile> createState() => _EntryTileState();
+}
+
+class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+  late final Animation<double> _size;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 320));
+    _slide = Tween(begin: Offset.zero, end: const Offset(1.2, 0)).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.7, curve: Curves.easeIn)),
+    );
+    _fade = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.65, curve: Curves.easeIn)),
+    );
+    _size = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.55, 1.0, curve: Curves.easeInOut)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _handleRemove() {
+    _ctrl.forward().then((_) => widget.onRemove());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-        decoration: BoxDecoration(
-          color: factionColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        entry.name,
+    return SizeTransition(
+      sizeFactor: _size,
+      axisAlignment: -1,
+      child: FadeTransition(
+        opacity: _fade,
+        child: SlideTransition(
+          position: _slide,
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      widget.factionColor,
+                      Color.lerp(widget.factionColor, Colors.black, 0.45)!,
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.entry.name,
+                                style: GoogleFonts.cinzel(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (widget.role != null) ...[
+                              const SizedBox(width: 6),
+                              Text(
+                                widget.role!,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white.withOpacity(0.65),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${widget.entry.cost}',
                         style: GoogleFonts.cinzel(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    if (role != null) ...[
-                      const SizedBox(width: 6),
-                      Text(
-                        role!,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.white.withOpacity(0.65),
-                          fontStyle: FontStyle.italic,
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: widget.busy ? null : _handleRemove,
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.15),
+                            border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                          ),
+                          child: Icon(Icons.remove, size: 14, color: Colors.white.withOpacity(0.85)),
                         ),
                       ),
                     ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${entry.cost}',
-                style: GoogleFonts.cinzel(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: busy ? null : onRemove,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.15),
-                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
                   ),
-                  child: Icon(Icons.remove, size: 14, color: Colors.white.withOpacity(0.85)),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }
 
