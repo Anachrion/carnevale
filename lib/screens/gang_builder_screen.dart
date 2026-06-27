@@ -2,15 +2,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/gang.dart';
+import '../models/gang_validation.dart';
 import '../models/profile.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
+import 'card_viewer_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kDarkText = Color(0xFF2C2418);
 const _kGold = Color(0xFFC4A050);
 const _kSubtleText = Color(0xFF7A6E62);
-const _kCardBg = Color(0xFFF5F2EE);
 
 const _kFactionColors = {
   'doctors':    Color(0xFF177282),
@@ -32,6 +33,10 @@ const _kFactionIcons = {
   'vatican':    'assets/images/icons/vatican icon.png',
 };
 
+enum _Tab { list, hire }
+
+enum _HireSort { role, name, cost }
+
 class GangBuilderScreen extends StatefulWidget {
   const GangBuilderScreen({super.key, required this.gang});
   final Gang gang;
@@ -45,27 +50,69 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   List<Profile> _profiles = [];
   bool _loading = true;
   bool _busy = false;
+  _Tab _tab = _Tab.list;
+  _HireSort _hireSort = _HireSort.role;
+  bool _hireSortAsc = true;
+  final _searchController = TextEditingController();
+
+  List<Profile> get _filteredProfiles {
+    final q = _searchController.text.trim().toLowerCase();
+    final filtered = q.isEmpty
+        ? List<Profile>.from(_profiles)
+        : _profiles.where((p) => p.name.toLowerCase().contains(q)).toList();
+    int roleRank(Profile p) {
+      if (p.keywords.contains('Leader')) return 0;
+      if (p.keywords.contains('Hero')) return 1;
+      return 2;
+    }
+
+    filtered.sort((a, b) {
+      final asc = _hireSortAsc;
+      switch (_hireSort) {
+        case _HireSort.cost:
+          final c = a.ducats.compareTo(b.ducats);
+          return asc ? c : -c;
+        case _HireSort.name:
+          final c = a.name.compareTo(b.name);
+          return asc ? c : -c;
+        case _HireSort.role:
+          final rankCmp = roleRank(a).compareTo(roleRank(b));
+          if (rankCmp != 0) return asc ? rankCmp : -rankCmp;
+          final nameCmp = a.name.compareTo(b.name);
+          return asc ? nameCmp : -nameCmp;
+      }
+    });
+    return filtered;
+  }
 
   @override
   void initState() {
     super.initState();
     _gang = widget.gang;
     _loadData();
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
-    final profiles = await ProfileService().search('', factions: {_gang.faction});
+    final profiles = await ProfileService().search('', factions: {_gang.faction, 'gifted'});
     setState(() {
       _profiles = profiles;
       _loading = false;
     });
   }
 
-  bool _hasEntry(Profile p) => _gang.entries.any((e) => e.referenceId == p.id);
+  int _entryCount(Profile p) =>
+      _gang.entries.where((e) => e.referenceId == p.cardReferenceId).length;
 
   ListEntry? _entryFor(Profile p) {
     try {
-      return _gang.entries.firstWhere((e) => e.referenceId == p.id);
+      return _gang.entries.firstWhere((e) => e.referenceId == p.cardReferenceId);
     } catch (_) {
       return null;
     }
@@ -75,7 +122,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      final updated = await GangService().addEntry(_gang.id, p.id);
+      final updated = await GangService().addEntry(_gang.id, p.cardReferenceId);
       setState(() => _gang = updated);
     } finally {
       setState(() => _busy = false);
@@ -85,6 +132,17 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   Future<void> _remove(Profile p) async {
     final entry = _entryFor(p);
     if (entry == null || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await GangService().removeEntry(_gang.id, entry.id);
+      setState(() => _gang = updated);
+    } finally {
+      setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _removeEntry(ListEntry entry) async {
+    if (_busy) return;
     setState(() => _busy = true);
     try {
       final updated = await GangService().removeEntry(_gang.id, entry.id);
@@ -123,8 +181,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                   children: [
                     _buildHeader(context, factionColor),
                     _buildPointsBar(factionColor),
+                    const SizedBox(height: 12),
+                    _buildTabBar(factionColor),
                     const SizedBox(height: 8),
-                    Expanded(child: _buildProfileList(factionColor)),
+                    Expanded(child: _buildTabContent(factionColor)),
                   ],
                 ),
               ),
@@ -239,108 +299,587 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     );
   }
 
-  Widget _buildProfileList(Color factionColor) {
+  Widget _buildTabBar(Color factionColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                _TabButton(
+                  label: 'List',
+                  selected: _tab == _Tab.list,
+                  factionColor: factionColor,
+                  onTap: () => setState(() => _tab = _Tab.list),
+                ),
+                _TabButton(
+                  label: 'Hire',
+                  selected: _tab == _Tab.hire,
+                  factionColor: factionColor,
+                  onTap: () => setState(() => _tab = _Tab.hire),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabContent(Color factionColor) {
     if (_loading) {
       return const Center(child: CircularProgressIndicator(color: _kGold));
     }
-    if (_profiles.isEmpty) {
+    return _tab == _Tab.list
+        ? _buildListTab(factionColor)
+        : _buildHireTab(factionColor);
+  }
+
+  Widget _buildListTab(Color factionColor) {
+    final entries = _gang.entries;
+    if (entries.isEmpty) {
       return Center(
-        child: Text('No profiles for this faction.', style: TextStyle(color: _kSubtleText)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.group_outlined, size: 48, color: _kSubtleText.withOpacity(0.4)),
+            const SizedBox(height: 12),
+            Text(
+              'No models hired yet',
+              style: GoogleFonts.cinzel(fontSize: 15, color: _kSubtleText),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Go to Hire to add models',
+              style: TextStyle(fontSize: 12, color: _kSubtleText.withOpacity(0.7)),
+            ),
+          ],
+        ),
       );
     }
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      itemCount: _profiles.length,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+      itemCount: entries.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
-        final p = _profiles[i];
-        final inList = _hasEntry(p);
-        final canAdd = !inList && (_gang.totalCost + p.ducats <= _gang.points);
-        return _ProfileBuilderTile(
-          profile: p,
-          inList: inList,
-          factionColor: factionColor,
-          canAdd: canAdd,
+        final entry = entries[i];
+        final profileIdx = _profiles.indexWhere((p) => p.cardReferenceId == entry.referenceId);
+        final entryColor = profileIdx != -1 && _profiles[profileIdx].faction == 'gifted'
+            ? (_kFactionColors['gifted'] ?? factionColor)
+            : factionColor;
+        return _EntryTile(
+          entry: entry,
+          factionColor: entryColor,
           busy: _busy,
-          onAdd: () => _add(p),
-          onRemove: () => _remove(p),
+          onRemove: () => _removeEntry(entry),
+          onTap: profileIdx == -1
+              ? null
+              : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CardViewerScreen(
+                        profiles: _profiles,
+                        initialIndex: profileIdx,
+                      ),
+                    ),
+                  ),
         );
       },
     );
   }
+
+  Widget _buildHireTab(Color factionColor) {
+    final profiles = _filteredProfiles;
+
+    final factionProfiles = _gang.faction == 'gifted'
+        ? profiles
+        : profiles.where((p) => p.faction == _gang.faction).toList();
+    final giftedProfiles = _gang.faction == 'gifted'
+        ? <Profile>[]
+        : profiles.where((p) => p.faction == 'gifted').toList();
+
+    Widget buildTile(Profile p) {
+      final isUnique = p.keywords.contains('Unique');
+      final count = _entryCount(p);
+      final validation = GangValidator.canAdd(_gang, p);
+      final overBudget = _gang.totalCost + p.ducats > _gang.points;
+      final greyOut = overBudget && !(isUnique && count > 0);
+      return _HireCardTile(
+        profile: p,
+        allProfiles: profiles,
+        index: profiles.indexOf(p),
+        count: count,
+        isUnique: isUnique,
+        factionColor: factionColor,
+        canAdd: validation.valid,
+        greyOut: greyOut,
+        busy: _busy,
+        onAdd: () => _add(p),
+        onRemove: () => _remove(p),
+      );
+    }
+
+    return Column(
+      children: [
+        _buildHireControls(),
+        Expanded(
+          child: _profiles.isEmpty
+              ? Center(
+                  child: Text('No profiles for this faction.', style: TextStyle(color: _kSubtleText)),
+                )
+              : profiles.isEmpty
+                  ? Center(
+                      child: Text('No profiles match your search.', style: TextStyle(color: _kSubtleText)),
+                    )
+                  : CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                          sliver: SliverList.separated(
+                            itemCount: factionProfiles.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 8),
+                            itemBuilder: (_, i) => buildTile(factionProfiles[i]),
+                          ),
+                        ),
+                        if (giftedProfiles.isNotEmpty) ...[
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+                              child: Row(
+                                children: [
+                                  Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    child: Text(
+                                      'Mercenaries',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: _kSubtleText.withOpacity(0.7),
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                            sliver: SliverList.separated(
+                              itemCount: giftedProfiles.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 8),
+                              itemBuilder: (_, i) => buildTile(giftedProfiles[i]),
+                            ),
+                          ),
+                        ] else
+                          const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+                      ],
+                    ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHireControls() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: _kDarkText, fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'Search profiles...',
+                    hintStyle: TextStyle(color: _kSubtleText.withOpacity(0.7), fontSize: 15),
+                    prefixIcon: const Icon(Icons.search, color: _kGold, size: 20),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear, color: _kSubtleText.withOpacity(0.6), size: 18),
+                            onPressed: () => _searchController.clear(),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              _SortChip(
+                label: 'Role',
+                selected: _hireSort == _HireSort.role,
+                ascending: _hireSortAsc,
+                onTap: () => setState(() {
+                  if (_hireSort == _HireSort.role) {
+                    _hireSortAsc = !_hireSortAsc;
+                  } else {
+                    _hireSort = _HireSort.role;
+                    _hireSortAsc = true;
+                  }
+                }),
+              ),
+              const SizedBox(width: 6),
+              _SortChip(
+                label: 'Name',
+                selected: _hireSort == _HireSort.name,
+                ascending: _hireSortAsc,
+                onTap: () => setState(() {
+                  if (_hireSort == _HireSort.name) {
+                    _hireSortAsc = !_hireSortAsc;
+                  } else {
+                    _hireSort = _HireSort.name;
+                    _hireSortAsc = true;
+                  }
+                }),
+              ),
+              const SizedBox(width: 6),
+              _SortChip(
+                label: 'Cost',
+                selected: _hireSort == _HireSort.cost,
+                ascending: _hireSortAsc,
+                onTap: () => setState(() {
+                  if (_hireSort == _HireSort.cost) {
+                    _hireSortAsc = !_hireSortAsc;
+                  } else {
+                    _hireSort = _HireSort.cost;
+                    _hireSortAsc = true;
+                  }
+                }),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _ProfileBuilderTile extends StatelessWidget {
-  const _ProfileBuilderTile({
+class _SortChip extends StatelessWidget {
+  const _SortChip({
+    required this.label,
+    required this.selected,
+    required this.ascending,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final bool ascending;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: selected ? _kGold.withOpacity(0.85) : Colors.white.withOpacity(0.35),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? _kGold : Colors.white.withOpacity(0.4),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? Colors.white : _kSubtleText,
+                letterSpacing: 0.5,
+              ),
+            ),
+            if (selected) ...[
+              const SizedBox(width: 3),
+              Icon(
+                ascending ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 10,
+                color: Colors.white,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TabButton extends StatelessWidget {
+  const _TabButton({
+    required this.label,
+    required this.selected,
+    required this.factionColor,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final Color factionColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? factionColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.cinzel(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : _kSubtleText,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EntryTile extends StatelessWidget {
+  const _EntryTile({
+    required this.entry,
+    required this.factionColor,
+    required this.busy,
+    required this.onRemove,
+    this.onTap,
+  });
+
+  final ListEntry entry;
+  final Color factionColor;
+  final bool busy;
+  final VoidCallback onRemove;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = Color.lerp(factionColor, Colors.black, 0.45)!;
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  entry.name,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${entry.cost}',
+                style: GoogleFonts.cinzel(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: busy ? null : onRemove,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.15),
+                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                  ),
+                  child: Icon(Icons.remove, size: 14, color: Colors.white.withOpacity(0.85)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+  }
+}
+
+class _HireCardTile extends StatelessWidget {
+  const _HireCardTile({
     required this.profile,
-    required this.inList,
+    required this.allProfiles,
+    required this.index,
+    required this.count,
+    required this.isUnique,
     required this.factionColor,
     required this.canAdd,
+    required this.greyOut,
     required this.busy,
     required this.onAdd,
     required this.onRemove,
   });
 
   final Profile profile;
-  final bool inList;
+  final List<Profile> allProfiles;
+  final int index;
+  final int count;
+  final bool isUnique;
   final Color factionColor;
   final bool canAdd;
+  final bool greyOut;
   final bool busy;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+    final inList = count > 0;
+    final base = _kFactionColors[profile.faction] ?? factionColor;
+    final bgColor = inList
+        ? Color.lerp(base, Colors.black, 0.45)!
+        : greyOut
+            ? Color.lerp(base, Colors.white, 0.28)!
+            : base;
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CardViewerScreen(profiles: allProfiles, initialIndex: index),
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: inList
-                ? factionColor.withOpacity(0.12)
-                : _kCardBg.withOpacity(0.65),
+            color: bgColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: inList ? factionColor.withOpacity(0.4) : Colors.white.withOpacity(0.3),
-              width: inList ? 1.0 : 0.5,
-            ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(10, 12, 14, 12),
             child: Row(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        profile.name,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: _kDarkText,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        '${profile.ducats} ducats',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: inList ? factionColor : _kSubtleText,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _ToggleButton(
-                  inList: inList,
+                _HireToggleButton(
                   canAdd: canAdd,
                   busy: busy,
-                  factionColor: factionColor,
                   onAdd: onAdd,
-                  onRemove: onRemove,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                profile.name,
+                                style: GoogleFonts.cinzel(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (profile.keywords.contains('Leader') || profile.keywords.contains('Hero')) ...[
+                              const SizedBox(width: 6),
+                              Text(
+                                profile.keywords.contains('Leader') ? 'leader' : 'hero',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white.withOpacity(0.65),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      if (inList)
+                        Container(
+                          margin: const EdgeInsets.only(left: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            isUnique ? 'Hired' : '×$count',
+                            style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${profile.ducats}',
+                        style: GoogleFonts.cinzel(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (inList)
+                        GestureDetector(
+                          onTap: busy ? null : onRemove,
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.15),
+                              border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                            ),
+                            child: Icon(Icons.remove, size: 14, color: Colors.white.withOpacity(0.85)),
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 28),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -351,61 +890,36 @@ class _ProfileBuilderTile extends StatelessWidget {
   }
 }
 
-class _ToggleButton extends StatelessWidget {
-  const _ToggleButton({
-    required this.inList,
+class _HireToggleButton extends StatelessWidget {
+  const _HireToggleButton({
     required this.canAdd,
     required this.busy,
-    required this.factionColor,
     required this.onAdd,
-    required this.onRemove,
   });
 
-  final bool inList;
   final bool canAdd;
   final bool busy;
-  final Color factionColor;
   final VoidCallback onAdd;
-  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     if (busy) {
-      return SizedBox(
-        width: 30, height: 30,
-        child: CircularProgressIndicator(strokeWidth: 2, color: factionColor),
+      return const SizedBox(
+        width: 32, height: 32,
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
       );
     }
-    if (inList) {
-      return GestureDetector(
-        onTap: onRemove,
-        child: Container(
-          width: 30, height: 30,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: factionColor.withOpacity(0.15),
-            border: Border.all(color: factionColor.withOpacity(0.5)),
-          ),
-          child: Icon(Icons.remove, size: 16, color: factionColor),
-        ),
-      );
-    }
+    if (!canAdd) return const SizedBox(width: 32, height: 32);
     return GestureDetector(
-      onTap: canAdd ? onAdd : null,
+      onTap: onAdd,
       child: Container(
-        width: 30, height: 30,
+        width: 32, height: 32,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: canAdd ? factionColor.withOpacity(0.15) : Colors.transparent,
-          border: Border.all(
-            color: canAdd ? factionColor.withOpacity(0.5) : _kSubtleText.withOpacity(0.2),
-          ),
+          color: Colors.white.withOpacity(0.2),
+          border: Border.all(color: Colors.white.withOpacity(0.5)),
         ),
-        child: Icon(
-          Icons.add,
-          size: 16,
-          color: canAdd ? factionColor : _kSubtleText.withOpacity(0.3),
-        ),
+        child: const Icon(Icons.add, size: 16, color: Colors.white),
       ),
     );
   }

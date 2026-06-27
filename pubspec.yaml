@@ -33,18 +33,21 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
-  http: ^1.2.0
+  carnevale_api:
+    path: lib/api_client
+  dio: ^5.7.0
+  built_value: '>=8.4.0 <9.0.0'
+  built_collection: '>=5.1.1 <6.0.0'
+  one_of: '>=1.5.0 <2.0.0'
+  one_of_serializer: '>=1.5.0 <2.0.0'
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  built_value_generator: '>=8.4.0 <9.0.0'
+  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

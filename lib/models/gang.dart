@@ -12,14 +12,6 @@ class ListEntry {
     required this.name,
     required this.cost,
   });
-
-  factory ListEntry.fromJson(Map<String, dynamic> j) => ListEntry(
-        id: j['id'] as int,
-        position: j['position'] as int,
-        referenceId: j['reference_id'] as int,
-        name: j['name'] as String,
-        cost: j['cost'] as int,
-      );
 }
 
 class Gang {
@@ -38,26 +30,4 @@ class Gang {
     this.totalCost = 0,
     this.entries = const [],
   });
-
-  Gang copyWith({List<ListEntry>? entries, int? totalCost}) => Gang(
-        id: id,
-        name: name,
-        faction: faction,
-        points: points,
-        totalCost: totalCost ?? this.totalCost,
-        entries: entries ?? this.entries,
-      );
-
-  factory Gang.fromJson(Map<String, dynamic> j) => Gang(
-        id: j['id'] as int,
-        name: j['name'] as String,
-        faction: j['faction'] as String,
-        points: j['points'] as int,
-        totalCost: j['total_cost'] as int? ?? 0,
-        entries: j['entries'] != null
-            ? (j['entries'] as List<dynamic>)
-                .map((e) => ListEntry.fromJson(e as Map<String, dynamic>))
-                .toList()
-            : [],
-      );
 }
