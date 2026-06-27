@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Weapon {
   final String name;
   final int damage;
@@ -16,15 +14,6 @@ class Weapon {
     required this.evasion,
     required this.abilities,
   });
-
-  factory Weapon.fromJson(Map<String, dynamic> j) => Weapon(
-        name: j['name'] as String,
-        damage: j['damage'] as int,
-        range: j['range'] as int,
-        penetration: j['penetration'] as int,
-        evasion: j['evasion'] as int,
-        abilities: _parseStringList(j['abilities']),
-      );
 }
 
 class SpecialRule {
@@ -43,15 +32,6 @@ class SpecialRule {
     this.spellDifficulty,
     this.spellDescription,
   });
-
-  factory SpecialRule.fromJson(Map<String, dynamic> j) => SpecialRule(
-        name: j['name'] as String,
-        description: j['description'] as String,
-        spellName: j['spell_name'] as String?,
-        spellCost: j['spell_cost'] as int?,
-        spellDifficulty: j['spell_difficulty'] as int?,
-        spellDescription: j['spell_description'] as String?,
-      );
 }
 
 class Profile {
@@ -76,6 +56,7 @@ class Profile {
   final List<SpecialRule> specialRules;
   final String frontImage;
   final String backImage;
+  final int cardReferenceId;
 
   const Profile({
     required this.id,
@@ -99,62 +80,6 @@ class Profile {
     required this.specialRules,
     required this.frontImage,
     required this.backImage,
+    required this.cardReferenceId,
   });
-
-  factory Profile.fromJson(Map<String, dynamic> j) => Profile(
-        id: j['id'] as int,
-        name: j['name'] as String,
-        faction: j['faction'] as String,
-        ducats: j['ducats'] as int,
-        movement: j['movement'] as int,
-        attack: j['attack'] as int,
-        dexterity: j['dexterity'] as int,
-        lifePoints: j['life_points'] as int,
-        mind: j['mind'] as int,
-        willPoints: j['will_points'] as int,
-        protection: j['protection'] as int,
-        actionPoints: j['action_points'] as int,
-        commandPoints: j['command_points'] as int,
-        size: j['size'] as int,
-        abilities: _parseStringList(j['abilities']),
-        keywords: _parseStringList(j['keywords']),
-        version: j['version'] as String,
-        weapons: _parseList(j['weapons'], Weapon.fromJson),
-        specialRules: _parseList(j['special_rules'], SpecialRule.fromJson),
-        frontImage: _firstCardRef(j['card_references'], 'card_front'),
-        backImage: _firstCardRef(j['card_references'], 'card_back'),
-      );
-}
-
-String _firstCardRef(dynamic refs, String key) {
-  if (refs is! List || refs.isEmpty) return '';
-  return (refs.first as Map<String, dynamic>)[key] as String? ?? '';
-}
-
-List<String> _parseStringList(dynamic value) {
-  if (value == null) return [];
-  if (value is List) return value.cast<String>();
-  if (value is String) {
-    try {
-      final parsed = jsonDecode(value);
-      if (parsed is List) return parsed.cast<String>();
-    } catch (_) {}
-  }
-  return [];
-}
-
-List<T> _parseList<T>(dynamic value, T Function(Map<String, dynamic>) fromJson) {
-  if (value == null) return [];
-  if (value is List) {
-    return value.map((e) => fromJson(e as Map<String, dynamic>)).toList();
-  }
-  if (value is String) {
-    try {
-      final parsed = jsonDecode(value);
-      if (parsed is List) {
-        return parsed.map((e) => fromJson(e as Map<String, dynamic>)).toList();
-      }
-    } catch (_) {}
-  }
-  return [];
 }
