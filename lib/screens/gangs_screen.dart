@@ -44,6 +44,7 @@ class _GangsScreenState extends State<GangsScreen> {
   final _service = GangService();
   List<Gang> _gangs = [];
   bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -52,25 +53,16 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 
   Future<void> _load() async {
-    final gangs = await _service.loadAll();
-    setState(() {
-      _gangs = List.from(gangs);
-      _loading = false;
-    });
+    setState(() { _loading = true; _error = null; });
+    try {
+      final gangs = await _service.loadAll();
+      setState(() { _gangs = gangs; _loading = false; });
+    } catch (e) {
+      setState(() { _error = e.toString(); _loading = false; });
+    }
   }
 
-  Future<Gang> _createGang(String name, String faction) async {
-    final gang = Gang(
-      id: _service.generateId(),
-      name: name,
-      faction: faction,
-      members: [],
-    );
-    await _service.save(gang);
-    return gang;
-  }
-
-  Future<void> _deleteGang(String id) async {
+  Future<void> _deleteGang(int id) async {
     await _service.delete(id);
     await _load();
   }
@@ -80,7 +72,9 @@ class _GangsScreenState extends State<GangsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CreateGangSheet(onCreate: _createGang),
+      builder: (_) => _CreateGangSheet(
+        onCreate: (name, faction, points) => _service.create(name, faction, points),
+      ),
     );
     if (gang != null && mounted) {
       await Navigator.push(
@@ -157,7 +151,7 @@ class _GangsScreenState extends State<GangsScreen> {
             ),
           ),
           const Spacer(),
-          if (!_loading)
+          if (!_loading && _error == null)
             Text(
               '${_gangs.length} gang${_gangs.length == 1 ? '' : 's'}',
               style: const TextStyle(fontSize: 12, color: _kSubtleText),
@@ -171,9 +165,21 @@ class _GangsScreenState extends State<GangsScreen> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator(color: _kGold));
     }
-    if (_gangs.isEmpty) {
-      return _buildEmpty();
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off, size: 40, color: _kSubtleText),
+            const SizedBox(height: 12),
+            Text('Could not reach server', style: TextStyle(color: _kSubtleText)),
+            const SizedBox(height: 8),
+            TextButton(onPressed: _load, child: const Text('Retry')),
+          ],
+        ),
+      );
     }
+    if (_gangs.isEmpty) return _buildEmpty();
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       itemCount: _gangs.length,
@@ -291,7 +297,7 @@ class _GangTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '${gang.totalDucats}',
+                          '${gang.totalCost}',
                           style: GoogleFonts.cinzel(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -299,8 +305,8 @@ class _GangTile extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'ducats',
-                          style: TextStyle(fontSize: 10, color: _kSubtleText),
+                          '/ ${gang.points} duc.',
+                          style: const TextStyle(fontSize: 10, color: _kSubtleText),
                         ),
                       ],
                     ),
@@ -344,7 +350,7 @@ class _GangTile extends StatelessWidget {
 
 class _CreateGangSheet extends StatefulWidget {
   const _CreateGangSheet({required this.onCreate});
-  final Future<Gang> Function(String name, String faction) onCreate;
+  final Future<Gang> Function(String name, String faction, int points) onCreate;
 
   @override
   State<_CreateGangSheet> createState() => _CreateGangSheetState();
@@ -352,21 +358,28 @@ class _CreateGangSheet extends StatefulWidget {
 
 class _CreateGangSheetState extends State<_CreateGangSheet> {
   final _nameController = TextEditingController();
+  final _pointsController = TextEditingController(text: '100');
   String _selectedFaction = _kFactions.first;
   bool _saving = false;
 
   @override
   void dispose() {
     _nameController.dispose();
+    _pointsController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
+    final points = int.tryParse(_pointsController.text.trim()) ?? 100;
     setState(() => _saving = true);
-    final gang = await widget.onCreate(name, _selectedFaction);
-    if (mounted) Navigator.of(context).pop(gang);
+    try {
+      final gang = await widget.onCreate(name, _selectedFaction, points);
+      if (mounted) Navigator.of(context).pop(gang);
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -386,115 +399,131 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
             ),
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
             child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40, height: 4,
-                    decoration: BoxDecoration(
-                      color: _kSubtleText.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'New Gang',
-                  style: GoogleFonts.cinzel(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: _kDarkText,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _nameController,
-                  autofocus: true,
-                  style: GoogleFonts.cinzel(color: _kDarkText, fontSize: 15),
-                  decoration: InputDecoration(
-                    labelText: 'Gang name',
-                    labelStyle: TextStyle(color: _kSubtleText, fontSize: 13),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: _kGold.withOpacity(0.5)),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: _kGold, width: 1.5),
-                    ),
-                  ),
-                  onSubmitted: (_) => _submit(),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Faction',
-                  style: TextStyle(fontSize: 12, color: _kSubtleText, letterSpacing: 1),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 52,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: _kFactions.map((f) {
-                      final selected = f == _selectedFaction;
-                      final color = _kFactionColors[f] ?? _kGold;
-                      final iconPath = _kFactionIcons[f]!;
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedFaction = f),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 10),
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: selected ? color : color.withOpacity(0.35),
-                            border: selected
-                                ? Border.all(color: Colors.white, width: 2.5)
-                                : null,
-                            boxShadow: selected
-                                ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 8)]
-                                : null,
-                          ),
-                          padding: const EdgeInsets.all(9),
-                          child: Image.asset(
-                            iconPath,
-                            fit: BoxFit.contain,
-                            color: Colors.white,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _saving ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _kGold,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40, height: 4,
+                      decoration: BoxDecoration(
+                        color: _kSubtleText.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      elevation: 0,
                     ),
-                    child: _saving
-                        ? const SizedBox(
-                            width: 20, height: 20,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                        : Text(
-                            'Create Gang',
-                            style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 15),
-                          ),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'New Gang',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: _kDarkText,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _nameController,
+                    autofocus: true,
+                    style: GoogleFonts.cinzel(color: _kDarkText, fontSize: 15),
+                    decoration: InputDecoration(
+                      labelText: 'Gang name',
+                      labelStyle: TextStyle(color: _kSubtleText, fontSize: 13),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: _kGold.withOpacity(0.5)),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: _kGold, width: 1.5),
+                      ),
+                    ),
+                    onSubmitted: (_) => _submit(),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _pointsController,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.cinzel(color: _kDarkText, fontSize: 15),
+                    decoration: InputDecoration(
+                      labelText: 'Point limit',
+                      labelStyle: TextStyle(color: _kSubtleText, fontSize: 13),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: _kGold.withOpacity(0.5)),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: _kGold, width: 1.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Faction',
+                    style: TextStyle(fontSize: 12, color: _kSubtleText, letterSpacing: 1),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 52,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: _kFactions.map((f) {
+                        final selected = f == _selectedFaction;
+                        final color = _kFactionColors[f] ?? _kGold;
+                        final iconPath = _kFactionIcons[f]!;
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedFaction = f),
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 10),
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: selected ? color : color.withOpacity(0.35),
+                              border: selected
+                                  ? Border.all(color: Colors.white, width: 2.5)
+                                  : null,
+                              boxShadow: selected
+                                  ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 8)]
+                                  : null,
+                            ),
+                            padding: const EdgeInsets.all(9),
+                            child: Image.asset(
+                              iconPath,
+                              fit: BoxFit.contain,
+                              color: Colors.white,
+                              colorBlendMode: BlendMode.srcIn,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _saving ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _kGold,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _saving
+                          ? const SizedBox(
+                              width: 20, height: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : Text(
+                              'Create Gang',
+                              style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 15),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
