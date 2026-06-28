@@ -53,6 +53,18 @@ class GangService {
     return _mapGang(res.data!);
   }
 
+  Future<Gang> reorderEntry(int entryId, int position) async {
+    final res = await _client.listEntries.updateListEntryPosition(
+      id: entryId,
+      entryPositionInput: api.EntryPositionInput((b) => b
+        ..entry = api.EntryPositionInputEntry((eb) => eb
+          ..position = position
+        ).toBuilder()
+      ),
+    );
+    return _mapGang(res.data!);
+  }
+
   Gang _mapGang(api.ModelList ml) => Gang(
         id: ml.id,
         name: ml.name ?? '',

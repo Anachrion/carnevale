@@ -11,6 +11,8 @@ Serializers _$serializers =
           ..add(CardReference.serializer)
           ..add(EntryInput.serializer)
           ..add(EntryInputEntry.serializer)
+          ..add(EntryPositionInput.serializer)
+          ..add(EntryPositionInputEntry.serializer)
           ..add(ListEntry.serializer)
           ..add(ListInput.serializer)
           ..add(ListInputList.serializer)

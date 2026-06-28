@@ -17,6 +17,8 @@ import 'package:carnevale_api/src/model/date.dart';
 import 'package:carnevale_api/src/model/card_reference.dart';
 import 'package:carnevale_api/src/model/entry_input.dart';
 import 'package:carnevale_api/src/model/entry_input_entry.dart';
+import 'package:carnevale_api/src/model/entry_position_input.dart';
+import 'package:carnevale_api/src/model/entry_position_input_entry.dart';
 import 'package:carnevale_api/src/model/list_entry.dart';
 import 'package:carnevale_api/src/model/list_input.dart';
 import 'package:carnevale_api/src/model/list_input_list.dart';
@@ -32,6 +34,8 @@ part 'serializers.g.dart';
   CardReference,
   EntryInput,
   EntryInputEntry,
+  EntryPositionInput,
+  EntryPositionInputEntry,
   ListEntry,
   ListInput,
   ListInputList,
