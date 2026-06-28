@@ -9,7 +9,8 @@ import 'package:carnevale_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **listId** | **int** |  | 
-**cardReferenceId** | **int** |  | 
+**entryType** | **String** |  | 
+**entryId** | **int** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

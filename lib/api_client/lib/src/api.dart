@@ -9,6 +9,7 @@ import 'package:carnevale_api/src/auth/api_key_auth.dart';
 import 'package:carnevale_api/src/auth/basic_auth.dart';
 import 'package:carnevale_api/src/auth/bearer_auth.dart';
 import 'package:carnevale_api/src/auth/oauth.dart';
+import 'package:carnevale_api/src/api/equipment_api.dart';
 import 'package:carnevale_api/src/api/list_entries_api.dart';
 import 'package:carnevale_api/src/api/lists_api.dart';
 import 'package:carnevale_api/src/api/profiles_api.dart';
@@ -105,6 +106,12 @@ class CarnevaleApi {
     if (this.dio.interceptors.any((i) => i is ApiKeyAuthInterceptor)) {
       (this.dio.interceptors.firstWhere((element) => element is ApiKeyAuthInterceptor) as ApiKeyAuthInterceptor).apiKeys.remove(name);
     }
+  }
+
+  /// Get EquipmentApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  EquipmentApi getEquipmentApi() {
+    return EquipmentApi(dio, serializers);
   }
 
   /// Get ListEntriesApi instance, base route and serializer can be overridden by a given but be careful,

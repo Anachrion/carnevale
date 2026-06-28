@@ -10,9 +10,11 @@ class ApiClient {
     lists = ListsApi(dio, standardSerializers);
     listEntries = ListEntriesApi(dio, standardSerializers);
     profiles = ProfilesApi(dio, standardSerializers);
+    equipment = EquipmentApi(dio, standardSerializers);
   }
 
   late final ListsApi lists;
   late final ListEntriesApi listEntries;
   late final ProfilesApi profiles;
+  late final EquipmentApi equipment;
 }

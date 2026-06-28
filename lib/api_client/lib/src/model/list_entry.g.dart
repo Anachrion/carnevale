@@ -6,13 +6,73 @@ part of 'list_entry.dart';
 // BuiltValueGenerator
 // **************************************************************************
 
+const ListEntryEntryTypeEnum _$listEntryEntryTypeEnum_cardReference =
+    const ListEntryEntryTypeEnum._('cardReference');
+const ListEntryEntryTypeEnum _$listEntryEntryTypeEnum_equipment =
+    const ListEntryEntryTypeEnum._('equipment');
+
+ListEntryEntryTypeEnum _$listEntryEntryTypeEnumValueOf(String name) {
+  switch (name) {
+    case 'cardReference':
+      return _$listEntryEntryTypeEnum_cardReference;
+    case 'equipment':
+      return _$listEntryEntryTypeEnum_equipment;
+    default:
+      throw ArgumentError(name);
+  }
+}
+
+final BuiltSet<ListEntryEntryTypeEnum> _$listEntryEntryTypeEnumValues =
+    BuiltSet<ListEntryEntryTypeEnum>(const <ListEntryEntryTypeEnum>[
+      _$listEntryEntryTypeEnum_cardReference,
+      _$listEntryEntryTypeEnum_equipment,
+    ]);
+
+Serializer<ListEntryEntryTypeEnum> _$listEntryEntryTypeEnumSerializer =
+    _$ListEntryEntryTypeEnumSerializer();
+
+class _$ListEntryEntryTypeEnumSerializer
+    implements PrimitiveSerializer<ListEntryEntryTypeEnum> {
+  static const Map<String, Object> _toWire = const <String, Object>{
+    'cardReference': 'CardReference',
+    'equipment': 'Equipment',
+  };
+  static const Map<Object, String> _fromWire = const <Object, String>{
+    'CardReference': 'cardReference',
+    'Equipment': 'equipment',
+  };
+
+  @override
+  final Iterable<Type> types = const <Type>[ListEntryEntryTypeEnum];
+  @override
+  final String wireName = 'ListEntryEntryTypeEnum';
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    ListEntryEntryTypeEnum object, {
+    FullType specifiedType = FullType.unspecified,
+  }) => _toWire[object.name] ?? object.name;
+
+  @override
+  ListEntryEntryTypeEnum deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) => ListEntryEntryTypeEnum.valueOf(
+    _fromWire[serialized] ?? (serialized is String ? serialized : ''),
+  );
+}
+
 class _$ListEntry extends ListEntry {
   @override
   final int id;
   @override
   final int position;
   @override
-  final int cardReferenceId;
+  final ListEntryEntryTypeEnum entryType;
+  @override
+  final int entryId;
   @override
   final String name;
   @override
@@ -24,7 +84,8 @@ class _$ListEntry extends ListEntry {
   _$ListEntry._({
     required this.id,
     required this.position,
-    required this.cardReferenceId,
+    required this.entryType,
+    required this.entryId,
     required this.name,
     required this.cost,
   }) : super._();
@@ -41,7 +102,8 @@ class _$ListEntry extends ListEntry {
     return other is ListEntry &&
         id == other.id &&
         position == other.position &&
-        cardReferenceId == other.cardReferenceId &&
+        entryType == other.entryType &&
+        entryId == other.entryId &&
         name == other.name &&
         cost == other.cost;
   }
@@ -51,7 +113,8 @@ class _$ListEntry extends ListEntry {
     var _$hash = 0;
     _$hash = $jc(_$hash, id.hashCode);
     _$hash = $jc(_$hash, position.hashCode);
-    _$hash = $jc(_$hash, cardReferenceId.hashCode);
+    _$hash = $jc(_$hash, entryType.hashCode);
+    _$hash = $jc(_$hash, entryId.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, cost.hashCode);
     _$hash = $jf(_$hash);
@@ -63,7 +126,8 @@ class _$ListEntry extends ListEntry {
     return (newBuiltValueToStringHelper(r'ListEntry')
           ..add('id', id)
           ..add('position', position)
-          ..add('cardReferenceId', cardReferenceId)
+          ..add('entryType', entryType)
+          ..add('entryId', entryId)
           ..add('name', name)
           ..add('cost', cost))
         .toString();
@@ -81,10 +145,14 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   int? get position => _$this._position;
   set position(int? position) => _$this._position = position;
 
-  int? _cardReferenceId;
-  int? get cardReferenceId => _$this._cardReferenceId;
-  set cardReferenceId(int? cardReferenceId) =>
-      _$this._cardReferenceId = cardReferenceId;
+  ListEntryEntryTypeEnum? _entryType;
+  ListEntryEntryTypeEnum? get entryType => _$this._entryType;
+  set entryType(ListEntryEntryTypeEnum? entryType) =>
+      _$this._entryType = entryType;
+
+  int? _entryId;
+  int? get entryId => _$this._entryId;
+  set entryId(int? entryId) => _$this._entryId = entryId;
 
   String? _name;
   String? get name => _$this._name;
@@ -103,7 +171,8 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
     if ($v != null) {
       _id = $v.id;
       _position = $v.position;
-      _cardReferenceId = $v.cardReferenceId;
+      _entryType = $v.entryType;
+      _entryId = $v.entryId;
       _name = $v.name;
       _cost = $v.cost;
       _$v = null;
@@ -134,10 +203,15 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
             r'ListEntry',
             'position',
           ),
-          cardReferenceId: BuiltValueNullFieldError.checkNotNull(
-            cardReferenceId,
+          entryType: BuiltValueNullFieldError.checkNotNull(
+            entryType,
             r'ListEntry',
-            'cardReferenceId',
+            'entryType',
+          ),
+          entryId: BuiltValueNullFieldError.checkNotNull(
+            entryId,
+            r'ListEntry',
+            'entryId',
           ),
           name: BuiltValueNullFieldError.checkNotNull(
             name,

@@ -1,14 +1,16 @@
 class ListEntry {
   final int id;
   final int position;
-  final int referenceId;
+  final String entryType;
+  final int entryId;
   final String name;
   final int cost;
 
   const ListEntry({
     required this.id,
     required this.position,
-    required this.referenceId,
+    required this.entryType,
+    required this.entryId,
     required this.name,
     required this.cost,
   });

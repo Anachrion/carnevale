@@ -19,6 +19,7 @@ import 'package:carnevale_api/src/model/entry_input.dart';
 import 'package:carnevale_api/src/model/entry_input_entry.dart';
 import 'package:carnevale_api/src/model/entry_position_input.dart';
 import 'package:carnevale_api/src/model/entry_position_input_entry.dart';
+import 'package:carnevale_api/src/model/equipment.dart';
 import 'package:carnevale_api/src/model/list_entry.dart';
 import 'package:carnevale_api/src/model/list_input.dart';
 import 'package:carnevale_api/src/model/list_input_list.dart';
@@ -36,6 +37,7 @@ part 'serializers.g.dart';
   EntryInputEntry,
   EntryPositionInput,
   EntryPositionInputEntry,
+  Equipment,
   ListEntry,
   ListInput,
   ListInputList,
@@ -46,6 +48,10 @@ part 'serializers.g.dart';
   Weapon,
 ])
 Serializers serializers = (_$serializers.toBuilder()
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Equipment)]),
+        () => ListBuilder<Equipment>(),
+      )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Profile)]),
         () => ListBuilder<Profile>(),

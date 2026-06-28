@@ -6,6 +6,8 @@ doc/EntryInput.md
 doc/EntryInputEntry.md
 doc/EntryPositionInput.md
 doc/EntryPositionInputEntry.md
+doc/Equipment.md
+doc/EquipmentApi.md
 doc/ListEntriesApi.md
 doc/ListEntry.md
 doc/ListInput.md
@@ -19,6 +21,7 @@ doc/ValidationErrors.md
 doc/Weapon.md
 lib/carnevale_api.dart
 lib/src/api.dart
+lib/src/api/equipment_api.dart
 lib/src/api/list_entries_api.dart
 lib/src/api/lists_api.dart
 lib/src/api/profiles_api.dart
@@ -35,6 +38,7 @@ lib/src/model/entry_input.dart
 lib/src/model/entry_input_entry.dart
 lib/src/model/entry_position_input.dart
 lib/src/model/entry_position_input_entry.dart
+lib/src/model/equipment.dart
 lib/src/model/list_entry.dart
 lib/src/model/list_input.dart
 lib/src/model/list_input_list.dart
@@ -45,5 +49,5 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/entry_position_input_entry_test.dart
-test/entry_position_input_test.dart
+test/equipment_api_test.dart
+test/equipment_test.dart

@@ -1,9 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/equipment.dart';
 import '../models/gang.dart';
 import '../models/gang_validation.dart';
 import '../models/profile.dart';
+import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
 import 'card_viewer_screen.dart';
@@ -48,6 +50,7 @@ class GangBuilderScreen extends StatefulWidget {
 class _GangBuilderScreenState extends State<GangBuilderScreen> {
   late Gang _gang;
   List<Profile> _profiles = [];
+  List<Equipment> _equipment = [];
   bool _loading = true;
   bool _busy = false;
   _Tab _tab = _Tab.list;
@@ -100,19 +103,23 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   }
 
   Future<void> _loadData() async {
-    final profiles = await ProfileService().search('', factions: {_gang.faction, 'gifted'});
+    final results = await Future.wait([
+      ProfileService().search('', factions: {_gang.faction, 'gifted'}),
+      EquipmentService().getAll(),
+    ]);
     setState(() {
-      _profiles = profiles;
+      _profiles = results[0] as List<Profile>;
+      _equipment = results[1] as List<Equipment>;
       _loading = false;
     });
   }
 
   int _entryCount(Profile p) =>
-      _gang.entries.where((e) => e.referenceId == p.cardReferenceId).length;
+      _gang.entries.where((e) => e.entryType == 'CardReference' && e.entryId == p.cardReferenceId).length;
 
   ListEntry? _entryFor(Profile p) {
     try {
-      return _gang.entries.firstWhere((e) => e.referenceId == p.cardReferenceId);
+      return _gang.entries.firstWhere((e) => e.entryType == 'CardReference' && e.entryId == p.cardReferenceId);
     } catch (_) {
       return null;
     }
@@ -122,7 +129,18 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      final updated = await GangService().addEntry(_gang.id, p.cardReferenceId);
+      final updated = await GangService().addEntry(_gang.id, p.cardReferenceId, 'CardReference');
+      setState(() => _gang = updated);
+    } finally {
+      setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _addEquipment(Equipment e) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await GangService().addEntry(_gang.id, e.id, 'Equipment');
       setState(() => _gang = updated);
     } finally {
       setState(() => _busy = false);
@@ -401,7 +419,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       itemCount: entries.length,
       itemBuilder: (_, i) {
         final entry = entries[i];
-        final profileIdx = _profiles.indexWhere((p) => p.cardReferenceId == entry.referenceId);
+        final profileIdx = entry.entryType == 'CardReference'
+            ? _profiles.indexWhere((p) => p.cardReferenceId == entry.entryId)
+            : -1;
         final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
         final entryColor = profile?.faction == 'gifted'
             ? (_kFactionColors['gifted'] ?? factionColor)
@@ -496,35 +516,37 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                           ),
                         ),
                         if (giftedProfiles.isNotEmpty) ...[
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-                              child: Row(
-                                children: [
-                                  Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    child: Text(
-                                      'Mercenaries',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: _kSubtleText.withOpacity(0.7),
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 1.5,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
-                                ],
-                              ),
-                            ),
-                          ),
+                          _buildHireDivider('Mercenaries'),
                           SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                             sliver: SliverList.separated(
                               itemCount: giftedProfiles.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 8),
                               itemBuilder: (_, i) => buildTile(giftedProfiles[i]),
+                            ),
+                          ),
+                        ],
+                        if (_equipment.isNotEmpty) ...[
+                          _buildHireDivider('Equipment'),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                            sliver: SliverList.separated(
+                              itemCount: _equipment.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 8),
+                              itemBuilder: (_, i) {
+                                final e = _equipment[i];
+                                final count = _gang.entries
+                                    .where((en) => en.entryType == 'Equipment' && en.entryId == e.id)
+                                    .length;
+                                final canAdd = _gang.totalCost + e.cost <= _gang.points;
+                                return _HireEquipmentTile(
+                                  equipment: e,
+                                  count: count,
+                                  canAdd: canAdd,
+                                  busy: _busy,
+                                  onAdd: () => _addEquipment(e),
+                                );
+                              },
                             ),
                           ),
                         ] else
@@ -535,6 +557,30 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       ],
     );
   }
+
+  SliverToBoxAdapter _buildHireDivider(String label) => SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+          child: Row(
+            children: [
+              Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: _kSubtleText.withOpacity(0.7),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ),
+              Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
+            ],
+          ),
+        ),
+      );
 
   Widget _buildHireControls() {
     return Padding(
@@ -1044,5 +1090,146 @@ class _HireToggleButton extends StatelessWidget {
         child: const Icon(Icons.add, size: 16, color: Colors.white),
       ),
     );
+  }
+}
+
+const _kEquipmentColor = Color(0xFF4A3F35);
+
+class _HireEquipmentTile extends StatelessWidget {
+  const _HireEquipmentTile({
+    required this.equipment,
+    required this.count,
+    required this.canAdd,
+    required this.busy,
+    required this.onAdd,
+  });
+
+  final Equipment equipment;
+  final int count;
+  final bool canAdd;
+  final bool busy;
+  final VoidCallback onAdd;
+
+  void _showDetail(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: _kEquipmentColor,
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        equipment.name,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '${equipment.cost}',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: _kGold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
+                const SizedBox(height: 12),
+                Text(
+                  equipment.description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.85),
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final inList = count > 0;
+    final bgColor = inList
+        ? Color.lerp(_kEquipmentColor, Colors.black, 0.35)!
+        : canAdd
+            ? _kEquipmentColor
+            : Color.lerp(_kEquipmentColor, Colors.white, 0.28)!;
+    return GestureDetector(
+      onTap: () => _showDetail(context),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 12, 14, 12),
+          child: Row(
+            children: [
+              _HireToggleButton(canAdd: canAdd, busy: busy, onAdd: onAdd),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  equipment.name,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (inList) ...[
+                Container(
+                  margin: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '×$count',
+                    style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+              const SizedBox(width: 8),
+              Text(
+                '${equipment.cost}',
+                style: GoogleFonts.cinzel(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
   }
 }

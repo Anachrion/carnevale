@@ -23,7 +23,7 @@ class GangValidator {
     }
 
     if (candidate.keywords.contains('Unique') &&
-        gang.entries.any((e) => e.referenceId == candidate.cardReferenceId)) {
+        gang.entries.any((e) => e.entryType == 'CardReference' && e.entryId == candidate.cardReferenceId)) {
       return ValidationResult.error('Unique — already hired');
     }
 
