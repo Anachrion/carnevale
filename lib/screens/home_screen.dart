@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'cards_screen.dart';
 import 'gangs_screen.dart';
+import 'settings_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kCardBackground = Color(0xFFF5F2EE);
@@ -53,7 +54,11 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       _MenuItem(icon: Icons.menu_book_outlined, title: 'Rules'),
                       const SizedBox(height: 12),
-                      _MenuItem(icon: Icons.settings_outlined, title: 'Settings'),
+                      _MenuItem(
+                        icon: Icons.settings_outlined,
+                        title: 'Settings',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                      ),
                     ],
                   ),
                 ),
