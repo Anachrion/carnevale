@@ -1,12 +1,11 @@
 import 'dart:ui';
+import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
-const _kDarkText = Color(0xFF2C2418);
 const _kGold = Color(0xFFC4A050);
-const _kCardBg = Color(0xFFF5F2EE);
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -80,8 +79,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             label: 'Theme',
                             child: DropdownButton<ThemeMode>(
                               value: settingsService.themeMode,
-                              dropdownColor: _kCardBg,
-                              style: GoogleFonts.cinzel(fontSize: 14, color: _kDarkText),
+                              dropdownColor: context.cardBgColor,
+                              style: GoogleFonts.cinzel(fontSize: 14, color: context.textColor),
                               underline: const SizedBox.shrink(),
                               icon: const Icon(Icons.expand_more, color: _kGold, size: 20),
                               onChanged: (mode) {
@@ -122,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: _kDarkText),
+            icon: Icon(Icons.arrow_back, color: context.textColor),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 4),
@@ -131,7 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: GoogleFonts.cinzel(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: _kDarkText,
+              color: context.textColor,
               letterSpacing: 3,
             ),
           ),
@@ -155,7 +154,7 @@ class _SettingRow extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: _kCardBg.withValues(alpha: 0.7),
+            color: context.cardBgColor.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 0.5),
           ),
@@ -167,7 +166,7 @@ class _SettingRow extends StatelessWidget {
                 style: GoogleFonts.cinzel(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: _kDarkText,
+                  color: context.textColor,
                 ),
               ),
               const Spacer(),

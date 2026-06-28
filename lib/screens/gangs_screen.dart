@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/gang.dart';
@@ -6,10 +7,7 @@ import '../services/gang_service.dart';
 import 'gang_builder_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
-const _kDarkText = Color(0xFF2C2418);
 const _kGold = Color(0xFFC4A050);
-const _kSubtleText = Color(0xFF7A6E62);
-const _kCardBg = Color(0xFFF5F2EE);
 
 const _kFactionColors = {
   'doctors':    Color(0xFF177282),
@@ -142,7 +140,7 @@ class _GangsScreenState extends State<GangsScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: _kDarkText),
+            icon: Icon(Icons.arrow_back, color: context.textColor),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 4),
@@ -151,7 +149,7 @@ class _GangsScreenState extends State<GangsScreen> {
             style: GoogleFonts.cinzel(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: _kDarkText,
+              color: context.textColor,
               letterSpacing: 3,
             ),
           ),
@@ -159,7 +157,7 @@ class _GangsScreenState extends State<GangsScreen> {
           if (!_loading && _error == null)
             Text(
               '${_gangs.length} gang${_gangs.length == 1 ? '' : 's'}',
-              style: const TextStyle(fontSize: 12, color: _kSubtleText),
+              style: TextStyle(fontSize: 12, color: context.subtleTextColor),
             ),
         ],
       ),
@@ -175,9 +173,9 @@ class _GangsScreenState extends State<GangsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.wifi_off, size: 40, color: _kSubtleText),
+            Icon(Icons.wifi_off, size: 40, color: context.subtleTextColor),
             const SizedBox(height: 12),
-            Text('Could not reach server', style: TextStyle(color: _kSubtleText)),
+            Text('Could not reach server', style: TextStyle(color: context.subtleTextColor)),
             const SizedBox(height: 8),
             TextButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -208,16 +206,16 @@ class _GangsScreenState extends State<GangsScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.flag_outlined, size: 56, color: _kSubtleText.withOpacity(0.4)),
+          Icon(Icons.flag_outlined, size: 56, color: context.subtleTextColor.withOpacity(0.4)),
           const SizedBox(height: 16),
           Text(
             'No gangs yet',
-            style: GoogleFonts.cinzel(fontSize: 16, color: _kSubtleText),
+            style: GoogleFonts.cinzel(fontSize: 16, color: context.subtleTextColor),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap + to create your first gang',
-            style: TextStyle(fontSize: 13, color: _kSubtleText.withOpacity(0.7)),
+            style: TextStyle(fontSize: 13, color: context.subtleTextColor.withOpacity(0.7)),
           ),
         ],
       ),
@@ -242,7 +240,7 @@ class _GangTile extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: _kCardBg.withOpacity(0.7),
+            color: context.cardBgColor.withOpacity(0.7),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
           ),
@@ -283,7 +281,7 @@ class _GangTile extends StatelessWidget {
                             style: GoogleFonts.cinzel(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: _kDarkText,
+                              color: context.textColor,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -311,7 +309,7 @@ class _GangTile extends StatelessWidget {
                         ),
                         Text(
                           '/ ${gang.points} duc.',
-                          style: const TextStyle(fontSize: 10, color: _kSubtleText),
+                          style: TextStyle(fontSize: 10, color: context.subtleTextColor),
                         ),
                       ],
                     ),
@@ -331,7 +329,7 @@ class _GangTile extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Delete Gang', style: GoogleFonts.cinzel(color: _kDarkText)),
+        title: Text('Delete Gang', style: GoogleFonts.cinzel(color: context.textColor)),
         content: Text('Delete "${gang.name}"?'),
         actions: [
           TextButton(
@@ -398,7 +396,7 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
-              color: _kCardBg.withOpacity(0.92),
+              color: context.cardBgColor.withOpacity(0.92),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.5),
             ),
@@ -412,7 +410,7 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                     child: Container(
                       width: 40, height: 4,
                       decoration: BoxDecoration(
-                        color: _kSubtleText.withOpacity(0.3),
+                        color: context.subtleTextColor.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -423,7 +421,7 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                     style: GoogleFonts.cinzel(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: _kDarkText,
+                      color: context.textColor,
                       letterSpacing: 2,
                     ),
                   ),
@@ -431,10 +429,10 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                   TextField(
                     controller: _nameController,
                     autofocus: true,
-                    style: GoogleFonts.cinzel(color: _kDarkText, fontSize: 15),
+                    style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
                     decoration: InputDecoration(
                       labelText: 'Gang name',
-                      labelStyle: TextStyle(color: _kSubtleText, fontSize: 13),
+                      labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: _kGold.withOpacity(0.5)),
                       ),
@@ -448,10 +446,10 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                   TextField(
                     controller: _pointsController,
                     keyboardType: TextInputType.number,
-                    style: GoogleFonts.cinzel(color: _kDarkText, fontSize: 15),
+                    style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
                     decoration: InputDecoration(
                       labelText: 'Point limit',
-                      labelStyle: TextStyle(color: _kSubtleText, fontSize: 13),
+                      labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: _kGold.withOpacity(0.5)),
                       ),
@@ -463,7 +461,7 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                   const SizedBox(height: 24),
                   Text(
                     'Faction',
-                    style: TextStyle(fontSize: 12, color: _kSubtleText, letterSpacing: 1),
+                    style: TextStyle(fontSize: 12, color: context.subtleTextColor, letterSpacing: 1),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
