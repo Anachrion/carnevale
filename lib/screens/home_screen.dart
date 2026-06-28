@@ -25,9 +25,13 @@ class HomeScreen extends StatelessWidget {
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
           height: constraints.maxHeight,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/images/bg_light.png'),
+              image: AssetImage(
+                Theme.of(context).brightness == Brightness.dark
+                    ? 'assets/images/bg_dark.png'
+                    : 'assets/images/bg_light.png',
+              ),
               fit: BoxFit.cover,
               alignment: Alignment.topCenter,
             ),
