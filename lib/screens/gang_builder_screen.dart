@@ -152,6 +152,33 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
+  Future<void> _reorderEntry(int oldIndex, int newIndex) async {
+    if (_busy) return;
+    if (newIndex > oldIndex) newIndex--;
+    if (newIndex == oldIndex) return;
+    final entry = _gang.entries[oldIndex];
+    final reordered = List<ListEntry>.from(_gang.entries)
+      ..removeAt(oldIndex)
+      ..insert(newIndex, entry);
+    setState(() {
+      _gang = Gang(
+        id: _gang.id,
+        name: _gang.name,
+        faction: _gang.faction,
+        points: _gang.points,
+        totalCost: _gang.totalCost,
+        entries: reordered,
+      );
+      _busy = true;
+    });
+    try {
+      final updated = await GangService().reorderEntry(entry.id, newIndex + 1);
+      setState(() => _gang = updated);
+    } finally {
+      setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final factionColor = _kFactionColors[_gang.faction] ?? _kGold;
@@ -366,10 +393,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         ),
       );
     }
-    return ListView.separated(
+    return ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+      onReorder: _reorderEntry,
+      proxyDecorator: (child, _, __) => child,
+      buildDefaultDragHandles: false,
       itemCount: entries.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final entry = entries[i];
         final profileIdx = _profiles.indexWhere((p) => p.cardReferenceId == entry.referenceId);
@@ -384,23 +413,28 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                 : profile.keywords.contains('Hero')
                     ? 'hero'
                     : null;
-        return _EntryTile(
-          entry: entry,
-          factionColor: entryColor,
-          role: role,
-          busy: _busy,
-          onRemove: () => _removeEntry(entry),
-          onTap: profileIdx == -1
-              ? null
-              : () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CardViewerScreen(
-                        profiles: _profiles,
-                        initialIndex: profileIdx,
+        return Padding(
+          key: ValueKey(entry.id),
+          padding: EdgeInsets.only(bottom: i < entries.length - 1 ? 8 : 0),
+          child: _EntryTile(
+            entry: entry,
+            index: i,
+            factionColor: entryColor,
+            role: role,
+            busy: _busy,
+            onRemove: () => _removeEntry(entry),
+            onTap: profileIdx == -1
+                ? null
+                : () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CardViewerScreen(
+                          profiles: _profiles,
+                          initialIndex: profileIdx,
+                        ),
                       ),
                     ),
-                  ),
+          ),
         );
       },
     );
@@ -685,6 +719,7 @@ class _TabButton extends StatelessWidget {
 class _EntryTile extends StatefulWidget {
   const _EntryTile({
     required this.entry,
+    required this.index,
     required this.factionColor,
     required this.busy,
     required this.onRemove,
@@ -693,6 +728,7 @@ class _EntryTile extends StatefulWidget {
   });
 
   final ListEntry entry;
+  final int index;
   final Color factionColor;
   final String? role;
   final bool busy;
@@ -760,9 +796,17 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+                  padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
                   child: Row(
                     children: [
+                      ReorderableDragStartListener(
+                        index: widget.index,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(Icons.drag_handle, size: 18, color: Colors.white.withOpacity(0.45)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.baseline,

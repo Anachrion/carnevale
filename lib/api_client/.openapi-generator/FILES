@@ -4,6 +4,8 @@ analysis_options.yaml
 doc/CardReference.md
 doc/EntryInput.md
 doc/EntryInputEntry.md
+doc/EntryPositionInput.md
+doc/EntryPositionInputEntry.md
 doc/ListEntriesApi.md
 doc/ListEntry.md
 doc/ListInput.md
@@ -31,6 +33,8 @@ lib/src/model/card_reference.dart
 lib/src/model/date.dart
 lib/src/model/entry_input.dart
 lib/src/model/entry_input_entry.dart
+lib/src/model/entry_position_input.dart
+lib/src/model/entry_position_input_entry.dart
 lib/src/model/list_entry.dart
 lib/src/model/list_input.dart
 lib/src/model/list_input_list.dart
@@ -41,3 +45,5 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
+test/entry_position_input_entry_test.dart
+test/entry_position_input_test.dart

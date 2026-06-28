@@ -67,6 +67,7 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
+[*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 [*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list
 [*ListsApi*](doc/ListsApi.md) | [**deleteList**](doc/ListsApi.md#deletelist) | **DELETE** /lists/{id} | Delete a list
 [*ListsApi*](doc/ListsApi.md) | [**getList**](doc/ListsApi.md#getlist) | **GET** /lists/{id} | Get a list
@@ -81,6 +82,8 @@ Class | Method | HTTP request | Description
  - [CardReference](doc/CardReference.md)
  - [EntryInput](doc/EntryInput.md)
  - [EntryInputEntry](doc/EntryInputEntry.md)
+ - [EntryPositionInput](doc/EntryPositionInput.md)
+ - [EntryPositionInputEntry](doc/EntryPositionInputEntry.md)
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)
  - [ListInputList](doc/ListInputList.md)
