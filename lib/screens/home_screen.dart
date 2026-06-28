@@ -35,38 +35,42 @@ class HomeScreen extends StatelessWidget {
               alignment: Alignment.topCenter,
             ),
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                _Header(),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(72, 80, 72, 32),
-                  child: Column(
-                    children: [
-                      _MenuItem(
-                        icon: Icons.style_outlined,
-                        title: 'Cards',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen())),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _Header(),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(72, 80, 72, 32),
+                      child: Column(
+                        children: [
+                          _MenuItem(
+                            icon: Icons.style_outlined,
+                            title: 'Cards',
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen())),
+                          ),
+                          const SizedBox(height: 12),
+                          _MenuItem(
+                            icon: Icons.flag_outlined,
+                            title: 'Gangs',
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GangsScreen())),
+                          ),
+                          const SizedBox(height: 12),
+                          _MenuItem(icon: Icons.menu_book_outlined, title: 'Rules'),
+                          const SizedBox(height: 12),
+                          _MenuItem(
+                            icon: Icons.settings_outlined,
+                            title: 'Settings',
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      _MenuItem(
-                        icon: Icons.flag_outlined,
-                        title: 'Gangs',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GangsScreen())),
-                      ),
-                      const SizedBox(height: 12),
-                      _MenuItem(icon: Icons.menu_book_outlined, title: 'Rules'),
-                      const SizedBox(height: 12),
-                      _MenuItem(
-                        icon: Icons.settings_outlined,
-                        title: 'Settings',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -82,23 +86,41 @@ class _Header extends StatelessWidget {
         children: [
           Center(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 16, 0, 32),
+              padding: const EdgeInsets.fromLTRB(0, 64, 0, 32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset('assets/images/mask.png', height: 160),
-                  const SizedBox(height: 10),
-                  Text(
+                  SizedBox(
+                    width: double.infinity,
+                    height: 160,
+                    child: Image.asset(
+                      'assets/images/mask.png',
+                      fit: BoxFit.contain,
+                      alignment: Alignment.center,
+                    ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -14),
+                    child: Text(
                     'CARNEVALE',
                     style: GoogleFonts.cinzel(
                       fontSize: 40,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w400,
                       color: context.textColor,
-                      letterSpacing: 5,
+                      letterSpacing: 10,
                     ),
                   ),
+                  ),
                   const SizedBox(height: 12),
-                  _GoldDivider(),
+                  SizedBox(
+                    width: 180,
+                    height: 25,
+                    child: Image.asset(
+                      'assets/images/divider.png',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.center,
+                    ),
+                  ),
                 ],
               ),
             ),
