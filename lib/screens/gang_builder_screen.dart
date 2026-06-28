@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/equipment.dart';
@@ -11,9 +12,7 @@ import '../services/profile_service.dart';
 import 'card_viewer_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
-const _kDarkText = Color(0xFF2C2418);
 const _kGold = Color(0xFFC4A050);
-const _kSubtleText = Color(0xFF7A6E62);
 
 const _kFactionColors = {
   'doctors':    Color(0xFF177282),
@@ -310,7 +309,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: _kDarkText),
+            icon: Icon(Icons.arrow_back, color: context.textColor),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 4),
@@ -320,7 +319,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               style: GoogleFonts.cinzel(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
-                color: _kDarkText,
+                color: context.textColor,
                 letterSpacing: 2,
               ),
               overflow: TextOverflow.ellipsis,
@@ -371,19 +370,19 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                       style: GoogleFonts.cinzel(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: isOver ? Colors.red.shade600 : _kDarkText,
+                        color: isOver ? Colors.red.shade600 : context.textColor,
                       ),
                     ),
                     Text(
                       ' / $limit ducats',
-                      style: GoogleFonts.cinzel(fontSize: 14, color: _kSubtleText),
+                      style: GoogleFonts.cinzel(fontSize: 14, color: context.subtleTextColor),
                     ),
                     const Spacer(),
                     Text(
                       '${limit - used} left',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isOver ? Colors.red.shade400 : _kSubtleText,
+                        color: isOver ? Colors.red.shade400 : context.subtleTextColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -459,16 +458,16 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.group_outlined, size: 48, color: _kSubtleText.withOpacity(0.4)),
+            Icon(Icons.group_outlined, size: 48, color: context.subtleTextColor.withOpacity(0.4)),
             const SizedBox(height: 12),
             Text(
               'No models hired yet',
-              style: GoogleFonts.cinzel(fontSize: 15, color: _kSubtleText),
+              style: GoogleFonts.cinzel(fontSize: 15, color: context.subtleTextColor),
             ),
             const SizedBox(height: 6),
             Text(
               'Go to Hire to add models',
-              style: TextStyle(fontSize: 12, color: _kSubtleText.withOpacity(0.7)),
+              style: TextStyle(fontSize: 12, color: context.subtleTextColor.withOpacity(0.7)),
             ),
           ],
         ),
@@ -571,11 +570,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         Expanded(
           child: _profiles.isEmpty
               ? Center(
-                  child: Text('No profiles for this faction.', style: TextStyle(color: _kSubtleText)),
+                  child: Text('No profiles for this faction.', style: TextStyle(color: context.subtleTextColor)),
                 )
               : profiles.isEmpty
                   ? Center(
-                      child: Text('No profiles match your search.', style: TextStyle(color: _kSubtleText)),
+                      child: Text('No profiles match your search.', style: TextStyle(color: context.subtleTextColor)),
                     )
                   : CustomScrollView(
                       slivers: [
@@ -636,20 +635,20 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
           child: Row(
             children: [
-              Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
+              Expanded(child: Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   label.toUpperCase(),
                   style: TextStyle(
                     fontSize: 11,
-                    color: _kSubtleText.withOpacity(0.7),
+                    color: context.subtleTextColor.withOpacity(0.7),
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.5,
                   ),
                 ),
               ),
-              Expanded(child: Divider(color: _kSubtleText.withOpacity(0.3), thickness: 0.5)),
+              Expanded(child: Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5)),
             ],
           ),
         ),
@@ -672,14 +671,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                 ),
                 child: TextField(
                   controller: _searchController,
-                  style: const TextStyle(color: _kDarkText, fontSize: 15),
+                  style: TextStyle(color: context.textColor, fontSize: 15),
                   decoration: InputDecoration(
                     hintText: 'Search profiles...',
-                    hintStyle: TextStyle(color: _kSubtleText.withOpacity(0.7), fontSize: 15),
+                    hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.7), fontSize: 15),
                     prefixIcon: const Icon(Icons.search, color: _kGold, size: 20),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: Icon(Icons.clear, color: _kSubtleText.withOpacity(0.6), size: 18),
+                            icon: Icon(Icons.clear, color: context.subtleTextColor.withOpacity(0.6), size: 18),
                             onPressed: () => _searchController.clear(),
                           )
                         : null,
@@ -777,7 +776,7 @@ class _SortChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? Colors.white : _kSubtleText,
+                color: selected ? Colors.white : context.subtleTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -827,7 +826,7 @@ class _TabButton extends StatelessWidget {
             style: GoogleFonts.cinzel(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: selected ? Colors.white : _kSubtleText,
+              color: selected ? Colors.white : context.subtleTextColor,
               letterSpacing: 1,
             ),
           ),

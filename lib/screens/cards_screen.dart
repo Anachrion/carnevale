@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/profile.dart';
@@ -6,10 +7,7 @@ import '../services/profile_service.dart';
 import 'card_viewer_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
-const _kDarkText = Color(0xFF2C2418);
 const _kGold = Color(0xFFC4A050);
-const _kSubtleText = Color(0xFF7A6E62);
-const _kCardBg = Color(0xFFF5F2EE);
 
 const _kFactionColors = {
   'doctors':    Color(0xFF177282),
@@ -135,7 +133,7 @@ class _CardsScreenState extends State<CardsScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: _kDarkText),
+            icon: Icon(Icons.arrow_back, color: context.textColor),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 4),
@@ -144,14 +142,14 @@ class _CardsScreenState extends State<CardsScreen> {
             style: GoogleFonts.cinzel(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: _kDarkText,
+              color: context.textColor,
               letterSpacing: 3,
             ),
           ),
           const Spacer(),
           Text(
             '${_results.length} profiles',
-            style: const TextStyle(fontSize: 12, color: _kSubtleText),
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
         ],
       ),
@@ -173,10 +171,10 @@ class _CardsScreenState extends State<CardsScreen> {
             ),
             child: TextField(
               controller: _searchController,
-              style: const TextStyle(color: _kDarkText, fontSize: 15),
+              style: TextStyle(color: context.textColor, fontSize: 15),
               decoration: InputDecoration(
                 hintText: 'Search profiles...',
-                hintStyle: TextStyle(color: _kSubtleText.withOpacity(0.7), fontSize: 15),
+                hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.7), fontSize: 15),
                 prefixIcon: const Icon(Icons.search, color: _kGold, size: 20),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -212,7 +210,7 @@ class _CardsScreenState extends State<CardsScreen> {
     }
     if (_results.isEmpty) {
       return Center(
-        child: Text('No profiles found.', style: TextStyle(color: _kSubtleText, fontSize: 14)),
+        child: Text('No profiles found.', style: TextStyle(color: context.subtleTextColor, fontSize: 14)),
       );
     }
     return ListView.separated(
@@ -251,7 +249,7 @@ class _AllChip extends StatelessWidget {
           style: GoogleFonts.cinzel(
             fontSize: 11,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-            color: selected ? Colors.white : _kDarkText,
+            color: selected ? Colors.white : context.textColor,
           ),
         ),
       ),
@@ -311,7 +309,7 @@ class _ProfileTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
           decoration: BoxDecoration(
-            color: _kFactionColors[profile.faction] ?? _kCardBg,
+            color: _kFactionColors[profile.faction] ?? context.cardBgColor,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(

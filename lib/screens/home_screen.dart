@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'cards_screen.dart';
@@ -9,8 +10,6 @@ const _kBackground = Color(0xFFF0EDE6);
 const _kCardBackground = Color(0xFFF5F2EE);
 const _kRed = Color(0xFF8B1A1A);
 const _kGold = Color(0xFFC4A050);
-const _kDarkText = Color(0xFF2C2418);
-const _kSubtleText = Color(0xFF7A6E62);
 const _kNewsCard = Color(0xFF5A6B78);
 const _kCircle = Color(0xFFE5E1DA);
 
@@ -94,7 +93,7 @@ class _Header extends StatelessWidget {
                     style: GoogleFonts.cinzel(
                       fontSize: 40,
                       fontWeight: FontWeight.w700,
-                      color: _kDarkText,
+                      color: context.textColor,
                       letterSpacing: 5,
                     ),
                   ),
@@ -108,7 +107,7 @@ class _Header extends StatelessWidget {
             top: 8,
             left: 8,
             child: IconButton(
-              icon: const Icon(Icons.menu, color: _kDarkText, size: 28),
+              icon: Icon(Icons.menu, color: context.textColor, size: 28),
               onPressed: () {},
             ),
           ),
@@ -174,7 +173,7 @@ class _MenuItem extends StatelessWidget {
                   width: 64,
                   height: 64,
                   decoration: const BoxDecoration(color: _kCircle, shape: BoxShape.circle),
-                  child: Icon(icon, color: _kDarkText, size: 26),
+                  child: Icon(icon, color: context.textColor, size: 26),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -183,7 +182,7 @@ class _MenuItem extends StatelessWidget {
                     style: GoogleFonts.cinzel(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: _kDarkText,
+                      color: context.textColor,
                     ),
                   ),
                 ),
