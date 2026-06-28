@@ -47,14 +47,13 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:carnevale_api/carnevale_api.dart';
 
 
-final api = CarnevaleApi().getListEntriesApi();
-final EntryInput entryInput = ; // EntryInput | 
+final api = CarnevaleApi().getEquipmentApi();
 
 try {
-    final response = await api.createListEntry(entryInput);
+    final response = await api.getEquipment();
     print(response);
 } on DioException catch (e) {
-    print("Exception when calling ListEntriesApi->createListEntry: $e\n");
+    print("Exception when calling EquipmentApi->getEquipment: $e\n");
 }
 
 ```
@@ -65,6 +64,7 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+[*EquipmentApi*](doc/EquipmentApi.md) | [**getEquipment**](doc/EquipmentApi.md#getequipment) | **GET** /equipment | List all equipment
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
@@ -84,6 +84,7 @@ Class | Method | HTTP request | Description
  - [EntryInputEntry](doc/EntryInputEntry.md)
  - [EntryPositionInput](doc/EntryPositionInput.md)
  - [EntryPositionInputEntry](doc/EntryPositionInputEntry.md)
+ - [Equipment](doc/Equipment.md)
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)
  - [ListInputList](doc/ListInputList.md)

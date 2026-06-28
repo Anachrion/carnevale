@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -12,14 +13,19 @@ part 'entry_input_entry.g.dart';
 ///
 /// Properties:
 /// * [listId] 
-/// * [cardReferenceId] 
+/// * [entryType] 
+/// * [entryId] 
 @BuiltValue()
 abstract class EntryInputEntry implements Built<EntryInputEntry, EntryInputEntryBuilder> {
   @BuiltValueField(wireName: r'list_id')
   int get listId;
 
-  @BuiltValueField(wireName: r'card_reference_id')
-  int get cardReferenceId;
+  @BuiltValueField(wireName: r'entry_type')
+  EntryInputEntryEntryTypeEnum get entryType;
+  // enum entryTypeEnum {  CardReference,  Equipment,  };
+
+  @BuiltValueField(wireName: r'entry_id')
+  int get entryId;
 
   EntryInputEntry._();
 
@@ -49,9 +55,14 @@ class _$EntryInputEntrySerializer implements PrimitiveSerializer<EntryInputEntry
       object.listId,
       specifiedType: const FullType(int),
     );
-    yield r'card_reference_id';
+    yield r'entry_type';
     yield serializers.serialize(
-      object.cardReferenceId,
+      object.entryType,
+      specifiedType: const FullType(EntryInputEntryEntryTypeEnum),
+    );
+    yield r'entry_id';
+    yield serializers.serialize(
+      object.entryId,
       specifiedType: const FullType(int),
     );
   }
@@ -84,12 +95,19 @@ class _$EntryInputEntrySerializer implements PrimitiveSerializer<EntryInputEntry
           ) as int;
           result.listId = valueDes;
           break;
-        case r'card_reference_id':
+        case r'entry_type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(EntryInputEntryEntryTypeEnum),
+          ) as EntryInputEntryEntryTypeEnum;
+          result.entryType = valueDes;
+          break;
+        case r'entry_id':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(int),
           ) as int;
-          result.cardReferenceId = valueDes;
+          result.entryId = valueDes;
           break;
         default:
           unhandled.add(key);
@@ -118,5 +136,20 @@ class _$EntryInputEntrySerializer implements PrimitiveSerializer<EntryInputEntry
     );
     return result.build();
   }
+}
+
+class EntryInputEntryEntryTypeEnum extends EnumClass {
+
+  @BuiltValueEnumConst(wireName: r'CardReference')
+  static const EntryInputEntryEntryTypeEnum cardReference = _$entryInputEntryEntryTypeEnum_cardReference;
+  @BuiltValueEnumConst(wireName: r'Equipment')
+  static const EntryInputEntryEntryTypeEnum equipment = _$entryInputEntryEntryTypeEnum_equipment;
+
+  static Serializer<EntryInputEntryEntryTypeEnum> get serializer => _$entryInputEntryEntryTypeEnumSerializer;
+
+  const EntryInputEntryEntryTypeEnum._(String name): super(name);
+
+  static BuiltSet<EntryInputEntryEntryTypeEnum> get values => _$entryInputEntryEntryTypeEnumValues;
+  static EntryInputEntryEntryTypeEnum valueOf(String name) => _$entryInputEntryEntryTypeEnumValueOf(name);
 }
 

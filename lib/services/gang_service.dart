@@ -36,12 +36,13 @@ class GangService {
     await _client.lists.deleteList(id: id);
   }
 
-  Future<Gang> addEntry(int listId, int cardReferenceId) async {
+  Future<Gang> addEntry(int listId, int entryId, String entryType) async {
     final res = await _client.listEntries.createListEntry(
       entryInput: api.EntryInput((b) => b
         ..entry = api.EntryInputEntry((eb) => eb
           ..listId = listId
-          ..cardReferenceId = cardReferenceId
+          ..entryType = api.EntryInputEntryEntryTypeEnum.valueOf(entryType)
+          ..entryId = entryId
         ).toBuilder()
       ),
     );
@@ -77,7 +78,8 @@ class GangService {
   ListEntry _mapEntry(api.ListEntry e) => ListEntry(
         id: e.id,
         position: e.position,
-        referenceId: e.cardReferenceId,
+        entryType: e.entryType.name,
+        entryId: e.entryId,
         name: e.name,
         cost: e.cost,
       );

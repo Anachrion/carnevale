@@ -1,4 +1,4 @@
-# carnevale_api.model.ListEntry
+# carnevale_api.model.Equipment
 
 ## Load the model package
 ```dart
@@ -9,10 +9,8 @@ import 'package:carnevale_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
-**position** | **int** |  | 
-**entryType** | **String** |  | 
-**entryId** | **int** |  | 
 **name** | **String** |  | 
+**description** | **String** |  | 
 **cost** | **int** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
