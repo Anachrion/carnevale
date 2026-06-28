@@ -170,6 +170,65 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
+  void _showEquipmentDetail(BuildContext context, Equipment e) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: _kEquipmentColor,
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        e.name,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '${e.cost}',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: _kGold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
+                const SizedBox(height: 12),
+                Text(
+                  e.description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.85),
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _reorderEntry(int oldIndex, int newIndex) async {
     if (_busy) return;
     if (newIndex > oldIndex) newIndex--;
@@ -423,9 +482,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             ? _profiles.indexWhere((p) => p.cardReferenceId == entry.entryId)
             : -1;
         final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
-        final entryColor = profile?.faction == 'gifted'
-            ? (_kFactionColors['gifted'] ?? factionColor)
-            : factionColor;
+        final equipmentItem = entry.entryType == 'Equipment'
+            ? _equipment.where((e) => e.id == entry.entryId).firstOrNull
+            : null;
+        final entryColor = entry.entryType == 'Equipment'
+            ? _kEquipmentColor
+            : profile?.faction == 'gifted'
+                ? (_kFactionColors['gifted'] ?? factionColor)
+                : factionColor;
         final role = profile == null
             ? null
             : profile.keywords.contains('Leader')
@@ -433,6 +497,20 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                 : profile.keywords.contains('Hero')
                     ? 'hero'
                     : null;
+        VoidCallback? onTap;
+        if (profileIdx != -1) {
+          onTap = () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CardViewerScreen(
+                    profiles: _profiles,
+                    initialIndex: profileIdx,
+                  ),
+                ),
+              );
+        } else if (equipmentItem != null) {
+          onTap = () => _showEquipmentDetail(context, equipmentItem);
+        }
         return ReorderableDragStartListener(
           key: ValueKey(entry.id),
           index: i,
@@ -441,20 +519,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             child: _EntryTile(
               entry: entry,
               factionColor: entryColor,
-            role: role,
-            busy: _busy,
-            onRemove: () => _removeEntry(entry),
-            onTap: profileIdx == -1
-                ? null
-                : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CardViewerScreen(
-                          profiles: _profiles,
-                          initialIndex: profileIdx,
-                        ),
-                      ),
-                    ),
+              role: role,
+              busy: _busy,
+              onRemove: () => _removeEntry(entry),
+              onTap: onTap,
             ),
           ),
         );
@@ -538,13 +606,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                                 final count = _gang.entries
                                     .where((en) => en.entryType == 'Equipment' && en.entryId == e.id)
                                     .length;
-                                final canAdd = _gang.totalCost + e.cost <= _gang.points;
+                                final canAdd = count == 0 && _gang.totalCost + e.cost <= _gang.points;
                                 return _HireEquipmentTile(
                                   equipment: e,
                                   count: count,
                                   canAdd: canAdd,
                                   busy: _busy,
                                   onAdd: () => _addEquipment(e),
+                                  onTap: () => _showEquipmentDetail(context, e),
                                 );
                               },
                             ),
@@ -1102,6 +1171,7 @@ class _HireEquipmentTile extends StatelessWidget {
     required this.canAdd,
     required this.busy,
     required this.onAdd,
+    required this.onTap,
   });
 
   final Equipment equipment;
@@ -1109,65 +1179,7 @@ class _HireEquipmentTile extends StatelessWidget {
   final bool canAdd;
   final bool busy;
   final VoidCallback onAdd;
-
-  void _showDetail(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: _kEquipmentColor,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        equipment.name,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${equipment.cost}',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: _kGold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
-                const SizedBox(height: 12),
-                Text(
-                  equipment.description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.85),
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1178,7 +1190,7 @@ class _HireEquipmentTile extends StatelessWidget {
             ? _kEquipmentColor
             : Color.lerp(_kEquipmentColor, Colors.white, 0.28)!;
     return GestureDetector(
-      onTap: () => _showDetail(context),
+      onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
