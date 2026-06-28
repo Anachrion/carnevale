@@ -47,20 +47,23 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           _MenuItem(
                             icon: Icons.style_outlined,
+                            imagePath: 'assets/images/cards_icon.png',
                             title: 'Cards',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen())),
                           ),
                           const SizedBox(height: 12),
                           _MenuItem(
                             icon: Icons.flag_outlined,
+                            imagePath: 'assets/images/list_icon.png',
                             title: 'Gangs',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GangsScreen())),
                           ),
                           const SizedBox(height: 12),
-                          _MenuItem(icon: Icons.menu_book_outlined, title: 'Rules'),
+                          _MenuItem(icon: Icons.menu_book_outlined, imagePath: 'assets/images/book_icon.png', title: 'Rules'),
                           const SizedBox(height: 12),
                           _MenuItem(
                             icon: Icons.settings_outlined,
+                            imagePath: 'assets/images/gear_icon.png',
                             title: 'Settings',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
                           ),
@@ -81,6 +84,7 @@ class HomeScreen extends StatelessWidget {
 class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return SafeArea(
       child: Stack(
         children: [
@@ -97,6 +101,8 @@ class _Header extends StatelessWidget {
                       'assets/images/mask.png',
                       fit: BoxFit.contain,
                       alignment: Alignment.center,
+                      color: isLight ? _kRed : null,
+                      colorBlendMode: BlendMode.srcIn,
                     ),
                   ),
                   Transform.translate(
@@ -111,15 +117,19 @@ class _Header extends StatelessWidget {
                     ),
                   ),
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
+                  Transform.translate(
+                    offset: const Offset(0, -8),
+                    child: SizedBox(
                     width: 180,
                     height: 25,
                     child: Image.asset(
                       'assets/images/divider.png',
                       fit: BoxFit.cover,
                       alignment: Alignment.center,
+                      color: isLight ? _kRed : const Color(0xFFB1986C),
+                      colorBlendMode: BlendMode.srcIn,
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -163,11 +173,13 @@ class _MenuItem extends StatelessWidget {
   const _MenuItem({
     required this.icon,
     required this.title,
+    this.imagePath,
     this.onTap,
   });
 
   final IconData icon;
   final String title;
+  final String? imagePath;
   final VoidCallback? onTap;
 
   @override
@@ -175,12 +187,14 @@ class _MenuItem extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           decoration: BoxDecoration(
-            color: _kCardBackground.withOpacity(0.55),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.25)
+                : _kCardBackground.withOpacity(0.55),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.0),
           ),
           child: Material(
             color: Colors.transparent,
@@ -188,14 +202,22 @@ class _MenuItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: onTap,
               child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: Row(
               children: [
-                Container(
+                SizedBox(
                   width: 64,
                   height: 64,
-                  decoration: const BoxDecoration(color: _kCircle, shape: BoxShape.circle),
-                  child: Icon(icon, color: context.textColor, size: 26),
+                  child: imagePath != null
+                      ? Image.asset(
+                          imagePath!,
+                          fit: BoxFit.contain,
+                          color: Theme.of(context).brightness == Brightness.light
+                              ? _kRed
+                              : const Color(0xFFB1986C),
+                          colorBlendMode: BlendMode.srcIn,
+                        )
+                      : Icon(icon, color: context.textColor, size: 26),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -234,7 +256,7 @@ class _NewsCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: () {},
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: Row(
               children: [
                 Container(
