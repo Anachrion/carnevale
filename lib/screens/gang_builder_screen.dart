@@ -991,7 +991,11 @@ class _HireToggleButton extends StatelessWidget {
         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
       );
     }
-    if (!canAdd) return const SizedBox(width: 32, height: 32);
+    if (!canAdd) return SizedBox(
+      width: 32,
+      height: 32,
+      child: Icon(Icons.block, size: 28, color: Colors.white.withOpacity(0.30)),
+    );
     return GestureDetector(
       onTap: onAdd,
       child: Container(
