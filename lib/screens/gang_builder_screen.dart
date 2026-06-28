@@ -413,13 +413,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                 : profile.keywords.contains('Hero')
                     ? 'hero'
                     : null;
-        return Padding(
+        return ReorderableDragStartListener(
           key: ValueKey(entry.id),
-          padding: EdgeInsets.only(bottom: i < entries.length - 1 ? 8 : 0),
-          child: _EntryTile(
-            entry: entry,
-            index: i,
-            factionColor: entryColor,
+          index: i,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: i < entries.length - 1 ? 8 : 0),
+            child: _EntryTile(
+              entry: entry,
+              factionColor: entryColor,
             role: role,
             busy: _busy,
             onRemove: () => _removeEntry(entry),
@@ -434,6 +435,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                         ),
                       ),
                     ),
+            ),
           ),
         );
       },
@@ -719,7 +721,6 @@ class _TabButton extends StatelessWidget {
 class _EntryTile extends StatefulWidget {
   const _EntryTile({
     required this.entry,
-    required this.index,
     required this.factionColor,
     required this.busy,
     required this.onRemove,
@@ -728,7 +729,6 @@ class _EntryTile extends StatefulWidget {
   });
 
   final ListEntry entry;
-  final int index;
   final Color factionColor;
   final String? role;
   final bool busy;
@@ -796,17 +796,9 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
+                  padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
                   child: Row(
                     children: [
-                      ReorderableDragStartListener(
-                        index: widget.index,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Icon(Icons.drag_handle, size: 18, color: Colors.white.withOpacity(0.45)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.baseline,
