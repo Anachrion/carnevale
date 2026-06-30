@@ -51,7 +51,6 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   List<Equipment> _equipment = [];
   bool _loading = true;
   bool _busy = false;
-  bool _errorsExpanded = true;
   _Tab _tab = _Tab.list;
   _HireSort _hireSort = _HireSort.role;
   bool _hireSortAsc = true;
@@ -405,23 +404,6 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     minHeight: 6,
                   ),
                 ),
-                if (_gang.entries.isNotEmpty && _gang.selectionValid) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(Icons.check_circle_outline, size: 14, color: Colors.green.shade600),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Ready',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           ),
@@ -430,7 +412,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     );
   }
 
-  static const _kAccentRed = Color(0xFFD04040);
+  static const _kAccentRed = Color(0xFFC0392B);
 
   TextSpan _highlightNumbers(String text, TextStyle base) {
     final spans = <InlineSpan>[];
@@ -442,7 +424,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       }
       spans.add(TextSpan(
         text: m.group(0),
-        style: base.copyWith(color: _kAccentRed, fontWeight: FontWeight.w700),
+        style: base.copyWith(fontWeight: FontWeight.w700),
       ));
       last = m.end;
     }
@@ -454,112 +436,35 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 
   Widget _buildValidityPanel() {
     final errors = _gang.selectionErrors;
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.38),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _kAccentRed.withOpacity(0.55), width: 1.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: const BoxDecoration(
-                          color: _kAccentRed,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.warning_rounded, color: Colors.white, size: 22),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'List Invalid',
-                              style: GoogleFonts.cinzel(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: _kAccentRed,
-                                letterSpacing: 0.4,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "Your list does not meet the guild's requirements.",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: context.subtleTextColor,
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          _errorsExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                          color: context.subtleTextColor,
-                          size: 22,
-                        ),
-                        onPressed: () => setState(() => _errorsExpanded = !_errorsExpanded),
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: _kAccentRed,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: errors.map((e) {
+            final base = TextStyle(fontSize: 12, color: Colors.white, height: 1.4);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 4,
+                    height: 4,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                   ),
-                ),
-                if (_errorsExpanded) ...[
-                  Divider(height: 1, thickness: 0.5, color: _kAccentRed.withOpacity(0.3)),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-                    child: Column(
-                      children: errors.map((e) {
-                        final base = TextStyle(fontSize: 13, color: context.textColor, height: 1.4);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 7),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Container(
-                                  width: 5,
-                                  height: 5,
-                                  decoration: const BoxDecoration(
-                                    color: _kAccentRed,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: RichText(text: _highlightNumbers(e, base)),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
+                  const SizedBox(width: 9),
+                  Expanded(child: RichText(text: _highlightNumbers(e, base))),
                 ],
-              ],
-            ),
-          ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -712,8 +617,6 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       final count = _entryCount(p);
       final alreadyHiredUnique = isUnique && count > 0;
       final leaderSlotTaken = isLeader && hasLeader && count == 0;
-      final overBudget = _gang.totalCost + p.ducats > _gang.points;
-      final greyOut = overBudget && !alreadyHiredUnique && !leaderSlotTaken;
       return _HireCardTile(
         profile: p,
         allProfiles: profiles,
@@ -722,7 +625,6 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         isUnique: isUnique,
         factionColor: factionColor,
         canAdd: !alreadyHiredUnique && !leaderSlotTaken,
-        greyOut: greyOut,
         busy: _busy,
         onAdd: () => _add(p),
         onRemove: () => _remove(p),
@@ -1156,7 +1058,6 @@ class _HireCardTile extends StatelessWidget {
     required this.isUnique,
     required this.factionColor,
     required this.canAdd,
-    required this.greyOut,
     required this.busy,
     required this.onAdd,
     required this.onRemove,
@@ -1169,7 +1070,6 @@ class _HireCardTile extends StatelessWidget {
   final bool isUnique;
   final Color factionColor;
   final bool canAdd;
-  final bool greyOut;
   final bool busy;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
@@ -1178,11 +1078,7 @@ class _HireCardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final inList = count > 0;
     final base = _kFactionColors[profile.faction] ?? factionColor;
-    final bgColor = inList
-        ? Color.lerp(base, Colors.black, 0.45)!
-        : greyOut
-            ? Color.lerp(base, Colors.white, 0.28)!
-            : base;
+    final bgColor = inList ? Color.lerp(base, Colors.black, 0.45)! : base;
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
