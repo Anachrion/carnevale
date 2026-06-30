@@ -190,11 +190,22 @@ class _MenuItem extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.25)
-                : _kCardBackground.withOpacity(0.55),
+            gradient: Theme.of(context).brightness == Brightness.dark
+                ? const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0x10000000), Color(0x88000000)],
+                  )
+                : LinearGradient(
+                    colors: [_kCardBackground.withOpacity(0.55), _kCardBackground.withOpacity(0.55)],
+                  ),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.0),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFFB1986C).withOpacity(0.45)
+                  : Colors.white.withOpacity(0.3),
+              width: 1.0,
+            ),
           ),
           child: Material(
             color: Colors.transparent,
@@ -212,6 +223,7 @@ class _MenuItem extends StatelessWidget {
                       ? Image.asset(
                           imagePath!,
                           fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
                           color: Theme.of(context).brightness == Brightness.light
                               ? _kRed
                               : const Color(0xFFB1986C),

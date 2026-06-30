@@ -148,15 +148,32 @@ class _SettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           decoration: BoxDecoration(
-            color: context.cardBgColor.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 0.5),
+            gradient: isDark
+                ? const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0x10000000), Color(0x88000000)],
+                  )
+                : LinearGradient(
+                    colors: [
+                      const Color(0xFFF5F2EE).withValues(alpha: 0.55),
+                      const Color(0xFFF5F2EE).withValues(alpha: 0.55),
+                    ],
+                  ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? const Color(0xFFB1986C).withValues(alpha: 0.45)
+                  : Colors.white.withValues(alpha: 0.3),
+              width: 1.0,
+            ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           child: Row(
