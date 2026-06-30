@@ -75,6 +75,8 @@ class GangService {
         faction: ml.faction,
         points: ml.points,
         totalCost: ml.totalCost,
+        selectionValid: ml.selectionValid,
+        selectionErrors: ml.selectionErrors.toList(),
         entries: ml.entries.map(_mapEntry).toList(),
       );
 

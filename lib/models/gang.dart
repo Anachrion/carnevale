@@ -23,6 +23,8 @@ class Gang {
   final int points;
   final int totalCost;
   final List<ListEntry> entries;
+  final bool selectionValid;
+  final List<String> selectionErrors;
 
   const Gang({
     required this.id,
@@ -31,5 +33,7 @@ class Gang {
     required this.points,
     this.totalCost = 0,
     this.entries = const [],
+    this.selectionValid = true,
+    this.selectionErrors = const [],
   });
 }

@@ -49,5 +49,3 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/equipment_api_test.dart
-test/equipment_test.dart

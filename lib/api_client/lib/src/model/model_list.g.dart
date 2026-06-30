@@ -18,6 +18,10 @@ class _$ModelList extends ModelList {
   @override
   final int totalCost;
   @override
+  final bool selectionValid;
+  @override
+  final BuiltList<String> selectionErrors;
+  @override
   final BuiltList<ListEntry> entries;
 
   factory _$ModelList([void Function(ModelListBuilder)? updates]) =>
@@ -29,6 +33,8 @@ class _$ModelList extends ModelList {
     required this.faction,
     required this.points,
     required this.totalCost,
+    required this.selectionValid,
+    required this.selectionErrors,
     required this.entries,
   }) : super._();
   @override
@@ -47,6 +53,8 @@ class _$ModelList extends ModelList {
         faction == other.faction &&
         points == other.points &&
         totalCost == other.totalCost &&
+        selectionValid == other.selectionValid &&
+        selectionErrors == other.selectionErrors &&
         entries == other.entries;
   }
 
@@ -58,6 +66,8 @@ class _$ModelList extends ModelList {
     _$hash = $jc(_$hash, faction.hashCode);
     _$hash = $jc(_$hash, points.hashCode);
     _$hash = $jc(_$hash, totalCost.hashCode);
+    _$hash = $jc(_$hash, selectionValid.hashCode);
+    _$hash = $jc(_$hash, selectionErrors.hashCode);
     _$hash = $jc(_$hash, entries.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -71,6 +81,8 @@ class _$ModelList extends ModelList {
           ..add('faction', faction)
           ..add('points', points)
           ..add('totalCost', totalCost)
+          ..add('selectionValid', selectionValid)
+          ..add('selectionErrors', selectionErrors)
           ..add('entries', entries))
         .toString();
   }
@@ -99,6 +111,17 @@ class ModelListBuilder implements Builder<ModelList, ModelListBuilder> {
   int? get totalCost => _$this._totalCost;
   set totalCost(int? totalCost) => _$this._totalCost = totalCost;
 
+  bool? _selectionValid;
+  bool? get selectionValid => _$this._selectionValid;
+  set selectionValid(bool? selectionValid) =>
+      _$this._selectionValid = selectionValid;
+
+  ListBuilder<String>? _selectionErrors;
+  ListBuilder<String> get selectionErrors =>
+      _$this._selectionErrors ??= ListBuilder<String>();
+  set selectionErrors(ListBuilder<String>? selectionErrors) =>
+      _$this._selectionErrors = selectionErrors;
+
   ListBuilder<ListEntry>? _entries;
   ListBuilder<ListEntry> get entries =>
       _$this._entries ??= ListBuilder<ListEntry>();
@@ -116,6 +139,8 @@ class ModelListBuilder implements Builder<ModelList, ModelListBuilder> {
       _faction = $v.faction;
       _points = $v.points;
       _totalCost = $v.totalCost;
+      _selectionValid = $v.selectionValid;
+      _selectionErrors = $v.selectionErrors.toBuilder();
       _entries = $v.entries.toBuilder();
       _$v = null;
     }
@@ -158,11 +183,19 @@ class ModelListBuilder implements Builder<ModelList, ModelListBuilder> {
               r'ModelList',
               'totalCost',
             ),
+            selectionValid: BuiltValueNullFieldError.checkNotNull(
+              selectionValid,
+              r'ModelList',
+              'selectionValid',
+            ),
+            selectionErrors: selectionErrors.build(),
             entries: entries.build(),
           );
     } catch (_) {
       late String _$failedField;
       try {
+        _$failedField = 'selectionErrors';
+        selectionErrors.build();
         _$failedField = 'entries';
         entries.build();
       } catch (e) {
