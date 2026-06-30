@@ -510,9 +510,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator(color: _kGold));
     }
-    return _tab == _Tab.list
-        ? _buildListTab(factionColor)
-        : _buildHireTab(factionColor);
+    return IndexedStack(
+      index: _tab == _Tab.list ? 0 : 1,
+      children: [
+        _buildListTab(factionColor),
+        _buildHireTab(factionColor),
+      ],
+    );
   }
 
   Widget _buildListTab(Color factionColor) {
