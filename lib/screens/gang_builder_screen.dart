@@ -351,17 +351,36 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     final barColor = isOver ? Colors.red.shade400 : _kGold;
     final remaining = limit - used;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.45),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+              gradient: isDark
+                  ? const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x10000000), Color(0x88000000)],
+                    )
+                  : LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFFF5F2EE).withOpacity(0.30),
+                        const Color(0xFFF5F2EE).withOpacity(0.75),
+                      ],
+                    ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFFB1986C).withOpacity(0.45)
+                    : Colors.white.withOpacity(0.3),
+                width: 1.0,
+              ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
@@ -474,14 +493,32 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.35),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+              gradient: Theme.of(context).brightness == Brightness.dark
+                  ? const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x10000000), Color(0x88000000)],
+                    )
+                  : LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFFF5F2EE).withOpacity(0.30),
+                        const Color(0xFFF5F2EE).withOpacity(0.75),
+                      ],
+                    ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFFB1986C).withOpacity(0.45)
+                    : Colors.white.withOpacity(0.3),
+                width: 1.0,
+              ),
             ),
             padding: const EdgeInsets.all(4),
             child: Row(
@@ -731,14 +768,32 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       child: Column(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                  gradient: Theme.of(context).brightness == Brightness.dark
+                      ? const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0x10000000), Color(0x88000000)],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFFF5F2EE).withOpacity(0.30),
+                            const Color(0xFFF5F2EE).withOpacity(0.75),
+                          ],
+                        ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFB1986C).withOpacity(0.45)
+                        : Colors.white.withOpacity(0.3),
+                    width: 1.0,
+                  ),
                 ),
                 child: TextField(
                   controller: _searchController,
@@ -746,7 +801,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search profiles...',
                     hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.7), fontSize: 15),
-                    prefixIcon: const Icon(Icons.search, color: _kGold, size: 20),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? _kGold
+                          : const Color(0xFF8B1A1A),
+                      size: 20,
+                    ),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                             icon: Icon(Icons.clear, color: context.subtleTextColor.withOpacity(0.6), size: 18),
@@ -827,15 +888,18 @@ class _SortChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = Theme.of(context).brightness == Brightness.dark
+        ? _kGold
+        : const Color(0xFF8B1A1A);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: selected ? _kGold.withOpacity(0.85) : Colors.white.withOpacity(0.35),
+          color: selected ? accent.withOpacity(0.85) : Colors.white.withOpacity(0.35),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? _kGold : Colors.white.withOpacity(0.4),
+            color: selected ? accent : Colors.white.withOpacity(0.4),
             width: 0.5,
           ),
         ),

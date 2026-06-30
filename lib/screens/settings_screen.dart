@@ -77,29 +77,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 10),
                           _SettingRow(
                             label: 'Theme',
-                            child: DropdownButton<ThemeMode>(
+                            child: _ThemePicker(
                               value: settingsService.themeMode,
-                              dropdownColor: context.cardBgColor,
-                              style: GoogleFonts.cinzel(fontSize: 14, color: context.textColor),
-                              underline: const SizedBox.shrink(),
-                              icon: const Icon(Icons.expand_more, color: _kGold, size: 20),
-                              onChanged: (mode) {
-                                if (mode != null) settingsService.setThemeMode(mode);
-                              },
-                              items: const [
-                                DropdownMenuItem(
-                                  value: ThemeMode.system,
-                                  child: Text('Follow System'),
-                                ),
-                                DropdownMenuItem(
-                                  value: ThemeMode.light,
-                                  child: Text('Light'),
-                                ),
-                                DropdownMenuItem(
-                                  value: ThemeMode.dark,
-                                  child: Text('Dark'),
-                                ),
-                              ],
+                              onChanged: (mode) => settingsService.setThemeMode(mode),
                             ),
                           ),
                         ],
@@ -134,6 +114,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
               letterSpacing: 3,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemePicker extends StatelessWidget {
+  const _ThemePicker({required this.value, required this.onChanged});
+  final ThemeMode value;
+  final ValueChanged<ThemeMode> onChanged;
+
+  static const _options = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+
+  String _label(ThemeMode m) => switch (m) {
+    ThemeMode.system => 'Follow System',
+    ThemeMode.light  => 'Light',
+    ThemeMode.dark   => 'Dark',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = isDark ? const Color(0xFFB1986C) : const Color(0xFF8B1A1A);
+
+    return GestureDetector(
+      onTap: () async {
+        final box = context.findRenderObject() as RenderBox;
+        final overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+        final position = RelativeRect.fromRect(
+          Rect.fromPoints(
+            box.localToGlobal(Offset.zero, ancestor: overlay),
+            box.localToGlobal(box.size.bottomRight(Offset.zero), ancestor: overlay),
+          ),
+          Offset.zero & overlay.size,
+        );
+        final result = await showMenu<ThemeMode>(
+          context: context,
+          position: position,
+          elevation: 8,
+          color: isDark ? const Color(0xFF0E1828) : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(color: accentColor.withOpacity(0.45), width: 1.0),
+          ),
+          items: _options.map((m) {
+            final selected = m == value;
+            return PopupMenuItem<ThemeMode>(
+              value: m,
+              child: Text(
+                _label(m),
+                style: GoogleFonts.cinzel(
+                  fontSize: 14,
+                  color: selected ? accentColor : context.textColor,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            );
+          }).toList(),
+        );
+        if (result != null) onChanged(result);
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _label(value),
+            style: GoogleFonts.cinzel(fontSize: 14, color: context.textColor),
+          ),
+          const SizedBox(width: 4),
+          Icon(Icons.expand_more, color: accentColor, size: 20),
         ],
       ),
     );
@@ -177,7 +227,7 @@ class _SettingRow extends StatelessWidget {
               width: 1.0,
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Row(
             children: [
               Text(
