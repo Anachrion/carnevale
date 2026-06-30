@@ -197,7 +197,9 @@ class _MenuItem extends StatelessWidget {
                     colors: [Color(0x10000000), Color(0x88000000)],
                   )
                 : LinearGradient(
-                    colors: [_kCardBackground.withOpacity(0.55), _kCardBackground.withOpacity(0.55)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [_kCardBackground.withOpacity(0.30), _kCardBackground.withOpacity(0.75)],
                   ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
@@ -242,7 +244,11 @@ class _MenuItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: _kGold, size: 22),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).brightness == Brightness.dark ? _kGold : _kRed,
+                  size: 22,
+                ),
               ],
             ),
           ),

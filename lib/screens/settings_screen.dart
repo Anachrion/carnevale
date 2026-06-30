@@ -162,9 +162,11 @@ class _SettingRow extends StatelessWidget {
                     colors: [Color(0x10000000), Color(0x88000000)],
                   )
                 : LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.55),
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.55),
+                      const Color(0xFFF5F2EE).withValues(alpha: 0.30),
+                      const Color(0xFFF5F2EE).withValues(alpha: 0.75),
                     ],
                   ),
             borderRadius: BorderRadius.circular(16),
