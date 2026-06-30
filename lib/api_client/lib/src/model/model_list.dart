@@ -18,6 +18,8 @@ part 'model_list.g.dart';
 /// * [faction] 
 /// * [points] 
 /// * [totalCost] 
+/// * [selectionValid] - Whether the current set of entries satisfies the gang composition rules (points limit, faction, uniqueness, Leader, Hero/Henchman ratio, etc).
+/// * [selectionErrors] 
 /// * [entries] 
 @BuiltValue()
 abstract class ModelList implements Built<ModelList, ModelListBuilder> {
@@ -35,6 +37,13 @@ abstract class ModelList implements Built<ModelList, ModelListBuilder> {
 
   @BuiltValueField(wireName: r'total_cost')
   int get totalCost;
+
+  /// Whether the current set of entries satisfies the gang composition rules (points limit, faction, uniqueness, Leader, Hero/Henchman ratio, etc).
+  @BuiltValueField(wireName: r'selection_valid')
+  bool get selectionValid;
+
+  @BuiltValueField(wireName: r'selection_errors')
+  BuiltList<String> get selectionErrors;
 
   @BuiltValueField(wireName: r'entries')
   BuiltList<ListEntry> get entries;
@@ -88,6 +97,16 @@ class _$ModelListSerializer implements PrimitiveSerializer<ModelList> {
     yield serializers.serialize(
       object.totalCost,
       specifiedType: const FullType(int),
+    );
+    yield r'selection_valid';
+    yield serializers.serialize(
+      object.selectionValid,
+      specifiedType: const FullType(bool),
+    );
+    yield r'selection_errors';
+    yield serializers.serialize(
+      object.selectionErrors,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
     );
     yield r'entries';
     yield serializers.serialize(
@@ -152,6 +171,20 @@ class _$ModelListSerializer implements PrimitiveSerializer<ModelList> {
             specifiedType: const FullType(int),
           ) as int;
           result.totalCost = valueDes;
+          break;
+        case r'selection_valid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.selectionValid = valueDes;
+          break;
+        case r'selection_errors':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.selectionErrors.replace(valueDes);
           break;
         case r'entries':
           final valueDes = serializers.deserialize(

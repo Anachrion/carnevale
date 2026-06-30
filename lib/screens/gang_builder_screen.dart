@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/equipment.dart';
 import '../models/gang.dart';
-import '../models/gang_validation.dart';
 import '../models/profile.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
@@ -52,6 +51,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   List<Equipment> _equipment = [];
   bool _loading = true;
   bool _busy = false;
+  bool _errorsExpanded = true;
   _Tab _tab = _Tab.list;
   _HireSort _hireSort = _HireSort.role;
   bool _hireSortAsc = true;
@@ -243,6 +243,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         faction: _gang.faction,
         points: _gang.points,
         totalCost: _gang.totalCost,
+        selectionValid: _gang.selectionValid,
+        selectionErrors: _gang.selectionErrors,
         entries: reordered,
       );
       _busy = true;
@@ -288,6 +290,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                   children: [
                     _buildHeader(context, factionColor),
                     _buildPointsBar(factionColor),
+                    if (_gang.entries.isNotEmpty && !_gang.selectionValid)
+                      _buildValidityPanel(),
                     const SizedBox(height: 12),
                     _buildTabBar(factionColor),
                     const SizedBox(height: 8),
@@ -346,6 +350,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     final ratio = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
     final isOver = used > limit;
     final barColor = isOver ? Colors.red.shade400 : _kGold;
+    final remaining = limit - used;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -364,6 +369,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
                       '$used',
@@ -379,7 +386,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     ),
                     const Spacer(),
                     Text(
-                      '${limit - used} left',
+                      isOver ? '−${-remaining} left' : '$remaining left',
                       style: TextStyle(
                         fontSize: 12,
                         color: isOver ? Colors.red.shade400 : context.subtleTextColor,
@@ -398,6 +405,158 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     minHeight: 6,
                   ),
                 ),
+                if (_gang.entries.isNotEmpty && _gang.selectionValid) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle_outline, size: 14, color: Colors.green.shade600),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Ready',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.green.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static const _kAccentRed = Color(0xFFD04040);
+
+  TextSpan _highlightNumbers(String text, TextStyle base) {
+    final spans = <InlineSpan>[];
+    final re = RegExp(r'\d+');
+    int last = 0;
+    for (final m in re.allMatches(text)) {
+      if (m.start > last) {
+        spans.add(TextSpan(text: text.substring(last, m.start), style: base));
+      }
+      spans.add(TextSpan(
+        text: m.group(0),
+        style: base.copyWith(color: _kAccentRed, fontWeight: FontWeight.w700),
+      ));
+      last = m.end;
+    }
+    if (last < text.length) {
+      spans.add(TextSpan(text: text.substring(last), style: base));
+    }
+    return TextSpan(children: spans);
+  }
+
+  Widget _buildValidityPanel() {
+    final errors = _gang.selectionErrors;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.38),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _kAccentRed.withOpacity(0.55), width: 1.0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: const BoxDecoration(
+                          color: _kAccentRed,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.warning_rounded, color: Colors.white, size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'List Invalid',
+                              style: GoogleFonts.cinzel(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _kAccentRed,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              "Your list does not meet the guild's requirements.",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: context.subtleTextColor,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _errorsExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                          color: context.subtleTextColor,
+                          size: 22,
+                        ),
+                        onPressed: () => setState(() => _errorsExpanded = !_errorsExpanded),
+                        padding: const EdgeInsets.all(8),
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_errorsExpanded) ...[
+                  Divider(height: 1, thickness: 0.5, color: _kAccentRed.withOpacity(0.3)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                    child: Column(
+                      children: errors.map((e) {
+                        final base = TextStyle(fontSize: 13, color: context.textColor, height: 1.4);
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 7),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: const BoxDecoration(
+                                    color: _kAccentRed,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: RichText(text: _highlightNumbers(e, base)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -543,12 +702,18 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         ? <Profile>[]
         : profiles.where((p) => p.faction == 'gifted').toList();
 
+    final hasLeader = _profiles.any(
+      (p) => p.keywords.contains('Leader') && _entryCount(p) > 0,
+    );
+
     Widget buildTile(Profile p) {
       final isUnique = p.keywords.contains('Unique');
+      final isLeader = p.keywords.contains('Leader');
       final count = _entryCount(p);
-      final validation = GangValidator.canAdd(_gang, p);
+      final alreadyHiredUnique = isUnique && count > 0;
+      final leaderSlotTaken = isLeader && hasLeader && count == 0;
       final overBudget = _gang.totalCost + p.ducats > _gang.points;
-      final greyOut = overBudget && !(isUnique && count > 0);
+      final greyOut = overBudget && !alreadyHiredUnique && !leaderSlotTaken;
       return _HireCardTile(
         profile: p,
         allProfiles: profiles,
@@ -556,7 +721,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         count: count,
         isUnique: isUnique,
         factionColor: factionColor,
-        canAdd: validation.valid,
+        canAdd: !alreadyHiredUnique && !leaderSlotTaken,
         greyOut: greyOut,
         busy: _busy,
         onAdd: () => _add(p),
@@ -609,7 +774,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                                 final count = _gang.entries
                                     .where((en) => en.entryType == 'Equipment' && en.entryId == e.id)
                                     .length;
-                                final canAdd = count == 0 && _gang.totalCost + e.cost <= _gang.points;
+                                final canAdd = count == 0;
                                 return _HireEquipmentTile(
                                   equipment: e,
                                   count: count,
