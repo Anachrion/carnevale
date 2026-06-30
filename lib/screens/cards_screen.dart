@@ -29,6 +29,8 @@ const _kFactionIcons = {
   'vatican':    'assets/images/icons/vatican icon.png',
 };
 
+enum _CardSort { name, cost }
+
 class CardsScreen extends StatefulWidget {
   const CardsScreen({super.key});
 
@@ -43,6 +45,23 @@ class _CardsScreenState extends State<CardsScreen> {
   List<Profile> _results = [];
   final Set<String> _selectedFactions = {};
   bool _loading = true;
+  _CardSort _sort = _CardSort.name;
+  bool _sortAsc = true;
+
+  List<Profile> get _sortedResults {
+    final list = List<Profile>.from(_results);
+    list.sort((a, b) {
+      switch (_sort) {
+        case _CardSort.cost:
+          final c = a.ducats.compareTo(b.ducats);
+          return _sortAsc ? c : -c;
+        case _CardSort.name:
+          final c = a.name.compareTo(b.name);
+          return _sortAsc ? c : -c;
+      }
+    });
+    return list;
+  }
 
   @override
   void initState() {
@@ -115,7 +134,8 @@ class _CardsScreenState extends State<CardsScreen> {
                     _buildHeader(context),
                     _buildSearchBar(),
                     _buildFactionFilter(),
-                    const SizedBox(height: 28),
+                    _buildSortChips(),
+                    const SizedBox(height: 8),
                     Expanded(child: _buildList()),
                   ],
                 ),
@@ -204,6 +224,69 @@ class _CardsScreenState extends State<CardsScreen> {
     );
   }
 
+  Widget _buildSortChips() {
+    final accent = Theme.of(context).brightness == Brightness.dark
+        ? _kGold
+        : const Color(0xFF8B1A1A);
+    Widget chip(String label, _CardSort value) {
+      final selected = _sort == value;
+      return GestureDetector(
+        onTap: () => setState(() {
+          if (_sort == value) {
+            _sortAsc = !_sortAsc;
+          } else {
+            _sort = value;
+            _sortAsc = true;
+          }
+        }),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: selected ? accent.withOpacity(0.85) : Colors.white.withOpacity(0.35),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? accent : Colors.white.withOpacity(0.4),
+              width: 0.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? Colors.white : context.subtleTextColor,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              if (selected) ...[
+                const SizedBox(width: 3),
+                Icon(
+                  _sortAsc ? Icons.arrow_upward : Icons.arrow_downward,
+                  size: 10,
+                  color: Colors.white,
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Row(
+        children: [
+          chip('Name', _CardSort.name),
+          const SizedBox(width: 6),
+          chip('Cost', _CardSort.cost),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFactionFilter() {
     final factions = ['guild', 'doctors', 'vatican', 'patricians', 'strigoi', 'gifted', 'rashaar'];
     return SizedBox(
@@ -231,11 +314,12 @@ class _CardsScreenState extends State<CardsScreen> {
         child: Text('No profiles found.', style: TextStyle(color: context.subtleTextColor, fontSize: 14)),
       );
     }
+    final sorted = _sortedResults;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      itemCount: _results.length,
+      itemCount: sorted.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) => _ProfileTile(profile: _results[i], profiles: _results, index: i),
+      itemBuilder: (_, i) => _ProfileTile(profile: sorted[i], profiles: sorted, index: i),
     );
   }
 
@@ -335,10 +419,28 @@ class _ProfileTile extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(profile.name, style: GoogleFonts.cinzel(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+                      Flexible(
+                        child: Text(
+                          profile.name,
+                          style: GoogleFonts.cinzel(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (profile.keywords.contains('Leader') || profile.keywords.contains('Hero')) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          profile.keywords.contains('Leader') ? 'leader' : 'hero',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.white.withOpacity(0.65),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
