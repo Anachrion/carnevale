@@ -383,7 +383,7 @@ class _FactionIconChip extends StatelessWidget {
         child: Image.asset(
           iconPath,
           fit: BoxFit.contain,
-          color: Colors.white,
+          color: selected ? Colors.white : Colors.white.withOpacity(0.35),
           colorBlendMode: BlendMode.srcIn,
         ),
       ),
