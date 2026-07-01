@@ -2,6 +2,7 @@ import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../widgets/app_drawer.dart';
 import 'cards_screen.dart';
 import 'gangs_screen.dart';
 import 'settings_screen.dart';
@@ -20,6 +21,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _kBackground,
+      drawer: const AppDrawer(current: AppDrawerRoute.home),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -140,7 +142,7 @@ class _Header extends StatelessWidget {
             left: 8,
             child: IconButton(
               icon: Icon(Icons.menu, color: context.textColor, size: 28),
-              onPressed: () {},
+              onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
         ],
