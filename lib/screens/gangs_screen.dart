@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/gang.dart';
 import '../services/gang_service.dart';
+import '../widgets/app_drawer.dart';
 import 'gang_builder_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
@@ -39,6 +40,7 @@ class GangsScreen extends StatefulWidget {
 }
 
 class _GangsScreenState extends State<GangsScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _service = GangService();
   List<Gang> _gangs = [];
   bool _loading = true;
@@ -87,7 +89,9 @@ class _GangsScreenState extends State<GangsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: _kBackground,
+      drawer: const AppDrawer(current: AppDrawerRoute.gangs),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateDialog,
         backgroundColor: _kGold,
@@ -140,8 +144,8 @@ class _GangsScreenState extends State<GangsScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: context.textColor),
-            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(Icons.menu, color: context.textColor),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           const SizedBox(width: 4),
           Text(

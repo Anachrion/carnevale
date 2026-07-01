@@ -3,9 +3,13 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
+import '../widgets/app_drawer.dart';
+import '../widgets/app_toast.dart';
+import 'account_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kGold = Color(0xFFC4A050);
+const _kBlue = Color(0xFF6C9BC2);
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,6 +19,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _loggingOut = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,10 +36,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _rebuild() => setState(() {});
 
+  Future<void> _logOut() async {
+    setState(() => _loggingOut = true);
+    await authService.logOut();
+    if (!mounted) return;
+    setState(() => _loggingOut = false);
+    showAppToast(context, 'Logged out');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: _kBackground,
+      drawer: const AppDrawer(current: AppDrawerRoute.settings),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -82,6 +99,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               onChanged: (mode) => settingsService.setThemeMode(mode),
                             ),
                           ),
+                          const SizedBox(height: 28),
+                          Text(
+                            'ACCOUNT',
+                            style: GoogleFonts.cinzel(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: _kGold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          AnimatedBuilder(
+                            animation: authService,
+                            builder: (context, _) {
+                              final user = authService.currentUser;
+                              if (user == null) {
+                                return _SettingRow(
+                                  label: 'Not logged in',
+                                  child: TextButton(
+                                    onPressed: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const AccountScreen()),
+                                    ),
+                                    child: Text(
+                                      'Log In / Sign Up',
+                                      style: GoogleFonts.cinzel(color: _kGold, fontWeight: FontWeight.w700),
+                                    ),
+                                  ),
+                                );
+                              }
+                              final isDark = Theme.of(context).brightness == Brightness.dark;
+                              final logoutColor = isDark ? const Color(0xFFB1986C) : const Color(0xFF8B1A1A);
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _SettingRow(
+                                    label: 'Signed in as',
+                                    child: Text(
+                                      user.username,
+                                      style: GoogleFonts.cinzel(color: context.textColor, fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _AccountButton(
+                                    icon: Icons.vpn_key_outlined,
+                                    label: 'Reset Password',
+                                    color: _kBlue,
+                                    onPressed: () {},
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _AccountButton(
+                                    icon: Icons.logout,
+                                    label: 'Log Out',
+                                    color: logoutColor,
+                                    tintColor: const Color(0xFF8B1A1A),
+                                    onPressed: _loggingOut ? null : _logOut,
+                                    loading: _loggingOut,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -101,8 +180,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: context.textColor),
-            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(Icons.menu, color: context.textColor),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           const SizedBox(width: 4),
           Text(
@@ -241,6 +320,80 @@ class _SettingRow extends StatelessWidget {
               const Spacer(),
               child,
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountButton extends StatelessWidget {
+  const _AccountButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+    this.tintColor,
+    this.loading = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color? tintColor;
+  final VoidCallback? onPressed;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tint = tintColor ?? color;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: isDark
+                      ? [tint.withValues(alpha: 0.10), tint.withValues(alpha: 0.30)]
+                      : [tint.withValues(alpha: 0.06), tint.withValues(alpha: 0.16)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withValues(alpha: 0.6), width: 1.2),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: loading
+                  ? Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: color, strokeWidth: 2),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(icon, color: color, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          label,
+                          style: GoogleFonts.cinzel(
+                            color: color,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
+import '../widgets/app_drawer.dart';
+import '../widgets/app_toast.dart';
+import 'home_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
 const _kGold = Color(0xFFC4A050);
@@ -16,6 +19,8 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +38,9 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: _kBackground,
+      drawer: const AppDrawer(current: AppDrawerRoute.account),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -88,8 +95,8 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: context.textColor),
-            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(Icons.menu, color: context.textColor),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           const SizedBox(width: 4),
           Text(
@@ -164,7 +171,9 @@ class _LoggedInPanelState extends State<_LoggedInPanel> {
   Future<void> _logOut() async {
     setState(() => _loggingOut = true);
     await authService.logOut();
-    if (mounted) setState(() => _loggingOut = false);
+    if (!mounted) return;
+    setState(() => _loggingOut = false);
+    showAppToast(context, 'Logged out');
   }
 
   @override
@@ -230,7 +239,6 @@ class _AuthFormState extends State<_AuthForm> {
   bool _isSignUp = false;
   bool _submitting = false;
   String? _error;
-  String? _info;
 
   @override
   void dispose() {
@@ -245,7 +253,6 @@ class _AuthFormState extends State<_AuthForm> {
     setState(() {
       _isSignUp = signUp;
       _error = null;
-      _info = null;
     });
   }
 
@@ -254,7 +261,6 @@ class _AuthFormState extends State<_AuthForm> {
     setState(() {
       _submitting = true;
       _error = null;
-      _info = null;
     });
     try {
       if (_isSignUp) {
@@ -264,19 +270,18 @@ class _AuthFormState extends State<_AuthForm> {
           password: _passwordController.text,
           passwordConfirmation: _passwordConfirmationController.text,
         );
-        if (!mounted) return;
-        setState(() {
-          _isSignUp = false;
-          _info = 'Check your email to confirm your account before logging in.';
-          _passwordController.clear();
-          _passwordConfirmationController.clear();
-        });
       } else {
         await authService.logIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
       }
+      if (!mounted) return;
+      showAppToast(context, _isSignUp ? 'Account created!' : 'Logged in successfully!');
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } finally {
@@ -355,10 +360,6 @@ class _AuthFormState extends State<_AuthForm> {
             if (_error != null) ...[
               const SizedBox(height: 16),
               Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
-            ],
-            if (_info != null) ...[
-              const SizedBox(height: 16),
-              Text(_info!, style: TextStyle(color: _kGold, fontSize: 13)),
             ],
             const SizedBox(height: 24),
             SizedBox(

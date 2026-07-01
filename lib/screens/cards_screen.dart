@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/profile.dart';
 import '../services/profile_service.dart';
+import '../widgets/app_drawer.dart';
 import 'card_viewer_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
@@ -39,6 +40,7 @@ class CardsScreen extends StatefulWidget {
 }
 
 class _CardsScreenState extends State<CardsScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _searchController = TextEditingController();
   final _service = ProfileService();
 
@@ -104,7 +106,9 @@ class _CardsScreenState extends State<CardsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: _kBackground,
+      drawer: const AppDrawer(current: AppDrawerRoute.cards),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -153,8 +157,8 @@ class _CardsScreenState extends State<CardsScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: context.textColor),
-            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(Icons.menu, color: context.textColor),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           const SizedBox(width: 4),
           Text(
