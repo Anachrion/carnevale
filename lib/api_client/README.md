@@ -75,9 +75,12 @@ Class | Method | HTTP request | Description
 [*ListsApi*](doc/ListsApi.md) | [**updateList**](doc/ListsApi.md#updatelist) | **PATCH** /lists/{id} | Update a list
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfile**](doc/ProfilesApi.md#getprofile) | **GET** /profiles/{id} | Get a profile
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfiles**](doc/ProfilesApi.md#getprofiles) | **GET** /profiles | List all profiles
+[*SessionApi*](doc/SessionApi.md) | [**forgotPassword**](doc/SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [*SessionApi*](doc/SessionApi.md) | [**login**](doc/SessionApi.md#login) | **POST** /login | Log in and receive a JWT
 [*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
+[*SessionApi*](doc/SessionApi.md) | [**resetPassword**](doc/SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [*SessionApi*](doc/SessionApi.md) | [**signup**](doc/SessionApi.md#signup) | **POST** /signup | Register a new user
+[*SessionApi*](doc/SessionApi.md) | [**updateAccount**](doc/SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
 
 
 ## Documentation For Models
@@ -88,6 +91,8 @@ Class | Method | HTTP request | Description
  - [EntryPositionInput](doc/EntryPositionInput.md)
  - [EntryPositionInputEntry](doc/EntryPositionInputEntry.md)
  - [Equipment](doc/Equipment.md)
+ - [ForgotPasswordInput](doc/ForgotPasswordInput.md)
+ - [ForgotPasswordInputUser](doc/ForgotPasswordInputUser.md)
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)
  - [ListInputList](doc/ListInputList.md)
@@ -97,9 +102,13 @@ Class | Method | HTTP request | Description
  - [Profile](doc/Profile.md)
  - [RegistrationInput](doc/RegistrationInput.md)
  - [RegistrationInputUser](doc/RegistrationInputUser.md)
+ - [ResetPasswordInput](doc/ResetPasswordInput.md)
+ - [ResetPasswordInputUser](doc/ResetPasswordInputUser.md)
  - [Session](doc/Session.md)
  - [SessionUser](doc/SessionUser.md)
  - [SpecialRule](doc/SpecialRule.md)
+ - [UpdateAccountInput](doc/UpdateAccountInput.md)
+ - [UpdateAccountInputUser](doc/UpdateAccountInputUser.md)
  - [ValidationErrors](doc/ValidationErrors.md)
  - [Weapon](doc/Weapon.md)
 

@@ -20,6 +20,8 @@ import 'package:carnevale_api/src/model/entry_input_entry.dart';
 import 'package:carnevale_api/src/model/entry_position_input.dart';
 import 'package:carnevale_api/src/model/entry_position_input_entry.dart';
 import 'package:carnevale_api/src/model/equipment.dart';
+import 'package:carnevale_api/src/model/forgot_password_input.dart';
+import 'package:carnevale_api/src/model/forgot_password_input_user.dart';
 import 'package:carnevale_api/src/model/list_entry.dart';
 import 'package:carnevale_api/src/model/list_input.dart';
 import 'package:carnevale_api/src/model/list_input_list.dart';
@@ -29,9 +31,13 @@ import 'package:carnevale_api/src/model/model_list.dart';
 import 'package:carnevale_api/src/model/profile.dart';
 import 'package:carnevale_api/src/model/registration_input.dart';
 import 'package:carnevale_api/src/model/registration_input_user.dart';
+import 'package:carnevale_api/src/model/reset_password_input.dart';
+import 'package:carnevale_api/src/model/reset_password_input_user.dart';
 import 'package:carnevale_api/src/model/session.dart';
 import 'package:carnevale_api/src/model/session_user.dart';
 import 'package:carnevale_api/src/model/special_rule.dart';
+import 'package:carnevale_api/src/model/update_account_input.dart';
+import 'package:carnevale_api/src/model/update_account_input_user.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 import 'package:carnevale_api/src/model/weapon.dart';
 
@@ -44,6 +50,8 @@ part 'serializers.g.dart';
   EntryPositionInput,
   EntryPositionInputEntry,
   Equipment,
+  ForgotPasswordInput,
+  ForgotPasswordInputUser,
   ListEntry,
   ListInput,
   ListInputList,
@@ -53,9 +61,13 @@ part 'serializers.g.dart';
   Profile,
   RegistrationInput,
   RegistrationInputUser,
+  ResetPasswordInput,
+  ResetPasswordInputUser,
   Session,
   SessionUser,
   SpecialRule,
+  UpdateAccountInput,
+  UpdateAccountInputUser,
   ValidationErrors,
   Weapon,
 ])

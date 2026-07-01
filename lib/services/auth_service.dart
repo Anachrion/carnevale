@@ -103,6 +103,33 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _client.session.forgotPassword(
+        forgotPasswordInput: api.ForgotPasswordInput((b) => b
+          ..user = api.ForgotPasswordInputUser((ub) => ub..email = email).toBuilder()),
+      );
+    } on DioException catch (e) {
+      throw AuthException(parseAuthError(e));
+    }
+  }
+
+  Future<void> updateUsername(String username) async {
+    try {
+      final res = await _client.session.updateAccount(
+        updateAccountInput: api.UpdateAccountInput((b) => b
+          ..user = api.UpdateAccountInputUser((ub) => ub..username = username).toBuilder()),
+      );
+      final user = res.data!.user;
+      final authUser = AuthUser(id: user.id, email: user.email, username: user.username);
+      _currentUser = authUser;
+      await _storage.write(key: _userKey, value: _userToJson(authUser));
+      notifyListeners();
+    } on DioException catch (e) {
+      throw AuthException(parseAuthError(e));
+    }
+  }
+
   Future<void> logOut() async {
     try {
       await _client.session.logout();

@@ -107,12 +107,6 @@ class AppDrawer extends StatelessWidget {
                     onTap: () => Navigator.pop(context),
                   ),
                   _NavItem(
-                    label: 'Account',
-                    active: current == AppDrawerRoute.account,
-                    accent: accent,
-                    onTap: () => _navigate(context, AppDrawerRoute.account, const AccountScreen()),
-                  ),
-                  _NavItem(
                     label: 'Settings',
                     active: current == AppDrawerRoute.settings,
                     accent: accent,
