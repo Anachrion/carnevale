@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
+import 'services/auth_service.dart';
 import 'services/settings_service.dart';
 
 final settingsService = SettingsService();
+final authService = AuthService();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await settingsService.load();
+  await authService.load();
   runApp(const CarnevaleApp());
 }
 

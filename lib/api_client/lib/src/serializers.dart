@@ -23,8 +23,14 @@ import 'package:carnevale_api/src/model/equipment.dart';
 import 'package:carnevale_api/src/model/list_entry.dart';
 import 'package:carnevale_api/src/model/list_input.dart';
 import 'package:carnevale_api/src/model/list_input_list.dart';
+import 'package:carnevale_api/src/model/login_input.dart';
+import 'package:carnevale_api/src/model/login_input_user.dart';
 import 'package:carnevale_api/src/model/model_list.dart';
 import 'package:carnevale_api/src/model/profile.dart';
+import 'package:carnevale_api/src/model/registration_input.dart';
+import 'package:carnevale_api/src/model/registration_input_user.dart';
+import 'package:carnevale_api/src/model/session.dart';
+import 'package:carnevale_api/src/model/session_user.dart';
 import 'package:carnevale_api/src/model/special_rule.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 import 'package:carnevale_api/src/model/weapon.dart';
@@ -41,8 +47,14 @@ part 'serializers.g.dart';
   ListEntry,
   ListInput,
   ListInputList,
+  LoginInput,
+  LoginInputUser,
   ModelList,
   Profile,
+  RegistrationInput,
+  RegistrationInputUser,
+  Session,
+  SessionUser,
   SpecialRule,
   ValidationErrors,
   Weapon,

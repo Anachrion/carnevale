@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 import '../main.dart';
+import '../screens/account_screen.dart';
 import '../screens/cards_screen.dart';
 import '../screens/gangs_screen.dart';
 import '../screens/settings_screen.dart';
 
-enum AppDrawerRoute { home, cards, gangs, rules, settings }
+enum AppDrawerRoute { home, cards, gangs, rules, account, settings }
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key, required this.current});
@@ -110,6 +111,12 @@ class AppDrawer extends StatelessWidget {
                     active: current == AppDrawerRoute.rules,
                     accent: accent,
                     onTap: () => Navigator.pop(context),
+                  ),
+                  _NavItem(
+                    label: 'Account',
+                    active: current == AppDrawerRoute.account,
+                    accent: accent,
+                    onTap: () => _navigate(context, AppDrawerRoute.account, const AccountScreen()),
                   ),
                   _NavItem(
                     label: 'Settings',
