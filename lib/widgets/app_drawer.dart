@@ -35,51 +35,43 @@ class AppDrawer extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.close, color: context.textColor),
-                    onPressed: () => Navigator.pop(context),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const Spacer(),
-                  CustomPaint(size: const Size(16, 26), painter: _DaggerPainter(accent)),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 12, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Carnevale',
-                          style: GoogleFonts.cinzel(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: context.textColor,
-                          ),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              child: AnimatedBuilder(
+                animation: authService,
+                builder: (context, _) {
+                  final user = authService.currentUser;
+                  if (user != null) {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: Text(
+                        user.username,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: context.textColor,
                         ),
-                        Text(
-                          'COMPANION',
-                          style: GoogleFonts.cinzel(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 2,
-                            color: context.subtleTextColor,
-                          ),
-                        ),
-                      ],
+                      ),
+                    );
+                  }
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _navigate(context, AppDrawerRoute.account, const AccountScreen()),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFC4A050),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Log In / Sign Up',
+                        style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, letterSpacing: 1, fontSize: 13),
+                      ),
                     ),
-                  ),
-                  Icon(Icons.keyboard_arrow_down, color: context.subtleTextColor),
-                ],
+                  );
+                },
               ),
             ),
             Divider(height: 1, thickness: 1, color: borderColor),
@@ -239,31 +231,4 @@ class _Ornament extends StatelessWidget {
       ],
     );
   }
-}
-
-class _DaggerPainter extends CustomPainter {
-  _DaggerPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.4
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final midX = size.width / 2;
-    canvas.drawLine(Offset(midX, 2), Offset(midX, size.height - 4), paint);
-    canvas.drawLine(
-      Offset(midX - 5, size.height * 0.34),
-      Offset(midX + 5, size.height * 0.34),
-      paint,
-    );
-    canvas.drawCircle(Offset(midX, size.height - 2), 1.6, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(covariant _DaggerPainter oldDelegate) => oldDelegate.color != color;
 }
