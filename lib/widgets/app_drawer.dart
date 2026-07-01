@@ -16,7 +16,9 @@ class AppDrawer extends StatelessWidget {
 
   void _navigate(BuildContext context, AppDrawerRoute route, Widget? screen) {
     Navigator.pop(context);
-    if (route != current && screen != null) {
+    if (route == AppDrawerRoute.home) {
+      Navigator.of(context).popUntil((r) => r.isFirst);
+    } else if (route != current && screen != null) {
       Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
     }
   }
