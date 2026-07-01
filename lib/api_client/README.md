@@ -75,6 +75,9 @@ Class | Method | HTTP request | Description
 [*ListsApi*](doc/ListsApi.md) | [**updateList**](doc/ListsApi.md#updatelist) | **PATCH** /lists/{id} | Update a list
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfile**](doc/ProfilesApi.md#getprofile) | **GET** /profiles/{id} | Get a profile
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfiles**](doc/ProfilesApi.md#getprofiles) | **GET** /profiles | List all profiles
+[*SessionApi*](doc/SessionApi.md) | [**login**](doc/SessionApi.md#login) | **POST** /login | Log in and receive a JWT
+[*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
+[*SessionApi*](doc/SessionApi.md) | [**signup**](doc/SessionApi.md#signup) | **POST** /signup | Register a new user
 
 
 ## Documentation For Models
@@ -88,8 +91,14 @@ Class | Method | HTTP request | Description
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)
  - [ListInputList](doc/ListInputList.md)
+ - [LoginInput](doc/LoginInput.md)
+ - [LoginInputUser](doc/LoginInputUser.md)
  - [ModelList](doc/ModelList.md)
  - [Profile](doc/Profile.md)
+ - [RegistrationInput](doc/RegistrationInput.md)
+ - [RegistrationInputUser](doc/RegistrationInputUser.md)
+ - [Session](doc/Session.md)
+ - [SessionUser](doc/SessionUser.md)
  - [SpecialRule](doc/SpecialRule.md)
  - [ValidationErrors](doc/ValidationErrors.md)
  - [Weapon](doc/Weapon.md)
@@ -97,7 +106,11 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Authorization
 
-Endpoints do not require authorization.
+
+Authentication schemes defined for the API:
+### bearerAuth
+
+- **Type**: HTTP Bearer Token authentication (JWT)
 
 
 ## Author
