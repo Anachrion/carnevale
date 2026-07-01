@@ -9,10 +9,53 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**forgotPassword**](SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [**login**](SessionApi.md#login) | **POST** /login | Log in and receive a JWT
 [**logout**](SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
+[**resetPassword**](SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [**signup**](SessionApi.md#signup) | **POST** /signup | Register a new user
+[**updateAccount**](SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
 
+
+# **forgotPassword**
+> forgotPassword(forgotPasswordInput)
+
+Request a password reset email
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getSessionApi();
+final ForgotPasswordInput forgotPasswordInput = ; // ForgotPasswordInput | 
+
+try {
+    api.forgotPassword(forgotPasswordInput);
+} on DioException catch (e) {
+    print('Exception when calling SessionApi->forgotPassword: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **forgotPasswordInput** | [**ForgotPasswordInput**](ForgotPasswordInput.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **login**
 > Session login(loginInput)
@@ -93,12 +136,51 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **resetPassword**
+> Session resetPassword(resetPasswordInput)
+
+Set a new password using a reset token
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getSessionApi();
+final ResetPasswordInput resetPasswordInput = ; // ResetPasswordInput | 
+
+try {
+    final response = api.resetPassword(resetPasswordInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling SessionApi->resetPassword: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **resetPasswordInput** | [**ResetPasswordInput**](ResetPasswordInput.md)|  | 
+
+### Return type
+
+[**Session**](Session.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **signup**
 > Session signup(registrationInput)
 
 Register a new user
-
-Creates the user and sends a confirmation email. The user cannot log in until the confirmation link has been clicked.
 
 ### Example
 ```dart
@@ -128,6 +210,47 @@ Name | Type | Description  | Notes
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateAccount**
+> Session updateAccount(updateAccountInput)
+
+Update the current user's username
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getSessionApi();
+final UpdateAccountInput updateAccountInput = ; // UpdateAccountInput | 
+
+try {
+    final response = api.updateAccount(updateAccountInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling SessionApi->updateAccount: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **updateAccountInput** | [**UpdateAccountInput**](UpdateAccountInput.md)|  | 
+
+### Return type
+
+[**Session**](Session.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

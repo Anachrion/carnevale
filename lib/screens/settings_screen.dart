@@ -3,6 +3,7 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
+import '../services/auth_service.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
 import 'account_screen.dart';
@@ -21,6 +22,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _loggingOut = false;
+  bool _sendingReset = false;
 
   @override
   void initState() {
@@ -42,6 +44,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() => _loggingOut = false);
     showAppToast(context, 'Logged out');
+  }
+
+  Future<void> _sendResetEmail(String email) async {
+    setState(() => _sendingReset = true);
+    try {
+      await authService.forgotPassword(email);
+      if (mounted) showAppToast(context, 'Password reset email sent!');
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _sendingReset = false);
+    }
   }
 
   @override
@@ -137,16 +153,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   _SettingRow(
                                     label: 'Signed in as',
                                     child: Text(
-                                      user.username,
+                                      user.email,
                                       style: GoogleFonts.cinzel(color: context.textColor, fontWeight: FontWeight.w600),
                                     ),
                                   ),
+                                  const SizedBox(height: 12),
+                                  _UsernameEditor(key: ValueKey(user.username), initialUsername: user.username),
                                   const SizedBox(height: 12),
                                   _AccountButton(
                                     icon: Icons.vpn_key_outlined,
                                     label: 'Reset Password',
                                     color: _kBlue,
-                                    onPressed: () {},
+                                    onPressed: _sendingReset ? null : () => _sendResetEmail(user.email),
+                                    loading: _sendingReset,
                                   ),
                                   const SizedBox(height: 12),
                                   _AccountButton(
@@ -397,6 +416,100 @@ class _AccountButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _UsernameEditor extends StatefulWidget {
+  const _UsernameEditor({super.key, required this.initialUsername});
+
+  final String initialUsername;
+
+  @override
+  State<_UsernameEditor> createState() => _UsernameEditorState();
+}
+
+class _UsernameEditorState extends State<_UsernameEditor> {
+  late final _controller = TextEditingController(text: widget.initialUsername);
+  bool _saving = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  bool get _changed {
+    final trimmed = _controller.text.trim();
+    return trimmed.isNotEmpty && trimmed != widget.initialUsername;
+  }
+
+  Future<void> _save() async {
+    if (!_changed) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      await authService.updateUsername(_controller.text.trim());
+      if (mounted) showAppToast(context, 'Username updated!');
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SettingRow(
+          label: 'Username',
+          child: SizedBox(
+            width: 170,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    onChanged: (_) => setState(() {}),
+                    onSubmitted: (_) => _save(),
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.cinzel(color: context.textColor, fontSize: 14),
+                    decoration: const InputDecoration(isDense: true, border: InputBorder.none),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                _saving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: _kGold),
+                      )
+                    : IconButton(
+                        icon: Icon(
+                          Icons.check,
+                          size: 20,
+                          color: _changed ? _kGold : context.subtleTextColor.withValues(alpha: 0.3),
+                        ),
+                        onPressed: _changed ? _save : null,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+              ],
+            ),
+          ),
+        ),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
+            child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+          ),
+      ],
     );
   }
 }
