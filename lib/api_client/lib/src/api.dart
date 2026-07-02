@@ -10,9 +10,11 @@ import 'package:carnevale_api/src/auth/basic_auth.dart';
 import 'package:carnevale_api/src/auth/bearer_auth.dart';
 import 'package:carnevale_api/src/auth/oauth.dart';
 import 'package:carnevale_api/src/api/equipment_api.dart';
+import 'package:carnevale_api/src/api/games_api.dart';
 import 'package:carnevale_api/src/api/list_entries_api.dart';
 import 'package:carnevale_api/src/api/lists_api.dart';
 import 'package:carnevale_api/src/api/profiles_api.dart';
+import 'package:carnevale_api/src/api/scenarios_api.dart';
 import 'package:carnevale_api/src/api/session_api.dart';
 
 class CarnevaleApi {
@@ -115,6 +117,12 @@ class CarnevaleApi {
     return EquipmentApi(dio, serializers);
   }
 
+  /// Get GamesApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  GamesApi getGamesApi() {
+    return GamesApi(dio, serializers);
+  }
+
   /// Get ListEntriesApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   ListEntriesApi getListEntriesApi() {
@@ -131,6 +139,12 @@ class CarnevaleApi {
   /// by doing that all interceptors will not be executed
   ProfilesApi getProfilesApi() {
     return ProfilesApi(dio, serializers);
+  }
+
+  /// Get ScenariosApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  ScenariosApi getScenariosApi() {
+    return ScenariosApi(dio, serializers);
   }
 
   /// Get SessionApi instance, base route and serializer can be overridden by a given but be careful,
