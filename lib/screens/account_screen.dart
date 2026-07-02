@@ -193,6 +193,10 @@ class _AuthFormState extends State<_AuthForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordConfirmationController = TextEditingController();
+  final _usernameFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _passwordConfirmationFocus = FocusNode();
 
   bool _isSignUp = false;
   bool _submitting = false;
@@ -204,6 +208,10 @@ class _AuthFormState extends State<_AuthForm> {
     _emailController.dispose();
     _passwordController.dispose();
     _passwordConfirmationController.dispose();
+    _usernameFocus.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _passwordConfirmationFocus.dispose();
     super.dispose();
   }
 
@@ -282,6 +290,9 @@ class _AuthFormState extends State<_AuthForm> {
             if (_isSignUp) ...[
               TextFormField(
                 controller: _usernameController,
+                focusNode: _usernameFocus,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => _emailFocus.requestFocus(),
                 style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
                 decoration: _decoration('Username'),
                 validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
@@ -290,7 +301,10 @@ class _AuthFormState extends State<_AuthForm> {
             ],
             TextFormField(
               controller: _emailController,
+              focusNode: _emailFocus,
               keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
               style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
               decoration: _decoration('Email'),
               validator: (v) {
@@ -302,7 +316,11 @@ class _AuthFormState extends State<_AuthForm> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _passwordController,
+              focusNode: _passwordFocus,
               obscureText: true,
+              textInputAction: _isSignUp ? TextInputAction.next : TextInputAction.done,
+              onFieldSubmitted: (_) =>
+                  _isSignUp ? _passwordConfirmationFocus.requestFocus() : _submit(),
               style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
               decoration: _decoration('Password'),
               validator: (v) {
@@ -328,7 +346,10 @@ class _AuthFormState extends State<_AuthForm> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordConfirmationController,
+                focusNode: _passwordConfirmationFocus,
                 obscureText: true,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _submit(),
                 style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
                 decoration: _decoration('Confirm Password'),
                 validator: (v) {
@@ -446,6 +467,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
               controller: _emailController,
               autofocus: true,
               keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _send(),
               style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
               decoration: InputDecoration(
                 labelText: 'Email',

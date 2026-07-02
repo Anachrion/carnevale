@@ -23,6 +23,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _passwordConfirmationController = TextEditingController();
+  final _passwordFocus = FocusNode();
+  final _passwordConfirmationFocus = FocusNode();
   bool _submitting = false;
   String? _error;
 
@@ -30,6 +32,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   void dispose() {
     _passwordController.dispose();
     _passwordConfirmationController.dispose();
+    _passwordFocus.dispose();
+    _passwordConfirmationFocus.dispose();
     super.dispose();
   }
 
@@ -119,7 +123,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             const SizedBox(height: 20),
                             TextFormField(
                               controller: _passwordController,
+                              focusNode: _passwordFocus,
                               obscureText: true,
+                              textInputAction: TextInputAction.next,
+                              onFieldSubmitted: (_) => _passwordConfirmationFocus.requestFocus(),
                               style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
                               decoration: _decoration('New Password'),
                               validator: (v) {
@@ -131,7 +138,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _passwordConfirmationController,
+                              focusNode: _passwordConfirmationFocus,
                               obscureText: true,
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _submit(),
                               style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
                               decoration: _decoration('Confirm New Password'),
                               validator: (v) {
