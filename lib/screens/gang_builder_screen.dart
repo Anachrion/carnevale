@@ -578,6 +578,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         ),
       );
     }
+    final hiredProfiles = entries
+        .where((e) => e.entryType == 'CardReference')
+        .map((e) => _profiles.where((p) => p.cardReferenceId == e.entryId).firstOrNull)
+        .whereType<Profile>()
+        .toList();
     return ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
       onReorder: _reorderEntry,
@@ -606,13 +611,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     ? 'hero'
                     : null;
         VoidCallback? onTap;
-        if (profileIdx != -1) {
+        if (profile != null) {
+          final hiredIndex = hiredProfiles.indexWhere((p) => p.cardReferenceId == profile.cardReferenceId);
           onTap = () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => CardViewerScreen(
-                    profiles: _profiles,
-                    initialIndex: profileIdx,
+                    profiles: hiredProfiles,
+                    initialIndex: hiredIndex,
                   ),
                 ),
               );
