@@ -14,7 +14,12 @@ import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:carnevale_api/src/date_serializer.dart';
 import 'package:carnevale_api/src/model/date.dart';
 
+import 'package:carnevale_api/src/model/agenda.dart';
+import 'package:carnevale_api/src/model/available_gang.dart';
 import 'package:carnevale_api/src/model/card_reference.dart';
+import 'package:carnevale_api/src/model/create_game_input.dart';
+import 'package:carnevale_api/src/model/deployment_zone_input.dart';
+import 'package:carnevale_api/src/model/draw_agendas_response.dart';
 import 'package:carnevale_api/src/model/entry_input.dart';
 import 'package:carnevale_api/src/model/entry_input_entry.dart';
 import 'package:carnevale_api/src/model/entry_position_input.dart';
@@ -22,6 +27,10 @@ import 'package:carnevale_api/src/model/entry_position_input_entry.dart';
 import 'package:carnevale_api/src/model/equipment.dart';
 import 'package:carnevale_api/src/model/forgot_password_input.dart';
 import 'package:carnevale_api/src/model/forgot_password_input_user.dart';
+import 'package:carnevale_api/src/model/game.dart';
+import 'package:carnevale_api/src/model/game_player.dart';
+import 'package:carnevale_api/src/model/game_player_gang.dart';
+import 'package:carnevale_api/src/model/join_game_input.dart';
 import 'package:carnevale_api/src/model/list_entry.dart';
 import 'package:carnevale_api/src/model/list_input.dart';
 import 'package:carnevale_api/src/model/list_input_list.dart';
@@ -33,6 +42,9 @@ import 'package:carnevale_api/src/model/registration_input.dart';
 import 'package:carnevale_api/src/model/registration_input_user.dart';
 import 'package:carnevale_api/src/model/reset_password_input.dart';
 import 'package:carnevale_api/src/model/reset_password_input_user.dart';
+import 'package:carnevale_api/src/model/role_input.dart';
+import 'package:carnevale_api/src/model/scenario.dart';
+import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/session.dart';
 import 'package:carnevale_api/src/model/session_user.dart';
 import 'package:carnevale_api/src/model/special_rule.dart';
@@ -44,7 +56,12 @@ import 'package:carnevale_api/src/model/weapon.dart';
 part 'serializers.g.dart';
 
 @SerializersFor([
+  Agenda,
+  AvailableGang,
   CardReference,
+  CreateGameInput,
+  DeploymentZoneInput,
+  DrawAgendasResponse,
   EntryInput,
   EntryInputEntry,
   EntryPositionInput,
@@ -52,6 +69,10 @@ part 'serializers.g.dart';
   Equipment,
   ForgotPasswordInput,
   ForgotPasswordInputUser,
+  Game,
+  GamePlayer,
+  GamePlayerGang,
+  JoinGameInput,
   ListEntry,
   ListInput,
   ListInputList,
@@ -63,6 +84,9 @@ part 'serializers.g.dart';
   RegistrationInputUser,
   ResetPasswordInput,
   ResetPasswordInputUser,
+  RoleInput,
+  Scenario,
+  SelectGangInput,
   Session,
   SessionUser,
   SpecialRule,
@@ -83,6 +107,18 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(ModelList)]),
         () => ListBuilder<ModelList>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Game)]),
+        () => ListBuilder<Game>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Scenario)]),
+        () => ListBuilder<Scenario>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(AvailableGang)]),
+        () => ListBuilder<AvailableGang>(),
       )
       ..add(const OneOfSerializer())
       ..add(const AnyOfSerializer())

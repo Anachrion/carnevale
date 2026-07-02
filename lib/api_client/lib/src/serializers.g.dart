@@ -8,7 +8,13 @@ part of 'serializers.dart';
 
 Serializers _$serializers =
     (Serializers().toBuilder()
+          ..add(Agenda.serializer)
+          ..add(AvailableGang.serializer)
           ..add(CardReference.serializer)
+          ..add(CreateGameInput.serializer)
+          ..add(DeploymentZoneInput.serializer)
+          ..add(DeploymentZoneInputZoneEnum.serializer)
+          ..add(DrawAgendasResponse.serializer)
           ..add(EntryInput.serializer)
           ..add(EntryInputEntry.serializer)
           ..add(EntryInputEntryEntryTypeEnum.serializer)
@@ -17,6 +23,13 @@ Serializers _$serializers =
           ..add(Equipment.serializer)
           ..add(ForgotPasswordInput.serializer)
           ..add(ForgotPasswordInputUser.serializer)
+          ..add(Game.serializer)
+          ..add(GamePlayer.serializer)
+          ..add(GamePlayerDeploymentZoneEnum.serializer)
+          ..add(GamePlayerGang.serializer)
+          ..add(GamePlayerRoleEnum.serializer)
+          ..add(GameStatusEnum.serializer)
+          ..add(JoinGameInput.serializer)
           ..add(ListEntry.serializer)
           ..add(ListEntryEntryTypeEnum.serializer)
           ..add(ListInput.serializer)
@@ -29,6 +42,10 @@ Serializers _$serializers =
           ..add(RegistrationInputUser.serializer)
           ..add(ResetPasswordInput.serializer)
           ..add(ResetPasswordInputUser.serializer)
+          ..add(RoleInput.serializer)
+          ..add(RoleInputRoleEnum.serializer)
+          ..add(Scenario.serializer)
+          ..add(SelectGangInput.serializer)
           ..add(Session.serializer)
           ..add(SessionUser.serializer)
           ..add(SpecialRule.serializer)
@@ -36,6 +53,18 @@ Serializers _$serializers =
           ..add(UpdateAccountInputUser.serializer)
           ..add(ValidationErrors.serializer)
           ..add(Weapon.serializer)
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(Agenda)]),
+            () => ListBuilder<Agenda>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(Agenda)]),
+            () => ListBuilder<Agenda>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(GamePlayer)]),
+            () => ListBuilder<GamePlayer>(),
+          )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),
             () => ListBuilder<String>(),
@@ -57,6 +86,18 @@ Serializers _$serializers =
             () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(Weapon)]),
             () => ListBuilder<Weapon>(),
           )
@@ -67,6 +108,10 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(CardReference)]),
             () => ListBuilder<CardReference>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(dynamic)]),
+            () => ListBuilder<dynamic>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltMap, const [

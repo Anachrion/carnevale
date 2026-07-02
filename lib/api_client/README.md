@@ -65,16 +65,29 @@ All URIs are relative to *http://localhost:3000/api/v1*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*EquipmentApi*](doc/EquipmentApi.md) | [**getEquipment**](doc/EquipmentApi.md#getequipment) | **GET** /equipment | List all equipment
+[*GamesApi*](doc/GamesApi.md) | [**createGame**](doc/GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
+[*GamesApi*](doc/GamesApi.md) | [**drawAgendas**](doc/GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
+[*GamesApi*](doc/GamesApi.md) | [**getAvailableGangs**](doc/GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
+[*GamesApi*](doc/GamesApi.md) | [**getGame**](doc/GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
+[*GamesApi*](doc/GamesApi.md) | [**getGames**](doc/GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
+[*GamesApi*](doc/GamesApi.md) | [**joinGame**](doc/GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
+[*GamesApi*](doc/GamesApi.md) | [**markReady**](doc/GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
+[*GamesApi*](doc/GamesApi.md) | [**pickDeploymentZone**](doc/GamesApi.md#pickdeploymentzone) | **PATCH** /games/{id}/deployment_zone | Pick a Deployment Zone (deployment roll-off winner only)
+[*GamesApi*](doc/GamesApi.md) | [**pickRole**](doc/GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
+[*GamesApi*](doc/GamesApi.md) | [**rollForDeployment**](doc/GamesApi.md#rollfordeployment) | **POST** /games/{id}/deployment_roll | Roll the deployment-priority die
+[*GamesApi*](doc/GamesApi.md) | [**rollForRole**](doc/GamesApi.md#rollforrole) | **POST** /games/{id}/role_roll | Roll for Attacker/Defender priority (asymmetric scenarios only)
+[*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
-[*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list
+[*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list owned by the current user
 [*ListsApi*](doc/ListsApi.md) | [**deleteList**](doc/ListsApi.md#deletelist) | **DELETE** /lists/{id} | Delete a list
 [*ListsApi*](doc/ListsApi.md) | [**getList**](doc/ListsApi.md#getlist) | **GET** /lists/{id} | Get a list
-[*ListsApi*](doc/ListsApi.md) | [**getLists**](doc/ListsApi.md#getlists) | **GET** /lists | List all lists
+[*ListsApi*](doc/ListsApi.md) | [**getLists**](doc/ListsApi.md#getlists) | **GET** /lists | List the current user&#39;s lists
 [*ListsApi*](doc/ListsApi.md) | [**updateList**](doc/ListsApi.md#updatelist) | **PATCH** /lists/{id} | Update a list
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfile**](doc/ProfilesApi.md#getprofile) | **GET** /profiles/{id} | Get a profile
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfiles**](doc/ProfilesApi.md#getprofiles) | **GET** /profiles | List all profiles
+[*ScenariosApi*](doc/ScenariosApi.md) | [**getScenarios**](doc/ScenariosApi.md#getscenarios) | **GET** /scenarios | List all scenarios
 [*SessionApi*](doc/SessionApi.md) | [**forgotPassword**](doc/SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [*SessionApi*](doc/SessionApi.md) | [**login**](doc/SessionApi.md#login) | **POST** /login | Log in and receive a JWT
 [*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
@@ -85,7 +98,12 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [Agenda](doc/Agenda.md)
+ - [AvailableGang](doc/AvailableGang.md)
  - [CardReference](doc/CardReference.md)
+ - [CreateGameInput](doc/CreateGameInput.md)
+ - [DeploymentZoneInput](doc/DeploymentZoneInput.md)
+ - [DrawAgendasResponse](doc/DrawAgendasResponse.md)
  - [EntryInput](doc/EntryInput.md)
  - [EntryInputEntry](doc/EntryInputEntry.md)
  - [EntryPositionInput](doc/EntryPositionInput.md)
@@ -93,6 +111,10 @@ Class | Method | HTTP request | Description
  - [Equipment](doc/Equipment.md)
  - [ForgotPasswordInput](doc/ForgotPasswordInput.md)
  - [ForgotPasswordInputUser](doc/ForgotPasswordInputUser.md)
+ - [Game](doc/Game.md)
+ - [GamePlayer](doc/GamePlayer.md)
+ - [GamePlayerGang](doc/GamePlayerGang.md)
+ - [JoinGameInput](doc/JoinGameInput.md)
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)
  - [ListInputList](doc/ListInputList.md)
@@ -104,6 +126,9 @@ Class | Method | HTTP request | Description
  - [RegistrationInputUser](doc/RegistrationInputUser.md)
  - [ResetPasswordInput](doc/ResetPasswordInput.md)
  - [ResetPasswordInputUser](doc/ResetPasswordInputUser.md)
+ - [RoleInput](doc/RoleInput.md)
+ - [Scenario](doc/Scenario.md)
+ - [SelectGangInput](doc/SelectGangInput.md)
  - [Session](doc/Session.md)
  - [SessionUser](doc/SessionUser.md)
  - [SpecialRule](doc/SpecialRule.md)

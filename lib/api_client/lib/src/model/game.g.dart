@@ -1,0 +1,318 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'game.dart';
+
+// **************************************************************************
+// BuiltValueGenerator
+// **************************************************************************
+
+const GameStatusEnum _$gameStatusEnum_pending = const GameStatusEnum._(
+  'pending',
+);
+const GameStatusEnum _$gameStatusEnum_gangSelection = const GameStatusEnum._(
+  'gangSelection',
+);
+const GameStatusEnum _$gameStatusEnum_agendaDraw = const GameStatusEnum._(
+  'agendaDraw',
+);
+const GameStatusEnum _$gameStatusEnum_deploymentRolloff =
+    const GameStatusEnum._('deploymentRolloff');
+const GameStatusEnum _$gameStatusEnum_deploying = const GameStatusEnum._(
+  'deploying',
+);
+const GameStatusEnum _$gameStatusEnum_inProgress = const GameStatusEnum._(
+  'inProgress',
+);
+const GameStatusEnum _$gameStatusEnum_completed = const GameStatusEnum._(
+  'completed',
+);
+
+GameStatusEnum _$gameStatusEnumValueOf(String name) {
+  switch (name) {
+    case 'pending':
+      return _$gameStatusEnum_pending;
+    case 'gangSelection':
+      return _$gameStatusEnum_gangSelection;
+    case 'agendaDraw':
+      return _$gameStatusEnum_agendaDraw;
+    case 'deploymentRolloff':
+      return _$gameStatusEnum_deploymentRolloff;
+    case 'deploying':
+      return _$gameStatusEnum_deploying;
+    case 'inProgress':
+      return _$gameStatusEnum_inProgress;
+    case 'completed':
+      return _$gameStatusEnum_completed;
+    default:
+      throw ArgumentError(name);
+  }
+}
+
+final BuiltSet<GameStatusEnum> _$gameStatusEnumValues =
+    BuiltSet<GameStatusEnum>(const <GameStatusEnum>[
+      _$gameStatusEnum_pending,
+      _$gameStatusEnum_gangSelection,
+      _$gameStatusEnum_agendaDraw,
+      _$gameStatusEnum_deploymentRolloff,
+      _$gameStatusEnum_deploying,
+      _$gameStatusEnum_inProgress,
+      _$gameStatusEnum_completed,
+    ]);
+
+Serializer<GameStatusEnum> _$gameStatusEnumSerializer =
+    _$GameStatusEnumSerializer();
+
+class _$GameStatusEnumSerializer
+    implements PrimitiveSerializer<GameStatusEnum> {
+  static const Map<String, Object> _toWire = const <String, Object>{
+    'pending': 'pending',
+    'gangSelection': 'gang_selection',
+    'agendaDraw': 'agenda_draw',
+    'deploymentRolloff': 'deployment_rolloff',
+    'deploying': 'deploying',
+    'inProgress': 'in_progress',
+    'completed': 'completed',
+  };
+  static const Map<Object, String> _fromWire = const <Object, String>{
+    'pending': 'pending',
+    'gang_selection': 'gangSelection',
+    'agenda_draw': 'agendaDraw',
+    'deployment_rolloff': 'deploymentRolloff',
+    'deploying': 'deploying',
+    'in_progress': 'inProgress',
+    'completed': 'completed',
+  };
+
+  @override
+  final Iterable<Type> types = const <Type>[GameStatusEnum];
+  @override
+  final String wireName = 'GameStatusEnum';
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    GameStatusEnum object, {
+    FullType specifiedType = FullType.unspecified,
+  }) => _toWire[object.name] ?? object.name;
+
+  @override
+  GameStatusEnum deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) => GameStatusEnum.valueOf(
+    _fromWire[serialized] ?? (serialized is String ? serialized : ''),
+  );
+}
+
+class _$Game extends Game {
+  @override
+  final int id;
+  @override
+  final String joinCode;
+  @override
+  final GameStatusEnum status;
+  @override
+  final int ducatLimit;
+  @override
+  final String? boardSize;
+  @override
+  final Scenario scenario;
+  @override
+  final int? roleRollWinnerId;
+  @override
+  final int? deploymentRollWinnerId;
+  @override
+  final BuiltList<GamePlayer> players;
+
+  factory _$Game([void Function(GameBuilder)? updates]) =>
+      (GameBuilder()..update(updates))._build();
+
+  _$Game._({
+    required this.id,
+    required this.joinCode,
+    required this.status,
+    required this.ducatLimit,
+    this.boardSize,
+    required this.scenario,
+    this.roleRollWinnerId,
+    this.deploymentRollWinnerId,
+    required this.players,
+  }) : super._();
+  @override
+  Game rebuild(void Function(GameBuilder) updates) =>
+      (toBuilder()..update(updates)).build();
+
+  @override
+  GameBuilder toBuilder() => GameBuilder()..replace(this);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) return true;
+    return other is Game &&
+        id == other.id &&
+        joinCode == other.joinCode &&
+        status == other.status &&
+        ducatLimit == other.ducatLimit &&
+        boardSize == other.boardSize &&
+        scenario == other.scenario &&
+        roleRollWinnerId == other.roleRollWinnerId &&
+        deploymentRollWinnerId == other.deploymentRollWinnerId &&
+        players == other.players;
+  }
+
+  @override
+  int get hashCode {
+    var _$hash = 0;
+    _$hash = $jc(_$hash, id.hashCode);
+    _$hash = $jc(_$hash, joinCode.hashCode);
+    _$hash = $jc(_$hash, status.hashCode);
+    _$hash = $jc(_$hash, ducatLimit.hashCode);
+    _$hash = $jc(_$hash, boardSize.hashCode);
+    _$hash = $jc(_$hash, scenario.hashCode);
+    _$hash = $jc(_$hash, roleRollWinnerId.hashCode);
+    _$hash = $jc(_$hash, deploymentRollWinnerId.hashCode);
+    _$hash = $jc(_$hash, players.hashCode);
+    _$hash = $jf(_$hash);
+    return _$hash;
+  }
+
+  @override
+  String toString() {
+    return (newBuiltValueToStringHelper(r'Game')
+          ..add('id', id)
+          ..add('joinCode', joinCode)
+          ..add('status', status)
+          ..add('ducatLimit', ducatLimit)
+          ..add('boardSize', boardSize)
+          ..add('scenario', scenario)
+          ..add('roleRollWinnerId', roleRollWinnerId)
+          ..add('deploymentRollWinnerId', deploymentRollWinnerId)
+          ..add('players', players))
+        .toString();
+  }
+}
+
+class GameBuilder implements Builder<Game, GameBuilder> {
+  _$Game? _$v;
+
+  int? _id;
+  int? get id => _$this._id;
+  set id(int? id) => _$this._id = id;
+
+  String? _joinCode;
+  String? get joinCode => _$this._joinCode;
+  set joinCode(String? joinCode) => _$this._joinCode = joinCode;
+
+  GameStatusEnum? _status;
+  GameStatusEnum? get status => _$this._status;
+  set status(GameStatusEnum? status) => _$this._status = status;
+
+  int? _ducatLimit;
+  int? get ducatLimit => _$this._ducatLimit;
+  set ducatLimit(int? ducatLimit) => _$this._ducatLimit = ducatLimit;
+
+  String? _boardSize;
+  String? get boardSize => _$this._boardSize;
+  set boardSize(String? boardSize) => _$this._boardSize = boardSize;
+
+  ScenarioBuilder? _scenario;
+  ScenarioBuilder get scenario => _$this._scenario ??= ScenarioBuilder();
+  set scenario(ScenarioBuilder? scenario) => _$this._scenario = scenario;
+
+  int? _roleRollWinnerId;
+  int? get roleRollWinnerId => _$this._roleRollWinnerId;
+  set roleRollWinnerId(int? roleRollWinnerId) =>
+      _$this._roleRollWinnerId = roleRollWinnerId;
+
+  int? _deploymentRollWinnerId;
+  int? get deploymentRollWinnerId => _$this._deploymentRollWinnerId;
+  set deploymentRollWinnerId(int? deploymentRollWinnerId) =>
+      _$this._deploymentRollWinnerId = deploymentRollWinnerId;
+
+  ListBuilder<GamePlayer>? _players;
+  ListBuilder<GamePlayer> get players =>
+      _$this._players ??= ListBuilder<GamePlayer>();
+  set players(ListBuilder<GamePlayer>? players) => _$this._players = players;
+
+  GameBuilder() {
+    Game._defaults(this);
+  }
+
+  GameBuilder get _$this {
+    final $v = _$v;
+    if ($v != null) {
+      _id = $v.id;
+      _joinCode = $v.joinCode;
+      _status = $v.status;
+      _ducatLimit = $v.ducatLimit;
+      _boardSize = $v.boardSize;
+      _scenario = $v.scenario.toBuilder();
+      _roleRollWinnerId = $v.roleRollWinnerId;
+      _deploymentRollWinnerId = $v.deploymentRollWinnerId;
+      _players = $v.players.toBuilder();
+      _$v = null;
+    }
+    return this;
+  }
+
+  @override
+  void replace(Game other) {
+    _$v = other as _$Game;
+  }
+
+  @override
+  void update(void Function(GameBuilder)? updates) {
+    if (updates != null) updates(this);
+  }
+
+  @override
+  Game build() => _build();
+
+  _$Game _build() {
+    _$Game _$result;
+    try {
+      _$result =
+          _$v ??
+          _$Game._(
+            id: BuiltValueNullFieldError.checkNotNull(id, r'Game', 'id'),
+            joinCode: BuiltValueNullFieldError.checkNotNull(
+              joinCode,
+              r'Game',
+              'joinCode',
+            ),
+            status: BuiltValueNullFieldError.checkNotNull(
+              status,
+              r'Game',
+              'status',
+            ),
+            ducatLimit: BuiltValueNullFieldError.checkNotNull(
+              ducatLimit,
+              r'Game',
+              'ducatLimit',
+            ),
+            boardSize: boardSize,
+            scenario: scenario.build(),
+            roleRollWinnerId: roleRollWinnerId,
+            deploymentRollWinnerId: deploymentRollWinnerId,
+            players: players.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'scenario';
+        scenario.build();
+
+        _$failedField = 'players';
+        players.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(r'Game', _$failedField, e.toString());
+      }
+      rethrow;
+    }
+    replace(_$result);
+    return _$result;
+  }
+}
+
+// ignore_for_file: deprecated_member_use_from_same_package,type=lint

@@ -1,0 +1,370 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'game_player.dart';
+
+// **************************************************************************
+// BuiltValueGenerator
+// **************************************************************************
+
+const GamePlayerRoleEnum _$gamePlayerRoleEnum_attacker =
+    const GamePlayerRoleEnum._('attacker');
+const GamePlayerRoleEnum _$gamePlayerRoleEnum_defender =
+    const GamePlayerRoleEnum._('defender');
+
+GamePlayerRoleEnum _$gamePlayerRoleEnumValueOf(String name) {
+  switch (name) {
+    case 'attacker':
+      return _$gamePlayerRoleEnum_attacker;
+    case 'defender':
+      return _$gamePlayerRoleEnum_defender;
+    default:
+      throw ArgumentError(name);
+  }
+}
+
+final BuiltSet<GamePlayerRoleEnum> _$gamePlayerRoleEnumValues =
+    BuiltSet<GamePlayerRoleEnum>(const <GamePlayerRoleEnum>[
+      _$gamePlayerRoleEnum_attacker,
+      _$gamePlayerRoleEnum_defender,
+    ]);
+
+const GamePlayerDeploymentZoneEnum _$gamePlayerDeploymentZoneEnum_A =
+    const GamePlayerDeploymentZoneEnum._('A');
+const GamePlayerDeploymentZoneEnum _$gamePlayerDeploymentZoneEnum_B =
+    const GamePlayerDeploymentZoneEnum._('B');
+
+GamePlayerDeploymentZoneEnum _$gamePlayerDeploymentZoneEnumValueOf(
+  String name,
+) {
+  switch (name) {
+    case 'A':
+      return _$gamePlayerDeploymentZoneEnum_A;
+    case 'B':
+      return _$gamePlayerDeploymentZoneEnum_B;
+    default:
+      throw ArgumentError(name);
+  }
+}
+
+final BuiltSet<GamePlayerDeploymentZoneEnum>
+_$gamePlayerDeploymentZoneEnumValues = BuiltSet<GamePlayerDeploymentZoneEnum>(
+  const <GamePlayerDeploymentZoneEnum>[
+    _$gamePlayerDeploymentZoneEnum_A,
+    _$gamePlayerDeploymentZoneEnum_B,
+  ],
+);
+
+Serializer<GamePlayerRoleEnum> _$gamePlayerRoleEnumSerializer =
+    _$GamePlayerRoleEnumSerializer();
+Serializer<GamePlayerDeploymentZoneEnum>
+_$gamePlayerDeploymentZoneEnumSerializer =
+    _$GamePlayerDeploymentZoneEnumSerializer();
+
+class _$GamePlayerRoleEnumSerializer
+    implements PrimitiveSerializer<GamePlayerRoleEnum> {
+  static const Map<String, Object> _toWire = const <String, Object>{
+    'attacker': 'attacker',
+    'defender': 'defender',
+  };
+  static const Map<Object, String> _fromWire = const <Object, String>{
+    'attacker': 'attacker',
+    'defender': 'defender',
+  };
+
+  @override
+  final Iterable<Type> types = const <Type>[GamePlayerRoleEnum];
+  @override
+  final String wireName = 'GamePlayerRoleEnum';
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    GamePlayerRoleEnum object, {
+    FullType specifiedType = FullType.unspecified,
+  }) => _toWire[object.name] ?? object.name;
+
+  @override
+  GamePlayerRoleEnum deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) => GamePlayerRoleEnum.valueOf(
+    _fromWire[serialized] ?? (serialized is String ? serialized : ''),
+  );
+}
+
+class _$GamePlayerDeploymentZoneEnumSerializer
+    implements PrimitiveSerializer<GamePlayerDeploymentZoneEnum> {
+  static const Map<String, Object> _toWire = const <String, Object>{
+    'A': 'A',
+    'B': 'B',
+  };
+  static const Map<Object, String> _fromWire = const <Object, String>{
+    'A': 'A',
+    'B': 'B',
+  };
+
+  @override
+  final Iterable<Type> types = const <Type>[GamePlayerDeploymentZoneEnum];
+  @override
+  final String wireName = 'GamePlayerDeploymentZoneEnum';
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    GamePlayerDeploymentZoneEnum object, {
+    FullType specifiedType = FullType.unspecified,
+  }) => _toWire[object.name] ?? object.name;
+
+  @override
+  GamePlayerDeploymentZoneEnum deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) => GamePlayerDeploymentZoneEnum.valueOf(
+    _fromWire[serialized] ?? (serialized is String ? serialized : ''),
+  );
+}
+
+class _$GamePlayer extends GamePlayer {
+  @override
+  final int id;
+  @override
+  final int userId;
+  @override
+  final String username;
+  @override
+  final bool host;
+  @override
+  final GamePlayerGang? list;
+  @override
+  final GamePlayerRoleEnum? role;
+  @override
+  final GamePlayerDeploymentZoneEnum? deploymentZone;
+  @override
+  final int? roleRoll;
+  @override
+  final int? deploymentRoll;
+  @override
+  final bool ready;
+  @override
+  final BuiltList<Agenda> agendas;
+
+  factory _$GamePlayer([void Function(GamePlayerBuilder)? updates]) =>
+      (GamePlayerBuilder()..update(updates))._build();
+
+  _$GamePlayer._({
+    required this.id,
+    required this.userId,
+    required this.username,
+    required this.host,
+    this.list,
+    this.role,
+    this.deploymentZone,
+    this.roleRoll,
+    this.deploymentRoll,
+    required this.ready,
+    required this.agendas,
+  }) : super._();
+  @override
+  GamePlayer rebuild(void Function(GamePlayerBuilder) updates) =>
+      (toBuilder()..update(updates)).build();
+
+  @override
+  GamePlayerBuilder toBuilder() => GamePlayerBuilder()..replace(this);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) return true;
+    return other is GamePlayer &&
+        id == other.id &&
+        userId == other.userId &&
+        username == other.username &&
+        host == other.host &&
+        list == other.list &&
+        role == other.role &&
+        deploymentZone == other.deploymentZone &&
+        roleRoll == other.roleRoll &&
+        deploymentRoll == other.deploymentRoll &&
+        ready == other.ready &&
+        agendas == other.agendas;
+  }
+
+  @override
+  int get hashCode {
+    var _$hash = 0;
+    _$hash = $jc(_$hash, id.hashCode);
+    _$hash = $jc(_$hash, userId.hashCode);
+    _$hash = $jc(_$hash, username.hashCode);
+    _$hash = $jc(_$hash, host.hashCode);
+    _$hash = $jc(_$hash, list.hashCode);
+    _$hash = $jc(_$hash, role.hashCode);
+    _$hash = $jc(_$hash, deploymentZone.hashCode);
+    _$hash = $jc(_$hash, roleRoll.hashCode);
+    _$hash = $jc(_$hash, deploymentRoll.hashCode);
+    _$hash = $jc(_$hash, ready.hashCode);
+    _$hash = $jc(_$hash, agendas.hashCode);
+    _$hash = $jf(_$hash);
+    return _$hash;
+  }
+
+  @override
+  String toString() {
+    return (newBuiltValueToStringHelper(r'GamePlayer')
+          ..add('id', id)
+          ..add('userId', userId)
+          ..add('username', username)
+          ..add('host', host)
+          ..add('list', list)
+          ..add('role', role)
+          ..add('deploymentZone', deploymentZone)
+          ..add('roleRoll', roleRoll)
+          ..add('deploymentRoll', deploymentRoll)
+          ..add('ready', ready)
+          ..add('agendas', agendas))
+        .toString();
+  }
+}
+
+class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
+  _$GamePlayer? _$v;
+
+  int? _id;
+  int? get id => _$this._id;
+  set id(int? id) => _$this._id = id;
+
+  int? _userId;
+  int? get userId => _$this._userId;
+  set userId(int? userId) => _$this._userId = userId;
+
+  String? _username;
+  String? get username => _$this._username;
+  set username(String? username) => _$this._username = username;
+
+  bool? _host;
+  bool? get host => _$this._host;
+  set host(bool? host) => _$this._host = host;
+
+  GamePlayerGangBuilder? _list;
+  GamePlayerGangBuilder get list => _$this._list ??= GamePlayerGangBuilder();
+  set list(GamePlayerGangBuilder? list) => _$this._list = list;
+
+  GamePlayerRoleEnum? _role;
+  GamePlayerRoleEnum? get role => _$this._role;
+  set role(GamePlayerRoleEnum? role) => _$this._role = role;
+
+  GamePlayerDeploymentZoneEnum? _deploymentZone;
+  GamePlayerDeploymentZoneEnum? get deploymentZone => _$this._deploymentZone;
+  set deploymentZone(GamePlayerDeploymentZoneEnum? deploymentZone) =>
+      _$this._deploymentZone = deploymentZone;
+
+  int? _roleRoll;
+  int? get roleRoll => _$this._roleRoll;
+  set roleRoll(int? roleRoll) => _$this._roleRoll = roleRoll;
+
+  int? _deploymentRoll;
+  int? get deploymentRoll => _$this._deploymentRoll;
+  set deploymentRoll(int? deploymentRoll) =>
+      _$this._deploymentRoll = deploymentRoll;
+
+  bool? _ready;
+  bool? get ready => _$this._ready;
+  set ready(bool? ready) => _$this._ready = ready;
+
+  ListBuilder<Agenda>? _agendas;
+  ListBuilder<Agenda> get agendas => _$this._agendas ??= ListBuilder<Agenda>();
+  set agendas(ListBuilder<Agenda>? agendas) => _$this._agendas = agendas;
+
+  GamePlayerBuilder() {
+    GamePlayer._defaults(this);
+  }
+
+  GamePlayerBuilder get _$this {
+    final $v = _$v;
+    if ($v != null) {
+      _id = $v.id;
+      _userId = $v.userId;
+      _username = $v.username;
+      _host = $v.host;
+      _list = $v.list?.toBuilder();
+      _role = $v.role;
+      _deploymentZone = $v.deploymentZone;
+      _roleRoll = $v.roleRoll;
+      _deploymentRoll = $v.deploymentRoll;
+      _ready = $v.ready;
+      _agendas = $v.agendas.toBuilder();
+      _$v = null;
+    }
+    return this;
+  }
+
+  @override
+  void replace(GamePlayer other) {
+    _$v = other as _$GamePlayer;
+  }
+
+  @override
+  void update(void Function(GamePlayerBuilder)? updates) {
+    if (updates != null) updates(this);
+  }
+
+  @override
+  GamePlayer build() => _build();
+
+  _$GamePlayer _build() {
+    _$GamePlayer _$result;
+    try {
+      _$result =
+          _$v ??
+          _$GamePlayer._(
+            id: BuiltValueNullFieldError.checkNotNull(id, r'GamePlayer', 'id'),
+            userId: BuiltValueNullFieldError.checkNotNull(
+              userId,
+              r'GamePlayer',
+              'userId',
+            ),
+            username: BuiltValueNullFieldError.checkNotNull(
+              username,
+              r'GamePlayer',
+              'username',
+            ),
+            host: BuiltValueNullFieldError.checkNotNull(
+              host,
+              r'GamePlayer',
+              'host',
+            ),
+            list: _list?.build(),
+            role: role,
+            deploymentZone: deploymentZone,
+            roleRoll: roleRoll,
+            deploymentRoll: deploymentRoll,
+            ready: BuiltValueNullFieldError.checkNotNull(
+              ready,
+              r'GamePlayer',
+              'ready',
+            ),
+            agendas: agendas.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'list';
+        _list?.build();
+
+        _$failedField = 'agendas';
+        agendas.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+          r'GamePlayer',
+          _$failedField,
+          e.toString(),
+        );
+      }
+      rethrow;
+    }
+    replace(_$result);
+    return _$result;
+  }
+}
+
+// ignore_for_file: deprecated_member_use_from_same_package,type=lint

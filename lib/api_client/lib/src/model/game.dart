@@ -1,0 +1,268 @@
+//
+// AUTO-GENERATED FILE, DO NOT MODIFY!
+//
+
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:carnevale_api/src/model/game_player.dart';
+import 'package:carnevale_api/src/model/scenario.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
+
+part 'game.g.dart';
+
+/// Game
+///
+/// Properties:
+/// * [id] 
+/// * [joinCode] 
+/// * [status] 
+/// * [ducatLimit] 
+/// * [boardSize] 
+/// * [scenario] 
+/// * [roleRollWinnerId] - game_player id of the role roll-off winner (asymmetric scenarios only).
+/// * [deploymentRollWinnerId] - game_player id of the deployment roll-off winner.
+/// * [players] 
+@BuiltValue()
+abstract class Game implements Built<Game, GameBuilder> {
+  @BuiltValueField(wireName: r'id')
+  int get id;
+
+  @BuiltValueField(wireName: r'join_code')
+  String get joinCode;
+
+  @BuiltValueField(wireName: r'status')
+  GameStatusEnum get status;
+  // enum statusEnum {  pending,  gang_selection,  agenda_draw,  deployment_rolloff,  deploying,  in_progress,  completed,  };
+
+  @BuiltValueField(wireName: r'ducat_limit')
+  int get ducatLimit;
+
+  @BuiltValueField(wireName: r'board_size')
+  String? get boardSize;
+
+  @BuiltValueField(wireName: r'scenario')
+  Scenario get scenario;
+
+  /// game_player id of the role roll-off winner (asymmetric scenarios only).
+  @BuiltValueField(wireName: r'role_roll_winner_id')
+  int? get roleRollWinnerId;
+
+  /// game_player id of the deployment roll-off winner.
+  @BuiltValueField(wireName: r'deployment_roll_winner_id')
+  int? get deploymentRollWinnerId;
+
+  @BuiltValueField(wireName: r'players')
+  BuiltList<GamePlayer> get players;
+
+  Game._();
+
+  factory Game([void updates(GameBuilder b)]) = _$Game;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(GameBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<Game> get serializer => _$GameSerializer();
+}
+
+class _$GameSerializer implements PrimitiveSerializer<Game> {
+  @override
+  final Iterable<Type> types = const [Game, _$Game];
+
+  @override
+  final String wireName = r'Game';
+
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    Game object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'id';
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(int),
+    );
+    yield r'join_code';
+    yield serializers.serialize(
+      object.joinCode,
+      specifiedType: const FullType(String),
+    );
+    yield r'status';
+    yield serializers.serialize(
+      object.status,
+      specifiedType: const FullType(GameStatusEnum),
+    );
+    yield r'ducat_limit';
+    yield serializers.serialize(
+      object.ducatLimit,
+      specifiedType: const FullType(int),
+    );
+    yield r'board_size';
+    yield object.boardSize == null ? null : serializers.serialize(
+      object.boardSize,
+      specifiedType: const FullType.nullable(String),
+    );
+    yield r'scenario';
+    yield serializers.serialize(
+      object.scenario,
+      specifiedType: const FullType(Scenario),
+    );
+    yield r'role_roll_winner_id';
+    yield object.roleRollWinnerId == null ? null : serializers.serialize(
+      object.roleRollWinnerId,
+      specifiedType: const FullType.nullable(int),
+    );
+    yield r'deployment_roll_winner_id';
+    yield object.deploymentRollWinnerId == null ? null : serializers.serialize(
+      object.deploymentRollWinnerId,
+      specifiedType: const FullType.nullable(int),
+    );
+    yield r'players';
+    yield serializers.serialize(
+      object.players,
+      specifiedType: const FullType(BuiltList, [FullType(GamePlayer)]),
+    );
+  }
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    Game object, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+  }
+
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required GameBuilder result,
+    required List<Object?> unhandled,
+  }) {
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.id = valueDes;
+          break;
+        case r'join_code':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.joinCode = valueDes;
+          break;
+        case r'status':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(GameStatusEnum),
+          ) as GameStatusEnum;
+          result.status = valueDes;
+          break;
+        case r'ducat_limit':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.ducatLimit = valueDes;
+          break;
+        case r'board_size':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.boardSize = valueDes;
+          break;
+        case r'scenario':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(Scenario),
+          ) as Scenario;
+          result.scenario.replace(valueDes);
+          break;
+        case r'role_roll_winner_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          if (valueDes == null) continue;
+          result.roleRollWinnerId = valueDes;
+          break;
+        case r'deployment_roll_winner_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          if (valueDes == null) continue;
+          result.deploymentRollWinnerId = valueDes;
+          break;
+        case r'players':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(GamePlayer)]),
+          ) as BuiltList<GamePlayer>;
+          result.players.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
+      }
+    }
+  }
+
+  @override
+  Game deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = GameBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
+}
+
+class GameStatusEnum extends EnumClass {
+
+  @BuiltValueEnumConst(wireName: r'pending')
+  static const GameStatusEnum pending = _$gameStatusEnum_pending;
+  @BuiltValueEnumConst(wireName: r'gang_selection')
+  static const GameStatusEnum gangSelection = _$gameStatusEnum_gangSelection;
+  @BuiltValueEnumConst(wireName: r'agenda_draw')
+  static const GameStatusEnum agendaDraw = _$gameStatusEnum_agendaDraw;
+  @BuiltValueEnumConst(wireName: r'deployment_rolloff')
+  static const GameStatusEnum deploymentRolloff = _$gameStatusEnum_deploymentRolloff;
+  @BuiltValueEnumConst(wireName: r'deploying')
+  static const GameStatusEnum deploying = _$gameStatusEnum_deploying;
+  @BuiltValueEnumConst(wireName: r'in_progress')
+  static const GameStatusEnum inProgress = _$gameStatusEnum_inProgress;
+  @BuiltValueEnumConst(wireName: r'completed')
+  static const GameStatusEnum completed = _$gameStatusEnum_completed;
+
+  static Serializer<GameStatusEnum> get serializer => _$gameStatusEnumSerializer;
+
+  const GameStatusEnum._(String name): super(name);
+
+  static BuiltSet<GameStatusEnum> get values => _$gameStatusEnumValues;
+  static GameStatusEnum valueOf(String name) => _$gameStatusEnumValueOf(name);
+}
+
