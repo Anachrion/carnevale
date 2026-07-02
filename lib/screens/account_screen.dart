@@ -291,7 +291,7 @@ class _AuthFormState extends State<_AuthForm> {
 
   InputDecoration _decoration(String label) => InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
+        labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
         enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
         focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
       );
@@ -304,18 +304,20 @@ class _AuthFormState extends State<_AuthForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                _ModeTab(label: 'Log In', active: !_isSignUp, onTap: () => _switchMode(false)),
-                const SizedBox(width: 24),
-                _ModeTab(label: 'Sign Up', active: _isSignUp, onTap: () => _switchMode(true)),
-              ],
+            Text(
+              _isSignUp ? 'Sign Up' : 'Log In',
+              style: GoogleFonts.cinzel(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+                color: context.textColor,
+              ),
             ),
             const SizedBox(height: 20),
             if (_isSignUp) ...[
               TextFormField(
                 controller: _usernameController,
-                style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
                 decoration: _decoration('Username'),
                 validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
@@ -324,7 +326,7 @@ class _AuthFormState extends State<_AuthForm> {
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
               decoration: _decoration('Email'),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
@@ -336,7 +338,7 @@ class _AuthFormState extends State<_AuthForm> {
             TextFormField(
               controller: _passwordController,
               obscureText: true,
-              style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
               decoration: _decoration('Password'),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Required';
@@ -349,7 +351,7 @@ class _AuthFormState extends State<_AuthForm> {
               TextFormField(
                 controller: _passwordConfirmationController,
                 obscureText: true,
-                style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
                 decoration: _decoration('Confirm Password'),
                 validator: (v) {
                   if (v != _passwordController.text) return 'Passwords do not match';
@@ -382,33 +384,27 @@ class _AuthFormState extends State<_AuthForm> {
                     : Text(_isSignUp ? 'Sign Up' : 'Log In'),
               ),
             ),
+            const SizedBox(height: 16),
+            Center(
+              child: GestureDetector(
+                onTap: () => _switchMode(!_isSignUp),
+                child: RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.notoSans(fontSize: 13, color: context.subtleTextColor),
+                    children: [
+                      TextSpan(
+                        text: _isSignUp ? 'Already have an account? ' : "Don't have an account yet? ",
+                      ),
+                      TextSpan(
+                        text: _isSignUp ? 'Log In' : 'Sign Up',
+                        style: TextStyle(color: _kGold, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ModeTab extends StatelessWidget {
-  const _ModeTab({required this.label, required this.active, required this.onTap});
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? const Color(0xFFB1986C) : const Color(0xFF8B1A1A);
-    return GestureDetector(
-      onTap: onTap,
-      child: Text(
-        label.toUpperCase(),
-        style: GoogleFonts.cinzel(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1,
-          color: active ? accent : context.subtleTextColor,
         ),
       ),
     );
