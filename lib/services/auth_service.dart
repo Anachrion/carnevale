@@ -114,6 +114,24 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<void> resetPassword({
+    required String token,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    try {
+      await _client.session.resetPassword(
+        resetPasswordInput: api.ResetPasswordInput((b) => b
+          ..user = api.ResetPasswordInputUser((ub) => ub
+            ..resetPasswordToken = token
+            ..password = password
+            ..passwordConfirmation = passwordConfirmation).toBuilder()),
+      );
+    } on DioException catch (e) {
+      throw AuthException(parseAuthError(e));
+    }
+  }
+
   Future<void> updateUsername(String username) async {
     try {
       final res = await _client.session.updateAccount(

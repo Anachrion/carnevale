@@ -9,7 +9,7 @@ mkfifo "$PIPE"
 # Keep the pipe open so flutter run doesn't exit when watcher writes to it
 exec 3<>"$PIPE"
 
-flutter run -d chrome <"$PIPE" &
+flutter run -d chrome --web-port=56569 <"$PIPE" &
 FLUTTER_PID=$!
 
 # Watch lib/ and assets/ for changes, send hot reload
