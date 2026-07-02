@@ -289,6 +289,13 @@ class _AuthFormState extends State<_AuthForm> {
     }
   }
 
+  void _showForgotPasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => _ForgotPasswordDialog(initialEmail: _emailController.text.trim()),
+    );
+  }
+
   InputDecoration _decoration(String label) => InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
@@ -346,6 +353,19 @@ class _AuthFormState extends State<_AuthForm> {
                 return null;
               },
             ),
+            if (!_isSignUp) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () => _showForgotPasswordDialog(context),
+                  child: Text(
+                    'Forgot password?',
+                    style: GoogleFonts.notoSans(fontSize: 13, color: _kGold, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
             if (_isSignUp) ...[
               const SizedBox(height: 16),
               TextFormField(
@@ -407,6 +427,103 @@ class _AuthFormState extends State<_AuthForm> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ForgotPasswordDialog extends StatefulWidget {
+  const _ForgotPasswordDialog({required this.initialEmail});
+  final String initialEmail;
+
+  @override
+  State<_ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
+}
+
+class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _emailController = TextEditingController(text: widget.initialEmail);
+  bool _sending = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    try {
+      await authService.forgotPassword(_emailController.text.trim());
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      showAppToast(context, 'Password reset email sent!');
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Reset Password', style: GoogleFonts.cinzel(color: context.textColor)),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Enter your email and we'll send you a link to reset your password.",
+              style: GoogleFonts.notoSans(fontSize: 13, color: context.subtleTextColor),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _emailController,
+              autofocus: true,
+              keyboardType: TextInputType.emailAddress,
+              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
+                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+              ),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (!v.contains('@')) return 'Enter a valid email';
+                return null;
+              },
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _sending ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _sending ? null : _send,
+          child: _sending
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text('Send', style: TextStyle(color: _kGold, fontWeight: FontWeight.w700)),
+        ),
+      ],
     );
   }
 }
