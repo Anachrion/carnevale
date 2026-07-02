@@ -6,6 +6,7 @@ import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/glass_panel.dart';
 import 'home_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
@@ -114,49 +115,6 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 }
 
-class _Panel extends StatelessWidget {
-  const _Panel({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: isDark
-                ? const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0x10000000), Color(0x88000000)],
-                  )
-                : LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.30),
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.75),
-                    ],
-                  ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark
-                  ? const Color(0xFFB1986C).withValues(alpha: 0.45)
-                  : Colors.white.withValues(alpha: 0.3),
-              width: 1.0,
-            ),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
 class _LoggedInPanel extends StatefulWidget {
   const _LoggedInPanel({required this.user});
   final AuthUser user;
@@ -178,7 +136,7 @@ class _LoggedInPanelState extends State<_LoggedInPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return _Panel(
+    return GlassPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -305,7 +263,7 @@ class _AuthFormState extends State<_AuthForm> {
 
   @override
   Widget build(BuildContext context) {
-    return _Panel(
+    return GlassPanel(
       child: Form(
         key: _formKey,
         child: Column(

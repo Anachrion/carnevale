@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/glass_panel.dart';
 import 'account_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
@@ -105,77 +106,65 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F2EE).withValues(alpha: 0.55),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-                          ),
-                          padding: const EdgeInsets.all(20),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Choose a new password for your account.',
-                                  style: GoogleFonts.notoSans(fontSize: 13, color: context.subtleTextColor),
-                                ),
-                                const SizedBox(height: 20),
-                                TextFormField(
-                                  controller: _passwordController,
-                                  obscureText: true,
-                                  style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
-                                  decoration: _decoration('New Password'),
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty) return 'Required';
-                                    if (v.length < 6) return 'At least 6 characters';
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _passwordConfirmationController,
-                                  obscureText: true,
-                                  style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
-                                  decoration: _decoration('Confirm New Password'),
-                                  validator: (v) {
-                                    if (v != _passwordController.text) return 'Passwords do not match';
-                                    return null;
-                                  },
-                                ),
-                                if (_error != null) ...[
-                                  const SizedBox(height: 16),
-                                  Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
-                                ],
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: _submitting ? null : _submit,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: _kGold,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 14),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      elevation: 0,
-                                    ),
-                                    child: _submitting
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                          )
-                                        : const Text('Reset Password'),
-                                  ),
-                                ),
-                              ],
+                    GlassPanel(
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Choose a new password for your account.',
+                              style: GoogleFonts.notoSans(fontSize: 13, color: context.subtleTextColor),
                             ),
-                          ),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+                              decoration: _decoration('New Password'),
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Required';
+                                if (v.length < 6) return 'At least 6 characters';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _passwordConfirmationController,
+                              obscureText: true,
+                              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+                              decoration: _decoration('Confirm New Password'),
+                              validator: (v) {
+                                if (v != _passwordController.text) return 'Passwords do not match';
+                                return null;
+                              },
+                            ),
+                            if (_error != null) ...[
+                              const SizedBox(height: 16),
+                              Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                            ],
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _submitting ? null : _submit,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _kGold,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 0,
+                                ),
+                                child: _submitting
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      )
+                                    : const Text('Reset Password'),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
