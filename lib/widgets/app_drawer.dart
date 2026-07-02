@@ -68,7 +68,7 @@ class AppDrawer extends StatelessWidget {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Log In / Sign Up',
+                        'Log In',
                         style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, letterSpacing: 1, fontSize: 13),
                       ),
                     ),

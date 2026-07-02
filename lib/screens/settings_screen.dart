@@ -139,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       MaterialPageRoute(builder: (_) => const AccountScreen()),
                                     ),
                                     child: Text(
-                                      'Log In / Sign Up',
+                                      'Log In',
                                       style: GoogleFonts.cinzel(color: _kGold, fontWeight: FontWeight.w700),
                                     ),
                                   ),
