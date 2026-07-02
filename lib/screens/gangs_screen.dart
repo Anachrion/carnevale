@@ -2,9 +2,11 @@ import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../main.dart';
 import '../models/gang.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_drawer.dart';
+import 'account_screen.dart';
 import 'gang_builder_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
@@ -49,7 +51,30 @@ class _GangsScreenState extends State<GangsScreen> {
   @override
   void initState() {
     super.initState();
-    _load();
+    authService.addListener(_onAuthChanged);
+    if (authService.isLoggedIn) {
+      _load();
+    } else {
+      _loading = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    authService.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    if (authService.isLoggedIn) {
+      _load();
+    } else if (mounted) {
+      setState(() {
+        _gangs = [];
+        _error = null;
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _load() async {
@@ -92,13 +117,15 @@ class _GangsScreenState extends State<GangsScreen> {
       key: _scaffoldKey,
       backgroundColor: _kBackground,
       drawer: const AppDrawer(current: AppDrawerRoute.gangs),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showCreateDialog,
-        backgroundColor: _kGold,
-        foregroundColor: Colors.white,
-        mini: true,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: authService.isLoggedIn
+          ? FloatingActionButton(
+              onPressed: _showCreateDialog,
+              backgroundColor: _kGold,
+              foregroundColor: Colors.white,
+              mini: true,
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -158,7 +185,7 @@ class _GangsScreenState extends State<GangsScreen> {
             ),
           ),
           const Spacer(),
-          if (!_loading && _error == null)
+          if (authService.isLoggedIn && !_loading && _error == null)
             Text(
               '${_gangs.length} gang${_gangs.length == 1 ? '' : 's'}',
               style: TextStyle(fontSize: 12, color: context.subtleTextColor),
@@ -168,7 +195,42 @@ class _GangsScreenState extends State<GangsScreen> {
     );
   }
 
+  Widget _buildLoggedOut() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.lock_outline, size: 40, color: context.subtleTextColor),
+            const SizedBox(height: 12),
+            Text(
+              'Log in to build and manage your gangs',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.subtleTextColor),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AccountScreen()),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kGold,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Log In'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBody() {
+    if (!authService.isLoggedIn) {
+      return _buildLoggedOut();
+    }
     if (_loading) {
       return const Center(child: CircularProgressIndicator(color: _kGold));
     }
