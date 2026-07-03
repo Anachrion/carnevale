@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/app_drawer.dart';
 import 'cards_screen.dart';
+import 'game_home_screen.dart';
 import 'gangs_screen.dart';
 import 'settings_screen.dart';
 
@@ -59,6 +60,12 @@ class HomeScreen extends StatelessWidget {
                             imagePath: 'assets/images/list_icon.png',
                             title: 'Gangs',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GangsScreen())),
+                          ),
+                          const SizedBox(height: 12),
+                          _MenuItem(
+                            icon: Icons.sports_esports_outlined,
+                            title: 'Game',
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameHomeScreen())),
                           ),
                           const SizedBox(height: 12),
                           _MenuItem(icon: Icons.menu_book_outlined, imagePath: 'assets/images/book_icon.png', title: 'Rules'),

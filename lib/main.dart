@@ -1,6 +1,7 @@
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'screens/game_home_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'services/auth_service.dart';
@@ -43,13 +44,24 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
 
   void _handleDeepLink(Uri uri) {
     if (uri == _lastHandledLink) return;
-    if (uri.path != '/reset-password') return;
-    final token = uri.queryParameters['reset_password_token'];
-    if (token == null || token.isEmpty) return;
-    _lastHandledLink = uri;
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) => ResetPasswordScreen(token: token)),
-    );
+    if (uri.path == '/reset-password') {
+      final token = uri.queryParameters['reset_password_token'];
+      if (token == null || token.isEmpty) return;
+      _lastHandledLink = uri;
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => ResetPasswordScreen(token: token)),
+      );
+      return;
+    }
+    if (uri.path == '/join') {
+      final code = uri.queryParameters['code'];
+      if (code == null || code.isEmpty) return;
+      _lastHandledLink = uri;
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => GameHomeScreen(initialJoinCode: code)),
+      );
+      return;
+    }
   }
 
   @override
