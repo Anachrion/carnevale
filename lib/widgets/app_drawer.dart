@@ -4,10 +4,11 @@ import '../app_colors.dart';
 import '../main.dart';
 import '../screens/account_screen.dart';
 import '../screens/cards_screen.dart';
+import '../screens/game_home_screen.dart';
 import '../screens/gangs_screen.dart';
 import '../screens/settings_screen.dart';
 
-enum AppDrawerRoute { home, cards, gangs, rules, account, settings }
+enum AppDrawerRoute { home, cards, gangs, game, rules, account, settings }
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key, required this.current});
@@ -99,6 +100,12 @@ class AppDrawer extends StatelessWidget {
                     active: current == AppDrawerRoute.gangs,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.gangs, const GangsScreen()),
+                  ),
+                  _NavItem(
+                    label: 'Game',
+                    active: current == AppDrawerRoute.game,
+                    accent: accent,
+                    onTap: () => _navigate(context, AppDrawerRoute.game, const GameHomeScreen()),
                   ),
                   _NavItem(
                     label: 'Rules',
