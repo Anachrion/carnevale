@@ -37,9 +37,15 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
   }
 
   Future<void> _initDeepLinks() async {
-    final initialLink = await _appLinks.getInitialLink();
-    if (initialLink != null) _handleDeepLink(initialLink);
-    _appLinks.uriLinkStream.listen(_handleDeepLink);
+    // app_links' web implementation can throw here (observed in release web builds);
+    // deep link detection is a nice-to-have, not something that should crash startup.
+    try {
+      final initialLink = await _appLinks.getInitialLink();
+      if (initialLink != null) _handleDeepLink(initialLink);
+      _appLinks.uriLinkStream.listen(_handleDeepLink);
+    } catch (e) {
+      debugPrint('Deep link initialization failed: $e');
+    }
   }
 
   void _handleDeepLink(Uri uri) {
