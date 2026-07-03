@@ -27,3 +27,22 @@ Available on iOS, Android, and Web.
 flutter pub get
 flutter run
 ```
+
+## Testing
+
+### Two-player login helper
+
+Manually testing the two-player game flow normally means logging into two separate browsers by hand each time. `scripts/two_player_login.py` automates that: it drives the real login form in two isolated Chrome windows (no auth bypass, no app changes) and leaves both logged in and open for you to test with.
+
+Requirements:
+- The backend seeded with the dev test accounts (`player1@dev.local` / `player2@dev.local`, password `password123`) — from `carnevale-backend`, run `rails db:seed`.
+- The Flutter web dev server running: `./dev.sh` (serves on `http://localhost:56569`).
+- Python 3 with Selenium: `pip install selenium`.
+
+Run it:
+
+```bash
+python3 scripts/two_player_login.py
+```
+
+Pass `--url` if your dev server runs on a different port.
