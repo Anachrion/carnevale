@@ -136,7 +136,7 @@ class _$GamePlayer extends GamePlayer {
   @override
   final bool host;
   @override
-  final GamePlayerGang? list;
+  final GangSummary? list;
   @override
   final GamePlayerRoleEnum? role;
   @override
@@ -245,9 +245,9 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
   bool? get host => _$this._host;
   set host(bool? host) => _$this._host = host;
 
-  GamePlayerGangBuilder? _list;
-  GamePlayerGangBuilder get list => _$this._list ??= GamePlayerGangBuilder();
-  set list(GamePlayerGangBuilder? list) => _$this._list = list;
+  GangSummaryBuilder? _list;
+  GangSummaryBuilder get list => _$this._list ??= GangSummaryBuilder();
+  set list(GangSummaryBuilder? list) => _$this._list = list;
 
   GamePlayerRoleEnum? _role;
   GamePlayerRoleEnum? get role => _$this._role;

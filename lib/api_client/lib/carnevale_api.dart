@@ -33,7 +33,7 @@ export 'package:carnevale_api/src/model/forgot_password_input.dart';
 export 'package:carnevale_api/src/model/forgot_password_input_user.dart';
 export 'package:carnevale_api/src/model/game.dart';
 export 'package:carnevale_api/src/model/game_player.dart';
-export 'package:carnevale_api/src/model/game_player_gang.dart';
+export 'package:carnevale_api/src/model/gang_summary.dart';
 export 'package:carnevale_api/src/model/join_game_input.dart';
 export 'package:carnevale_api/src/model/list_entry.dart';
 export 'package:carnevale_api/src/model/list_input.dart';

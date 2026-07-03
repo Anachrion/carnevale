@@ -29,7 +29,7 @@ import 'package:carnevale_api/src/model/forgot_password_input.dart';
 import 'package:carnevale_api/src/model/forgot_password_input_user.dart';
 import 'package:carnevale_api/src/model/game.dart';
 import 'package:carnevale_api/src/model/game_player.dart';
-import 'package:carnevale_api/src/model/game_player_gang.dart';
+import 'package:carnevale_api/src/model/gang_summary.dart';
 import 'package:carnevale_api/src/model/join_game_input.dart';
 import 'package:carnevale_api/src/model/list_entry.dart';
 import 'package:carnevale_api/src/model/list_input.dart';
@@ -71,7 +71,7 @@ part 'serializers.g.dart';
   ForgotPasswordInputUser,
   Game,
   GamePlayer,
-  GamePlayerGang,
+  GangSummary,
   JoinGameInput,
   ListEntry,
   ListInput,
