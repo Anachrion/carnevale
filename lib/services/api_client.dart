@@ -5,9 +5,14 @@ class ApiClient {
   static final ApiClient _instance = ApiClient._();
   factory ApiClient() => _instance;
 
+  static const _host = 'localhost:3000';
+
+  /// Base URL for the ActionCable WebSocket endpoint, shared with [GameService].
+  static const cableUrl = 'ws://$_host/cable';
+
   ApiClient._() {
     final dio = Dio(BaseOptions(
-      baseUrl: 'http://localhost:3000/api/v1',
+      baseUrl: 'http://$_host/api/v1',
       // Without this, Devise's failure app treats requests as HTML and redirects
       // (302) instead of returning the documented JSON error body on 401/422.
       headers: {'Accept': 'application/json'},
@@ -31,6 +36,8 @@ class ApiClient {
     listEntries = ListEntriesApi(dio, standardSerializers);
     profiles = ProfilesApi(dio, standardSerializers);
     equipment = EquipmentApi(dio, standardSerializers);
+    games = GamesApi(dio, standardSerializers);
+    scenarios = ScenariosApi(dio, standardSerializers);
   }
 
   /// Set by [AuthService] once a user is logged in; sent as a Bearer token on every request.
@@ -44,4 +51,6 @@ class ApiClient {
   late final ListEntriesApi listEntries;
   late final ProfilesApi profiles;
   late final EquipmentApi equipment;
+  late final GamesApi games;
+  late final ScenariosApi scenarios;
 }
