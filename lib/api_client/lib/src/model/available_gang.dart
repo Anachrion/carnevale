@@ -3,7 +3,7 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:built_collection/built_collection.dart';
+import 'package:carnevale_api/src/model/gang_summary.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -17,7 +17,7 @@ part 'available_gang.g.dart';
 @BuiltValue()
 abstract class AvailableGang implements Built<AvailableGang, AvailableGangBuilder> {
   @BuiltValueField(wireName: r'list')
-  BuiltList get list;
+  GangSummary get list;
 
   /// False when list.points exceeds the game's ducat_limit.
   @BuiltValueField(wireName: r'selectable')
@@ -49,7 +49,7 @@ class _$AvailableGangSerializer implements PrimitiveSerializer<AvailableGang> {
     yield r'list';
     yield serializers.serialize(
       object.list,
-      specifiedType: const FullType(BuiltList),
+      specifiedType: const FullType(GangSummary),
     );
     yield r'selectable';
     yield serializers.serialize(
@@ -82,8 +82,8 @@ class _$AvailableGangSerializer implements PrimitiveSerializer<AvailableGang> {
         case r'list':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(BuiltList),
-          ) as BuiltList;
+            specifiedType: const FullType(GangSummary),
+          ) as GangSummary;
           result.list.replace(valueDes);
           break;
         case r'selectable':

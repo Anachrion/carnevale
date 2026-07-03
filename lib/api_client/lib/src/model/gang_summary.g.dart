@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'game_player_gang.dart';
+part of 'gang_summary.dart';
 
 // **************************************************************************
 // BuiltValueGenerator
 // **************************************************************************
 
-class _$GamePlayerGang extends GamePlayerGang {
+class _$GangSummary extends GangSummary {
   @override
   final int id;
   @override
@@ -18,10 +18,10 @@ class _$GamePlayerGang extends GamePlayerGang {
   @override
   final int totalCost;
 
-  factory _$GamePlayerGang([void Function(GamePlayerGangBuilder)? updates]) =>
-      (GamePlayerGangBuilder()..update(updates))._build();
+  factory _$GangSummary([void Function(GangSummaryBuilder)? updates]) =>
+      (GangSummaryBuilder()..update(updates))._build();
 
-  _$GamePlayerGang._({
+  _$GangSummary._({
     required this.id,
     this.name,
     required this.faction,
@@ -29,16 +29,16 @@ class _$GamePlayerGang extends GamePlayerGang {
     required this.totalCost,
   }) : super._();
   @override
-  GamePlayerGang rebuild(void Function(GamePlayerGangBuilder) updates) =>
+  GangSummary rebuild(void Function(GangSummaryBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  GamePlayerGangBuilder toBuilder() => GamePlayerGangBuilder()..replace(this);
+  GangSummaryBuilder toBuilder() => GangSummaryBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is GamePlayerGang &&
+    return other is GangSummary &&
         id == other.id &&
         name == other.name &&
         faction == other.faction &&
@@ -60,7 +60,7 @@ class _$GamePlayerGang extends GamePlayerGang {
 
   @override
   String toString() {
-    return (newBuiltValueToStringHelper(r'GamePlayerGang')
+    return (newBuiltValueToStringHelper(r'GangSummary')
           ..add('id', id)
           ..add('name', name)
           ..add('faction', faction)
@@ -70,9 +70,8 @@ class _$GamePlayerGang extends GamePlayerGang {
   }
 }
 
-class GamePlayerGangBuilder
-    implements Builder<GamePlayerGang, GamePlayerGangBuilder> {
-  _$GamePlayerGang? _$v;
+class GangSummaryBuilder implements Builder<GangSummary, GangSummaryBuilder> {
+  _$GangSummary? _$v;
 
   int? _id;
   int? get id => _$this._id;
@@ -94,11 +93,11 @@ class GamePlayerGangBuilder
   int? get totalCost => _$this._totalCost;
   set totalCost(int? totalCost) => _$this._totalCost = totalCost;
 
-  GamePlayerGangBuilder() {
-    GamePlayerGang._defaults(this);
+  GangSummaryBuilder() {
+    GangSummary._defaults(this);
   }
 
-  GamePlayerGangBuilder get _$this {
+  GangSummaryBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
       _id = $v.id;
@@ -112,41 +111,37 @@ class GamePlayerGangBuilder
   }
 
   @override
-  void replace(GamePlayerGang other) {
-    _$v = other as _$GamePlayerGang;
+  void replace(GangSummary other) {
+    _$v = other as _$GangSummary;
   }
 
   @override
-  void update(void Function(GamePlayerGangBuilder)? updates) {
+  void update(void Function(GangSummaryBuilder)? updates) {
     if (updates != null) updates(this);
   }
 
   @override
-  GamePlayerGang build() => _build();
+  GangSummary build() => _build();
 
-  _$GamePlayerGang _build() {
+  _$GangSummary _build() {
     final _$result =
         _$v ??
-        _$GamePlayerGang._(
-          id: BuiltValueNullFieldError.checkNotNull(
-            id,
-            r'GamePlayerGang',
-            'id',
-          ),
+        _$GangSummary._(
+          id: BuiltValueNullFieldError.checkNotNull(id, r'GangSummary', 'id'),
           name: name,
           faction: BuiltValueNullFieldError.checkNotNull(
             faction,
-            r'GamePlayerGang',
+            r'GangSummary',
             'faction',
           ),
           points: BuiltValueNullFieldError.checkNotNull(
             points,
-            r'GamePlayerGang',
+            r'GangSummary',
             'points',
           ),
           totalCost: BuiltValueNullFieldError.checkNotNull(
             totalCost,
-            r'GamePlayerGang',
+            r'GangSummary',
             'totalCost',
           ),
         );

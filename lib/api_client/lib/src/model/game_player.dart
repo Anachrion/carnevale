@@ -5,7 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:carnevale_api/src/model/agenda.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:carnevale_api/src/model/game_player_gang.dart';
+import 'package:carnevale_api/src/model/gang_summary.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -40,7 +40,7 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   bool get host;
 
   @BuiltValueField(wireName: r'list')
-  GamePlayerGang? get list;
+  GangSummary? get list;
 
   @BuiltValueField(wireName: r'role')
   GamePlayerRoleEnum? get role;
@@ -109,7 +109,7 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     yield r'list';
     yield object.list == null ? null : serializers.serialize(
       object.list,
-      specifiedType: const FullType.nullable(GamePlayerGang),
+      specifiedType: const FullType.nullable(GangSummary),
     );
     yield r'role';
     yield object.role == null ? null : serializers.serialize(
@@ -195,8 +195,8 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
         case r'list':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType.nullable(GamePlayerGang),
-          ) as GamePlayerGang?;
+            specifiedType: const FullType.nullable(GangSummary),
+          ) as GangSummary?;
           if (valueDes == null) continue;
           result.list.replace(valueDes);
           break;

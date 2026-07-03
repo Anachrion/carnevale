@@ -8,7 +8,7 @@ part of 'available_gang.dart';
 
 class _$AvailableGang extends AvailableGang {
   @override
-  final BuiltList<dynamic> list;
+  final GangSummary list;
   @override
   final bool selectable;
 
@@ -53,9 +53,9 @@ class AvailableGangBuilder
     implements Builder<AvailableGang, AvailableGangBuilder> {
   _$AvailableGang? _$v;
 
-  ListBuilder<dynamic>? _list;
-  ListBuilder<dynamic> get list => _$this._list ??= ListBuilder<dynamic>();
-  set list(ListBuilder<dynamic>? list) => _$this._list = list;
+  GangSummaryBuilder? _list;
+  GangSummaryBuilder get list => _$this._list ??= GangSummaryBuilder();
+  set list(GangSummaryBuilder? list) => _$this._list = list;
 
   bool? _selectable;
   bool? get selectable => _$this._selectable;

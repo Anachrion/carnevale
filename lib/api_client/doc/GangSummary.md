@@ -1,4 +1,4 @@
-# carnevale_api.model.GamePlayerGang
+# carnevale_api.model.GangSummary
 
 ## Load the model package
 ```dart

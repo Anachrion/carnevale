@@ -1,12 +1,12 @@
 import 'package:test/test.dart';
 import 'package:carnevale_api/carnevale_api.dart';
 
-// tests for GamePlayerGang
+// tests for GangSummary
 void main() {
-  final instance = GamePlayerGangBuilder();
+  final instance = GangSummaryBuilder();
   // TODO add properties to the builder and call build()
 
-  group(GamePlayerGang, () {
+  group(GangSummary, () {
     // int id
     test('to test the property `id`', () async {
       // TODO

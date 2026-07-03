@@ -26,9 +26,9 @@ Serializers _$serializers =
           ..add(Game.serializer)
           ..add(GamePlayer.serializer)
           ..add(GamePlayerDeploymentZoneEnum.serializer)
-          ..add(GamePlayerGang.serializer)
           ..add(GamePlayerRoleEnum.serializer)
           ..add(GameStatusEnum.serializer)
+          ..add(GangSummary.serializer)
           ..add(JoinGameInput.serializer)
           ..add(ListEntry.serializer)
           ..add(ListEntryEntryTypeEnum.serializer)
@@ -108,10 +108,6 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(CardReference)]),
             () => ListBuilder<CardReference>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, const [const FullType(dynamic)]),
-            () => ListBuilder<dynamic>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltMap, const [

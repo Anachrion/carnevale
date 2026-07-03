@@ -6,9 +6,9 @@
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
-part 'game_player_gang.g.dart';
+part 'gang_summary.g.dart';
 
-/// GamePlayerGang
+/// GangSummary
 ///
 /// Properties:
 /// * [id] 
@@ -17,7 +17,7 @@ part 'game_player_gang.g.dart';
 /// * [points] 
 /// * [totalCost] 
 @BuiltValue()
-abstract class GamePlayerGang implements Built<GamePlayerGang, GamePlayerGangBuilder> {
+abstract class GangSummary implements Built<GangSummary, GangSummaryBuilder> {
   @BuiltValueField(wireName: r'id')
   int get id;
 
@@ -33,27 +33,27 @@ abstract class GamePlayerGang implements Built<GamePlayerGang, GamePlayerGangBui
   @BuiltValueField(wireName: r'total_cost')
   int get totalCost;
 
-  GamePlayerGang._();
+  GangSummary._();
 
-  factory GamePlayerGang([void updates(GamePlayerGangBuilder b)]) = _$GamePlayerGang;
+  factory GangSummary([void updates(GangSummaryBuilder b)]) = _$GangSummary;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(GamePlayerGangBuilder b) => b;
+  static void _defaults(GangSummaryBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<GamePlayerGang> get serializer => _$GamePlayerGangSerializer();
+  static Serializer<GangSummary> get serializer => _$GangSummarySerializer();
 }
 
-class _$GamePlayerGangSerializer implements PrimitiveSerializer<GamePlayerGang> {
+class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
   @override
-  final Iterable<Type> types = const [GamePlayerGang, _$GamePlayerGang];
+  final Iterable<Type> types = const [GangSummary, _$GangSummary];
 
   @override
-  final String wireName = r'GamePlayerGang';
+  final String wireName = r'GangSummary';
 
   Iterable<Object?> _serializeProperties(
     Serializers serializers,
-    GamePlayerGang object, {
+    GangSummary object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
@@ -86,7 +86,7 @@ class _$GamePlayerGangSerializer implements PrimitiveSerializer<GamePlayerGang> 
   @override
   Object serialize(
     Serializers serializers,
-    GamePlayerGang object, {
+    GangSummary object, {
     FullType specifiedType = FullType.unspecified,
   }) {
     return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
@@ -97,7 +97,7 @@ class _$GamePlayerGangSerializer implements PrimitiveSerializer<GamePlayerGang> 
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
     required List<Object?> serializedList,
-    required GamePlayerGangBuilder result,
+    required GangSummaryBuilder result,
     required List<Object?> unhandled,
   }) {
     for (var i = 0; i < serializedList.length; i += 2) {
@@ -149,12 +149,12 @@ class _$GamePlayerGangSerializer implements PrimitiveSerializer<GamePlayerGang> 
   }
 
   @override
-  GamePlayerGang deserialize(
+  GangSummary deserialize(
     Serializers serializers,
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    final result = GamePlayerGangBuilder();
+    final result = GangSummaryBuilder();
     final serializedList = (serialized as Iterable<Object?>).toList();
     final unhandled = <Object?>[];
     _deserializeProperties(
