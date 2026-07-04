@@ -16,6 +16,7 @@ Method | HTTP request | Description
 [**getAvailableGangs**](GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [**getGame**](GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
 [**getGames**](GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
+[**getPlayerList**](GamesApi.md#getplayerlist) | **GET** /games/{id}/players/{player_id}/list | Either player&#39;s selected gang, in full (with entries)
 [**joinGame**](GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [**markReady**](GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
@@ -309,6 +310,51 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**BuiltList&lt;Game&gt;**](Game.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getPlayerList**
+> BuiltList getPlayerList(id, playerId)
+
+Either player's selected gang, in full (with entries)
+
+Available for consultation by both participants once that player has picked a gang, regardless of whose turn it currently is — gang lists aren't secret once selected. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int playerId = 56; // int | 
+
+try {
+    final response = api.getPlayerList(id, playerId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->getPlayerList: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **playerId** | **int**|  | 
+
+### Return type
+
+[**BuiltList**](BuiltList.md)
 
 ### Authorization
 
