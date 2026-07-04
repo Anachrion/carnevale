@@ -368,7 +368,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     }
     final hiredProfiles = entries
         .where((e) => e.entryType == 'CardReference')
-        .map((e) => profiles.where((p) => p.cardReferenceId == e.entryId).firstOrNull)
+        .map((e) => profiles.where((p) => p.cardReferenceIds.contains(e.entryId)).firstOrNull)
         .whereType<Profile>()
         .toList();
     return ListView.separated(
@@ -378,7 +378,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
       itemBuilder: (_, i) {
         final entry = entries[i];
         final profile = entry.entryType == 'CardReference'
-            ? profiles.where((p) => p.cardReferenceId == entry.entryId).firstOrNull
+            ? profiles.where((p) => p.cardReferenceIds.contains(entry.entryId)).firstOrNull
             : null;
         final equipmentItem = entry.entryType == 'Equipment'
             ? equipment.where((e) => e.id == entry.entryId).firstOrNull

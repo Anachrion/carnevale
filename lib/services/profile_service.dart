@@ -36,7 +36,11 @@ class ProfileService {
   void invalidateCache() => _cache = null;
 
   Profile _mapProfile(api.Profile p) {
-    final ref = p.cardReferences.isNotEmpty ? p.cardReferences.first : null;
+    // A profile can have more than one printed card (e.g. "(A)"/"(B)" copies of the same
+    // henchman, sharing identical art) - keep every card_reference id so a gang entry hired
+    // against any of them still resolves back to this profile, not just whichever loads first.
+    final refs = p.cardReferences.toList();
+    final ref = refs.isNotEmpty ? refs.first : null;
     return Profile(
       id: p.id,
       name: p.name,
@@ -59,7 +63,7 @@ class ProfileService {
       specialRules: p.specialRules.map(_mapSpecialRule).toList(),
       frontImage: ref?.cardFront ?? '',
       backImage: ref?.cardBack ?? '',
-      cardReferenceId: ref?.id ?? 0,
+      cardReferenceIds: refs.map((r) => r.id).toList(),
     );
   }
 

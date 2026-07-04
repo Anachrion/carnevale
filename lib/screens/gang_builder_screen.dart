@@ -113,11 +113,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   }
 
   int _entryCount(Profile p) =>
-      _gang.entries.where((e) => e.entryType == 'CardReference' && e.entryId == p.cardReferenceId).length;
+      _gang.entries.where((e) => e.entryType == 'CardReference' && p.cardReferenceIds.contains(e.entryId)).length;
 
   ListEntry? _entryFor(Profile p) {
     try {
-      return _gang.entries.firstWhere((e) => e.entryType == 'CardReference' && e.entryId == p.cardReferenceId);
+      return _gang.entries.firstWhere((e) => e.entryType == 'CardReference' && p.cardReferenceIds.contains(e.entryId));
     } catch (_) {
       return null;
     }
@@ -580,7 +580,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
     final hiredProfiles = entries
         .where((e) => e.entryType == 'CardReference')
-        .map((e) => _profiles.where((p) => p.cardReferenceId == e.entryId).firstOrNull)
+        .map((e) => _profiles.where((p) => p.cardReferenceIds.contains(e.entryId)).firstOrNull)
         .whereType<Profile>()
         .toList();
     return ReorderableListView.builder(
@@ -592,7 +592,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       itemBuilder: (_, i) {
         final entry = entries[i];
         final profileIdx = entry.entryType == 'CardReference'
-            ? _profiles.indexWhere((p) => p.cardReferenceId == entry.entryId)
+            ? _profiles.indexWhere((p) => p.cardReferenceIds.contains(entry.entryId))
             : -1;
         final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
         final equipmentItem = entry.entryType == 'Equipment'

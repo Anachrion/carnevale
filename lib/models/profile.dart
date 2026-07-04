@@ -56,7 +56,12 @@ class Profile {
   final List<SpecialRule> specialRules;
   final String frontImage;
   final String backImage;
-  final int cardReferenceId;
+  final List<int> cardReferenceIds;
+
+  // A profile can be printed as more than one physical card (e.g. "(A)"/"(B)" copies of the
+  // same henchman) — any of cardReferenceIds identifies this profile, this just picks one to
+  // send when hiring a new copy, where it doesn't matter which.
+  int get cardReferenceId => cardReferenceIds.isNotEmpty ? cardReferenceIds.first : 0;
 
   const Profile({
     required this.id,
@@ -80,6 +85,6 @@ class Profile {
     required this.specialRules,
     required this.frontImage,
     required this.backImage,
-    required this.cardReferenceId,
+    required this.cardReferenceIds,
   });
 }
