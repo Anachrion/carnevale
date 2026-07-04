@@ -13,6 +13,10 @@ import 'card_viewer_screen.dart';
 const _kGold = Color(0xFFC4A050);
 const _kEquipmentColor = Color(0xFF4A3F35);
 
+const _kHpPillColors = [ Color(0x998A3434), Color(0x994A1414) ];
+const _kWpPillColors = [ Color(0x99428DF5), Color(0x9914244A) ];
+const _kCpPillColors = [ Color(0x9911B84E), Color(0x9914381C) ];
+
 const _kFactionColors = {
   'doctors':    Color(0xFF177282),
   'strigoi':    Color(0xFF2a3d6e),
@@ -501,9 +505,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _StatPill(label: 'HP', value: state.lifePoints),
-                          _StatPill(label: 'WP', value: state.willPoints),
-                          _StatPill(label: 'CP', value: state.commandPoints),
+                          _StatPill(label: 'HP', value: state.lifePoints, colors: _kHpPillColors),
+                          _StatPill(label: 'WP', value: state.willPoints, colors: _kWpPillColors),
+                          _StatPill(label: 'CP', value: state.commandPoints, colors: _kCpPillColors),
                         ],
                       ),
                     ),
@@ -544,17 +548,18 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 /// Compact "HP 6/10"-style pill: current value first, starting value after the slash — matches
 /// the "A/B" shorthand used at the table (A = remaining, B = starting).
 class _StatPill extends StatelessWidget {
-  const _StatPill({required this.label, required this.value});
+  const _StatPill({required this.label, required this.value, required this.colors});
 
   final String label;
   final EntryStatValue value;
+  final List<Color> colors;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.25),
+        gradient: LinearGradient(colors: colors, begin: Alignment.centerLeft, end: Alignment.centerRight),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
