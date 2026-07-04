@@ -64,6 +64,8 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           _MenuItem(
                             icon: Icons.sports_esports_outlined,
+                            imagePath: 'assets/images/games_icon.png',
+                            imageScale: 1.10,
                             title: 'Games',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameHomeScreen())),
                           ),
@@ -183,12 +185,14 @@ class _MenuItem extends StatelessWidget {
     required this.icon,
     required this.title,
     this.imagePath,
+    this.imageScale = 1.0,
     this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String? imagePath;
+  final double imageScale;
   final VoidCallback? onTap;
 
   @override
@@ -231,14 +235,17 @@ class _MenuItem extends StatelessWidget {
                   width: 64,
                   height: 64,
                   child: imagePath != null
-                      ? Image.asset(
-                          imagePath!,
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
-                          color: Theme.of(context).brightness == Brightness.light
-                              ? _kRed
-                              : const Color(0xFFB1986C),
-                          colorBlendMode: BlendMode.srcIn,
+                      ? Transform.scale(
+                          scale: imageScale,
+                          child: Image.asset(
+                            imagePath!,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                            color: Theme.of(context).brightness == Brightness.light
+                                ? _kRed
+                                : const Color(0xFFB1986C),
+                            colorBlendMode: BlendMode.srcIn,
+                          ),
                         )
                       : Icon(icon, color: context.textColor, size: 26),
                 ),
