@@ -18,8 +18,6 @@ Method | HTTP request | Description
 [**markReady**](GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [**pickDeploymentZone**](GamesApi.md#pickdeploymentzone) | **PATCH** /games/{id}/deployment_zone | Pick a Deployment Zone (deployment roll-off winner only)
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
-[**rollForDeployment**](GamesApi.md#rollfordeployment) | **POST** /games/{id}/deployment_roll | Roll the deployment-priority die
-[**rollForRole**](GamesApi.md#rollforrole) | **POST** /games/{id}/role_roll | Roll for Attacker/Defender priority (asymmetric scenarios only)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 
 
@@ -235,7 +233,7 @@ This endpoint does not need any parameter.
 
 Join a game via its join_code
 
-Idempotent if the current user has already joined. Returns 422 if the game is already full.
+Idempotent if the current user has already joined. Returns 422 if the game is already full. Once the second player joins, the role and deployment roll-off winners are picked at random server-side (not revealed to clients until each corresponding step). 
 
 ### Example
 ```dart
@@ -321,7 +319,7 @@ Name | Type | Description  | Notes
 
 Pick a Deployment Zone (deployment roll-off winner only)
 
-The other player is automatically assigned the remaining zone.
+The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there's no client-triggered roll. `deployment_roll_winner_id` on the Game is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining zone. 
 
 ### Example
 ```dart
@@ -366,7 +364,7 @@ Name | Type | Description  | Notes
 
 Pick Attacker or Defender (role roll-off winner only)
 
-The other player is automatically assigned the remaining role.
+The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there's no client-triggered roll. `role_roll_winner_id` on the Game is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining role. 
 
 ### Example
 ```dart
@@ -402,92 +400,6 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **rollForDeployment**
-> Game rollForDeployment(id)
-
-Roll the deployment-priority die
-
-Ties are re-rolled automatically, server-side, before this responds.
-
-### Example
-```dart
-import 'package:carnevale_api/api.dart';
-
-final api = CarnevaleApi().getGamesApi();
-final int id = 56; // int | 
-
-try {
-    final response = api.rollForDeployment(id);
-    print(response);
-} on DioException catch (e) {
-    print('Exception when calling GamesApi->rollForDeployment: $e\n');
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **id** | **int**|  | 
-
-### Return type
-
-[**Game**](Game.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **rollForRole**
-> Game rollForRole(id)
-
-Roll for Attacker/Defender priority (asymmetric scenarios only)
-
-Ties are re-rolled automatically, server-side, before this responds.
-
-### Example
-```dart
-import 'package:carnevale_api/api.dart';
-
-final api = CarnevaleApi().getGamesApi();
-final int id = 56; // int | 
-
-try {
-    final response = api.rollForRole(id);
-    print(response);
-} on DioException catch (e) {
-    print('Exception when calling GamesApi->rollForRole: $e\n');
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **id** | **int**|  | 
-
-### Return type
-
-[**Game**](Game.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

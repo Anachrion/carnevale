@@ -21,8 +21,6 @@ part 'game_player.g.dart';
 /// * [list] 
 /// * [role] 
 /// * [deploymentZone] 
-/// * [roleRoll] 
-/// * [deploymentRoll] 
 /// * [ready] 
 /// * [agendas] - Only populated for the requesting player's own entry — always empty for the opponent's.
 @BuiltValue()
@@ -49,12 +47,6 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   @BuiltValueField(wireName: r'deployment_zone')
   GamePlayerDeploymentZoneEnum? get deploymentZone;
   // enum deploymentZoneEnum {  A,  B,  };
-
-  @BuiltValueField(wireName: r'role_roll')
-  int? get roleRoll;
-
-  @BuiltValueField(wireName: r'deployment_roll')
-  int? get deploymentRoll;
 
   @BuiltValueField(wireName: r'ready')
   bool get ready;
@@ -120,16 +112,6 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     yield object.deploymentZone == null ? null : serializers.serialize(
       object.deploymentZone,
       specifiedType: const FullType.nullable(GamePlayerDeploymentZoneEnum),
-    );
-    yield r'role_roll';
-    yield object.roleRoll == null ? null : serializers.serialize(
-      object.roleRoll,
-      specifiedType: const FullType.nullable(int),
-    );
-    yield r'deployment_roll';
-    yield object.deploymentRoll == null ? null : serializers.serialize(
-      object.deploymentRoll,
-      specifiedType: const FullType.nullable(int),
     );
     yield r'ready';
     yield serializers.serialize(
@@ -215,22 +197,6 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
           ) as GamePlayerDeploymentZoneEnum?;
           if (valueDes == null) continue;
           result.deploymentZone = valueDes;
-          break;
-        case r'role_roll':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
-          if (valueDes == null) continue;
-          result.roleRoll = valueDes;
-          break;
-        case r'deployment_roll':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
-          if (valueDes == null) continue;
-          result.deploymentRoll = valueDes;
           break;
         case r'ready':
           final valueDes = serializers.deserialize(

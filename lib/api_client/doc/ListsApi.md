@@ -9,17 +9,17 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**createList**](ListsApi.md#createlist) | **POST** /lists | Create a list
+[**createList**](ListsApi.md#createlist) | **POST** /lists | Create a list owned by the current user
 [**deleteList**](ListsApi.md#deletelist) | **DELETE** /lists/{id} | Delete a list
 [**getList**](ListsApi.md#getlist) | **GET** /lists/{id} | Get a list
-[**getLists**](ListsApi.md#getlists) | **GET** /lists | List all lists
+[**getLists**](ListsApi.md#getlists) | **GET** /lists | List the current user&#39;s lists
 [**updateList**](ListsApi.md#updatelist) | **PATCH** /lists/{id} | Update a list
 
 
 # **createList**
 > BuiltList createList(listInput)
 
-Create a list
+Create a list owned by the current user
 
 ### Example
 ```dart
@@ -48,7 +48,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -61,6 +61,8 @@ No authorization required
 > deleteList(id)
 
 Delete a list
+
+Returns 404 if the list doesn't belong to the current user.
 
 ### Example
 ```dart
@@ -88,7 +90,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -101,6 +103,8 @@ No authorization required
 > BuiltList getList(id)
 
 Get a list
+
+Returns 404 if the list doesn't belong to the current user.
 
 ### Example
 ```dart
@@ -129,7 +133,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -141,7 +145,7 @@ No authorization required
 # **getLists**
 > BuiltList<BuiltList> getLists()
 
-List all lists
+List the current user's lists
 
 ### Example
 ```dart
@@ -166,7 +170,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -179,6 +183,8 @@ No authorization required
 > BuiltList updateList(id, listInput)
 
 Update a list
+
+Returns 404 if the list doesn't belong to the current user.
 
 ### Example
 ```dart
@@ -209,7 +215,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

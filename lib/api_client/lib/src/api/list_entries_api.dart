@@ -24,7 +24,7 @@ class ListEntriesApi {
   const ListEntriesApi(this._dio, this._serializers);
 
   /// Add a card to a list
-  /// 
+  /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
   /// * [entryInput] 
@@ -53,7 +53,13 @@ class ListEntriesApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       contentType: 'application/json',
@@ -119,7 +125,7 @@ class ListEntriesApi {
   }
 
   /// Remove a card from a list
-  /// 
+  /// Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
   /// * [id] 
@@ -148,7 +154,13 @@ class ListEntriesApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       validateStatus: validateStatus,
@@ -194,7 +206,7 @@ class ListEntriesApi {
   }
 
   /// Move a card to a new position in the list
-  /// 
+  /// Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
   /// * [id] 
@@ -225,7 +237,13 @@ class ListEntriesApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       contentType: 'application/json',

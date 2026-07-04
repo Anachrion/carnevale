@@ -19,6 +19,8 @@ Method | HTTP request | Description
 
 Add a card to a list
 
+Returns 404 if the list doesn't belong to the current user.
+
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
@@ -46,7 +48,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -59,6 +61,8 @@ No authorization required
 > BuiltList deleteListEntry(id)
 
 Remove a card from a list
+
+Returns 404 if the entry's list doesn't belong to the current user.
 
 ### Example
 ```dart
@@ -87,7 +91,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -100,6 +104,8 @@ No authorization required
 > BuiltList updateListEntryPosition(id, entryPositionInput)
 
 Move a card to a new position in the list
+
+Returns 404 if the entry's list doesn't belong to the current user.
 
 ### Example
 ```dart
@@ -130,7 +136,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

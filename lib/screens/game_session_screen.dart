@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,7 +10,6 @@ import '../services/game_service.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
 const _kGold = Color(0xFFC4A050);
 
 /// One status-driven screen for the whole two-player setup flow, rather than a
@@ -80,13 +80,37 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBackground,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Expanded(child: _buildBody(context)),
-          ],
+      body: LayoutBuilder(
+        builder: (context, constraints) => Container(
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                Theme.of(context).brightness == Brightness.dark ? 'assets/images/bg_dark.png' : 'assets/images/bg_light.png',
+              ),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(color: Colors.black.withOpacity(0.05)),
+                ),
+              ),
+              SafeArea(
+                child: Column(
+                  children: [
+                    _buildHeader(context),
+                    Expanded(child: _buildBody(context)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -223,17 +247,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         const CircularProgressIndicator(color: _kGold),
       ]);
     }
-    if (me.roleRoll == null) {
-      return _PhaseCard(
-        title: 'Role roll-off',
-        subtitle: 'This scenario is asymmetric — roll to see who picks Attacker or Defender.',
-        children: [
-          _ActionButton(label: 'Roll', onTap: () => _run(() => _service.rollForRole(game.id)), busy: _busy),
-        ],
-      );
-    }
     return _PhaseCard(title: 'Role roll-off', children: [
-      Text('You rolled ${me.roleRoll}. Waiting for the opponent to roll...', style: TextStyle(color: context.subtleTextColor)),
+      Text('Determining who picks a role...', style: TextStyle(color: context.subtleTextColor)),
       const SizedBox(height: 16),
       const CircularProgressIndicator(color: _kGold),
     ]);
@@ -342,17 +357,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         const CircularProgressIndicator(color: _kGold),
       ]);
     }
-    if (me.deploymentRoll == null) {
-      return _PhaseCard(
-        title: 'Deployment roll-off',
-        subtitle: 'Roll to see who picks a Deployment Zone first.',
-        children: [
-          _ActionButton(label: 'Roll', onTap: () => _run(() => _service.rollForDeployment(game.id)), busy: _busy),
-        ],
-      );
-    }
     return _PhaseCard(title: 'Deployment roll-off', children: [
-      Text('You rolled ${me.deploymentRoll}. Waiting for the opponent to roll...', style: TextStyle(color: context.subtleTextColor)),
+      Text('Determining who picks a Deployment Zone...', style: TextStyle(color: context.subtleTextColor)),
       const SizedBox(height: 16),
       const CircularProgressIndicator(color: _kGold),
     ]);

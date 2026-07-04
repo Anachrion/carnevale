@@ -142,10 +142,6 @@ class _$GamePlayer extends GamePlayer {
   @override
   final GamePlayerDeploymentZoneEnum? deploymentZone;
   @override
-  final int? roleRoll;
-  @override
-  final int? deploymentRoll;
-  @override
   final bool ready;
   @override
   final BuiltList<Agenda> agendas;
@@ -161,8 +157,6 @@ class _$GamePlayer extends GamePlayer {
     this.list,
     this.role,
     this.deploymentZone,
-    this.roleRoll,
-    this.deploymentRoll,
     required this.ready,
     required this.agendas,
   }) : super._();
@@ -184,8 +178,6 @@ class _$GamePlayer extends GamePlayer {
         list == other.list &&
         role == other.role &&
         deploymentZone == other.deploymentZone &&
-        roleRoll == other.roleRoll &&
-        deploymentRoll == other.deploymentRoll &&
         ready == other.ready &&
         agendas == other.agendas;
   }
@@ -200,8 +192,6 @@ class _$GamePlayer extends GamePlayer {
     _$hash = $jc(_$hash, list.hashCode);
     _$hash = $jc(_$hash, role.hashCode);
     _$hash = $jc(_$hash, deploymentZone.hashCode);
-    _$hash = $jc(_$hash, roleRoll.hashCode);
-    _$hash = $jc(_$hash, deploymentRoll.hashCode);
     _$hash = $jc(_$hash, ready.hashCode);
     _$hash = $jc(_$hash, agendas.hashCode);
     _$hash = $jf(_$hash);
@@ -218,8 +208,6 @@ class _$GamePlayer extends GamePlayer {
           ..add('list', list)
           ..add('role', role)
           ..add('deploymentZone', deploymentZone)
-          ..add('roleRoll', roleRoll)
-          ..add('deploymentRoll', deploymentRoll)
           ..add('ready', ready)
           ..add('agendas', agendas))
         .toString();
@@ -258,15 +246,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
   set deploymentZone(GamePlayerDeploymentZoneEnum? deploymentZone) =>
       _$this._deploymentZone = deploymentZone;
 
-  int? _roleRoll;
-  int? get roleRoll => _$this._roleRoll;
-  set roleRoll(int? roleRoll) => _$this._roleRoll = roleRoll;
-
-  int? _deploymentRoll;
-  int? get deploymentRoll => _$this._deploymentRoll;
-  set deploymentRoll(int? deploymentRoll) =>
-      _$this._deploymentRoll = deploymentRoll;
-
   bool? _ready;
   bool? get ready => _$this._ready;
   set ready(bool? ready) => _$this._ready = ready;
@@ -289,8 +268,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
       _list = $v.list?.toBuilder();
       _role = $v.role;
       _deploymentZone = $v.deploymentZone;
-      _roleRoll = $v.roleRoll;
-      _deploymentRoll = $v.deploymentRoll;
       _ready = $v.ready;
       _agendas = $v.agendas.toBuilder();
       _$v = null;
@@ -336,8 +313,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
             list: _list?.build(),
             role: role,
             deploymentZone: deploymentZone,
-            roleRoll: roleRoll,
-            deploymentRoll: deploymentRoll,
             ready: BuiltValueNullFieldError.checkNotNull(
               ready,
               r'GamePlayer',
