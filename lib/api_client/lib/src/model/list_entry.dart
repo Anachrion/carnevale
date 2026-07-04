@@ -28,7 +28,7 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
 
   @BuiltValueField(wireName: r'entry_type')
   ListEntryEntryTypeEnum get entryType;
-  // enum entryTypeEnum {  CardReference,  Equipment,  };
+  // enum entryTypeEnum {  Catalog::CardReference,  Catalog::Equipment,  };
 
   @BuiltValueField(wireName: r'entry_id')
   int get entryId;
@@ -188,10 +188,10 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
 
 class ListEntryEntryTypeEnum extends EnumClass {
 
-  @BuiltValueEnumConst(wireName: r'CardReference')
-  static const ListEntryEntryTypeEnum cardReference = _$listEntryEntryTypeEnum_cardReference;
-  @BuiltValueEnumConst(wireName: r'Equipment')
-  static const ListEntryEntryTypeEnum equipment = _$listEntryEntryTypeEnum_equipment;
+  @BuiltValueEnumConst(wireName: r'Catalog::CardReference')
+  static const ListEntryEntryTypeEnum catalogColonColonCardReference = _$listEntryEntryTypeEnum_catalogColonColonCardReference;
+  @BuiltValueEnumConst(wireName: r'Catalog::Equipment')
+  static const ListEntryEntryTypeEnum catalogColonColonEquipment = _$listEntryEntryTypeEnum_catalogColonColonEquipment;
 
   static Serializer<ListEntryEntryTypeEnum> get serializer => _$listEntryEntryTypeEnumSerializer;
 
