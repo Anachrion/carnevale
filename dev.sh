@@ -12,9 +12,10 @@ exec 3<>"$PIPE"
 flutter run -d chrome --web-port=56569 <"$PIPE" &
 FLUTTER_PID=$!
 
-# Watch lib/ and assets/ for changes, send hot reload
+# Watch lib/ and assets/ for changes, send hot restart (R, not r — hot reload alone doesn't
+# reliably pick up const-constructor/widget-tree-shape changes)
 fswatch -o lib/ assets/ | while read; do
-  echo "r" > "$PIPE"
+  echo "R" > "$PIPE"
 done &
 WATCHER_PID=$!
 
