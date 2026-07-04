@@ -28,6 +28,7 @@ Serializers _$serializers =
           ..add(GamePlayerDeploymentZoneEnum.serializer)
           ..add(GamePlayerRoleEnum.serializer)
           ..add(GameStatusEnum.serializer)
+          ..add(GameViewerVisibilityEnum.serializer)
           ..add(GangSummary.serializer)
           ..add(JoinGameInput.serializer)
           ..add(ListEntry.serializer)

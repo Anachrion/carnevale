@@ -22,6 +22,7 @@ part 'game.g.dart';
 /// * [scenario] 
 /// * [roleRollWinnerId] - game_player id of the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
 /// * [deploymentRollWinnerId] - game_player id of the deployment roll-off winner. Picked at random as soon as the second player joins.
+/// * [viewerVisibility] - The requesting user's own archive/delete state for this game — never reflects the opponent's.
 /// * [players] 
 @BuiltValue()
 abstract class Game implements Built<Game, GameBuilder> {
@@ -51,6 +52,11 @@ abstract class Game implements Built<Game, GameBuilder> {
   /// game_player id of the deployment roll-off winner. Picked at random as soon as the second player joins.
   @BuiltValueField(wireName: r'deployment_roll_winner_id')
   int? get deploymentRollWinnerId;
+
+  /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
+  @BuiltValueField(wireName: r'viewer_visibility')
+  GameViewerVisibilityEnum get viewerVisibility;
+  // enum viewerVisibilityEnum {  active,  archived,  deleted,  };
 
   @BuiltValueField(wireName: r'players')
   BuiltList<GamePlayer> get players;
@@ -117,6 +123,11 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     yield object.deploymentRollWinnerId == null ? null : serializers.serialize(
       object.deploymentRollWinnerId,
       specifiedType: const FullType.nullable(int),
+    );
+    yield r'viewer_visibility';
+    yield serializers.serialize(
+      object.viewerVisibility,
+      specifiedType: const FullType(GameViewerVisibilityEnum),
     );
     yield r'players';
     yield serializers.serialize(
@@ -205,6 +216,13 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
           if (valueDes == null) continue;
           result.deploymentRollWinnerId = valueDes;
           break;
+        case r'viewer_visibility':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(GameViewerVisibilityEnum),
+          ) as GameViewerVisibilityEnum;
+          result.viewerVisibility = valueDes;
+          break;
         case r'players':
           final valueDes = serializers.deserialize(
             value,
@@ -264,5 +282,25 @@ class GameStatusEnum extends EnumClass {
 
   static BuiltSet<GameStatusEnum> get values => _$gameStatusEnumValues;
   static GameStatusEnum valueOf(String name) => _$gameStatusEnumValueOf(name);
+}
+
+class GameViewerVisibilityEnum extends EnumClass {
+
+  /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
+  @BuiltValueEnumConst(wireName: r'active')
+  static const GameViewerVisibilityEnum active = _$gameViewerVisibilityEnum_active;
+  /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
+  @BuiltValueEnumConst(wireName: r'archived')
+  static const GameViewerVisibilityEnum archived = _$gameViewerVisibilityEnum_archived;
+  /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
+  @BuiltValueEnumConst(wireName: r'deleted')
+  static const GameViewerVisibilityEnum deleted = _$gameViewerVisibilityEnum_deleted;
+
+  static Serializer<GameViewerVisibilityEnum> get serializer => _$gameViewerVisibilityEnumSerializer;
+
+  const GameViewerVisibilityEnum._(String name): super(name);
+
+  static BuiltSet<GameViewerVisibilityEnum> get values => _$gameViewerVisibilityEnumValues;
+  static GameViewerVisibilityEnum valueOf(String name) => _$gameViewerVisibilityEnumValueOf(name);
 }
 

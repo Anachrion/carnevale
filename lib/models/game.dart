@@ -83,6 +83,7 @@ class Game {
   final Scenario scenario;
   final int? roleRollWinnerId;
   final int? deploymentRollWinnerId;
+  final String viewerVisibility;
   final List<GamePlayer> players;
 
   const Game({
@@ -94,6 +95,7 @@ class Game {
     required this.scenario,
     this.roleRollWinnerId,
     this.deploymentRollWinnerId,
+    required this.viewerVisibility,
     this.players = const [],
   });
 

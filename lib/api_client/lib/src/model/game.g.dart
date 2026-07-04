@@ -59,8 +59,37 @@ final BuiltSet<GameStatusEnum> _$gameStatusEnumValues =
       _$gameStatusEnum_completed,
     ]);
 
+const GameViewerVisibilityEnum _$gameViewerVisibilityEnum_active =
+    const GameViewerVisibilityEnum._('active');
+const GameViewerVisibilityEnum _$gameViewerVisibilityEnum_archived =
+    const GameViewerVisibilityEnum._('archived');
+const GameViewerVisibilityEnum _$gameViewerVisibilityEnum_deleted =
+    const GameViewerVisibilityEnum._('deleted');
+
+GameViewerVisibilityEnum _$gameViewerVisibilityEnumValueOf(String name) {
+  switch (name) {
+    case 'active':
+      return _$gameViewerVisibilityEnum_active;
+    case 'archived':
+      return _$gameViewerVisibilityEnum_archived;
+    case 'deleted':
+      return _$gameViewerVisibilityEnum_deleted;
+    default:
+      throw ArgumentError(name);
+  }
+}
+
+final BuiltSet<GameViewerVisibilityEnum> _$gameViewerVisibilityEnumValues =
+    BuiltSet<GameViewerVisibilityEnum>(const <GameViewerVisibilityEnum>[
+      _$gameViewerVisibilityEnum_active,
+      _$gameViewerVisibilityEnum_archived,
+      _$gameViewerVisibilityEnum_deleted,
+    ]);
+
 Serializer<GameStatusEnum> _$gameStatusEnumSerializer =
     _$GameStatusEnumSerializer();
+Serializer<GameViewerVisibilityEnum> _$gameViewerVisibilityEnumSerializer =
+    _$GameViewerVisibilityEnumSerializer();
 
 class _$GameStatusEnumSerializer
     implements PrimitiveSerializer<GameStatusEnum> {
@@ -105,6 +134,41 @@ class _$GameStatusEnumSerializer
   );
 }
 
+class _$GameViewerVisibilityEnumSerializer
+    implements PrimitiveSerializer<GameViewerVisibilityEnum> {
+  static const Map<String, Object> _toWire = const <String, Object>{
+    'active': 'active',
+    'archived': 'archived',
+    'deleted': 'deleted',
+  };
+  static const Map<Object, String> _fromWire = const <Object, String>{
+    'active': 'active',
+    'archived': 'archived',
+    'deleted': 'deleted',
+  };
+
+  @override
+  final Iterable<Type> types = const <Type>[GameViewerVisibilityEnum];
+  @override
+  final String wireName = 'GameViewerVisibilityEnum';
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    GameViewerVisibilityEnum object, {
+    FullType specifiedType = FullType.unspecified,
+  }) => _toWire[object.name] ?? object.name;
+
+  @override
+  GameViewerVisibilityEnum deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) => GameViewerVisibilityEnum.valueOf(
+    _fromWire[serialized] ?? (serialized is String ? serialized : ''),
+  );
+}
+
 class _$Game extends Game {
   @override
   final int id;
@@ -123,6 +187,8 @@ class _$Game extends Game {
   @override
   final int? deploymentRollWinnerId;
   @override
+  final GameViewerVisibilityEnum viewerVisibility;
+  @override
   final BuiltList<GamePlayer> players;
 
   factory _$Game([void Function(GameBuilder)? updates]) =>
@@ -137,6 +203,7 @@ class _$Game extends Game {
     required this.scenario,
     this.roleRollWinnerId,
     this.deploymentRollWinnerId,
+    required this.viewerVisibility,
     required this.players,
   }) : super._();
   @override
@@ -158,6 +225,7 @@ class _$Game extends Game {
         scenario == other.scenario &&
         roleRollWinnerId == other.roleRollWinnerId &&
         deploymentRollWinnerId == other.deploymentRollWinnerId &&
+        viewerVisibility == other.viewerVisibility &&
         players == other.players;
   }
 
@@ -172,6 +240,7 @@ class _$Game extends Game {
     _$hash = $jc(_$hash, scenario.hashCode);
     _$hash = $jc(_$hash, roleRollWinnerId.hashCode);
     _$hash = $jc(_$hash, deploymentRollWinnerId.hashCode);
+    _$hash = $jc(_$hash, viewerVisibility.hashCode);
     _$hash = $jc(_$hash, players.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -188,6 +257,7 @@ class _$Game extends Game {
           ..add('scenario', scenario)
           ..add('roleRollWinnerId', roleRollWinnerId)
           ..add('deploymentRollWinnerId', deploymentRollWinnerId)
+          ..add('viewerVisibility', viewerVisibility)
           ..add('players', players))
         .toString();
   }
@@ -230,6 +300,11 @@ class GameBuilder implements Builder<Game, GameBuilder> {
   set deploymentRollWinnerId(int? deploymentRollWinnerId) =>
       _$this._deploymentRollWinnerId = deploymentRollWinnerId;
 
+  GameViewerVisibilityEnum? _viewerVisibility;
+  GameViewerVisibilityEnum? get viewerVisibility => _$this._viewerVisibility;
+  set viewerVisibility(GameViewerVisibilityEnum? viewerVisibility) =>
+      _$this._viewerVisibility = viewerVisibility;
+
   ListBuilder<GamePlayer>? _players;
   ListBuilder<GamePlayer> get players =>
       _$this._players ??= ListBuilder<GamePlayer>();
@@ -250,6 +325,7 @@ class GameBuilder implements Builder<Game, GameBuilder> {
       _scenario = $v.scenario.toBuilder();
       _roleRollWinnerId = $v.roleRollWinnerId;
       _deploymentRollWinnerId = $v.deploymentRollWinnerId;
+      _viewerVisibility = $v.viewerVisibility;
       _players = $v.players.toBuilder();
       _$v = null;
     }
@@ -295,6 +371,11 @@ class GameBuilder implements Builder<Game, GameBuilder> {
             scenario: scenario.build(),
             roleRollWinnerId: roleRollWinnerId,
             deploymentRollWinnerId: deploymentRollWinnerId,
+            viewerVisibility: BuiltValueNullFieldError.checkNotNull(
+              viewerVisibility,
+              r'Game',
+              'viewerVisibility',
+            ),
             players: players.build(),
           );
     } catch (_) {

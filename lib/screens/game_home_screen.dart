@@ -24,10 +24,12 @@ class GameHomeScreen extends StatefulWidget {
   State<GameHomeScreen> createState() => _GameHomeScreenState();
 }
 
-class _GameHomeScreenState extends State<GameHomeScreen> {
+class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _service = GameService();
-  List<models.Game> _games = [];
+  late final _tabController = TabController(length: 2, vsync: this);
+  List<models.Game> _activeGames = [];
+  List<models.Game> _archivedGames = [];
   bool _loading = true;
   String? _error;
 
@@ -48,6 +50,7 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
   @override
   void dispose() {
     authService.removeListener(_onAuthChanged);
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -56,7 +59,8 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
       _load();
     } else if (mounted) {
       setState(() {
-        _games = [];
+        _activeGames = [];
+        _archivedGames = [];
         _error = null;
         _loading = false;
       });
@@ -69,9 +73,13 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
       _error = null;
     });
     try {
-      final games = await _service.loadMyGames();
+      final results = await Future.wait([
+        _service.loadMyGames(visibility: 'active'),
+        _service.loadMyGames(visibility: 'archived'),
+      ]);
       setState(() {
-        _games = games;
+        _activeGames = results[0];
+        _archivedGames = results[1];
         _loading = false;
       });
     } catch (e, st) {
@@ -86,6 +94,36 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
   void _openGame(int gameId) async {
     await Navigator.push(context, MaterialPageRoute(builder: (_) => GameSessionScreen(gameId: gameId)));
     await _load();
+  }
+
+  Future<void> _archiveGame(int gameId) async {
+    try {
+      await _service.archiveGame(gameId);
+      if (mounted) showAppToast(context, 'Game archived');
+      await _load();
+    } catch (e) {
+      if (mounted) showAppToast(context, 'Could not archive this game');
+    }
+  }
+
+  Future<void> _unarchiveGame(int gameId) async {
+    try {
+      await _service.unarchiveGame(gameId);
+      if (mounted) showAppToast(context, 'Game restored');
+      await _load();
+    } catch (e) {
+      if (mounted) showAppToast(context, 'Could not restore this game');
+    }
+  }
+
+  Future<void> _deleteGame(int gameId) async {
+    try {
+      await _service.deleteGame(gameId);
+      if (mounted) showAppToast(context, 'Game deleted');
+      await _load();
+    } catch (e) {
+      if (mounted) showAppToast(context, 'Could not delete this game');
+    }
   }
 
   Future<void> _showCreateSheet() async {
@@ -143,6 +181,8 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
                     if (authService.isLoggedIn) ...[
                       const SizedBox(height: 8),
                       _buildActions(),
+                      const SizedBox(height: 8),
+                      _buildTabBar(context),
                     ],
                     const SizedBox(height: 8),
                     Expanded(child: _buildBody()),
@@ -213,6 +253,22 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
     );
   }
 
+  Widget _buildTabBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: TabBar(
+        controller: _tabController,
+        labelColor: _kGold,
+        unselectedLabelColor: context.subtleTextColor,
+        indicatorColor: _kGold,
+        dividerColor: context.subtleTextColor.withOpacity(0.2),
+        labelStyle: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 13, letterSpacing: 1),
+        unselectedLabelStyle: GoogleFonts.cinzel(fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 1),
+        tabs: const [Tab(text: 'Active'), Tab(text: 'Archived')],
+      ),
+    );
+  }
+
   Widget _buildLoggedOut() {
     return Center(
       child: Padding(
@@ -256,41 +312,76 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
         ),
       );
     }
-    if (_games.isEmpty) {
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        _buildGameList(
+          games: _activeGames,
+          isArchivedTab: false,
+          emptyIcon: Icons.sports_esports_outlined,
+          emptyTitle: 'No games yet',
+          emptySubtitle: 'Create a game or join one with a code',
+        ),
+        _buildGameList(
+          games: _archivedGames,
+          isArchivedTab: true,
+          emptyIcon: Icons.archive_outlined,
+          emptyTitle: 'No archived games',
+          emptySubtitle: 'Games you archive will show up here',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGameList({
+    required List<models.Game> games,
+    required bool isArchivedTab,
+    required IconData emptyIcon,
+    required String emptyTitle,
+    required String emptySubtitle,
+  }) {
+    if (games.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sports_esports_outlined, size: 56, color: context.subtleTextColor.withOpacity(0.4)),
+            Icon(emptyIcon, size: 56, color: context.subtleTextColor.withOpacity(0.4)),
             const SizedBox(height: 16),
-            Text('No games yet', style: GoogleFonts.cinzel(fontSize: 16, color: context.subtleTextColor)),
+            Text(emptyTitle, style: GoogleFonts.cinzel(fontSize: 16, color: context.subtleTextColor)),
             const SizedBox(height: 8),
-            Text(
-              'Create a game or join one with a code',
-              style: TextStyle(fontSize: 13, color: context.subtleTextColor.withOpacity(0.7)),
-            ),
+            Text(emptySubtitle, style: TextStyle(fontSize: 13, color: context.subtleTextColor.withOpacity(0.7))),
           ],
         ),
       );
     }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-      itemCount: _games.length,
+      itemCount: games.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, i) => _GameTile(
-        game: _games[i],
-        onPlay: () => _openGame(_games[i].id),
-        onDelete: () => showAppToast(context, 'Delete not implemented yet'),
+        game: games[i],
+        isArchived: isArchivedTab,
+        onPlay: () => _openGame(games[i].id),
+        onDelete: () => _deleteGame(games[i].id),
+        onArchiveToggle: () => isArchivedTab ? _unarchiveGame(games[i].id) : _archiveGame(games[i].id),
       ),
     );
   }
 }
 
 class _GameTile extends StatefulWidget {
-  const _GameTile({required this.game, required this.onPlay, required this.onDelete});
+  const _GameTile({
+    required this.game,
+    required this.isArchived,
+    required this.onPlay,
+    required this.onDelete,
+    required this.onArchiveToggle,
+  });
   final models.Game game;
+  final bool isArchived;
   final VoidCallback onPlay;
   final VoidCallback onDelete;
+  final VoidCallback onArchiveToggle;
 
   @override
   State<_GameTile> createState() => _GameTileState();
@@ -378,10 +469,17 @@ class _GameTileState extends State<_GameTile> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(
-                onPressed: widget.onDelete,
+                onPressed: () => _confirmDelete(context),
                 icon: const Icon(Icons.delete_outline),
                 color: Colors.red.shade400,
                 tooltip: 'Delete game',
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                onPressed: widget.onArchiveToggle,
+                icon: Icon(widget.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined),
+                color: context.subtleTextColor,
+                tooltip: widget.isArchived ? 'Restore game' : 'Archive game',
               ),
               const SizedBox(width: 4),
               IconButton(
@@ -392,6 +490,29 @@ class _GameTileState extends State<_GameTile> {
                 tooltip: 'Open game',
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Delete Game', style: GoogleFonts.cinzel(color: context.textColor)),
+        content: const Text('Delete this game? You won\'t be able to see it again, even if your opponent still can.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              widget.onDelete();
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

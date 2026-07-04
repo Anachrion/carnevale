@@ -9,7 +9,9 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**archiveGame**](GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
 [**createGame**](GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
+[**deleteGame**](GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [**drawAgendas**](GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
 [**getAvailableGangs**](GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [**getGame**](GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
@@ -19,7 +21,51 @@ Method | HTTP request | Description
 [**pickDeploymentZone**](GamesApi.md#pickdeploymentzone) | **PATCH** /games/{id}/deployment_zone | Pick a Deployment Zone (deployment roll-off winner only)
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
+[**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 
+
+# **archiveGame**
+> Game archiveGame(id)
+
+Archive this game for the current user only
+
+Hides the game from the current user's default game list (`GET /games`), but it remains reachable via `GET /games/{id}`. Purely per-user — the other player's view is unaffected. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.archiveGame(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->archiveGame: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **createGame**
 > Game createGame(createGameInput)
@@ -61,6 +107,48 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: application/json
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **deleteGame**
+> deleteGame(id)
+
+Soft-delete this game for the current user only
+
+Hides the game from the current user permanently (they can no longer GET or list it). The other player is unaffected and keeps seeing the game normally. Once every player has deleted the game, it is hard-deleted server-side. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    api.deleteGame(id);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->deleteGame: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -192,18 +280,21 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getGames**
-> BuiltList<Game> getGames()
+> BuiltList<Game> getGames(visibility)
 
 List the current user's games (to resume/reopen)
+
+Never includes games the current user has deleted, regardless of the other player's state.
 
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
 
 final api = CarnevaleApi().getGamesApi();
+final String visibility = visibility_example; // String | Which of the current user's games to return.
 
 try {
-    final response = api.getGames();
+    final response = api.getGames(visibility);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling GamesApi->getGames: $e\n');
@@ -211,7 +302,10 @@ try {
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **visibility** | **String**| Which of the current user's games to return. | [optional] [default to 'active']
 
 ### Return type
 
@@ -443,6 +537,49 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **unarchiveGame**
+> Game unarchiveGame(id)
+
+Restore this game to the current user's default game list
+
+Reverses `archive` for the current user only.
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.unarchiveGame(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->unarchiveGame: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
