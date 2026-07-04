@@ -147,12 +147,38 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
     if (game != null && mounted) _openGame(game.id);
   }
 
+  Future<void> _showActionSheet() async {
+    final action = await showModalBottomSheet<_GameAction>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _GameActionSheet(),
+    );
+    if (!mounted || action == null) return;
+    switch (action) {
+      case _GameAction.create:
+        _showCreateSheet();
+        break;
+      case _GameAction.join:
+        _showJoinSheet();
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: _kBackground,
       drawer: const AppDrawer(current: AppDrawerRoute.game),
+      floatingActionButton: authService.isLoggedIn
+          ? FloatingActionButton(
+              onPressed: _showActionSheet,
+              backgroundColor: _kGold,
+              foregroundColor: Colors.white,
+              mini: true,
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -179,8 +205,6 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
                   children: [
                     _buildHeader(context),
                     if (authService.isLoggedIn) ...[
-                      const SizedBox(height: 8),
-                      _buildActions(),
                       const SizedBox(height: 8),
                       _buildTabBar(context),
                     ],
@@ -209,44 +233,6 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
           Text(
             'Games',
             style: GoogleFonts.cinzel(fontSize: 24, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 3),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActions() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: _showCreateSheet,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Create Game'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _kGold,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: _showJoinSheet,
-              icon: const Icon(Icons.meeting_room_outlined, size: 18),
-              label: const Text('Join Game'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: _kGold,
-                side: const BorderSide(color: _kGold),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
           ),
         ],
       ),
@@ -411,7 +397,7 @@ class _GameTileState extends State<_GameTile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _game.scenario.name,
+                          _game.name,
                           style: GoogleFonts.cinzel(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor),
                         ),
                         const SizedBox(height: 4),
@@ -455,6 +441,8 @@ class _GameTileState extends State<_GameTile> {
         children: [
           Divider(color: context.subtleTextColor.withOpacity(0.2), height: 1),
           const SizedBox(height: 12),
+          Text(_game.scenario.name, style: TextStyle(fontSize: 12, color: context.subtleTextColor)),
+          const SizedBox(height: 6),
           Text(
             '${p1?.username ?? '—'} vs ${p2?.username ?? 'waiting for an opponent'}',
             style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: context.textColor),
@@ -531,6 +519,73 @@ class _GameTileState extends State<_GameTile> {
   }
 }
 
+enum _GameAction { create, join }
+
+class _GameActionSheet extends StatelessWidget {
+  const _GameActionSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: context.cardBgColor.withOpacity(0.92),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.5),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: context.subtleTextColor.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(_GameAction.create),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Create Game'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _kGold,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(_GameAction.join),
+                  icon: const Icon(Icons.meeting_room_outlined, size: 18),
+                  label: const Text('Join Game'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _kGold,
+                    side: const BorderSide(color: _kGold),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _CreateGameSheet extends StatefulWidget {
   const _CreateGameSheet();
 
@@ -540,6 +595,7 @@ class _CreateGameSheet extends StatefulWidget {
 
 class _CreateGameSheetState extends State<_CreateGameSheet> {
   final _service = GameService();
+  final _nameController = TextEditingController();
   final _ducatController = TextEditingController();
   final _boardSizeController = TextEditingController();
   List<models.Scenario> _scenarios = [];
@@ -556,6 +612,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _ducatController.dispose();
     _boardSizeController.dispose();
     super.dispose();
@@ -590,10 +647,12 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
     if (scenario == null || _saving) return;
     setState(() => _saving = true);
     try {
+      final name = _nameController.text.trim();
       final ducatLimit = int.tryParse(_ducatController.text.trim());
       final boardSize = _boardSizeController.text.trim();
       final game = await _service.createGame(
         scenarioId: scenario.id,
+        name: name.isEmpty ? null : name,
         ducatLimit: ducatLimit,
         boardSize: boardSize.isEmpty ? null : boardSize,
       );
@@ -649,6 +708,19 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                           selected: _selected?.id == s.id,
                           onTap: () => _selectScenario(s),
                         )),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _nameController,
+                      style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                      decoration: InputDecoration(
+                        labelText: 'Game name (optional)',
+                        hintText: _selected?.name,
+                        hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.6), fontSize: 15),
+                        labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
+                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _ducatController,

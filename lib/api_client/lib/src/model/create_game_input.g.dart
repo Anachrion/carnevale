@@ -10,6 +10,8 @@ class _$CreateGameInput extends CreateGameInput {
   @override
   final int scenarioId;
   @override
+  final String? name;
+  @override
   final int? ducatLimit;
   @override
   final String? boardSize;
@@ -19,6 +21,7 @@ class _$CreateGameInput extends CreateGameInput {
 
   _$CreateGameInput._({
     required this.scenarioId,
+    this.name,
     this.ducatLimit,
     this.boardSize,
   }) : super._();
@@ -34,6 +37,7 @@ class _$CreateGameInput extends CreateGameInput {
     if (identical(other, this)) return true;
     return other is CreateGameInput &&
         scenarioId == other.scenarioId &&
+        name == other.name &&
         ducatLimit == other.ducatLimit &&
         boardSize == other.boardSize;
   }
@@ -42,6 +46,7 @@ class _$CreateGameInput extends CreateGameInput {
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, scenarioId.hashCode);
+    _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, ducatLimit.hashCode);
     _$hash = $jc(_$hash, boardSize.hashCode);
     _$hash = $jf(_$hash);
@@ -52,6 +57,7 @@ class _$CreateGameInput extends CreateGameInput {
   String toString() {
     return (newBuiltValueToStringHelper(r'CreateGameInput')
           ..add('scenarioId', scenarioId)
+          ..add('name', name)
           ..add('ducatLimit', ducatLimit)
           ..add('boardSize', boardSize))
         .toString();
@@ -65,6 +71,10 @@ class CreateGameInputBuilder
   int? _scenarioId;
   int? get scenarioId => _$this._scenarioId;
   set scenarioId(int? scenarioId) => _$this._scenarioId = scenarioId;
+
+  String? _name;
+  String? get name => _$this._name;
+  set name(String? name) => _$this._name = name;
 
   int? _ducatLimit;
   int? get ducatLimit => _$this._ducatLimit;
@@ -82,6 +92,7 @@ class CreateGameInputBuilder
     final $v = _$v;
     if ($v != null) {
       _scenarioId = $v.scenarioId;
+      _name = $v.name;
       _ducatLimit = $v.ducatLimit;
       _boardSize = $v.boardSize;
       _$v = null;
@@ -111,6 +122,7 @@ class CreateGameInputBuilder
             r'CreateGameInput',
             'scenarioId',
           ),
+          name: name,
           ducatLimit: ducatLimit,
           boardSize: boardSize,
         );

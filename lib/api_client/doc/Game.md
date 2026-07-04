@@ -9,6 +9,7 @@ import 'package:carnevale_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
+**name** | **String** |  | 
 **joinCode** | **String** |  | 
 **status** | **String** |  | 
 **ducatLimit** | **int** |  | 

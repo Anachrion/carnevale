@@ -128,7 +128,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           const SizedBox(width: 4),
           Expanded(
             child: Text(
-              _game?.scenario.name ?? 'Game',
+              _game?.name ?? 'Game',
               style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 2),
               overflow: TextOverflow.ellipsis,
             ),

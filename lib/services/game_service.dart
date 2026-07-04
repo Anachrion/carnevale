@@ -52,10 +52,11 @@ class GameService extends ChangeNotifier {
     await _client.games.deleteGame(id: gameId);
   }
 
-  Future<models.Game> createGame({required int scenarioId, int? ducatLimit, String? boardSize}) async {
+  Future<models.Game> createGame({required int scenarioId, String? name, int? ducatLimit, String? boardSize}) async {
     final res = await _client.games.createGame(
       createGameInput: api.CreateGameInput((b) => b
         ..scenarioId = scenarioId
+        ..name = name
         ..ducatLimit = ducatLimit
         ..boardSize = boardSize),
     );
@@ -152,6 +153,7 @@ class GameService extends ChangeNotifier {
 
   models.Game _mapGame(api.Game g) => models.Game(
         id: g.id,
+        name: g.name,
         joinCode: g.joinCode,
         status: wireEnum(g.status, const FullType(api.GameStatusEnum)),
         ducatLimit: g.ducatLimit,
