@@ -33,9 +33,23 @@ class GameService extends ChangeNotifier {
     return (res.data?.toList() ?? []).map(_mapScenario).toList();
   }
 
-  Future<List<models.Game>> loadMyGames() async {
-    final res = await _client.games.getGames();
+  Future<List<models.Game>> loadMyGames({String visibility = 'active'}) async {
+    final res = await _client.games.getGames(visibility: visibility);
     return (res.data?.toList() ?? []).map(_mapGame).toList();
+  }
+
+  Future<models.Game> archiveGame(int gameId) async {
+    final res = await _client.games.archiveGame(id: gameId);
+    return _mapGame(res.data!);
+  }
+
+  Future<models.Game> unarchiveGame(int gameId) async {
+    final res = await _client.games.unarchiveGame(id: gameId);
+    return _mapGame(res.data!);
+  }
+
+  Future<void> deleteGame(int gameId) async {
+    await _client.games.deleteGame(id: gameId);
   }
 
   Future<models.Game> createGame({required int scenarioId, int? ducatLimit, String? boardSize}) async {
@@ -145,6 +159,7 @@ class GameService extends ChangeNotifier {
         scenario: _mapScenario(g.scenario),
         roleRollWinnerId: g.roleRollWinnerId,
         deploymentRollWinnerId: g.deploymentRollWinnerId,
+        viewerVisibility: g.viewerVisibility.name,
         players: g.players.map(_mapPlayer).toList(),
       );
 
