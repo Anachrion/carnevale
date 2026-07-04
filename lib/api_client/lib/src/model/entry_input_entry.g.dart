@@ -7,19 +7,20 @@ part of 'entry_input_entry.dart';
 // **************************************************************************
 
 const EntryInputEntryEntryTypeEnum
-_$entryInputEntryEntryTypeEnum_cardReference =
-    const EntryInputEntryEntryTypeEnum._('cardReference');
-const EntryInputEntryEntryTypeEnum _$entryInputEntryEntryTypeEnum_equipment =
-    const EntryInputEntryEntryTypeEnum._('equipment');
+_$entryInputEntryEntryTypeEnum_catalogColonColonCardReference =
+    const EntryInputEntryEntryTypeEnum._('catalogColonColonCardReference');
+const EntryInputEntryEntryTypeEnum
+_$entryInputEntryEntryTypeEnum_catalogColonColonEquipment =
+    const EntryInputEntryEntryTypeEnum._('catalogColonColonEquipment');
 
 EntryInputEntryEntryTypeEnum _$entryInputEntryEntryTypeEnumValueOf(
   String name,
 ) {
   switch (name) {
-    case 'cardReference':
-      return _$entryInputEntryEntryTypeEnum_cardReference;
-    case 'equipment':
-      return _$entryInputEntryEntryTypeEnum_equipment;
+    case 'catalogColonColonCardReference':
+      return _$entryInputEntryEntryTypeEnum_catalogColonColonCardReference;
+    case 'catalogColonColonEquipment':
+      return _$entryInputEntryEntryTypeEnum_catalogColonColonEquipment;
     default:
       throw ArgumentError(name);
   }
@@ -28,8 +29,8 @@ EntryInputEntryEntryTypeEnum _$entryInputEntryEntryTypeEnumValueOf(
 final BuiltSet<EntryInputEntryEntryTypeEnum>
 _$entryInputEntryEntryTypeEnumValues =
     BuiltSet<EntryInputEntryEntryTypeEnum>(const <EntryInputEntryEntryTypeEnum>[
-      _$entryInputEntryEntryTypeEnum_cardReference,
-      _$entryInputEntryEntryTypeEnum_equipment,
+      _$entryInputEntryEntryTypeEnum_catalogColonColonCardReference,
+      _$entryInputEntryEntryTypeEnum_catalogColonColonEquipment,
     ]);
 
 Serializer<EntryInputEntryEntryTypeEnum>
@@ -39,12 +40,12 @@ _$entryInputEntryEntryTypeEnumSerializer =
 class _$EntryInputEntryEntryTypeEnumSerializer
     implements PrimitiveSerializer<EntryInputEntryEntryTypeEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
-    'cardReference': 'CardReference',
-    'equipment': 'Equipment',
+    'catalogColonColonCardReference': 'Catalog::CardReference',
+    'catalogColonColonEquipment': 'Catalog::Equipment',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
-    'CardReference': 'cardReference',
-    'Equipment': 'equipment',
+    'Catalog::CardReference': 'catalogColonColonCardReference',
+    'Catalog::Equipment': 'catalogColonColonEquipment',
   };
 
   @override

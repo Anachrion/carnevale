@@ -38,8 +38,8 @@ class GangService {
 
   Future<Gang> addEntry(int listId, int entryId, String entryType) async {
     final typeEnum = entryType == 'Equipment'
-        ? api.EntryInputEntryEntryTypeEnum.equipment
-        : api.EntryInputEntryEntryTypeEnum.cardReference;
+        ? api.EntryInputEntryEntryTypeEnum.catalogColonColonEquipment
+        : api.EntryInputEntryEntryTypeEnum.catalogColonColonCardReference;
     final res = await _client.listEntries.createListEntry(
       entryInput: api.EntryInput((b) => b
         ..entry = api.EntryInputEntry((eb) => eb
@@ -83,7 +83,7 @@ class GangService {
   ListEntry _mapEntry(api.ListEntry e) => ListEntry(
         id: e.id,
         position: e.position,
-        entryType: e.entryType == api.ListEntryEntryTypeEnum.equipment
+        entryType: e.entryType == api.ListEntryEntryTypeEnum.catalogColonColonEquipment
             ? 'Equipment'
             : 'CardReference',
         entryId: e.entryId,
