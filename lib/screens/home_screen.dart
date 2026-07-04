@@ -58,6 +58,7 @@ class HomeScreen extends StatelessWidget {
                           _MenuItem(
                             icon: Icons.flag_outlined,
                             imagePath: 'assets/images/list_icon.png',
+                            imageScale: 1.2,
                             title: 'Gangs',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GangsScreen())),
                           ),
@@ -75,6 +76,7 @@ class HomeScreen extends StatelessWidget {
                           _MenuItem(
                             icon: Icons.settings_outlined,
                             imagePath: 'assets/images/gear_icon.png',
+                            imageScale: 1.2,
                             title: 'Settings',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
                           ),
