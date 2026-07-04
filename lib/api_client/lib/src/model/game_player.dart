@@ -22,6 +22,8 @@ part 'game_player.g.dart';
 /// * [role] 
 /// * [deploymentZone] 
 /// * [ready] 
+/// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
+/// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins.
 /// * [agendas] - Only populated for the requesting player's own entry — always empty for the opponent's.
 @BuiltValue()
 abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
@@ -50,6 +52,14 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
 
   @BuiltValueField(wireName: r'ready')
   bool get ready;
+
+  /// True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
+  @BuiltValueField(wireName: r'won_role_roll')
+  bool get wonRoleRoll;
+
+  /// True for the deployment roll-off winner. Picked at random as soon as the second player joins.
+  @BuiltValueField(wireName: r'won_deployment_roll')
+  bool get wonDeploymentRoll;
 
   /// Only populated for the requesting player's own entry — always empty for the opponent's.
   @BuiltValueField(wireName: r'agendas')
@@ -116,6 +126,16 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     yield r'ready';
     yield serializers.serialize(
       object.ready,
+      specifiedType: const FullType(bool),
+    );
+    yield r'won_role_roll';
+    yield serializers.serialize(
+      object.wonRoleRoll,
+      specifiedType: const FullType(bool),
+    );
+    yield r'won_deployment_roll';
+    yield serializers.serialize(
+      object.wonDeploymentRoll,
       specifiedType: const FullType(bool),
     );
     yield r'agendas';
@@ -204,6 +224,20 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.ready = valueDes;
+          break;
+        case r'won_role_roll':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.wonRoleRoll = valueDes;
+          break;
+        case r'won_deployment_roll':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.wonDeploymentRoll = valueDes;
           break;
         case r'agendas':
           final valueDes = serializers.deserialize(

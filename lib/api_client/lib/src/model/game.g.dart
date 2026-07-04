@@ -185,10 +185,6 @@ class _$Game extends Game {
   @override
   final Scenario scenario;
   @override
-  final int? roleRollWinnerId;
-  @override
-  final int? deploymentRollWinnerId;
-  @override
   final GameViewerVisibilityEnum viewerVisibility;
   @override
   final BuiltList<GamePlayer> players;
@@ -204,8 +200,6 @@ class _$Game extends Game {
     required this.ducatLimit,
     this.boardSize,
     required this.scenario,
-    this.roleRollWinnerId,
-    this.deploymentRollWinnerId,
     required this.viewerVisibility,
     required this.players,
   }) : super._();
@@ -227,8 +221,6 @@ class _$Game extends Game {
         ducatLimit == other.ducatLimit &&
         boardSize == other.boardSize &&
         scenario == other.scenario &&
-        roleRollWinnerId == other.roleRollWinnerId &&
-        deploymentRollWinnerId == other.deploymentRollWinnerId &&
         viewerVisibility == other.viewerVisibility &&
         players == other.players;
   }
@@ -243,8 +235,6 @@ class _$Game extends Game {
     _$hash = $jc(_$hash, ducatLimit.hashCode);
     _$hash = $jc(_$hash, boardSize.hashCode);
     _$hash = $jc(_$hash, scenario.hashCode);
-    _$hash = $jc(_$hash, roleRollWinnerId.hashCode);
-    _$hash = $jc(_$hash, deploymentRollWinnerId.hashCode);
     _$hash = $jc(_$hash, viewerVisibility.hashCode);
     _$hash = $jc(_$hash, players.hashCode);
     _$hash = $jf(_$hash);
@@ -261,8 +251,6 @@ class _$Game extends Game {
           ..add('ducatLimit', ducatLimit)
           ..add('boardSize', boardSize)
           ..add('scenario', scenario)
-          ..add('roleRollWinnerId', roleRollWinnerId)
-          ..add('deploymentRollWinnerId', deploymentRollWinnerId)
           ..add('viewerVisibility', viewerVisibility)
           ..add('players', players))
         .toString();
@@ -300,16 +288,6 @@ class GameBuilder implements Builder<Game, GameBuilder> {
   ScenarioBuilder get scenario => _$this._scenario ??= ScenarioBuilder();
   set scenario(ScenarioBuilder? scenario) => _$this._scenario = scenario;
 
-  int? _roleRollWinnerId;
-  int? get roleRollWinnerId => _$this._roleRollWinnerId;
-  set roleRollWinnerId(int? roleRollWinnerId) =>
-      _$this._roleRollWinnerId = roleRollWinnerId;
-
-  int? _deploymentRollWinnerId;
-  int? get deploymentRollWinnerId => _$this._deploymentRollWinnerId;
-  set deploymentRollWinnerId(int? deploymentRollWinnerId) =>
-      _$this._deploymentRollWinnerId = deploymentRollWinnerId;
-
   GameViewerVisibilityEnum? _viewerVisibility;
   GameViewerVisibilityEnum? get viewerVisibility => _$this._viewerVisibility;
   set viewerVisibility(GameViewerVisibilityEnum? viewerVisibility) =>
@@ -334,8 +312,6 @@ class GameBuilder implements Builder<Game, GameBuilder> {
       _ducatLimit = $v.ducatLimit;
       _boardSize = $v.boardSize;
       _scenario = $v.scenario.toBuilder();
-      _roleRollWinnerId = $v.roleRollWinnerId;
-      _deploymentRollWinnerId = $v.deploymentRollWinnerId;
       _viewerVisibility = $v.viewerVisibility;
       _players = $v.players.toBuilder();
       _$v = null;
@@ -381,8 +357,6 @@ class GameBuilder implements Builder<Game, GameBuilder> {
             ),
             boardSize: boardSize,
             scenario: scenario.build(),
-            roleRollWinnerId: roleRollWinnerId,
-            deploymentRollWinnerId: deploymentRollWinnerId,
             viewerVisibility: BuiltValueNullFieldError.checkNotNull(
               viewerVisibility,
               r'Game',
