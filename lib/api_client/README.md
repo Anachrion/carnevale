@@ -72,6 +72,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**getAvailableGangs**](doc/GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [*GamesApi*](doc/GamesApi.md) | [**getGame**](doc/GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
 [*GamesApi*](doc/GamesApi.md) | [**getGames**](doc/GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
+[*GamesApi*](doc/GamesApi.md) | [**getPlayerList**](doc/GamesApi.md#getplayerlist) | **GET** /games/{id}/players/{player_id}/list | Either player&#39;s selected gang, in full (with entries)
 [*GamesApi*](doc/GamesApi.md) | [**joinGame**](doc/GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [*GamesApi*](doc/GamesApi.md) | [**markReady**](doc/GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [*GamesApi*](doc/GamesApi.md) | [**pickRole**](doc/GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)

@@ -3,8 +3,10 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:flutter/foundation.dart';
 
 import '../models/game.dart' as models;
+import '../models/gang.dart';
 import 'action_cable_client.dart';
 import 'api_client.dart';
+import 'gang_service.dart';
 
 class AvailableGang {
   final models.GangSummary gang;
@@ -107,6 +109,13 @@ class GameService extends ChangeNotifier {
   Future<models.Game> markReady(int gameId) async {
     final res = await _client.games.markReady(id: gameId);
     return _mapGame(res.data!);
+  }
+
+  /// Either player's selected gang, in full — available once that player has picked one,
+  /// regardless of whose turn it currently is.
+  Future<Gang> playerList(int gameId, int playerId) async {
+    final res = await _client.games.getPlayerList(id: gameId, playerId: playerId);
+    return GangService().mapGang(res.data!);
   }
 
   /// Fetches an initial snapshot and opens a live ActionCable subscription for

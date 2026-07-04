@@ -9,6 +9,9 @@ import '../services/api_client.dart';
 import '../services/game_service.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
+import 'gang_viewer_screen.dart';
+
+const _kGangsVisibleStatuses = {'agenda_draw', 'deploying', 'in_progress', 'completed'};
 
 const _kGold = Color(0xFFC4A050);
 
@@ -117,6 +120,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final game = _game;
+    final me = _me;
+    final opponent = _opponent;
+    final showGangsButton = game != null && me != null && opponent != null && _kGangsVisibleStatuses.contains(game.status);
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
       child: Row(
@@ -133,6 +140,23 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (showGangsButton)
+            IconButton(
+              icon: Icon(Icons.groups_outlined, color: context.textColor),
+              tooltip: 'View gangs',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => GameGangsScreen(
+                    gameId: game.id,
+                    myPlayerId: me.id,
+                    myLabel: 'My Gang',
+                    opponentPlayerId: opponent.id,
+                    opponentLabel: opponent.username,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

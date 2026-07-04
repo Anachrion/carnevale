@@ -11,12 +11,12 @@ class GangService {
 
   Future<List<Gang>> loadAll() async {
     final res = await _client.lists.getLists();
-    return (res.data?.toList() ?? []).map(_mapGang).toList();
+    return (res.data?.toList() ?? []).map(mapGang).toList();
   }
 
   Future<Gang> loadOne(int id) async {
     final res = await _client.lists.getList(id: id);
-    return _mapGang(res.data!);
+    return mapGang(res.data!);
   }
 
   Future<Gang> create(String name, String faction, int points) async {
@@ -29,7 +29,7 @@ class GangService {
         ).toBuilder()
       ),
     );
-    return _mapGang(res.data!);
+    return mapGang(res.data!);
   }
 
   Future<void> delete(int id) async {
@@ -49,12 +49,12 @@ class GangService {
         ).toBuilder()
       ),
     );
-    return _mapGang(res.data!);
+    return mapGang(res.data!);
   }
 
   Future<Gang> removeEntry(int listId, int entryId) async {
     final res = await _client.listEntries.deleteListEntry(id: entryId);
-    return _mapGang(res.data!);
+    return mapGang(res.data!);
   }
 
   Future<Gang> reorderEntry(int entryId, int position) async {
@@ -66,10 +66,10 @@ class GangService {
         ).toBuilder()
       ),
     );
-    return _mapGang(res.data!);
+    return mapGang(res.data!);
   }
 
-  Gang _mapGang(api.ModelList ml) => Gang(
+  Gang mapGang(api.ModelList ml) => Gang(
         id: ml.id,
         name: ml.name ?? '',
         faction: ml.faction,
@@ -77,10 +77,10 @@ class GangService {
         totalCost: ml.totalCost,
         selectionValid: ml.selectionValid,
         selectionErrors: ml.selectionErrors.toList(),
-        entries: ml.entries.map(_mapEntry).toList(),
+        entries: ml.entries.map(mapEntry).toList(),
       );
 
-  ListEntry _mapEntry(api.ListEntry e) => ListEntry(
+  ListEntry mapEntry(api.ListEntry e) => ListEntry(
         id: e.id,
         position: e.position,
         entryType: e.entryType == api.ListEntryEntryTypeEnum.catalogColonColonEquipment
