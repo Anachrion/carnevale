@@ -6,6 +6,7 @@ import '../main.dart';
 import '../models/game.dart' as models;
 import '../services/game_service.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import 'account_screen.dart';
 import 'game_session_screen.dart';
@@ -276,48 +277,134 @@ class _GameHomeScreenState extends State<GameHomeScreen> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       itemCount: _games.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, i) => _GameTile(game: _games[i], onTap: () => _openGame(_games[i].id)),
+      itemBuilder: (_, i) => _GameTile(
+        game: _games[i],
+        onPlay: () => _openGame(_games[i].id),
+        onDelete: () => showAppToast(context, 'Delete not implemented yet'),
+      ),
     );
   }
 }
 
-class _GameTile extends StatelessWidget {
-  const _GameTile({required this.game, required this.onTap});
+class _GameTile extends StatefulWidget {
+  const _GameTile({required this.game, required this.onPlay, required this.onDelete});
   final models.Game game;
-  final VoidCallback onTap;
+  final VoidCallback onPlay;
+  final VoidCallback onDelete;
 
-  String get _statusLabel => game.status.replaceAll('_', ' ');
+  @override
+  State<_GameTile> createState() => _GameTileState();
+}
+
+class _GameTileState extends State<_GameTile> {
+  bool _expanded = false;
+
+  models.Game get _game => widget.game;
+  String get _statusLabel => _game.status.replaceAll('_', ' ');
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GlassPanel(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      game.scenario.name,
-                      style: GoogleFonts.cinzel(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _game.scenario.name,
+                          style: GoogleFonts.cinzel(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_statusLabel[0].toUpperCase()}${_statusLabel.substring(1)} · Code ${_game.joinCode}',
+                          style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${_statusLabel[0].toUpperCase()}${_statusLabel.substring(1)} · Code ${game.joinCode}',
-                      style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-                    ),
-                  ],
-                ),
+                  ),
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(Icons.expand_more, color: isDark ? _kGold : const Color(0xFF8B1A1A), size: 22),
+                  ),
+                ],
               ),
-              Icon(Icons.chevron_right, color: isDark ? _kGold : const Color(0xFF8B1A1A), size: 20),
+            ),
+          ),
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity),
+            secondChild: _buildDetails(context),
+            crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 200),
+            sizeCurve: Curves.easeInOut,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetails(BuildContext context) {
+    final players = _game.players;
+    final p1 = players.firstOrNull;
+    final p2 = players.length > 1 ? players[1] : null;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Divider(color: context.subtleTextColor.withOpacity(0.2), height: 1),
+          const SizedBox(height: 12),
+          Text(
+            '${p1?.username ?? '—'} vs ${p2?.username ?? 'waiting for an opponent'}',
+            style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: context.textColor),
+          ),
+          const SizedBox(height: 6),
+          if (p1 != null) _buildPlayerListLine(context, p1),
+          if (p2 != null) _buildPlayerListLine(context, p2),
+          const SizedBox(height: 8),
+          Text('${_game.ducatLimit} ducats', style: TextStyle(fontSize: 12, color: context.subtleTextColor)),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                onPressed: widget.onDelete,
+                icon: const Icon(Icons.delete_outline),
+                color: Colors.red.shade400,
+                tooltip: 'Delete game',
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                onPressed: widget.onPlay,
+                icon: const Icon(Icons.play_circle_fill),
+                color: _kGold,
+                iconSize: 28,
+                tooltip: 'Open game',
+              ),
             ],
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayerListLine(BuildContext context, models.GamePlayer p) {
+    final listName = p.list?.name ?? p.list?.faction;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Text(
+        '${p.username}: ${listName ?? 'No gang selected yet'}',
+        style: TextStyle(fontSize: 12, color: context.subtleTextColor),
       ),
     );
   }
