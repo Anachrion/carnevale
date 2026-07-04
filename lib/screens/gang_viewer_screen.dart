@@ -13,9 +13,9 @@ import 'card_viewer_screen.dart';
 const _kGold = Color(0xFFC4A050);
 const _kEquipmentColor = Color(0xFF4A3F35);
 
-const _kHpBorderColor = Color(0xFFA14343);
-const _kWpBorderColor = Color(0xFF3B6BAE);
-const _kCpBorderColor = Color(0xFF296E42);
+const _kHpBorderColors = [ Color(0xFFCB9898), Color(0xFFA14343) ];
+const _kWpBorderColors = [ Color(0xFF93AED2), Color(0xFF3B6BAE) ];
+const _kCpBorderColors = [ Color(0xFF89AF97), Color(0xFF296E42) ];
 
 const _kFactionColors = {
   'doctors':    Color(0xFF177282),
@@ -505,9 +505,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _StatPill(label: 'HP', value: state.lifePoints, borderColor: _kHpBorderColor),
-                          _StatPill(label: 'WP', value: state.willPoints, borderColor: _kWpBorderColor),
-                          _StatPill(label: 'CP', value: state.commandPoints, borderColor: _kCpBorderColor),
+                          _StatPill(label: 'HP', value: state.lifePoints, borderColors: _kHpBorderColors),
+                          _StatPill(label: 'WP', value: state.willPoints, borderColors: _kWpBorderColors),
+                          _StatPill(label: 'CP', value: state.commandPoints, borderColors: _kCpBorderColors),
                         ],
                       ),
                     ),
@@ -548,27 +548,63 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 /// Compact "HP 6/10"-style pill: current value first, starting value after the slash — matches
 /// the "A/B" shorthand used at the table (A = remaining, B = starting).
 class _StatPill extends StatelessWidget {
-  const _StatPill({required this.label, required this.value, required this.borderColor});
+  const _StatPill({required this.label, required this.value, required this.borderColors});
 
   final String label;
   final EntryStatValue value;
-  final Color borderColor;
+  final List<Color> borderColors;
 
+  static const _radius = 8.0;
+  static const _strokeWidth = 1.4;
+
+  // BoxDecoration.border can't paint a gradient, so the stroke is drawn directly with a
+  // CustomPaint foreground painter instead of Border.all — one widget, one shape, no need to
+  // keep an inner/outer corner radius pair in sync (the nested-container approach used earlier).
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: borderColor, width: 1.4),
-      ),
-      child: Text(
-        '$label ${value.current}/${value.starting}',
-        style: GoogleFonts.cinzel(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+    return CustomPaint(
+      foregroundPainter: _GradientBorderPainter(colors: borderColors, radius: _radius, strokeWidth: _strokeWidth),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(_radius),
+        ),
+        child: Text(
+          '$label ${value.current}/${value.starting}',
+          style: GoogleFonts.cinzel(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+        ),
       ),
     );
   }
+}
+
+class _GradientBorderPainter extends CustomPainter {
+  _GradientBorderPainter({required this.colors, required this.radius, required this.strokeWidth});
+
+  final List<Color> colors;
+  final double radius;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(
+      strokeWidth / 2,
+      strokeWidth / 2,
+      size.width - strokeWidth,
+      size.height - strokeWidth,
+    );
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius - strokeWidth / 2));
+    final paint = Paint()
+      ..shader = LinearGradient(colors: colors).createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GradientBorderPainter oldDelegate) =>
+      oldDelegate.colors != colors || oldDelegate.radius != radius || oldDelegate.strokeWidth != strokeWidth;
 }
 
 /// A single status counter icon (stunned/hidden/guarding/carrying objective/underwater), always
