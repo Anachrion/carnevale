@@ -1,4 +1,4 @@
-# carnevale_api.model.ListEntry
+# carnevale_api.model.AgendaHistoryEntryAgenda
 
 ## Load the model package
 ```dart
@@ -9,12 +9,7 @@ import 'package:carnevale_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
-**position** | **int** |  | 
-**entryType** | **String** |  | 
-**entryId** | **int** |  | 
 **name** | **String** |  | 
-**cost** | **int** |  | 
-**state** | [**EntryState**](EntryState.md) | Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track. | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

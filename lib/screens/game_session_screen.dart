@@ -11,7 +11,8 @@ import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import 'gang_viewer_screen.dart';
 
-const _kGangsVisibleStatuses = {'agenda_draw', 'deploying', 'in_progress', 'completed'};
+const _kGangsVisibleStatuses = {'agenda_draw', 'deploying'};
+const _kScrollablePhaseStatuses = {'pending', 'gang_selection', 'agenda_draw', 'deploying'};
 
 const _kGold = Color(0xFFC4A050);
 
@@ -182,6 +183,13 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     final me = _me;
     if (game == null || me == null) return const Center(child: CircularProgressIndicator(color: _kGold));
 
+    // in_progress/completed (and any future status) render full-bleed below the header instead
+    // of inside a SingleChildScrollView, since the models tab view manages its own scrolling
+    // per-tab and needs a bounded height to lay out its TabBarView.
+    if (!_kScrollablePhaseStatuses.contains(game.status)) {
+      return _buildInProgressPhase(context, game, me);
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       child: switch (game.status) {
@@ -190,9 +198,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           _buildRoleRolloffPhase(context, game, me),
         'gang_selection' => _buildGangSelectionPhase(context, game, me),
         'agenda_draw' => _buildAgendaDrawPhase(context, game, me),
-        'deploying' => _buildDeployingPhase(context, game, me),
-        'in_progress' => _buildInProgressPhase(context, game),
-        _ => _buildInProgressPhase(context, game),
+        _ => _buildDeployingPhase(context, game, me),
       },
     );
   }
@@ -381,11 +387,20 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   // ── In progress ──────────────────────────────────────────────────────────
 
-  Widget _buildInProgressPhase(BuildContext context, models.Game game) {
-    return _PhaseCard(
-      title: 'Setup complete!',
-      subtitle: 'Round 1 is about to begin. In-round play isn\'t supported yet — see you at the table.',
-      children: const [],
+  // Setup is complete the moment the game reaches in_progress (or beyond, e.g. completed): both
+  // players' models are shown side by side, each tagged with its remaining/starting HP, WP, and
+  // CP and its status counters. Editing those values isn't supported yet — this is read-only.
+  Widget _buildInProgressPhase(BuildContext context, models.Game game, models.GamePlayer me) {
+    final opponent = _opponent;
+    if (opponent == null) {
+      return const Center(child: CircularProgressIndicator(color: _kGold));
+    }
+    return GangsTabView(
+      gameId: game.id,
+      myPlayerId: me.id,
+      myLabel: 'My Models',
+      opponentPlayerId: opponent.id,
+      opponentLabel: opponent.username,
     );
   }
 }

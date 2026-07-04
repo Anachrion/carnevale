@@ -9,9 +9,11 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**advanceTurn**](GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the game&#39;s shared turn counter
 [**archiveGame**](GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
 [**createGame**](GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
 [**deleteGame**](GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
+[**discardAgenda**](GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
 [**drawAgendas**](GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
 [**getAvailableGangs**](GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [**getGame**](GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
@@ -20,9 +22,53 @@ Method | HTTP request | Description
 [**joinGame**](GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [**markReady**](GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
+[**scoreAgenda**](GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 
+
+# **advanceTurn**
+> Game advanceTurn(id)
+
+Advance the game's shared turn counter
+
+Callable by either player — like the roll winners and role pick, this app tracks the physical game rather than refereeing whose turn it is to act. On the scenario's final turn, this instead marks the game `completed`. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.advanceTurn(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->advanceTurn: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **archiveGame**
 > Game archiveGame(id)
@@ -152,12 +198,12 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **drawAgendas**
-> DrawAgendasResponse drawAgendas(id)
+# **discardAgenda**
+> Game discardAgenda(id, agendaId, discardAgendaInput)
 
-Privately draw this player's Agenda cards
+Discard an Agenda from this player's hand
 
-Never broadcast or visible to the opponent.
+Only valid while the game is `in_progress`, and only for an agenda currently in the requesting player's hand. Requires `origin` (`special_rule` or `command_point` — an agenda is never freely discarded, only via one of those). Set `recycle: true` if the scenario's \"Cycle\" rule applies, which immediately draws a replacement card (origin `recycle`, linked back to this discard). 
 
 ### Example
 ```dart
@@ -165,9 +211,57 @@ import 'package:carnevale_api/api.dart';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
+final int agendaId = 56; // int | 
+final DiscardAgendaInput discardAgendaInput = ; // DiscardAgendaInput | 
 
 try {
-    final response = api.drawAgendas(id);
+    final response = api.discardAgenda(id, agendaId, discardAgendaInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->discardAgenda: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **agendaId** | **int**|  | 
+ **discardAgendaInput** | [**DiscardAgendaInput**](DiscardAgendaInput.md)|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **drawAgendas**
+> DrawAgendasResponse drawAgendas(id, drawAgendaInput)
+
+Privately draw this player's Agenda cards
+
+Never broadcast or visible to the opponent. Behavior depends on game status: while `agenda_draw`, draws the scenario's full initial hand (no request body). While `in_progress`, draws a single replacement card and requires `origin` in the body (`special_rule` or `command_point` — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final DrawAgendaInput drawAgendaInput = ; // DrawAgendaInput | 
+
+try {
+    final response = api.drawAgendas(id, drawAgendaInput);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling GamesApi->drawAgendas: $e\n');
@@ -179,6 +273,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **int**|  | 
+ **drawAgendaInput** | [**DrawAgendaInput**](DrawAgendaInput.md)|  | [optional] 
 
 ### Return type
 
@@ -190,7 +285,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -415,7 +510,7 @@ Name | Type | Description  | Notes
 
 Confirm physical deployment is done
 
-Once both players are ready, the game's status becomes in_progress.
+Once both players are ready, the game's status becomes in_progress and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each player's list.
 
 ### Example
 ```dart
@@ -482,6 +577,53 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **int**|  | 
  **roleInput** | [**RoleInput**](RoleInput.md)|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **scoreAgenda**
+> Game scoreAgenda(id, agendaId, scoreAgendaInput)
+
+Score an Agenda from this player's hand (flat 1 Victory Point)
+
+Only valid while the game is `in_progress`, and only for an agenda currently in the requesting player's hand. Set `recycle: true` if the scenario's \"Cycle\" rule applies, which immediately draws a replacement card (origin `recycle`, linked back to this score). 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int agendaId = 56; // int | 
+final ScoreAgendaInput scoreAgendaInput = ; // ScoreAgendaInput | 
+
+try {
+    final response = api.scoreAgenda(id, agendaId, scoreAgendaInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->scoreAgenda: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **agendaId** | **int**|  | 
+ **scoreAgendaInput** | [**ScoreAgendaInput**](ScoreAgendaInput.md)|  | [optional] 
 
 ### Return type
 

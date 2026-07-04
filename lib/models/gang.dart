@@ -1,3 +1,32 @@
+class EntryStatValue {
+  final int current;
+  final int starting;
+
+  const EntryStatValue({required this.current, required this.starting});
+}
+
+class EntryState {
+  final EntryStatValue lifePoints;
+  final EntryStatValue willPoints;
+  final EntryStatValue commandPoints;
+  final bool stunned;
+  final bool hidden;
+  final bool guarding;
+  final bool carryingObjective;
+  final int underwaterCounters;
+
+  const EntryState({
+    required this.lifePoints,
+    required this.willPoints,
+    required this.commandPoints,
+    required this.stunned,
+    required this.hidden,
+    required this.guarding,
+    required this.carryingObjective,
+    required this.underwaterCounters,
+  });
+}
+
 class ListEntry {
   final int id;
   final int position;
@@ -5,6 +34,7 @@ class ListEntry {
   final int entryId;
   final String name;
   final int cost;
+  final EntryState? state;
 
   const ListEntry({
     required this.id,
@@ -13,6 +43,7 @@ class ListEntry {
     required this.entryId,
     required this.name,
     required this.cost,
+    this.state,
   });
 }
 

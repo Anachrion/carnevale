@@ -84,7 +84,11 @@ class _$GamePlayer extends GamePlayer {
   @override
   final bool wonDeploymentRoll;
   @override
+  final int score;
+  @override
   final BuiltList<Agenda> agendas;
+  @override
+  final BuiltList<AgendaHistoryEntry> agendaHistory;
 
   factory _$GamePlayer([void Function(GamePlayerBuilder)? updates]) =>
       (GamePlayerBuilder()..update(updates))._build();
@@ -99,7 +103,9 @@ class _$GamePlayer extends GamePlayer {
     required this.ready,
     required this.wonRoleRoll,
     required this.wonDeploymentRoll,
+    required this.score,
     required this.agendas,
+    required this.agendaHistory,
   }) : super._();
   @override
   GamePlayer rebuild(void Function(GamePlayerBuilder) updates) =>
@@ -121,7 +127,9 @@ class _$GamePlayer extends GamePlayer {
         ready == other.ready &&
         wonRoleRoll == other.wonRoleRoll &&
         wonDeploymentRoll == other.wonDeploymentRoll &&
-        agendas == other.agendas;
+        score == other.score &&
+        agendas == other.agendas &&
+        agendaHistory == other.agendaHistory;
   }
 
   @override
@@ -136,7 +144,9 @@ class _$GamePlayer extends GamePlayer {
     _$hash = $jc(_$hash, ready.hashCode);
     _$hash = $jc(_$hash, wonRoleRoll.hashCode);
     _$hash = $jc(_$hash, wonDeploymentRoll.hashCode);
+    _$hash = $jc(_$hash, score.hashCode);
     _$hash = $jc(_$hash, agendas.hashCode);
+    _$hash = $jc(_$hash, agendaHistory.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -153,7 +163,9 @@ class _$GamePlayer extends GamePlayer {
           ..add('ready', ready)
           ..add('wonRoleRoll', wonRoleRoll)
           ..add('wonDeploymentRoll', wonDeploymentRoll)
-          ..add('agendas', agendas))
+          ..add('score', score)
+          ..add('agendas', agendas)
+          ..add('agendaHistory', agendaHistory))
         .toString();
   }
 }
@@ -198,9 +210,19 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
   set wonDeploymentRoll(bool? wonDeploymentRoll) =>
       _$this._wonDeploymentRoll = wonDeploymentRoll;
 
+  int? _score;
+  int? get score => _$this._score;
+  set score(int? score) => _$this._score = score;
+
   ListBuilder<Agenda>? _agendas;
   ListBuilder<Agenda> get agendas => _$this._agendas ??= ListBuilder<Agenda>();
   set agendas(ListBuilder<Agenda>? agendas) => _$this._agendas = agendas;
+
+  ListBuilder<AgendaHistoryEntry>? _agendaHistory;
+  ListBuilder<AgendaHistoryEntry> get agendaHistory =>
+      _$this._agendaHistory ??= ListBuilder<AgendaHistoryEntry>();
+  set agendaHistory(ListBuilder<AgendaHistoryEntry>? agendaHistory) =>
+      _$this._agendaHistory = agendaHistory;
 
   GamePlayerBuilder() {
     GamePlayer._defaults(this);
@@ -218,7 +240,9 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
       _ready = $v.ready;
       _wonRoleRoll = $v.wonRoleRoll;
       _wonDeploymentRoll = $v.wonDeploymentRoll;
+      _score = $v.score;
       _agendas = $v.agendas.toBuilder();
+      _agendaHistory = $v.agendaHistory.toBuilder();
       _$v = null;
     }
     return this;
@@ -276,7 +300,13 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
               r'GamePlayer',
               'wonDeploymentRoll',
             ),
+            score: BuiltValueNullFieldError.checkNotNull(
+              score,
+              r'GamePlayer',
+              'score',
+            ),
             agendas: agendas.build(),
+            agendaHistory: agendaHistory.build(),
           );
     } catch (_) {
       late String _$failedField;
@@ -286,6 +316,8 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
 
         _$failedField = 'agendas';
         agendas.build();
+        _$failedField = 'agendaHistory';
+        agendaHistory.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
           r'GamePlayer',

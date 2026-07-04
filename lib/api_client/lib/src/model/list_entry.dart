@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:carnevale_api/src/model/entry_state.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
@@ -18,6 +19,7 @@ part 'list_entry.g.dart';
 /// * [entryId] 
 /// * [name] 
 /// * [cost] 
+/// * [state] - Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
 @BuiltValue()
 abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -38,6 +40,10 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
 
   @BuiltValueField(wireName: r'cost')
   int get cost;
+
+  /// Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
+  @BuiltValueField(wireName: r'state')
+  EntryState? get state;
 
   ListEntry._();
 
@@ -92,6 +98,13 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
       object.cost,
       specifiedType: const FullType(int),
     );
+    if (object.state != null) {
+      yield r'state';
+      yield serializers.serialize(
+        object.state,
+        specifiedType: const FullType.nullable(EntryState),
+      );
+    }
   }
 
   @override
@@ -156,6 +169,14 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
             specifiedType: const FullType(int),
           ) as int;
           result.cost = valueDes;
+          break;
+        case r'state':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(EntryState),
+          ) as EntryState?;
+          if (valueDes == null) continue;
+          result.state.replace(valueDes);
           break;
         default:
           unhandled.add(key);

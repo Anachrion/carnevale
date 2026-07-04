@@ -20,6 +20,7 @@ part 'game.g.dart';
 /// * [status] 
 /// * [ducatLimit] 
 /// * [boardSize] 
+/// * [currentTurn] - The shared turn counter, starting at 1. Advanced by either player via POST /games/{id}/turns/advance.
 /// * [scenario] 
 /// * [viewerVisibility] - The requesting user's own archive/delete state for this game — never reflects the opponent's.
 /// * [players] 
@@ -43,6 +44,10 @@ abstract class Game implements Built<Game, GameBuilder> {
 
   @BuiltValueField(wireName: r'board_size')
   String? get boardSize;
+
+  /// The shared turn counter, starting at 1. Advanced by either player via POST /games/{id}/turns/advance.
+  @BuiltValueField(wireName: r'current_turn')
+  int get currentTurn;
 
   @BuiltValueField(wireName: r'scenario')
   Scenario get scenario;
@@ -107,6 +112,11 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     yield object.boardSize == null ? null : serializers.serialize(
       object.boardSize,
       specifiedType: const FullType.nullable(String),
+    );
+    yield r'current_turn';
+    yield serializers.serialize(
+      object.currentTurn,
+      specifiedType: const FullType(int),
     );
     yield r'scenario';
     yield serializers.serialize(
@@ -188,6 +198,13 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
           ) as String?;
           if (valueDes == null) continue;
           result.boardSize = valueDes;
+          break;
+        case r'current_turn':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.currentTurn = valueDes;
           break;
         case r'scenario':
           final valueDes = serializers.deserialize(

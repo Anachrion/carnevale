@@ -54,51 +54,48 @@ class GameGangsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        body: LayoutBuilder(
-          builder: (context, constraints) => Container(
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                  Theme.of(context).brightness == Brightness.dark
-                      ? 'assets/images/bg_dark.png'
-                      : 'assets/images/bg_light.png',
-                ),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) => Container(
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                Theme.of(context).brightness == Brightness.dark
+                    ? 'assets/images/bg_dark.png'
+                    : 'assets/images/bg_light.png',
               ),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
             ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: Container(color: Colors.black.withOpacity(0.05)),
-                  ),
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(color: Colors.black.withOpacity(0.05)),
                 ),
-                SafeArea(
-                  child: Column(
-                    children: [
-                      _buildHeader(context),
-                      _buildTabBar(context),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: TabBarView(
-                          children: [
-                            _GangTab(gameId: gameId, playerId: myPlayerId),
-                            _GangTab(gameId: gameId, playerId: opponentPlayerId),
-                          ],
-                        ),
+              ),
+              SafeArea(
+                child: Column(
+                  children: [
+                    _buildHeader(context),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: GangsTabView(
+                        gameId: gameId,
+                        myPlayerId: myPlayerId,
+                        myLabel: myLabel,
+                        opponentPlayerId: opponentPlayerId,
+                        opponentLabel: opponentLabel,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -119,6 +116,47 @@ class GameGangsScreen extends StatelessWidget {
             child: Text(
               'Gangs',
               style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The my-gang/opponent-gang tab pair, split out of [GameGangsScreen] so it can also be embedded
+/// directly as a game phase's body (e.g. once a game goes in_progress) without a second Scaffold
+/// or app bar on top of the one the host screen already provides.
+class GangsTabView extends StatelessWidget {
+  const GangsTabView({
+    super.key,
+    required this.gameId,
+    required this.myPlayerId,
+    required this.myLabel,
+    required this.opponentPlayerId,
+    required this.opponentLabel,
+  });
+
+  final int gameId;
+  final int myPlayerId;
+  final String myLabel;
+  final int opponentPlayerId;
+  final String opponentLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          _buildTabBar(context),
+          const SizedBox(height: 8),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _GangTab(gameId: gameId, playerId: myPlayerId),
+                _GangTab(gameId: gameId, playerId: opponentPlayerId),
+              ],
             ),
           ),
         ],
@@ -420,6 +458,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = entry.state;
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -433,22 +472,145 @@ class _ReadOnlyEntryTile extends StatelessWidget {
             ),
           ),
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  entry.name,
-                  style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      entry.name,
+                      style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${entry.cost}',
+                    style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
+                  ),
+                ],
+              ),
+              if (state != null) ...[
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          _StatPill(label: 'HP', value: state.lifePoints),
+                          _StatPill(label: 'WP', value: state.willPoints),
+                          _StatPill(label: 'CP', value: state.commandPoints),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 6,
+                      children: _counterIcons(state),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${entry.cost}',
-                style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
-              ),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // Always shows all five counters (dimmed when inactive) rather than only the active ones, so
+  // every tile has the same fixed layout — easier to scan across a whole gang, and leaves room
+  // to become tap targets once in-round editing lands.
+  List<Widget> _counterIcons(EntryState state) {
+    return [
+      _CounterIcon(asset: 'assets/images/counters/stunned.png', label: 'Stunned', active: state.stunned),
+      _CounterIcon(asset: 'assets/images/counters/hidden.png', label: 'Hidden', active: state.hidden),
+      _CounterIcon(asset: 'assets/images/counters/guard.png', label: 'Guarding', active: state.guarding),
+      _CounterIcon(asset: 'assets/images/counters/carry_objective.png', label: 'Carrying objective', active: state.carryingObjective),
+      _CounterIcon(
+        asset: 'assets/images/counters/underwater_counter.png',
+        label: 'Underwater',
+        active: state.underwaterCounters > 0,
+        badge: state.underwaterCounters > 0 ? state.underwaterCounters : null,
+      ),
+    ];
+  }
+}
+
+/// Compact "HP 6/10"-style pill: current value first, starting value after the slash — matches
+/// the "A/B" shorthand used at the table (A = remaining, B = starting).
+class _StatPill extends StatelessWidget {
+  const _StatPill({required this.label, required this.value});
+
+  final String label;
+  final EntryStatValue value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$label ${value.current}/${value.starting}',
+        style: GoogleFonts.cinzel(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+      ),
+    );
+  }
+}
+
+/// A single status counter icon (stunned/hidden/guarding/carrying objective/underwater), always
+/// rendered so tile layouts stay consistent — full opacity with a gold ring when the counter is
+/// active, dimmed with no ring when it isn't. Underwater additionally carries a count badge (it
+/// stacks up to 2, unlike the other four, which are simple on/off flags).
+class _CounterIcon extends StatelessWidget {
+  const _CounterIcon({required this.asset, required this.label, required this.active, this.badge});
+
+  final String asset;
+  final String label;
+  final bool active;
+  final int? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: active ? _kGold.withOpacity(0.35) : Colors.black.withOpacity(0.2),
+          shape: BoxShape.circle,
+          border: active ? Border.all(color: _kGold, width: 1.4) : null,
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Opacity(
+              opacity: active ? 1.0 : 0.35,
+              child: Image.asset(asset, width: 26, height: 26, color: Colors.white, colorBlendMode: BlendMode.srcIn),
+            ),
+            if (badge != null)
+              Positioned(
+                right: -4,
+                bottom: -4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(color: _kGold, borderRadius: BorderRadius.circular(6)),
+                  child: Text(
+                    '$badge',
+                    style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.black),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
