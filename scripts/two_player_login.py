@@ -16,6 +16,7 @@ Usage:
 
 import argparse
 import tempfile
+import time
 from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
@@ -53,6 +54,24 @@ def js_click(driver: webdriver.Chrome, element) -> None:
     driver.execute_script("arguments[0].click();", element)
 
 
+def type_into(driver: webdriver.Chrome, wait: WebDriverWait, selector: str, text: str):
+    # Flutter web moves a single hidden backing <input> to whichever field is
+    # focused; there's a brief handoff after .click() before it's actually
+    # ready, so send_keys() right after can land before focus settles and
+    # the keystrokes get dropped (field ends up empty). Verify and retry.
+    # Even once the DOM value matches, Flutter's Dart-side TextEditingController
+    # syncs from it asynchronously - give it a moment before moving on, or a
+    # same-instant Enter keypress can submit before the controller catches up.
+    for _ in range(4):
+        field = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
+        field.click()
+        field.send_keys(text)
+        if field.get_attribute("value") == text:
+            time.sleep(0.4)
+            return field
+    raise RuntimeError(f"Could not reliably type into {selector!r}")
+
+
 def open_login_form(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
     # The app opens on the Home screen; "Log In" lives in the drawer behind
     # the hamburger button (top-left, 44x44, no accessible label of its own).
@@ -76,21 +95,16 @@ def open_login_form(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
 
 def log_in(driver: webdriver.Chrome, url: str, email: str, password: str) -> None:
     driver.get(url)
-    wait = WebDriverWait(driver, 30)
+    # The first page load in a fresh profile pays a cold-start cost (Flutter
+    # engine/canvaskit download+compile, plus the dev server may still be
+    # compiling the bundle for the first request of the session) that later
+    # loads don't - give it generous headroom rather than failing outright.
+    wait = WebDriverWait(driver, 60)
     enable_semantics(driver, wait)
     open_login_form(driver, wait)
 
-    email_field = wait.until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Email"]'))
-    )
-    email_field.click()
-    email_field.send_keys(email)
-
-    password_field = wait.until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Password"]'))
-    )
-    password_field.click()
-    password_field.send_keys(password)
+    type_into(driver, wait, '[aria-label="Email"]', email)
+    password_field = type_into(driver, wait, '[aria-label="Password"]', password)
     password_field.send_keys(Keys.RETURN)
 
     # On success the app shows a toast and navigates back to Home; on failure
@@ -104,7 +118,7 @@ def log_in(driver: webdriver.Chrome, url: str, email: str, password: str) -> Non
         except StaleElementReferenceException:
             return False
 
-    WebDriverWait(driver, 15).until(reached_home)
+    WebDriverWait(driver, 30).until(reached_home)
 
 
 def main() -> None:
@@ -118,11 +132,17 @@ def main() -> None:
         driver = make_driver(profile_dir)
         drivers.append(driver)
         print(f"Logging in as {email} ...")
-        try:
-            log_in(driver, args.url, email, password)
-            print(f"  -> logged in.")
-        except Exception as e:
-            print(f"  -> FAILED: {e}")
+        attempts = 3
+        for attempt in range(1, attempts + 1):
+            try:
+                log_in(driver, args.url, email, password)
+                print("  -> logged in.")
+                break
+            except Exception as e:
+                if attempt < attempts:
+                    print(f"  -> attempt {attempt} failed ({e or type(e).__name__}), retrying ...")
+                else:
+                    print(f"  -> FAILED: {e or type(e).__name__}")
 
     print("Done. Leaving browser windows open - close them manually when done.")
 

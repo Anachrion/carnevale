@@ -74,8 +74,6 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**markReady**](doc/GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [*GamesApi*](doc/GamesApi.md) | [**pickDeploymentZone**](doc/GamesApi.md#pickdeploymentzone) | **PATCH** /games/{id}/deployment_zone | Pick a Deployment Zone (deployment roll-off winner only)
 [*GamesApi*](doc/GamesApi.md) | [**pickRole**](doc/GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
-[*GamesApi*](doc/GamesApi.md) | [**rollForDeployment**](doc/GamesApi.md#rollfordeployment) | **POST** /games/{id}/deployment_roll | Roll the deployment-priority die
-[*GamesApi*](doc/GamesApi.md) | [**rollForRole**](doc/GamesApi.md#rollforrole) | **POST** /games/{id}/role_roll | Roll for Attacker/Defender priority (asymmetric scenarios only)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
@@ -113,7 +111,7 @@ Class | Method | HTTP request | Description
  - [ForgotPasswordInputUser](doc/ForgotPasswordInputUser.md)
  - [Game](doc/Game.md)
  - [GamePlayer](doc/GamePlayer.md)
- - [GamePlayerGang](doc/GamePlayerGang.md)
+ - [GangSummary](doc/GangSummary.md)
  - [JoinGameInput](doc/JoinGameInput.md)
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)

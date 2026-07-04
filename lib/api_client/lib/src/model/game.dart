@@ -20,8 +20,8 @@ part 'game.g.dart';
 /// * [ducatLimit] 
 /// * [boardSize] 
 /// * [scenario] 
-/// * [roleRollWinnerId] - game_player id of the role roll-off winner (asymmetric scenarios only).
-/// * [deploymentRollWinnerId] - game_player id of the deployment roll-off winner.
+/// * [roleRollWinnerId] - game_player id of the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
+/// * [deploymentRollWinnerId] - game_player id of the deployment roll-off winner. Picked at random as soon as the second player joins.
 /// * [players] 
 @BuiltValue()
 abstract class Game implements Built<Game, GameBuilder> {
@@ -44,11 +44,11 @@ abstract class Game implements Built<Game, GameBuilder> {
   @BuiltValueField(wireName: r'scenario')
   Scenario get scenario;
 
-  /// game_player id of the role roll-off winner (asymmetric scenarios only).
+  /// game_player id of the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
   @BuiltValueField(wireName: r'role_roll_winner_id')
   int? get roleRollWinnerId;
 
-  /// game_player id of the deployment roll-off winner.
+  /// game_player id of the deployment roll-off winner. Picked at random as soon as the second player joins.
   @BuiltValueField(wireName: r'deployment_roll_winner_id')
   int? get deploymentRollWinnerId;
 

@@ -22,7 +22,7 @@ class ListsApi {
 
   const ListsApi(this._dio, this._serializers);
 
-  /// Create a list
+  /// Create a list owned by the current user
   /// 
   ///
   /// Parameters:
@@ -52,7 +52,13 @@ class ListsApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       contentType: 'application/json',
@@ -118,7 +124,7 @@ class ListsApi {
   }
 
   /// Delete a list
-  /// 
+  /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
   /// * [id] 
@@ -147,7 +153,13 @@ class ListsApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       validateStatus: validateStatus,
@@ -165,7 +177,7 @@ class ListsApi {
   }
 
   /// Get a list
-  /// 
+  /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
   /// * [id] 
@@ -194,7 +206,13 @@ class ListsApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       validateStatus: validateStatus,
@@ -239,7 +257,7 @@ class ListsApi {
     );
   }
 
-  /// List all lists
+  /// List the current user&#39;s lists
   /// 
   ///
   /// Parameters:
@@ -267,7 +285,13 @@ class ListsApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       validateStatus: validateStatus,
@@ -313,7 +337,7 @@ class ListsApi {
   }
 
   /// Update a list
-  /// 
+  /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
   /// * [id] 
@@ -344,7 +368,13 @@ class ListsApi {
         ...?headers,
       },
       extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
         ...?extra,
       },
       contentType: 'application/json',

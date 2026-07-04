@@ -101,20 +101,20 @@ Serializers serializers = (_$serializers.toBuilder()
         () => ListBuilder<Equipment>(),
       )
       ..addBuilderFactory(
-        const FullType(BuiltList, [FullType(Profile)]),
-        () => ListBuilder<Profile>(),
-      )
-      ..addBuilderFactory(
-        const FullType(BuiltList, [FullType(ModelList)]),
-        () => ListBuilder<ModelList>(),
-      )
-      ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Game)]),
         () => ListBuilder<Game>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Scenario)]),
         () => ListBuilder<Scenario>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Profile)]),
+        () => ListBuilder<Profile>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ModelList)]),
+        () => ListBuilder<ModelList>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(AvailableGang)]),

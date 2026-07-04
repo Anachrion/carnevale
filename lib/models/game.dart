@@ -30,8 +30,6 @@ class GamePlayer {
   final GangSummary? list;
   final String? role;
   final String? deploymentZone;
-  final int? roleRoll;
-  final int? deploymentRoll;
   final bool ready;
   final List<Agenda> agendas;
 
@@ -43,8 +41,6 @@ class GamePlayer {
     this.list,
     this.role,
     this.deploymentZone,
-    this.roleRoll,
-    this.deploymentRoll,
     this.ready = false,
     this.agendas = const [],
   });

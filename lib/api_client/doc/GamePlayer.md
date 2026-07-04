@@ -12,11 +12,9 @@ Name | Type | Description | Notes
 **userId** | **int** |  | 
 **username** | **String** |  | 
 **host** | **bool** |  | 
-**list** | [**GamePlayerGang**](GamePlayerGang.md) |  | 
+**list** | [**GangSummary**](GangSummary.md) |  | 
 **role** | **String** |  | 
 **deploymentZone** | **String** |  | 
-**roleRoll** | **int** |  | 
-**deploymentRoll** | **int** |  | 
 **ready** | **bool** |  | 
 **agendas** | [**BuiltList&lt;Agenda&gt;**](Agenda.md) | Only populated for the requesting player's own entry — always empty for the opponent's. | 
 
