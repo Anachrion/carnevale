@@ -13,9 +13,9 @@ import 'card_viewer_screen.dart';
 const _kGold = Color(0xFFC4A050);
 const _kEquipmentColor = Color(0xFF4A3F35);
 
-const _kHpPillColors = [ Color(0x998A3434), Color(0x994A1414) ];
-const _kWpPillColors = [ Color(0x99428DF5), Color(0x9914244A) ];
-const _kCpPillColors = [ Color(0x9911B84E), Color(0x9914381C) ];
+const _kHpBorderColor = Color(0xFFA14343);
+const _kWpBorderColor = Color(0xFF3B6BAE);
+const _kCpBorderColor = Color(0xFF296E42);
 
 const _kFactionColors = {
   'doctors':    Color(0xFF177282),
@@ -505,9 +505,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _StatPill(label: 'HP', value: state.lifePoints, colors: _kHpPillColors),
-                          _StatPill(label: 'WP', value: state.willPoints, colors: _kWpPillColors),
-                          _StatPill(label: 'CP', value: state.commandPoints, colors: _kCpPillColors),
+                          _StatPill(label: 'HP', value: state.lifePoints, borderColor: _kHpBorderColor),
+                          _StatPill(label: 'WP', value: state.willPoints, borderColor: _kWpBorderColor),
+                          _StatPill(label: 'CP', value: state.commandPoints, borderColor: _kCpBorderColor),
                         ],
                       ),
                     ),
@@ -548,19 +548,20 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 /// Compact "HP 6/10"-style pill: current value first, starting value after the slash — matches
 /// the "A/B" shorthand used at the table (A = remaining, B = starting).
 class _StatPill extends StatelessWidget {
-  const _StatPill({required this.label, required this.value, required this.colors});
+  const _StatPill({required this.label, required this.value, required this.borderColor});
 
   final String label;
   final EntryStatValue value;
-  final List<Color> colors;
+  final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: colors, begin: Alignment.centerLeft, end: Alignment.centerRight),
+        color: Colors.black.withOpacity(0.25),
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor, width: 1.4),
       ),
       child: Text(
         '$label ${value.current}/${value.starting}',
