@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:carnevale_api/src/model/agenda_history_entry.dart';
 import 'package:carnevale_api/src/model/agenda.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:carnevale_api/src/model/gang_summary.dart';
@@ -23,7 +24,9 @@ part 'game_player.g.dart';
 /// * [ready] 
 /// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
 /// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
-/// * [agendas] - Only populated for the requesting player's own entry — always empty for the opponent's.
+/// * [score] - Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Visible for both players, unlike the hidden hand.
+/// * [agendas] - This player's current hand. Only populated for the requesting player's own entry — always empty for the opponent's.
+/// * [agendaHistory] - Every draw/score/discard event for this player, in turn order. Only populated for the requesting player's own entry — always empty for the opponent's.
 @BuiltValue()
 abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -56,9 +59,17 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   @BuiltValueField(wireName: r'won_deployment_roll')
   bool get wonDeploymentRoll;
 
-  /// Only populated for the requesting player's own entry — always empty for the opponent's.
+  /// Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Visible for both players, unlike the hidden hand.
+  @BuiltValueField(wireName: r'score')
+  int get score;
+
+  /// This player's current hand. Only populated for the requesting player's own entry — always empty for the opponent's.
   @BuiltValueField(wireName: r'agendas')
   BuiltList<Agenda> get agendas;
+
+  /// Every draw/score/discard event for this player, in turn order. Only populated for the requesting player's own entry — always empty for the opponent's.
+  @BuiltValueField(wireName: r'agenda_history')
+  BuiltList<AgendaHistoryEntry> get agendaHistory;
 
   GamePlayer._();
 
@@ -128,10 +139,20 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
       object.wonDeploymentRoll,
       specifiedType: const FullType(bool),
     );
+    yield r'score';
+    yield serializers.serialize(
+      object.score,
+      specifiedType: const FullType(int),
+    );
     yield r'agendas';
     yield serializers.serialize(
       object.agendas,
       specifiedType: const FullType(BuiltList, [FullType(Agenda)]),
+    );
+    yield r'agenda_history';
+    yield serializers.serialize(
+      object.agendaHistory,
+      specifiedType: const FullType(BuiltList, [FullType(AgendaHistoryEntry)]),
     );
   }
 
@@ -221,12 +242,26 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
           ) as bool;
           result.wonDeploymentRoll = valueDes;
           break;
+        case r'score':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.score = valueDes;
+          break;
         case r'agendas':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(BuiltList, [FullType(Agenda)]),
           ) as BuiltList<Agenda>;
           result.agendas.replace(valueDes);
+          break;
+        case r'agenda_history':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(AgendaHistoryEntry)]),
+          ) as BuiltList<AgendaHistoryEntry>;
+          result.agendaHistory.replace(valueDes);
           break;
         default:
           unhandled.add(key);

@@ -26,6 +26,8 @@ class _$Scenario extends Scenario {
   @override
   final String duration;
   @override
+  final int turns;
+  @override
   final BuiltList<String> deploymentZones;
   @override
   final String? illustration;
@@ -43,6 +45,7 @@ class _$Scenario extends Scenario {
     required this.agendas,
     required this.specialRules,
     required this.duration,
+    required this.turns,
     required this.deploymentZones,
     this.illustration,
   }) : super._();
@@ -66,6 +69,7 @@ class _$Scenario extends Scenario {
         agendas == other.agendas &&
         specialRules == other.specialRules &&
         duration == other.duration &&
+        turns == other.turns &&
         deploymentZones == other.deploymentZones &&
         illustration == other.illustration;
   }
@@ -82,6 +86,7 @@ class _$Scenario extends Scenario {
     _$hash = $jc(_$hash, agendas.hashCode);
     _$hash = $jc(_$hash, specialRules.hashCode);
     _$hash = $jc(_$hash, duration.hashCode);
+    _$hash = $jc(_$hash, turns.hashCode);
     _$hash = $jc(_$hash, deploymentZones.hashCode);
     _$hash = $jc(_$hash, illustration.hashCode);
     _$hash = $jf(_$hash);
@@ -100,6 +105,7 @@ class _$Scenario extends Scenario {
           ..add('agendas', agendas)
           ..add('specialRules', specialRules)
           ..add('duration', duration)
+          ..add('turns', turns)
           ..add('deploymentZones', deploymentZones)
           ..add('illustration', illustration))
         .toString();
@@ -148,6 +154,10 @@ class ScenarioBuilder implements Builder<Scenario, ScenarioBuilder> {
   String? get duration => _$this._duration;
   set duration(String? duration) => _$this._duration = duration;
 
+  int? _turns;
+  int? get turns => _$this._turns;
+  set turns(int? turns) => _$this._turns = turns;
+
   ListBuilder<String>? _deploymentZones;
   ListBuilder<String> get deploymentZones =>
       _$this._deploymentZones ??= ListBuilder<String>();
@@ -174,6 +184,7 @@ class ScenarioBuilder implements Builder<Scenario, ScenarioBuilder> {
       _agendas = $v.agendas.toBuilder();
       _specialRules = $v.specialRules.toBuilder();
       _duration = $v.duration;
+      _turns = $v.turns;
       _deploymentZones = $v.deploymentZones.toBuilder();
       _illustration = $v.illustration;
       _$v = null;
@@ -232,6 +243,11 @@ class ScenarioBuilder implements Builder<Scenario, ScenarioBuilder> {
               duration,
               r'Scenario',
               'duration',
+            ),
+            turns: BuiltValueNullFieldError.checkNotNull(
+              turns,
+              r'Scenario',
+              'turns',
             ),
             deploymentZones: deploymentZones.build(),
             illustration: illustration,

@@ -65,9 +65,11 @@ All URIs are relative to *http://localhost:3000/api/v1*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*EquipmentApi*](doc/EquipmentApi.md) | [**getEquipment**](doc/EquipmentApi.md#getequipment) | **GET** /equipment | List all equipment
+[*GamesApi*](doc/GamesApi.md) | [**advanceTurn**](doc/GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the game&#39;s shared turn counter
 [*GamesApi*](doc/GamesApi.md) | [**archiveGame**](doc/GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
 [*GamesApi*](doc/GamesApi.md) | [**createGame**](doc/GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
 [*GamesApi*](doc/GamesApi.md) | [**deleteGame**](doc/GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
+[*GamesApi*](doc/GamesApi.md) | [**discardAgenda**](doc/GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
 [*GamesApi*](doc/GamesApi.md) | [**drawAgendas**](doc/GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
 [*GamesApi*](doc/GamesApi.md) | [**getAvailableGangs**](doc/GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [*GamesApi*](doc/GamesApi.md) | [**getGame**](doc/GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
@@ -76,6 +78,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**joinGame**](doc/GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [*GamesApi*](doc/GamesApi.md) | [**markReady**](doc/GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [*GamesApi*](doc/GamesApi.md) | [**pickRole**](doc/GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
+[*GamesApi*](doc/GamesApi.md) | [**scoreAgenda**](doc/GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [*GamesApi*](doc/GamesApi.md) | [**unarchiveGame**](doc/GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
@@ -100,14 +103,20 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [Agenda](doc/Agenda.md)
+ - [AgendaHistoryEntry](doc/AgendaHistoryEntry.md)
+ - [AgendaHistoryEntryAgenda](doc/AgendaHistoryEntryAgenda.md)
  - [AvailableGang](doc/AvailableGang.md)
  - [CardReference](doc/CardReference.md)
  - [CreateGameInput](doc/CreateGameInput.md)
+ - [DiscardAgendaInput](doc/DiscardAgendaInput.md)
+ - [DrawAgendaInput](doc/DrawAgendaInput.md)
  - [DrawAgendasResponse](doc/DrawAgendasResponse.md)
  - [EntryInput](doc/EntryInput.md)
  - [EntryInputEntry](doc/EntryInputEntry.md)
  - [EntryPositionInput](doc/EntryPositionInput.md)
  - [EntryPositionInputEntry](doc/EntryPositionInputEntry.md)
+ - [EntryStatValue](doc/EntryStatValue.md)
+ - [EntryState](doc/EntryState.md)
  - [Equipment](doc/Equipment.md)
  - [ForgotPasswordInput](doc/ForgotPasswordInput.md)
  - [ForgotPasswordInputUser](doc/ForgotPasswordInputUser.md)
@@ -128,6 +137,7 @@ Class | Method | HTTP request | Description
  - [ResetPasswordInputUser](doc/ResetPasswordInputUser.md)
  - [RoleInput](doc/RoleInput.md)
  - [Scenario](doc/Scenario.md)
+ - [ScoreAgendaInput](doc/ScoreAgendaInput.md)
  - [SelectGangInput](doc/SelectGangInput.md)
  - [Session](doc/Session.md)
  - [SessionUser](doc/SessionUser.md)

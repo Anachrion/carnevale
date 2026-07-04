@@ -176,6 +176,8 @@ class _$Game extends Game {
   @override
   final String? boardSize;
   @override
+  final int currentTurn;
+  @override
   final Scenario scenario;
   @override
   final GameViewerVisibilityEnum viewerVisibility;
@@ -192,6 +194,7 @@ class _$Game extends Game {
     required this.status,
     required this.ducatLimit,
     this.boardSize,
+    required this.currentTurn,
     required this.scenario,
     required this.viewerVisibility,
     required this.players,
@@ -213,6 +216,7 @@ class _$Game extends Game {
         status == other.status &&
         ducatLimit == other.ducatLimit &&
         boardSize == other.boardSize &&
+        currentTurn == other.currentTurn &&
         scenario == other.scenario &&
         viewerVisibility == other.viewerVisibility &&
         players == other.players;
@@ -227,6 +231,7 @@ class _$Game extends Game {
     _$hash = $jc(_$hash, status.hashCode);
     _$hash = $jc(_$hash, ducatLimit.hashCode);
     _$hash = $jc(_$hash, boardSize.hashCode);
+    _$hash = $jc(_$hash, currentTurn.hashCode);
     _$hash = $jc(_$hash, scenario.hashCode);
     _$hash = $jc(_$hash, viewerVisibility.hashCode);
     _$hash = $jc(_$hash, players.hashCode);
@@ -243,6 +248,7 @@ class _$Game extends Game {
           ..add('status', status)
           ..add('ducatLimit', ducatLimit)
           ..add('boardSize', boardSize)
+          ..add('currentTurn', currentTurn)
           ..add('scenario', scenario)
           ..add('viewerVisibility', viewerVisibility)
           ..add('players', players))
@@ -277,6 +283,10 @@ class GameBuilder implements Builder<Game, GameBuilder> {
   String? get boardSize => _$this._boardSize;
   set boardSize(String? boardSize) => _$this._boardSize = boardSize;
 
+  int? _currentTurn;
+  int? get currentTurn => _$this._currentTurn;
+  set currentTurn(int? currentTurn) => _$this._currentTurn = currentTurn;
+
   ScenarioBuilder? _scenario;
   ScenarioBuilder get scenario => _$this._scenario ??= ScenarioBuilder();
   set scenario(ScenarioBuilder? scenario) => _$this._scenario = scenario;
@@ -304,6 +314,7 @@ class GameBuilder implements Builder<Game, GameBuilder> {
       _status = $v.status;
       _ducatLimit = $v.ducatLimit;
       _boardSize = $v.boardSize;
+      _currentTurn = $v.currentTurn;
       _scenario = $v.scenario.toBuilder();
       _viewerVisibility = $v.viewerVisibility;
       _players = $v.players.toBuilder();
@@ -349,6 +360,11 @@ class GameBuilder implements Builder<Game, GameBuilder> {
               'ducatLimit',
             ),
             boardSize: boardSize,
+            currentTurn: BuiltValueNullFieldError.checkNotNull(
+              currentTurn,
+              r'Game',
+              'currentTurn',
+            ),
             scenario: scenario.build(),
             viewerVisibility: BuiltValueNullFieldError.checkNotNull(
               viewerVisibility,

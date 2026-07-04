@@ -16,7 +16,8 @@ Name | Type | Description | Notes
 **primaryObjective** | **String** |  | 
 **agendas** | **BuiltList&lt;String&gt;** |  | 
 **specialRules** | **BuiltList&lt;String&gt;** |  | 
-**duration** | **String** |  | 
+**duration** | **String** | Free-text rendering of the scenario's duration (e.g. \"5 rounds.\"). See `turns` for the structured count. | 
+**turns** | **int** | Number of turns the scenario lasts. | 
 **deploymentZones** | **BuiltList&lt;String&gt;** |  | 
 **illustration** | **String** |  | [optional] 
 

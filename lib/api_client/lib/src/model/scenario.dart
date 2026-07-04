@@ -20,7 +20,8 @@ part 'scenario.g.dart';
 /// * [primaryObjective] 
 /// * [agendas] 
 /// * [specialRules] 
-/// * [duration] 
+/// * [duration] - Free-text rendering of the scenario's duration (e.g. \"5 rounds.\"). See `turns` for the structured count.
+/// * [turns] - Number of turns the scenario lasts.
 /// * [deploymentZones] 
 /// * [illustration] 
 @BuiltValue()
@@ -51,8 +52,13 @@ abstract class Scenario implements Built<Scenario, ScenarioBuilder> {
   @BuiltValueField(wireName: r'special_rules')
   BuiltList<String> get specialRules;
 
+  /// Free-text rendering of the scenario's duration (e.g. \"5 rounds.\"). See `turns` for the structured count.
   @BuiltValueField(wireName: r'duration')
   String get duration;
+
+  /// Number of turns the scenario lasts.
+  @BuiltValueField(wireName: r'turns')
+  int get turns;
 
   @BuiltValueField(wireName: r'deployment_zones')
   BuiltList<String> get deploymentZones;
@@ -127,6 +133,11 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
     yield serializers.serialize(
       object.duration,
       specifiedType: const FullType(String),
+    );
+    yield r'turns';
+    yield serializers.serialize(
+      object.turns,
+      specifiedType: const FullType(int),
     );
     yield r'deployment_zones';
     yield serializers.serialize(
@@ -225,6 +236,13 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
             specifiedType: const FullType(String),
           ) as String;
           result.duration = valueDes;
+          break;
+        case r'turns':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.turns = valueDes;
           break;
         case r'deployment_zones':
           final valueDes = serializers.deserialize(

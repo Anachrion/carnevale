@@ -9,15 +9,25 @@ part of 'serializers.dart';
 Serializers _$serializers =
     (Serializers().toBuilder()
           ..add(Agenda.serializer)
+          ..add(AgendaHistoryEntry.serializer)
+          ..add(AgendaHistoryEntryActionEnum.serializer)
+          ..add(AgendaHistoryEntryAgenda.serializer)
+          ..add(AgendaHistoryEntryOriginEnum.serializer)
           ..add(AvailableGang.serializer)
           ..add(CardReference.serializer)
           ..add(CreateGameInput.serializer)
+          ..add(DiscardAgendaInput.serializer)
+          ..add(DiscardAgendaInputOriginEnum.serializer)
+          ..add(DrawAgendaInput.serializer)
+          ..add(DrawAgendaInputOriginEnum.serializer)
           ..add(DrawAgendasResponse.serializer)
           ..add(EntryInput.serializer)
           ..add(EntryInputEntry.serializer)
           ..add(EntryInputEntryEntryTypeEnum.serializer)
           ..add(EntryPositionInput.serializer)
           ..add(EntryPositionInputEntry.serializer)
+          ..add(EntryStatValue.serializer)
+          ..add(EntryState.serializer)
           ..add(Equipment.serializer)
           ..add(ForgotPasswordInput.serializer)
           ..add(ForgotPasswordInputUser.serializer)
@@ -43,6 +53,7 @@ Serializers _$serializers =
           ..add(RoleInput.serializer)
           ..add(RoleInputRoleEnum.serializer)
           ..add(Scenario.serializer)
+          ..add(ScoreAgendaInput.serializer)
           ..add(SelectGangInput.serializer)
           ..add(Session.serializer)
           ..add(SessionUser.serializer)
@@ -58,6 +69,12 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(Agenda)]),
             () => ListBuilder<Agenda>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(AgendaHistoryEntry),
+            ]),
+            () => ListBuilder<AgendaHistoryEntry>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(GamePlayer)]),

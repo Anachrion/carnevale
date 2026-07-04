@@ -15,14 +15,20 @@ import 'package:carnevale_api/src/date_serializer.dart';
 import 'package:carnevale_api/src/model/date.dart';
 
 import 'package:carnevale_api/src/model/agenda.dart';
+import 'package:carnevale_api/src/model/agenda_history_entry.dart';
+import 'package:carnevale_api/src/model/agenda_history_entry_agenda.dart';
 import 'package:carnevale_api/src/model/available_gang.dart';
 import 'package:carnevale_api/src/model/card_reference.dart';
 import 'package:carnevale_api/src/model/create_game_input.dart';
+import 'package:carnevale_api/src/model/discard_agenda_input.dart';
+import 'package:carnevale_api/src/model/draw_agenda_input.dart';
 import 'package:carnevale_api/src/model/draw_agendas_response.dart';
 import 'package:carnevale_api/src/model/entry_input.dart';
 import 'package:carnevale_api/src/model/entry_input_entry.dart';
 import 'package:carnevale_api/src/model/entry_position_input.dart';
 import 'package:carnevale_api/src/model/entry_position_input_entry.dart';
+import 'package:carnevale_api/src/model/entry_stat_value.dart';
+import 'package:carnevale_api/src/model/entry_state.dart';
 import 'package:carnevale_api/src/model/equipment.dart';
 import 'package:carnevale_api/src/model/forgot_password_input.dart';
 import 'package:carnevale_api/src/model/forgot_password_input_user.dart';
@@ -43,6 +49,7 @@ import 'package:carnevale_api/src/model/reset_password_input.dart';
 import 'package:carnevale_api/src/model/reset_password_input_user.dart';
 import 'package:carnevale_api/src/model/role_input.dart';
 import 'package:carnevale_api/src/model/scenario.dart';
+import 'package:carnevale_api/src/model/score_agenda_input.dart';
 import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/session.dart';
 import 'package:carnevale_api/src/model/session_user.dart';
@@ -56,14 +63,20 @@ part 'serializers.g.dart';
 
 @SerializersFor([
   Agenda,
+  AgendaHistoryEntry,
+  AgendaHistoryEntryAgenda,
   AvailableGang,
   CardReference,
   CreateGameInput,
+  DiscardAgendaInput,
+  DrawAgendaInput,
   DrawAgendasResponse,
   EntryInput,
   EntryInputEntry,
   EntryPositionInput,
   EntryPositionInputEntry,
+  EntryStatValue,
+  EntryState,
   Equipment,
   ForgotPasswordInput,
   ForgotPasswordInputUser,
@@ -84,6 +97,7 @@ part 'serializers.g.dart';
   ResetPasswordInputUser,
   RoleInput,
   Scenario,
+  ScoreAgendaInput,
   SelectGangInput,
   Session,
   SessionUser,

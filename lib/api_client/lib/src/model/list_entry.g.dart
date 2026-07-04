@@ -79,6 +79,8 @@ class _$ListEntry extends ListEntry {
   final String name;
   @override
   final int cost;
+  @override
+  final EntryState? state;
 
   factory _$ListEntry([void Function(ListEntryBuilder)? updates]) =>
       (ListEntryBuilder()..update(updates))._build();
@@ -90,6 +92,7 @@ class _$ListEntry extends ListEntry {
     required this.entryId,
     required this.name,
     required this.cost,
+    this.state,
   }) : super._();
   @override
   ListEntry rebuild(void Function(ListEntryBuilder) updates) =>
@@ -107,7 +110,8 @@ class _$ListEntry extends ListEntry {
         entryType == other.entryType &&
         entryId == other.entryId &&
         name == other.name &&
-        cost == other.cost;
+        cost == other.cost &&
+        state == other.state;
   }
 
   @override
@@ -119,6 +123,7 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, entryId.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, cost.hashCode);
+    _$hash = $jc(_$hash, state.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -131,7 +136,8 @@ class _$ListEntry extends ListEntry {
           ..add('entryType', entryType)
           ..add('entryId', entryId)
           ..add('name', name)
-          ..add('cost', cost))
+          ..add('cost', cost)
+          ..add('state', state))
         .toString();
   }
 }
@@ -164,6 +170,10 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   int? get cost => _$this._cost;
   set cost(int? cost) => _$this._cost = cost;
 
+  EntryStateBuilder? _state;
+  EntryStateBuilder get state => _$this._state ??= EntryStateBuilder();
+  set state(EntryStateBuilder? state) => _$this._state = state;
+
   ListEntryBuilder() {
     ListEntry._defaults(this);
   }
@@ -177,6 +187,7 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _entryId = $v.entryId;
       _name = $v.name;
       _cost = $v.cost;
+      _state = $v.state?.toBuilder();
       _$v = null;
     }
     return this;
@@ -196,36 +207,53 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   ListEntry build() => _build();
 
   _$ListEntry _build() {
-    final _$result =
-        _$v ??
-        _$ListEntry._(
-          id: BuiltValueNullFieldError.checkNotNull(id, r'ListEntry', 'id'),
-          position: BuiltValueNullFieldError.checkNotNull(
-            position,
-            r'ListEntry',
-            'position',
-          ),
-          entryType: BuiltValueNullFieldError.checkNotNull(
-            entryType,
-            r'ListEntry',
-            'entryType',
-          ),
-          entryId: BuiltValueNullFieldError.checkNotNull(
-            entryId,
-            r'ListEntry',
-            'entryId',
-          ),
-          name: BuiltValueNullFieldError.checkNotNull(
-            name,
-            r'ListEntry',
-            'name',
-          ),
-          cost: BuiltValueNullFieldError.checkNotNull(
-            cost,
-            r'ListEntry',
-            'cost',
-          ),
+    _$ListEntry _$result;
+    try {
+      _$result =
+          _$v ??
+          _$ListEntry._(
+            id: BuiltValueNullFieldError.checkNotNull(id, r'ListEntry', 'id'),
+            position: BuiltValueNullFieldError.checkNotNull(
+              position,
+              r'ListEntry',
+              'position',
+            ),
+            entryType: BuiltValueNullFieldError.checkNotNull(
+              entryType,
+              r'ListEntry',
+              'entryType',
+            ),
+            entryId: BuiltValueNullFieldError.checkNotNull(
+              entryId,
+              r'ListEntry',
+              'entryId',
+            ),
+            name: BuiltValueNullFieldError.checkNotNull(
+              name,
+              r'ListEntry',
+              'name',
+            ),
+            cost: BuiltValueNullFieldError.checkNotNull(
+              cost,
+              r'ListEntry',
+              'cost',
+            ),
+            state: _state?.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'state';
+        _state?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+          r'ListEntry',
+          _$failedField,
+          e.toString(),
         );
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

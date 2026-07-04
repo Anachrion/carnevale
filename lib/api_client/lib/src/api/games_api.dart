@@ -13,10 +13,13 @@ import 'package:carnevale_api/src/api_util.dart';
 import 'package:carnevale_api/src/model/available_gang.dart';
 import 'package:carnevale_api/src/model/create_game_input.dart';
 import 'package:carnevale_api/src/model/model_list.dart';
+import 'package:carnevale_api/src/model/discard_agenda_input.dart';
+import 'package:carnevale_api/src/model/draw_agenda_input.dart';
 import 'package:carnevale_api/src/model/draw_agendas_response.dart';
 import 'package:carnevale_api/src/model/game.dart';
 import 'package:carnevale_api/src/model/join_game_input.dart';
 import 'package:carnevale_api/src/model/role_input.dart';
+import 'package:carnevale_api/src/model/score_agenda_input.dart';
 import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
@@ -27,6 +30,87 @@ class GamesApi {
   final Serializers _serializers;
 
   const GamesApi(this._dio, this._serializers);
+
+  /// Advance the game&#39;s shared turn counter
+  /// Callable by either player — like the roll winners and role pick, this app tracks the physical game rather than refereeing whose turn it is to act. On the scenario&#39;s final turn, this instead marks the game &#x60;completed&#x60;. 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Game] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Game>> advanceTurn({ 
+    required int id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/turns/advance'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Game? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(Game),
+      ) as Game;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Game>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
 
   /// Archive this game for the current user only
   /// Hides the game from the current user&#39;s default game list (&#x60;GET /games&#x60;), but it remains reachable via &#x60;GET /games/{id}&#x60;. Purely per-user — the other player&#39;s view is unaffected. 
@@ -263,11 +347,117 @@ class GamesApi {
     return _response;
   }
 
-  /// Privately draw this player&#39;s Agenda cards
-  /// Never broadcast or visible to the opponent.
+  /// Discard an Agenda from this player&#39;s hand
+  /// Only valid while the game is &#x60;in_progress&#x60;, and only for an agenda currently in the requesting player&#39;s hand. Requires &#x60;origin&#x60; (&#x60;special_rule&#x60; or &#x60;command_point&#x60; — an agenda is never freely discarded, only via one of those). Set &#x60;recycle: true&#x60; if the scenario&#39;s \&quot;Cycle\&quot; rule applies, which immediately draws a replacement card (origin &#x60;recycle&#x60;, linked back to this discard). 
   ///
   /// Parameters:
   /// * [id] 
+  /// * [agendaId] 
+  /// * [discardAgendaInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Game] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Game>> discardAgenda({ 
+    required int id,
+    required int agendaId,
+    required DiscardAgendaInput discardAgendaInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/agendas/{agenda_id}/discard'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString()).replaceAll('{' r'agenda_id' '}', encodeQueryParameter(_serializers, agendaId, const FullType(int)).toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(DiscardAgendaInput);
+      _bodyData = _serializers.serialize(discardAgendaInput, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Game? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(Game),
+      ) as Game;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Game>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Privately draw this player&#39;s Agenda cards
+  /// Never broadcast or visible to the opponent. Behavior depends on game status: while &#x60;agenda_draw&#x60;, draws the scenario&#39;s full initial hand (no request body). While &#x60;in_progress&#x60;, draws a single replacement card and requires &#x60;origin&#x60; in the body (&#x60;special_rule&#x60; or &#x60;command_point&#x60; — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [drawAgendaInput] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -279,6 +469,7 @@ class GamesApi {
   /// Throws [DioException] if API call or serialization fails
   Future<Response<DrawAgendasResponse>> drawAgendas({ 
     required int id,
+    DrawAgendaInput? drawAgendaInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -302,11 +493,31 @@ class GamesApi {
         ],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(DrawAgendaInput);
+      _bodyData = drawAgendaInput == null ? null : _serializers.serialize(drawAgendaInput, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
@@ -777,7 +988,7 @@ class GamesApi {
   }
 
   /// Confirm physical deployment is done
-  /// Once both players are ready, the game&#39;s status becomes in_progress.
+  /// Once both players are ready, the game&#39;s status becomes in_progress and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each player&#39;s list.
   ///
   /// Parameters:
   /// * [id] 
@@ -907,6 +1118,111 @@ class GamesApi {
     try {
       const _type = FullType(RoleInput);
       _bodyData = _serializers.serialize(roleInput, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Game? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(Game),
+      ) as Game;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Game>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
+  /// Only valid while the game is &#x60;in_progress&#x60;, and only for an agenda currently in the requesting player&#39;s hand. Set &#x60;recycle: true&#x60; if the scenario&#39;s \&quot;Cycle\&quot; rule applies, which immediately draws a replacement card (origin &#x60;recycle&#x60;, linked back to this score). 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [agendaId] 
+  /// * [scoreAgendaInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Game] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Game>> scoreAgenda({ 
+    required int id,
+    required int agendaId,
+    ScoreAgendaInput? scoreAgendaInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/agendas/{agenda_id}/score'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString()).replaceAll('{' r'agenda_id' '}', encodeQueryParameter(_serializers, agendaId, const FullType(int)).toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(ScoreAgendaInput);
+      _bodyData = scoreAgendaInput == null ? null : _serializers.serialize(scoreAgendaInput, specifiedType: _type);
 
     } catch(error, stackTrace) {
       throw DioException(
