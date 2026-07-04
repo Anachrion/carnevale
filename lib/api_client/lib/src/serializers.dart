@@ -18,7 +18,6 @@ import 'package:carnevale_api/src/model/agenda.dart';
 import 'package:carnevale_api/src/model/available_gang.dart';
 import 'package:carnevale_api/src/model/card_reference.dart';
 import 'package:carnevale_api/src/model/create_game_input.dart';
-import 'package:carnevale_api/src/model/deployment_zone_input.dart';
 import 'package:carnevale_api/src/model/draw_agendas_response.dart';
 import 'package:carnevale_api/src/model/entry_input.dart';
 import 'package:carnevale_api/src/model/entry_input_entry.dart';
@@ -60,7 +59,6 @@ part 'serializers.g.dart';
   AvailableGang,
   CardReference,
   CreateGameInput,
-  DeploymentZoneInput,
   DrawAgendasResponse,
   EntryInput,
   EntryInputEntry,

@@ -28,37 +28,8 @@ final BuiltSet<GamePlayerRoleEnum> _$gamePlayerRoleEnumValues =
       _$gamePlayerRoleEnum_defender,
     ]);
 
-const GamePlayerDeploymentZoneEnum _$gamePlayerDeploymentZoneEnum_A =
-    const GamePlayerDeploymentZoneEnum._('A');
-const GamePlayerDeploymentZoneEnum _$gamePlayerDeploymentZoneEnum_B =
-    const GamePlayerDeploymentZoneEnum._('B');
-
-GamePlayerDeploymentZoneEnum _$gamePlayerDeploymentZoneEnumValueOf(
-  String name,
-) {
-  switch (name) {
-    case 'A':
-      return _$gamePlayerDeploymentZoneEnum_A;
-    case 'B':
-      return _$gamePlayerDeploymentZoneEnum_B;
-    default:
-      throw ArgumentError(name);
-  }
-}
-
-final BuiltSet<GamePlayerDeploymentZoneEnum>
-_$gamePlayerDeploymentZoneEnumValues = BuiltSet<GamePlayerDeploymentZoneEnum>(
-  const <GamePlayerDeploymentZoneEnum>[
-    _$gamePlayerDeploymentZoneEnum_A,
-    _$gamePlayerDeploymentZoneEnum_B,
-  ],
-);
-
 Serializer<GamePlayerRoleEnum> _$gamePlayerRoleEnumSerializer =
     _$GamePlayerRoleEnumSerializer();
-Serializer<GamePlayerDeploymentZoneEnum>
-_$gamePlayerDeploymentZoneEnumSerializer =
-    _$GamePlayerDeploymentZoneEnumSerializer();
 
 class _$GamePlayerRoleEnumSerializer
     implements PrimitiveSerializer<GamePlayerRoleEnum> {
@@ -93,39 +64,6 @@ class _$GamePlayerRoleEnumSerializer
   );
 }
 
-class _$GamePlayerDeploymentZoneEnumSerializer
-    implements PrimitiveSerializer<GamePlayerDeploymentZoneEnum> {
-  static const Map<String, Object> _toWire = const <String, Object>{
-    'A': 'A',
-    'B': 'B',
-  };
-  static const Map<Object, String> _fromWire = const <Object, String>{
-    'A': 'A',
-    'B': 'B',
-  };
-
-  @override
-  final Iterable<Type> types = const <Type>[GamePlayerDeploymentZoneEnum];
-  @override
-  final String wireName = 'GamePlayerDeploymentZoneEnum';
-
-  @override
-  Object serialize(
-    Serializers serializers,
-    GamePlayerDeploymentZoneEnum object, {
-    FullType specifiedType = FullType.unspecified,
-  }) => _toWire[object.name] ?? object.name;
-
-  @override
-  GamePlayerDeploymentZoneEnum deserialize(
-    Serializers serializers,
-    Object serialized, {
-    FullType specifiedType = FullType.unspecified,
-  }) => GamePlayerDeploymentZoneEnum.valueOf(
-    _fromWire[serialized] ?? (serialized is String ? serialized : ''),
-  );
-}
-
 class _$GamePlayer extends GamePlayer {
   @override
   final int id;
@@ -139,8 +77,6 @@ class _$GamePlayer extends GamePlayer {
   final GangSummary? list;
   @override
   final GamePlayerRoleEnum? role;
-  @override
-  final GamePlayerDeploymentZoneEnum? deploymentZone;
   @override
   final bool ready;
   @override
@@ -160,7 +96,6 @@ class _$GamePlayer extends GamePlayer {
     required this.host,
     this.list,
     this.role,
-    this.deploymentZone,
     required this.ready,
     required this.wonRoleRoll,
     required this.wonDeploymentRoll,
@@ -183,7 +118,6 @@ class _$GamePlayer extends GamePlayer {
         host == other.host &&
         list == other.list &&
         role == other.role &&
-        deploymentZone == other.deploymentZone &&
         ready == other.ready &&
         wonRoleRoll == other.wonRoleRoll &&
         wonDeploymentRoll == other.wonDeploymentRoll &&
@@ -199,7 +133,6 @@ class _$GamePlayer extends GamePlayer {
     _$hash = $jc(_$hash, host.hashCode);
     _$hash = $jc(_$hash, list.hashCode);
     _$hash = $jc(_$hash, role.hashCode);
-    _$hash = $jc(_$hash, deploymentZone.hashCode);
     _$hash = $jc(_$hash, ready.hashCode);
     _$hash = $jc(_$hash, wonRoleRoll.hashCode);
     _$hash = $jc(_$hash, wonDeploymentRoll.hashCode);
@@ -217,7 +150,6 @@ class _$GamePlayer extends GamePlayer {
           ..add('host', host)
           ..add('list', list)
           ..add('role', role)
-          ..add('deploymentZone', deploymentZone)
           ..add('ready', ready)
           ..add('wonRoleRoll', wonRoleRoll)
           ..add('wonDeploymentRoll', wonDeploymentRoll)
@@ -253,11 +185,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
   GamePlayerRoleEnum? get role => _$this._role;
   set role(GamePlayerRoleEnum? role) => _$this._role = role;
 
-  GamePlayerDeploymentZoneEnum? _deploymentZone;
-  GamePlayerDeploymentZoneEnum? get deploymentZone => _$this._deploymentZone;
-  set deploymentZone(GamePlayerDeploymentZoneEnum? deploymentZone) =>
-      _$this._deploymentZone = deploymentZone;
-
   bool? _ready;
   bool? get ready => _$this._ready;
   set ready(bool? ready) => _$this._ready = ready;
@@ -288,7 +215,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
       _host = $v.host;
       _list = $v.list?.toBuilder();
       _role = $v.role;
-      _deploymentZone = $v.deploymentZone;
       _ready = $v.ready;
       _wonRoleRoll = $v.wonRoleRoll;
       _wonDeploymentRoll = $v.wonDeploymentRoll;
@@ -335,7 +261,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
             ),
             list: _list?.build(),
             role: role,
-            deploymentZone: deploymentZone,
             ready: BuiltValueNullFieldError.checkNotNull(
               ready,
               r'GamePlayer',

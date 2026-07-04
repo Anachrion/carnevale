@@ -13,8 +13,8 @@ void main() {
         'gang_selection',
       );
       expect(
-        service.wireEnum(api.GameStatusEnum.deploymentRolloff, const FullType(api.GameStatusEnum)),
-        'deployment_rolloff',
+        service.wireEnum(api.GameStatusEnum.inProgress, const FullType(api.GameStatusEnum)),
+        'in_progress',
       );
     });
 
@@ -23,7 +23,6 @@ void main() {
         api.GameStatusEnum.pending: 'pending',
         api.GameStatusEnum.gangSelection: 'gang_selection',
         api.GameStatusEnum.agendaDraw: 'agenda_draw',
-        api.GameStatusEnum.deploymentRolloff: 'deployment_rolloff',
         api.GameStatusEnum.deploying: 'deploying',
         api.GameStatusEnum.inProgress: 'in_progress',
         api.GameStatusEnum.completed: 'completed',

@@ -12,7 +12,6 @@ import 'package:built_collection/built_collection.dart';
 import 'package:carnevale_api/src/api_util.dart';
 import 'package:carnevale_api/src/model/available_gang.dart';
 import 'package:carnevale_api/src/model/create_game_input.dart';
-import 'package:carnevale_api/src/model/deployment_zone_input.dart';
 import 'package:carnevale_api/src/model/draw_agendas_response.dart';
 import 'package:carnevale_api/src/model/game.dart';
 import 'package:carnevale_api/src/model/join_game_input.dart';
@@ -593,7 +592,7 @@ class GamesApi {
   }
 
   /// Join a game via its join_code
-  /// Idempotent if the current user has already joined. Returns 422 if the game is already full. Once the second player joins, the role and deployment roll-off winners are picked at random server-side (not revealed to clients until each corresponding step). 
+  /// Idempotent if the current user has already joined. Returns 422 if the game is already full. Once the second player joins, the role and deployment roll-off winners are picked at random server-side. The role winner is revealed once that step of the flow is reached; the deployment winner is informational only (the zone itself is chosen at the table, not in-app). 
   ///
   /// Parameters:
   /// * [joinGameInput] 
@@ -737,109 +736,6 @@ class GamesApi {
 
     final _response = await _dio.request<Object>(
       _path,
-      options: _options,
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-    );
-
-    Game? _responseData;
-
-    try {
-      final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(Game),
-      ) as Game;
-
-    } catch (error, stackTrace) {
-      throw DioException(
-        requestOptions: _response.requestOptions,
-        response: _response,
-        type: DioExceptionType.unknown,
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
-    return Response<Game>(
-      data: _responseData,
-      headers: _response.headers,
-      isRedirect: _response.isRedirect,
-      requestOptions: _response.requestOptions,
-      redirects: _response.redirects,
-      statusCode: _response.statusCode,
-      statusMessage: _response.statusMessage,
-      extra: _response.extra,
-    );
-  }
-
-  /// Pick a Deployment Zone (deployment roll-off winner only)
-  /// The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there&#39;s no client-triggered roll. &#x60;won_deployment_roll&#x60; on the winner&#39;s GamePlayer entry is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining zone. 
-  ///
-  /// Parameters:
-  /// * [id] 
-  /// * [deploymentZoneInput] 
-  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
-  /// * [headers] - Can be used to add additional headers to the request
-  /// * [extras] - Can be used to add flags to the request
-  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
-  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
-  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
-  ///
-  /// Returns a [Future] containing a [Response] with a [Game] as data
-  /// Throws [DioException] if API call or serialization fails
-  Future<Response<Game>> pickDeploymentZone({ 
-    required int id,
-    required DeploymentZoneInput deploymentZoneInput,
-    CancelToken? cancelToken,
-    Map<String, dynamic>? headers,
-    Map<String, dynamic>? extra,
-    ValidateStatus? validateStatus,
-    ProgressCallback? onSendProgress,
-    ProgressCallback? onReceiveProgress,
-  }) async {
-    final _path = r'/games/{id}/deployment_zone'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
-    final _options = Options(
-      method: r'PATCH',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
-      extra: <String, dynamic>{
-        'secure': <Map<String, String>>[
-          {
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
-          },
-        ],
-        ...?extra,
-      },
-      contentType: 'application/json',
-      validateStatus: validateStatus,
-    );
-
-    dynamic _bodyData;
-
-    try {
-      const _type = FullType(DeploymentZoneInput);
-      _bodyData = _serializers.serialize(deploymentZoneInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
-      throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
-        type: DioExceptionType.unknown,
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
-    final _response = await _dio.request<Object>(
-      _path,
-      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,

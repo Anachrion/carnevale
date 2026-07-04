@@ -29,7 +29,6 @@ class GamePlayer {
   final bool host;
   final GangSummary? list;
   final String? role;
-  final String? deploymentZone;
   final bool ready;
   final bool wonRoleRoll;
   final bool wonDeploymentRoll;
@@ -42,7 +41,6 @@ class GamePlayer {
     required this.host,
     this.list,
     this.role,
-    this.deploymentZone,
     this.ready = false,
     this.wonRoleRoll = false,
     this.wonDeploymentRoll = false,

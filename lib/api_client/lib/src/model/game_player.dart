@@ -20,10 +20,9 @@ part 'game_player.g.dart';
 /// * [host] 
 /// * [list] 
 /// * [role] 
-/// * [deploymentZone] 
 /// * [ready] 
 /// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
-/// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins.
+/// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
 /// * [agendas] - Only populated for the requesting player's own entry — always empty for the opponent's.
 @BuiltValue()
 abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
@@ -46,10 +45,6 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   GamePlayerRoleEnum? get role;
   // enum roleEnum {  attacker,  defender,  };
 
-  @BuiltValueField(wireName: r'deployment_zone')
-  GamePlayerDeploymentZoneEnum? get deploymentZone;
-  // enum deploymentZoneEnum {  A,  B,  };
-
   @BuiltValueField(wireName: r'ready')
   bool get ready;
 
@@ -57,7 +52,7 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   @BuiltValueField(wireName: r'won_role_roll')
   bool get wonRoleRoll;
 
-  /// True for the deployment roll-off winner. Picked at random as soon as the second player joins.
+  /// True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
   @BuiltValueField(wireName: r'won_deployment_roll')
   bool get wonDeploymentRoll;
 
@@ -117,11 +112,6 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     yield object.role == null ? null : serializers.serialize(
       object.role,
       specifiedType: const FullType.nullable(GamePlayerRoleEnum),
-    );
-    yield r'deployment_zone';
-    yield object.deploymentZone == null ? null : serializers.serialize(
-      object.deploymentZone,
-      specifiedType: const FullType.nullable(GamePlayerDeploymentZoneEnum),
     );
     yield r'ready';
     yield serializers.serialize(
@@ -210,14 +200,6 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
           if (valueDes == null) continue;
           result.role = valueDes;
           break;
-        case r'deployment_zone':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(GamePlayerDeploymentZoneEnum),
-          ) as GamePlayerDeploymentZoneEnum?;
-          if (valueDes == null) continue;
-          result.deploymentZone = valueDes;
-          break;
         case r'ready':
           final valueDes = serializers.deserialize(
             value,
@@ -288,20 +270,5 @@ class GamePlayerRoleEnum extends EnumClass {
 
   static BuiltSet<GamePlayerRoleEnum> get values => _$gamePlayerRoleEnumValues;
   static GamePlayerRoleEnum valueOf(String name) => _$gamePlayerRoleEnumValueOf(name);
-}
-
-class GamePlayerDeploymentZoneEnum extends EnumClass {
-
-  @BuiltValueEnumConst(wireName: r'A')
-  static const GamePlayerDeploymentZoneEnum A = _$gamePlayerDeploymentZoneEnum_A;
-  @BuiltValueEnumConst(wireName: r'B')
-  static const GamePlayerDeploymentZoneEnum B = _$gamePlayerDeploymentZoneEnum_B;
-
-  static Serializer<GamePlayerDeploymentZoneEnum> get serializer => _$gamePlayerDeploymentZoneEnumSerializer;
-
-  const GamePlayerDeploymentZoneEnum._(String name): super(name);
-
-  static BuiltSet<GamePlayerDeploymentZoneEnum> get values => _$gamePlayerDeploymentZoneEnumValues;
-  static GamePlayerDeploymentZoneEnum valueOf(String name) => _$gamePlayerDeploymentZoneEnumValueOf(name);
 }
 

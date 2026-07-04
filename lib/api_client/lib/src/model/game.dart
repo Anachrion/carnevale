@@ -36,7 +36,7 @@ abstract class Game implements Built<Game, GameBuilder> {
 
   @BuiltValueField(wireName: r'status')
   GameStatusEnum get status;
-  // enum statusEnum {  pending,  gang_selection,  agenda_draw,  deployment_rolloff,  deploying,  in_progress,  completed,  };
+  // enum statusEnum {  pending,  gang_selection,  agenda_draw,  deploying,  in_progress,  completed,  };
 
   @BuiltValueField(wireName: r'ducat_limit')
   int get ducatLimit;
@@ -247,8 +247,6 @@ class GameStatusEnum extends EnumClass {
   static const GameStatusEnum gangSelection = _$gameStatusEnum_gangSelection;
   @BuiltValueEnumConst(wireName: r'agenda_draw')
   static const GameStatusEnum agendaDraw = _$gameStatusEnum_agendaDraw;
-  @BuiltValueEnumConst(wireName: r'deployment_rolloff')
-  static const GameStatusEnum deploymentRolloff = _$gameStatusEnum_deploymentRolloff;
   @BuiltValueEnumConst(wireName: r'deploying')
   static const GameStatusEnum deploying = _$gameStatusEnum_deploying;
   @BuiltValueEnumConst(wireName: r'in_progress')

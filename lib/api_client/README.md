@@ -74,7 +74,6 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**getGames**](doc/GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
 [*GamesApi*](doc/GamesApi.md) | [**joinGame**](doc/GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [*GamesApi*](doc/GamesApi.md) | [**markReady**](doc/GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
-[*GamesApi*](doc/GamesApi.md) | [**pickDeploymentZone**](doc/GamesApi.md#pickdeploymentzone) | **PATCH** /games/{id}/deployment_zone | Pick a Deployment Zone (deployment roll-off winner only)
 [*GamesApi*](doc/GamesApi.md) | [**pickRole**](doc/GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [*GamesApi*](doc/GamesApi.md) | [**unarchiveGame**](doc/GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
@@ -103,7 +102,6 @@ Class | Method | HTTP request | Description
  - [AvailableGang](doc/AvailableGang.md)
  - [CardReference](doc/CardReference.md)
  - [CreateGameInput](doc/CreateGameInput.md)
- - [DeploymentZoneInput](doc/DeploymentZoneInput.md)
  - [DrawAgendasResponse](doc/DrawAgendasResponse.md)
  - [EntryInput](doc/EntryInput.md)
  - [EntryInputEntry](doc/EntryInputEntry.md)

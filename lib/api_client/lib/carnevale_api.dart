@@ -22,7 +22,6 @@ export 'package:carnevale_api/src/model/agenda.dart';
 export 'package:carnevale_api/src/model/available_gang.dart';
 export 'package:carnevale_api/src/model/card_reference.dart';
 export 'package:carnevale_api/src/model/create_game_input.dart';
-export 'package:carnevale_api/src/model/deployment_zone_input.dart';
 export 'package:carnevale_api/src/model/draw_agendas_response.dart';
 export 'package:carnevale_api/src/model/entry_input.dart';
 export 'package:carnevale_api/src/model/entry_input_entry.dart';

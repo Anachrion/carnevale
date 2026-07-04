@@ -104,15 +104,6 @@ class GameService extends ChangeNotifier {
     return (res.data?.agendas.toList() ?? []).map(_mapAgenda).toList();
   }
 
-  Future<models.Game> pickDeploymentZone(int gameId, String zone) async {
-    final zoneEnum = zone == 'A' ? api.DeploymentZoneInputZoneEnum.A : api.DeploymentZoneInputZoneEnum.B;
-    final res = await _client.games.pickDeploymentZone(
-      id: gameId,
-      deploymentZoneInput: api.DeploymentZoneInput((b) => b..zone = zoneEnum),
-    );
-    return _mapGame(res.data!);
-  }
-
   Future<models.Game> markReady(int gameId) async {
     final res = await _client.games.markReady(id: gameId);
     return _mapGame(res.data!);
@@ -170,7 +161,6 @@ class GameService extends ChangeNotifier {
         host: p.host,
         list: p.list == null ? null : _mapGangSummary(p.list!),
         role: p.role?.name,
-        deploymentZone: p.deploymentZone?.name,
         ready: p.ready,
         wonRoleRoll: p.wonRoleRoll,
         wonDeploymentRoll: p.wonDeploymentRoll,
