@@ -166,7 +166,6 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           _buildRoleRolloffPhase(context, game, me),
         'gang_selection' => _buildGangSelectionPhase(context, game, me),
         'agenda_draw' => _buildAgendaDrawPhase(context, game, me),
-        'deployment_rolloff' => _buildDeploymentRolloffPhase(context, game, me),
         'deploying' => _buildDeployingPhase(context, game, me),
         'in_progress' => _buildInProgressPhase(context, game),
         _ => _buildInProgressPhase(context, game),
@@ -332,49 +331,19 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     ]);
   }
 
-  // ── Deployment roll-off ──────────────────────────────────────────────────
-
-  Widget _buildDeploymentRolloffPhase(BuildContext context, models.Game game, models.GamePlayer me) {
-    final opponentWon = _opponent?.wonDeploymentRoll ?? false;
-    if (me.wonDeploymentRoll && me.deploymentZone == null) {
-      return _PhaseCard(title: 'You won the deployment roll-off!', children: [
-        Text('Choose a Deployment Zone:', style: TextStyle(color: context.subtleTextColor)),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(child: _ActionButton(label: 'Zone A', onTap: () => _run(() => _service.pickDeploymentZone(game.id, 'A')), busy: _busy)),
-            const SizedBox(width: 12),
-            Expanded(child: _ActionButton(label: 'Zone B', onTap: () => _run(() => _service.pickDeploymentZone(game.id, 'B')), busy: _busy)),
-          ],
-        ),
-      ]);
-    }
-    if (me.wonDeploymentRoll || opponentWon) {
-      final winnerName = opponentWon ? (_opponent?.username ?? 'Opponent') : 'you';
-      return _PhaseCard(title: 'Deployment roll-off', children: [
-        Text('Waiting for $winnerName to pick a Deployment Zone...', style: TextStyle(color: context.subtleTextColor)),
-        const SizedBox(height: 16),
-        const CircularProgressIndicator(color: _kGold),
-      ]);
-    }
-    return _PhaseCard(title: 'Deployment roll-off', children: [
-      Text('Determining who picks a Deployment Zone...', style: TextStyle(color: context.subtleTextColor)),
-      const SizedBox(height: 16),
-      const CircularProgressIndicator(color: _kGold),
-    ]);
-  }
-
   // ── Deploying ────────────────────────────────────────────────────────────
 
   Widget _buildDeployingPhase(BuildContext context, models.Game game, models.GamePlayer me) {
     final opponent = _opponent;
+    final winnerName = me.wonDeploymentRoll ? 'You' : (opponent?.wonDeploymentRoll ?? false) ? (opponent?.username ?? 'Opponent') : null;
     return _PhaseCard(
       title: 'Deploy your gangs',
-      subtitle: 'Place your miniatures at the table, then confirm below.',
+      subtitle: 'Agree on deployment zones at the table, place your miniatures, then confirm below.',
       children: [
-        Text('Your zone: ${me.deploymentZone ?? '—'}', style: TextStyle(color: context.textColor)),
-        if (opponent != null) Text('${opponent.username}\'s zone: ${opponent.deploymentZone ?? '—'}', style: TextStyle(color: context.textColor)),
-        const SizedBox(height: 16),
+        if (winnerName != null) ...[
+          Text('$winnerName won the deployment roll-off.', style: TextStyle(color: context.textColor)),
+          const SizedBox(height: 16),
+        ],
         if (!me.ready)
           _ActionButton(label: "I'm Ready", onTap: () => _run(() => _service.markReady(game.id)), busy: _busy)
         else ...[

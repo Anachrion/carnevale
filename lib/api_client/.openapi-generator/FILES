@@ -5,7 +5,6 @@ doc/Agenda.md
 doc/AvailableGang.md
 doc/CardReference.md
 doc/CreateGameInput.md
-doc/DeploymentZoneInput.md
 doc/DrawAgendasResponse.md
 doc/EntryInput.md
 doc/EntryInputEntry.md
@@ -67,7 +66,6 @@ lib/src/model/available_gang.dart
 lib/src/model/card_reference.dart
 lib/src/model/create_game_input.dart
 lib/src/model/date.dart
-lib/src/model/deployment_zone_input.dart
 lib/src/model/draw_agendas_response.dart
 lib/src/model/entry_input.dart
 lib/src/model/entry_input_entry.dart

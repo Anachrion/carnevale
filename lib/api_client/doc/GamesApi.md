@@ -18,7 +18,6 @@ Method | HTTP request | Description
 [**getGames**](GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
 [**joinGame**](GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [**markReady**](GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
-[**pickDeploymentZone**](GamesApi.md#pickdeploymentzone) | **PATCH** /games/{id}/deployment_zone | Pick a Deployment Zone (deployment roll-off winner only)
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
@@ -327,7 +326,7 @@ Name | Type | Description  | Notes
 
 Join a game via its join_code
 
-Idempotent if the current user has already joined. Returns 422 if the game is already full. Once the second player joins, the role and deployment roll-off winners are picked at random server-side (not revealed to clients until each corresponding step). 
+Idempotent if the current user has already joined. Returns 422 if the game is already full. Once the second player joins, the role and deployment roll-off winners are picked at random server-side. The role winner is revealed once that step of the flow is reached; the deployment winner is informational only (the zone itself is chosen at the table, not in-app). 
 
 ### Example
 ```dart
@@ -404,51 +403,6 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **pickDeploymentZone**
-> Game pickDeploymentZone(id, deploymentZoneInput)
-
-Pick a Deployment Zone (deployment roll-off winner only)
-
-The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there's no client-triggered roll. `won_deployment_roll` on the winner's GamePlayer entry is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining zone. 
-
-### Example
-```dart
-import 'package:carnevale_api/api.dart';
-
-final api = CarnevaleApi().getGamesApi();
-final int id = 56; // int | 
-final DeploymentZoneInput deploymentZoneInput = ; // DeploymentZoneInput | 
-
-try {
-    final response = api.pickDeploymentZone(id, deploymentZoneInput);
-    print(response);
-} on DioException catch (e) {
-    print('Exception when calling GamesApi->pickDeploymentZone: $e\n');
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **id** | **int**|  | 
- **deploymentZoneInput** | [**DeploymentZoneInput**](DeploymentZoneInput.md)|  | 
-
-### Return type
-
-[**Game**](Game.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
