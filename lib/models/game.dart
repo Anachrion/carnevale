@@ -31,6 +31,8 @@ class GamePlayer {
   final String? role;
   final String? deploymentZone;
   final bool ready;
+  final bool wonRoleRoll;
+  final bool wonDeploymentRoll;
   final List<Agenda> agendas;
 
   const GamePlayer({
@@ -42,6 +44,8 @@ class GamePlayer {
     this.role,
     this.deploymentZone,
     this.ready = false,
+    this.wonRoleRoll = false,
+    this.wonDeploymentRoll = false,
     this.agendas = const [],
   });
 }
@@ -82,8 +86,6 @@ class Game {
   final int ducatLimit;
   final String? boardSize;
   final Scenario scenario;
-  final int? roleRollWinnerId;
-  final int? deploymentRollWinnerId;
   final String viewerVisibility;
   final List<GamePlayer> players;
 
@@ -95,8 +97,6 @@ class Game {
     required this.ducatLimit,
     this.boardSize,
     required this.scenario,
-    this.roleRollWinnerId,
-    this.deploymentRollWinnerId,
     required this.viewerVisibility,
     this.players = const [],
   });

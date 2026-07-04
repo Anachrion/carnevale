@@ -159,8 +159,6 @@ class GameService extends ChangeNotifier {
         ducatLimit: g.ducatLimit,
         boardSize: g.boardSize,
         scenario: _mapScenario(g.scenario),
-        roleRollWinnerId: g.roleRollWinnerId,
-        deploymentRollWinnerId: g.deploymentRollWinnerId,
         viewerVisibility: g.viewerVisibility.name,
         players: g.players.map(_mapPlayer).toList(),
       );
@@ -174,6 +172,8 @@ class GameService extends ChangeNotifier {
         role: p.role?.name,
         deploymentZone: p.deploymentZone?.name,
         ready: p.ready,
+        wonRoleRoll: p.wonRoleRoll,
+        wonDeploymentRoll: p.wonDeploymentRoll,
         agendas: p.agendas.map(_mapAgenda).toList(),
       );
 

@@ -222,8 +222,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   // ── Role roll-off (asymmetric scenarios only) ───────────────────────────
 
   Widget _buildRoleRolloffPhase(BuildContext context, models.Game game, models.GamePlayer me) {
-    final winnerId = game.roleRollWinnerId;
-    if (winnerId != null && winnerId == me.id && me.role == null) {
+    final opponentWon = _opponent?.wonRoleRoll ?? false;
+    if (me.wonRoleRoll && me.role == null) {
       return _PhaseCard(
         title: 'You won the roll-off!',
         children: [
@@ -239,8 +239,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         ],
       );
     }
-    if (winnerId != null) {
-      final winnerName = winnerId == _opponent?.id ? (_opponent?.username ?? 'Opponent') : 'you';
+    if (me.wonRoleRoll || opponentWon) {
+      final winnerName = opponentWon ? (_opponent?.username ?? 'Opponent') : 'you';
       return _PhaseCard(title: 'Role roll-off', children: [
         Text('Waiting for $winnerName to choose a role...', style: TextStyle(color: context.subtleTextColor)),
         const SizedBox(height: 16),
@@ -335,8 +335,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   // ── Deployment roll-off ──────────────────────────────────────────────────
 
   Widget _buildDeploymentRolloffPhase(BuildContext context, models.Game game, models.GamePlayer me) {
-    final winnerId = game.deploymentRollWinnerId;
-    if (winnerId != null && winnerId == me.id && me.deploymentZone == null) {
+    final opponentWon = _opponent?.wonDeploymentRoll ?? false;
+    if (me.wonDeploymentRoll && me.deploymentZone == null) {
       return _PhaseCard(title: 'You won the deployment roll-off!', children: [
         Text('Choose a Deployment Zone:', style: TextStyle(color: context.subtleTextColor)),
         const SizedBox(height: 16),
@@ -349,8 +349,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         ),
       ]);
     }
-    if (winnerId != null) {
-      final winnerName = winnerId == _opponent?.id ? (_opponent?.username ?? 'Opponent') : 'you';
+    if (me.wonDeploymentRoll || opponentWon) {
+      final winnerName = opponentWon ? (_opponent?.username ?? 'Opponent') : 'you';
       return _PhaseCard(title: 'Deployment roll-off', children: [
         Text('Waiting for $winnerName to pick a Deployment Zone...', style: TextStyle(color: context.subtleTextColor)),
         const SizedBox(height: 16),

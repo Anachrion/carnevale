@@ -21,8 +21,6 @@ part 'game.g.dart';
 /// * [ducatLimit] 
 /// * [boardSize] 
 /// * [scenario] 
-/// * [roleRollWinnerId] - game_player id of the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
-/// * [deploymentRollWinnerId] - game_player id of the deployment roll-off winner. Picked at random as soon as the second player joins.
 /// * [viewerVisibility] - The requesting user's own archive/delete state for this game — never reflects the opponent's.
 /// * [players] 
 @BuiltValue()
@@ -48,14 +46,6 @@ abstract class Game implements Built<Game, GameBuilder> {
 
   @BuiltValueField(wireName: r'scenario')
   Scenario get scenario;
-
-  /// game_player id of the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
-  @BuiltValueField(wireName: r'role_roll_winner_id')
-  int? get roleRollWinnerId;
-
-  /// game_player id of the deployment roll-off winner. Picked at random as soon as the second player joins.
-  @BuiltValueField(wireName: r'deployment_roll_winner_id')
-  int? get deploymentRollWinnerId;
 
   /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
   @BuiltValueField(wireName: r'viewer_visibility')
@@ -122,16 +112,6 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     yield serializers.serialize(
       object.scenario,
       specifiedType: const FullType(Scenario),
-    );
-    yield r'role_roll_winner_id';
-    yield object.roleRollWinnerId == null ? null : serializers.serialize(
-      object.roleRollWinnerId,
-      specifiedType: const FullType.nullable(int),
-    );
-    yield r'deployment_roll_winner_id';
-    yield object.deploymentRollWinnerId == null ? null : serializers.serialize(
-      object.deploymentRollWinnerId,
-      specifiedType: const FullType.nullable(int),
     );
     yield r'viewer_visibility';
     yield serializers.serialize(
@@ -215,22 +195,6 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
             specifiedType: const FullType(Scenario),
           ) as Scenario;
           result.scenario.replace(valueDes);
-          break;
-        case r'role_roll_winner_id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
-          if (valueDes == null) continue;
-          result.roleRollWinnerId = valueDes;
-          break;
-        case r'deployment_roll_winner_id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
-          if (valueDes == null) continue;
-          result.deploymentRollWinnerId = valueDes;
           break;
         case r'viewer_visibility':
           final valueDes = serializers.deserialize(

@@ -775,7 +775,7 @@ class GamesApi {
   }
 
   /// Pick a Deployment Zone (deployment roll-off winner only)
-  /// The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there&#39;s no client-triggered roll. &#x60;deployment_roll_winner_id&#x60; on the Game is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining zone. 
+  /// The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there&#39;s no client-triggered roll. &#x60;won_deployment_roll&#x60; on the winner&#39;s GamePlayer entry is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining zone. 
   ///
   /// Parameters:
   /// * [id] 
@@ -878,7 +878,7 @@ class GamesApi {
   }
 
   /// Pick Attacker or Defender (role roll-off winner only)
-  /// The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there&#39;s no client-triggered roll. &#x60;role_roll_winner_id&#x60; on the Game is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining role. 
+  /// The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there&#39;s no client-triggered roll. &#x60;won_role_roll&#x60; on the winner&#39;s GamePlayer entry is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining role. 
   ///
   /// Parameters:
   /// * [id] 

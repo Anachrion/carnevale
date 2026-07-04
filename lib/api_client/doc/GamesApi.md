@@ -413,7 +413,7 @@ Name | Type | Description  | Notes
 
 Pick a Deployment Zone (deployment roll-off winner only)
 
-The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there's no client-triggered roll. `deployment_roll_winner_id` on the Game is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining zone. 
+The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there's no client-triggered roll. `won_deployment_roll` on the winner's GamePlayer entry is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining zone. 
 
 ### Example
 ```dart
@@ -458,7 +458,7 @@ Name | Type | Description  | Notes
 
 Pick Attacker or Defender (role roll-off winner only)
 
-The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there's no client-triggered roll. `role_roll_winner_id` on the Game is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining role. 
+The roll-off winner is picked at random, server-side, as soon as the second player joins the game — there's no client-triggered roll. `won_role_roll` on the winner's GamePlayer entry is only revealed to clients once this step of the flow is reached. The other player is automatically assigned the remaining role. 
 
 ### Example
 ```dart

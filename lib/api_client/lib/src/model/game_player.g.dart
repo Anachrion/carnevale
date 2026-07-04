@@ -144,6 +144,10 @@ class _$GamePlayer extends GamePlayer {
   @override
   final bool ready;
   @override
+  final bool wonRoleRoll;
+  @override
+  final bool wonDeploymentRoll;
+  @override
   final BuiltList<Agenda> agendas;
 
   factory _$GamePlayer([void Function(GamePlayerBuilder)? updates]) =>
@@ -158,6 +162,8 @@ class _$GamePlayer extends GamePlayer {
     this.role,
     this.deploymentZone,
     required this.ready,
+    required this.wonRoleRoll,
+    required this.wonDeploymentRoll,
     required this.agendas,
   }) : super._();
   @override
@@ -179,6 +185,8 @@ class _$GamePlayer extends GamePlayer {
         role == other.role &&
         deploymentZone == other.deploymentZone &&
         ready == other.ready &&
+        wonRoleRoll == other.wonRoleRoll &&
+        wonDeploymentRoll == other.wonDeploymentRoll &&
         agendas == other.agendas;
   }
 
@@ -193,6 +201,8 @@ class _$GamePlayer extends GamePlayer {
     _$hash = $jc(_$hash, role.hashCode);
     _$hash = $jc(_$hash, deploymentZone.hashCode);
     _$hash = $jc(_$hash, ready.hashCode);
+    _$hash = $jc(_$hash, wonRoleRoll.hashCode);
+    _$hash = $jc(_$hash, wonDeploymentRoll.hashCode);
     _$hash = $jc(_$hash, agendas.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -209,6 +219,8 @@ class _$GamePlayer extends GamePlayer {
           ..add('role', role)
           ..add('deploymentZone', deploymentZone)
           ..add('ready', ready)
+          ..add('wonRoleRoll', wonRoleRoll)
+          ..add('wonDeploymentRoll', wonDeploymentRoll)
           ..add('agendas', agendas))
         .toString();
   }
@@ -250,6 +262,15 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
   bool? get ready => _$this._ready;
   set ready(bool? ready) => _$this._ready = ready;
 
+  bool? _wonRoleRoll;
+  bool? get wonRoleRoll => _$this._wonRoleRoll;
+  set wonRoleRoll(bool? wonRoleRoll) => _$this._wonRoleRoll = wonRoleRoll;
+
+  bool? _wonDeploymentRoll;
+  bool? get wonDeploymentRoll => _$this._wonDeploymentRoll;
+  set wonDeploymentRoll(bool? wonDeploymentRoll) =>
+      _$this._wonDeploymentRoll = wonDeploymentRoll;
+
   ListBuilder<Agenda>? _agendas;
   ListBuilder<Agenda> get agendas => _$this._agendas ??= ListBuilder<Agenda>();
   set agendas(ListBuilder<Agenda>? agendas) => _$this._agendas = agendas;
@@ -269,6 +290,8 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
       _role = $v.role;
       _deploymentZone = $v.deploymentZone;
       _ready = $v.ready;
+      _wonRoleRoll = $v.wonRoleRoll;
+      _wonDeploymentRoll = $v.wonDeploymentRoll;
       _agendas = $v.agendas.toBuilder();
       _$v = null;
     }
@@ -317,6 +340,16 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
               ready,
               r'GamePlayer',
               'ready',
+            ),
+            wonRoleRoll: BuiltValueNullFieldError.checkNotNull(
+              wonRoleRoll,
+              r'GamePlayer',
+              'wonRoleRoll',
+            ),
+            wonDeploymentRoll: BuiltValueNullFieldError.checkNotNull(
+              wonDeploymentRoll,
+              r'GamePlayer',
+              'wonDeploymentRoll',
             ),
             agendas: agendas.build(),
           );
