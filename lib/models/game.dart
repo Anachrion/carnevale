@@ -76,6 +76,7 @@ class Scenario {
 
 class Game {
   final int id;
+  final String name;
   final String joinCode;
   final String status;
   final int ducatLimit;
@@ -88,6 +89,7 @@ class Game {
 
   const Game({
     required this.id,
+    required this.name,
     required this.joinCode,
     required this.status,
     required this.ducatLimit,

@@ -12,12 +12,17 @@ part 'create_game_input.g.dart';
 ///
 /// Properties:
 /// * [scenarioId] 
+/// * [name] - Defaults to the scenario's name if omitted.
 /// * [ducatLimit] - Defaults to the scenario's ducats if omitted.
 /// * [boardSize] 
 @BuiltValue()
 abstract class CreateGameInput implements Built<CreateGameInput, CreateGameInputBuilder> {
   @BuiltValueField(wireName: r'scenario_id')
   int get scenarioId;
+
+  /// Defaults to the scenario's name if omitted.
+  @BuiltValueField(wireName: r'name')
+  String? get name;
 
   /// Defaults to the scenario's ducats if omitted.
   @BuiltValueField(wireName: r'ducat_limit')
@@ -54,6 +59,13 @@ class _$CreateGameInputSerializer implements PrimitiveSerializer<CreateGameInput
       object.scenarioId,
       specifiedType: const FullType(int),
     );
+    if (object.name != null) {
+      yield r'name';
+      yield serializers.serialize(
+        object.name,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
     if (object.ducatLimit != null) {
       yield r'ducat_limit';
       yield serializers.serialize(
@@ -97,6 +109,14 @@ class _$CreateGameInputSerializer implements PrimitiveSerializer<CreateGameInput
             specifiedType: const FullType(int),
           ) as int;
           result.scenarioId = valueDes;
+          break;
+        case r'name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.name = valueDes;
           break;
         case r'ducat_limit':
           final valueDes = serializers.deserialize(

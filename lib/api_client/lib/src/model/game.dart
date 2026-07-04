@@ -15,6 +15,7 @@ part 'game.g.dart';
 ///
 /// Properties:
 /// * [id] 
+/// * [name] 
 /// * [joinCode] 
 /// * [status] 
 /// * [ducatLimit] 
@@ -28,6 +29,9 @@ part 'game.g.dart';
 abstract class Game implements Built<Game, GameBuilder> {
   @BuiltValueField(wireName: r'id')
   int get id;
+
+  @BuiltValueField(wireName: r'name')
+  String get name;
 
   @BuiltValueField(wireName: r'join_code')
   String get joinCode;
@@ -88,6 +92,11 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     yield serializers.serialize(
       object.id,
       specifiedType: const FullType(int),
+    );
+    yield r'name';
+    yield serializers.serialize(
+      object.name,
+      specifiedType: const FullType(String),
     );
     yield r'join_code';
     yield serializers.serialize(
@@ -163,6 +172,13 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
             specifiedType: const FullType(int),
           ) as int;
           result.id = valueDes;
+          break;
+        case r'name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.name = valueDes;
           break;
         case r'join_code':
           final valueDes = serializers.deserialize(

@@ -110,7 +110,7 @@ class GamesApi {
   }
 
   /// Create a game, hosted by the current user
-  /// ducat_limit defaults from the scenario if omitted.
+  /// ducat_limit and name default from the scenario if omitted.
   ///
   /// Parameters:
   /// * [createGameInput] 

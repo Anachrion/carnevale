@@ -9,6 +9,7 @@ import 'package:carnevale_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **scenarioId** | **int** |  | 
+**name** | **String** | Defaults to the scenario's name if omitted. | [optional] 
 **ducatLimit** | **int** | Defaults to the scenario's ducats if omitted. | [optional] 
 **boardSize** | **String** |  | [optional] 
 

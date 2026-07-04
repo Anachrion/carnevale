@@ -173,6 +173,8 @@ class _$Game extends Game {
   @override
   final int id;
   @override
+  final String name;
+  @override
   final String joinCode;
   @override
   final GameStatusEnum status;
@@ -196,6 +198,7 @@ class _$Game extends Game {
 
   _$Game._({
     required this.id,
+    required this.name,
     required this.joinCode,
     required this.status,
     required this.ducatLimit,
@@ -218,6 +221,7 @@ class _$Game extends Game {
     if (identical(other, this)) return true;
     return other is Game &&
         id == other.id &&
+        name == other.name &&
         joinCode == other.joinCode &&
         status == other.status &&
         ducatLimit == other.ducatLimit &&
@@ -233,6 +237,7 @@ class _$Game extends Game {
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, id.hashCode);
+    _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, joinCode.hashCode);
     _$hash = $jc(_$hash, status.hashCode);
     _$hash = $jc(_$hash, ducatLimit.hashCode);
@@ -250,6 +255,7 @@ class _$Game extends Game {
   String toString() {
     return (newBuiltValueToStringHelper(r'Game')
           ..add('id', id)
+          ..add('name', name)
           ..add('joinCode', joinCode)
           ..add('status', status)
           ..add('ducatLimit', ducatLimit)
@@ -269,6 +275,10 @@ class GameBuilder implements Builder<Game, GameBuilder> {
   int? _id;
   int? get id => _$this._id;
   set id(int? id) => _$this._id = id;
+
+  String? _name;
+  String? get name => _$this._name;
+  set name(String? name) => _$this._name = name;
 
   String? _joinCode;
   String? get joinCode => _$this._joinCode;
@@ -318,6 +328,7 @@ class GameBuilder implements Builder<Game, GameBuilder> {
     final $v = _$v;
     if ($v != null) {
       _id = $v.id;
+      _name = $v.name;
       _joinCode = $v.joinCode;
       _status = $v.status;
       _ducatLimit = $v.ducatLimit;
@@ -352,6 +363,7 @@ class GameBuilder implements Builder<Game, GameBuilder> {
           _$v ??
           _$Game._(
             id: BuiltValueNullFieldError.checkNotNull(id, r'Game', 'id'),
+            name: BuiltValueNullFieldError.checkNotNull(name, r'Game', 'name'),
             joinCode: BuiltValueNullFieldError.checkNotNull(
               joinCode,
               r'Game',
