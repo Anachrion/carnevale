@@ -207,7 +207,7 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
           ),
           const SizedBox(width: 4),
           Text(
-            'Game',
+            'Games',
             style: GoogleFonts.cinzel(fontSize: 24, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 3),
           ),
         ],

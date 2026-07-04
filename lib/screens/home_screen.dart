@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           _MenuItem(
                             icon: Icons.sports_esports_outlined,
-                            title: 'Game',
+                            title: 'Games',
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameHomeScreen())),
                           ),
                           const SizedBox(height: 12),

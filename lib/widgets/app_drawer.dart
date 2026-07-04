@@ -102,7 +102,7 @@ class AppDrawer extends StatelessWidget {
                     onTap: () => _navigate(context, AppDrawerRoute.gangs, const GangsScreen()),
                   ),
                   _NavItem(
-                    label: 'Game',
+                    label: 'Games',
                     active: current == AppDrawerRoute.game,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.game, const GameHomeScreen()),
