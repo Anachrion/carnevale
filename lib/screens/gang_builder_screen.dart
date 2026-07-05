@@ -8,6 +8,7 @@ import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
+import '../widgets/equipment_detail.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
@@ -189,58 +190,6 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-  }
-
-  void _showEquipmentDetail(BuildContext context, api.Equipment e) {
-    showDialog(
-      context: context,
-      builder: (context) => ThemedDialogCard(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    e.name,
-                    style: GoogleFonts.cinzel(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.textColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  '${e.cost}',
-                  style: GoogleFonts.cinzel(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppPalette.gold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Divider(
-              color: context.subtleTextColor.withOpacity(0.3),
-              thickness: 0.5,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              e.description,
-              style: TextStyle(
-                fontSize: 13,
-                color: context.textColor,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _reorderEntry(int oldIndex, int newIndex) async {
@@ -615,7 +564,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             ),
           );
         } else if (equipmentItem != null) {
-          onTap = () => _showEquipmentDetail(context, equipmentItem);
+          onTap = () => showEquipmentDetailDialog(context, equipmentItem);
         }
         return ReorderableDragStartListener(
           key: ValueKey(entry.id),
@@ -738,7 +687,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                               canAdd: canAdd,
                               busy: _busy,
                               onAdd: () => _addEquipment(e),
-                              onTap: () => _showEquipmentDetail(context, e),
+                              onTap: () =>
+                                  showEquipmentDetailDialog(context, e),
                             );
                           },
                         ),
