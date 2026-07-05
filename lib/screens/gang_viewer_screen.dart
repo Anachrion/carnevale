@@ -623,21 +623,26 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     );
   }
 
-  // Always shows all five counters (dimmed when inactive) rather than only the active ones, so
-  // every tile has the same fixed layout — easier to scan across a whole gang. Editing happens
-  // through the + button next to them (own models only), not by tapping the icons themselves.
+  // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
+  // entirely, so a clean model shows no counter icons at all. Editing happens through the +
+  // button next to them (own models only), not by tapping the icons themselves.
   List<Widget> _counterIcons(EntryState state) {
     return [
-      _CounterIcon(asset: 'assets/images/counters/stunned.png', label: 'Stunned', active: state.stunned),
-      _CounterIcon(asset: 'assets/images/counters/hidden.png', label: 'Hidden', active: state.hidden),
-      _CounterIcon(asset: 'assets/images/counters/guard.png', label: 'Guarding', active: state.guarding),
-      _CounterIcon(asset: 'assets/images/counters/carry_objective.png', label: 'Carrying objective', active: state.carryingObjective),
-      _CounterIcon(
-        asset: 'assets/images/counters/underwater_counter.png',
-        label: 'Underwater',
-        active: state.underwaterCounters > 0,
-        badge: state.underwaterCounters > 0 ? state.underwaterCounters : null,
-      ),
+      if (state.stunned)
+        _CounterIcon(asset: 'assets/images/counters/stunned.png', label: 'Stunned', active: true),
+      if (state.hidden)
+        _CounterIcon(asset: 'assets/images/counters/hidden.png', label: 'Hidden', active: true),
+      if (state.guarding)
+        _CounterIcon(asset: 'assets/images/counters/guard.png', label: 'Guarding', active: true),
+      if (state.carryingObjective)
+        _CounterIcon(asset: 'assets/images/counters/carry_objective.png', label: 'Carrying objective', active: true),
+      if (state.underwaterCounters > 0)
+        _CounterIcon(
+          asset: 'assets/images/counters/underwater_counter.png',
+          label: 'Underwater',
+          active: true,
+          badge: state.underwaterCounters,
+        ),
     ];
   }
 }
