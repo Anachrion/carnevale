@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:carnevale_api/src/model/entry_state.dart';
 import 'package:built_collection/built_collection.dart';
+import 'package:carnevale_api/src/model/spell.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -20,6 +21,12 @@ part 'list_entry.g.dart';
 /// * [name] 
 /// * [cost] 
 /// * [state] - Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
+/// * [mage] - Whether this model is a Mage and can therefore be given spells. Always false for Equipment.
+/// * [spellSlots] - Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
+/// * [disciplines] - Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
+/// * [spellDiscipline] - The Discipline this model has committed to, or null if none picked yet.
+/// * [cantrip] - The free Cantrip the model always knows for its committed Discipline; null when no Discipline is picked. Not counted against spell_slots.
+/// * [spells] - The non-free spells this model currently knows.
 @BuiltValue()
 abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -44,6 +51,30 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   /// Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
   @BuiltValueField(wireName: r'state')
   EntryState? get state;
+
+  /// Whether this model is a Mage and can therefore be given spells. Always false for Equipment.
+  @BuiltValueField(wireName: r'mage')
+  bool get mage;
+
+  /// Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
+  @BuiltValueField(wireName: r'spell_slots')
+  int get spellSlots;
+
+  /// Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
+  @BuiltValueField(wireName: r'disciplines')
+  BuiltList<String> get disciplines;
+
+  /// The Discipline this model has committed to, or null if none picked yet.
+  @BuiltValueField(wireName: r'spell_discipline')
+  String? get spellDiscipline;
+
+  /// The free Cantrip the model always knows for its committed Discipline; null when no Discipline is picked. Not counted against spell_slots.
+  @BuiltValueField(wireName: r'cantrip')
+  Spell? get cantrip;
+
+  /// The non-free spells this model currently knows.
+  @BuiltValueField(wireName: r'spells')
+  BuiltList<Spell> get spells;
 
   ListEntry._();
 
@@ -105,6 +136,40 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
         specifiedType: const FullType.nullable(EntryState),
       );
     }
+    yield r'mage';
+    yield serializers.serialize(
+      object.mage,
+      specifiedType: const FullType(bool),
+    );
+    yield r'spell_slots';
+    yield serializers.serialize(
+      object.spellSlots,
+      specifiedType: const FullType(int),
+    );
+    yield r'disciplines';
+    yield serializers.serialize(
+      object.disciplines,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
+    if (object.spellDiscipline != null) {
+      yield r'spell_discipline';
+      yield serializers.serialize(
+        object.spellDiscipline,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.cantrip != null) {
+      yield r'cantrip';
+      yield serializers.serialize(
+        object.cantrip,
+        specifiedType: const FullType.nullable(Spell),
+      );
+    }
+    yield r'spells';
+    yield serializers.serialize(
+      object.spells,
+      specifiedType: const FullType(BuiltList, [FullType(Spell)]),
+    );
   }
 
   @override
@@ -177,6 +242,50 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
           ) as EntryState?;
           if (valueDes == null) continue;
           result.state.replace(valueDes);
+          break;
+        case r'mage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.mage = valueDes;
+          break;
+        case r'spell_slots':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.spellSlots = valueDes;
+          break;
+        case r'disciplines':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.disciplines.replace(valueDes);
+          break;
+        case r'spell_discipline':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.spellDiscipline = valueDes;
+          break;
+        case r'cantrip':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(Spell),
+          ) as Spell?;
+          if (valueDes == null) continue;
+          result.cantrip.replace(valueDes);
+          break;
+        case r'spells':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(Spell)]),
+          ) as BuiltList<Spell>;
+          result.spells.replace(valueDes);
           break;
         default:
           unhandled.add(key);

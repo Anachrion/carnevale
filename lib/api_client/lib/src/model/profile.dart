@@ -32,6 +32,9 @@ part 'profile.g.dart';
 /// * [abilities] 
 /// * [keywords] 
 /// * [version] 
+/// * [mage] - Whether the profile has the Mage ability and can be given spells (rulebook p24).
+/// * [spellSlots] - Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
+/// * [disciplines] - Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
 /// * [weapons] 
 /// * [specialRules] 
 /// * [cardReferences] 
@@ -87,6 +90,18 @@ abstract class Profile implements Built<Profile, ProfileBuilder> {
 
   @BuiltValueField(wireName: r'version')
   String get version;
+
+  /// Whether the profile has the Mage ability and can be given spells (rulebook p24).
+  @BuiltValueField(wireName: r'mage')
+  bool get mage;
+
+  /// Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
+  @BuiltValueField(wireName: r'spell_slots')
+  int get spellSlots;
+
+  /// Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
+  @BuiltValueField(wireName: r'disciplines')
+  BuiltList<String> get disciplines;
 
   @BuiltValueField(wireName: r'weapons')
   BuiltList<Weapon> get weapons;
@@ -204,6 +219,21 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
     yield serializers.serialize(
       object.version,
       specifiedType: const FullType(String),
+    );
+    yield r'mage';
+    yield serializers.serialize(
+      object.mage,
+      specifiedType: const FullType(bool),
+    );
+    yield r'spell_slots';
+    yield serializers.serialize(
+      object.spellSlots,
+      specifiedType: const FullType(int),
+    );
+    yield r'disciplines';
+    yield serializers.serialize(
+      object.disciplines,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
     );
     yield r'weapons';
     yield serializers.serialize(
@@ -361,6 +391,27 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
             specifiedType: const FullType(String),
           ) as String;
           result.version = valueDes;
+          break;
+        case r'mage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.mage = valueDes;
+          break;
+        case r'spell_slots':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.spellSlots = valueDes;
+          break;
+        case r'disciplines':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.disciplines.replace(valueDes);
           break;
         case r'weapons':
           final valueDes = serializers.deserialize(

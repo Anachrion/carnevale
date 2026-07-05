@@ -16,6 +16,7 @@ import 'package:carnevale_api/src/api/lists_api.dart';
 import 'package:carnevale_api/src/api/profiles_api.dart';
 import 'package:carnevale_api/src/api/scenarios_api.dart';
 import 'package:carnevale_api/src/api/session_api.dart';
+import 'package:carnevale_api/src/api/spells_api.dart';
 
 class CarnevaleApi {
   static const String basePath = r'http://localhost:3000/api/v1';
@@ -151,5 +152,11 @@ class CarnevaleApi {
   /// by doing that all interceptors will not be executed
   SessionApi getSessionApi() {
     return SessionApi(dio, serializers);
+  }
+
+  /// Get SpellsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  SpellsApi getSpellsApi() {
+    return SpellsApi(dio, serializers);
   }
 }

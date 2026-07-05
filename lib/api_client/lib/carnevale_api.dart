@@ -17,6 +17,7 @@ export 'package:carnevale_api/src/api/lists_api.dart';
 export 'package:carnevale_api/src/api/profiles_api.dart';
 export 'package:carnevale_api/src/api/scenarios_api.dart';
 export 'package:carnevale_api/src/api/session_api.dart';
+export 'package:carnevale_api/src/api/spells_api.dart';
 
 export 'package:carnevale_api/src/model/agenda.dart';
 export 'package:carnevale_api/src/model/agenda_history_entry.dart';
@@ -57,7 +58,10 @@ export 'package:carnevale_api/src/model/score_agenda_input.dart';
 export 'package:carnevale_api/src/model/select_gang_input.dart';
 export 'package:carnevale_api/src/model/session.dart';
 export 'package:carnevale_api/src/model/session_user.dart';
+export 'package:carnevale_api/src/model/set_entry_spells_input.dart';
+export 'package:carnevale_api/src/model/set_entry_spells_input_entry.dart';
 export 'package:carnevale_api/src/model/special_rule.dart';
+export 'package:carnevale_api/src/model/spell.dart';
 export 'package:carnevale_api/src/model/update_account_input.dart';
 export 'package:carnevale_api/src/model/update_account_input_user.dart';
 export 'package:carnevale_api/src/model/update_counters_input.dart';

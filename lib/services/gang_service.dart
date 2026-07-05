@@ -1,3 +1,4 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/gang.dart';
 import 'api_client.dart';
@@ -69,6 +70,25 @@ class GangService {
     return mapGang(res.data!);
   }
 
+  /// Replaces a Mage model's committed Discipline and full set of known spells (rulebook p24).
+  Future<Gang> setEntrySpells(int entryId, String? discipline, List<int> spellIds) async {
+    final res = await _client.listEntries.setListEntrySpells(
+      id: entryId,
+      setEntrySpellsInput: api.SetEntrySpellsInput((b) => b
+        ..entry = api.SetEntrySpellsInputEntry((eb) => eb
+          ..discipline = _disciplineEnum(discipline)
+          ..spellIds = ListBuilder<int>(spellIds)
+        ).toBuilder()
+      ),
+    );
+    return mapGang(res.data!);
+  }
+
+  Future<List<Spell>> loadSpells() async {
+    final res = await _client.spells.getSpells();
+    return (res.data?.toList() ?? []).map(mapSpell).toList();
+  }
+
   Gang mapGang(api.ModelList ml) => Gang(
         id: ml.id,
         name: ml.name ?? '',
@@ -90,7 +110,27 @@ class GangService {
         name: e.name,
         cost: e.cost,
         state: e.state == null ? null : mapEntryState(e.state!),
+        mage: e.mage,
+        spellSlots: e.spellSlots,
+        disciplines: e.disciplines.toList(),
+        spellDiscipline: e.spellDiscipline,
+        cantrip: e.cantrip == null ? null : mapSpell(e.cantrip!),
+        spells: e.spells.map(mapSpell).toList(),
       );
+
+  Spell mapSpell(api.Spell s) => Spell(
+        id: s.id,
+        name: s.name,
+        discipline: api.standardSerializers.serializeWith(api.SpellDisciplineEnum.serializer, s.discipline) as String,
+        cost: s.cost,
+        difficulty: s.difficulty,
+        cantrip: s.cantrip,
+        description: s.description,
+      );
+
+  api.SetEntrySpellsInputEntryDisciplineEnum? _disciplineEnum(String? slug) => slug == null
+      ? null
+      : api.standardSerializers.deserializeWith(api.SetEntrySpellsInputEntryDisciplineEnum.serializer, slug);
 
   EntryStatValue mapStatValue(api.EntryStatValue v) => EntryStatValue(current: v.current, starting: v.starting);
 

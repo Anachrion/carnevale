@@ -38,6 +38,7 @@ class ApiClient {
     equipment = EquipmentApi(dio, standardSerializers);
     games = GamesApi(dio, standardSerializers);
     scenarios = ScenariosApi(dio, standardSerializers);
+    spells = SpellsApi(dio, standardSerializers);
   }
 
   /// Set by [AuthService] once a user is logged in; sent as a Bearer token on every request.
@@ -53,4 +54,5 @@ class ApiClient {
   late final EquipmentApi equipment;
   late final GamesApi games;
   late final ScenariosApi scenarios;
+  late final SpellsApi spells;
 }

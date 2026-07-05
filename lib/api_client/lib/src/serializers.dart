@@ -53,7 +53,10 @@ import 'package:carnevale_api/src/model/score_agenda_input.dart';
 import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/session.dart';
 import 'package:carnevale_api/src/model/session_user.dart';
+import 'package:carnevale_api/src/model/set_entry_spells_input.dart';
+import 'package:carnevale_api/src/model/set_entry_spells_input_entry.dart';
 import 'package:carnevale_api/src/model/special_rule.dart';
+import 'package:carnevale_api/src/model/spell.dart';
 import 'package:carnevale_api/src/model/update_account_input.dart';
 import 'package:carnevale_api/src/model/update_account_input_user.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
@@ -105,7 +108,10 @@ part 'serializers.g.dart';
   SelectGangInput,
   Session,
   SessionUser,
+  SetEntrySpellsInput,
+  SetEntrySpellsInputEntry,
   SpecialRule,
+  Spell,
   UpdateAccountInput,
   UpdateAccountInputUser,
   UpdateCountersInput,
@@ -119,6 +125,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Equipment)]),
         () => ListBuilder<Equipment>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Spell)]),
+        () => ListBuilder<Spell>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Game)]),
