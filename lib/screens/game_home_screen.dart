@@ -74,6 +74,7 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
         _service.loadMyGames(visibility: 'active'),
         _service.loadMyGames(visibility: 'archived'),
       ]);
+      if (!mounted) return;
       setState(() {
         _activeGames = results[0];
         _archivedGames = results[1];
@@ -81,6 +82,7 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
       });
     } catch (e, st) {
       debugPrint('GameHomeScreen error: $e\n$st');
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;
@@ -618,6 +620,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
   Future<void> _load() async {
     try {
       final scenarios = await _service.loadScenarios();
+      if (!mounted) return;
       setState(() {
         _scenarios = scenarios;
         _selected = scenarios.firstOrNull;
@@ -625,6 +628,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Could not load scenarios';
         _loading = false;

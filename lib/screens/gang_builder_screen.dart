@@ -86,6 +86,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       EquipmentService().getAll(),
       GangService().loadSpells(),
     ]);
+    if (!mounted) return;
     setState(() {
       _profiles = results[0] as List<Profile>;
       _equipment = results[1] as List<Equipment>;
@@ -100,13 +101,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       context: context,
       builder: (_) => _SpellPickerDialog(entry: entry, allSpells: _spells),
     );
-    if (result == null) return;
+    if (result == null || !mounted) return;
     setState(() => _busy = true);
     try {
       final updated = await GangService().setEntrySpells(entry.id, result.discipline, result.spellIds);
+      if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -126,9 +128,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     setState(() => _busy = true);
     try {
       final updated = await GangService().addEntry(_gang.id, p.cardReferenceId, 'CardReference');
+      if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -137,9 +140,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     setState(() => _busy = true);
     try {
       final updated = await GangService().addEntry(_gang.id, e.id, 'Equipment');
+      if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -149,9 +153,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     setState(() => _busy = true);
     try {
       final updated = await GangService().removeEntry(_gang.id, entry.id);
+      if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -160,9 +165,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     setState(() => _busy = true);
     try {
       final updated = await GangService().removeEntry(_gang.id, entry.id);
+      if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -238,9 +244,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     });
     try {
       final updated = await GangService().reorderEntry(entry.id, newIndex + 1);
+      if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
-      setState(() => _busy = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 

@@ -57,6 +57,7 @@ class _CardsScreenState extends State<CardsScreen> {
 
   Future<void> _load() async {
     final results = await _service.search('');
+    if (!mounted) return;
     setState(() {
       _results = results;
       _loading = false;
@@ -68,6 +69,7 @@ class _CardsScreenState extends State<CardsScreen> {
       _searchController.text,
       factions: _selectedFactions,
     );
+    if (!mounted) return;
     setState(() => _results = results);
   }
 
