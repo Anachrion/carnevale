@@ -10,5 +10,5 @@ extension AppColors on BuildContext {
       _isDark ? const Color(0xFFAA9E92) : const Color(0xFF7A6E62);
 
   Color get cardBgColor =>
-      _isDark ? const Color(0xFF1E1C18) : const Color(0xFFF5F2EE);
+      _isDark ? const Color(0xFF191D27) : const Color(0xFFF5F2EE);
 }
