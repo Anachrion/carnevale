@@ -1,38 +1,16 @@
-class Agenda {
-  final int id;
-  final String name;
-  final String description;
-
-  const Agenda({required this.id, required this.name, required this.description});
-}
-
-class GangSummary {
-  final int id;
-  final String? name;
-  final String faction;
-  final int points;
-  final int totalCost;
-
-  const GangSummary({
-    required this.id,
-    required this.name,
-    required this.faction,
-    required this.points,
-    required this.totalCost,
-  });
-}
+import 'package:carnevale_api/carnevale_api.dart' as api;
 
 class GamePlayer {
   final int id;
   final int userId;
   final String username;
   final bool host;
-  final GangSummary? list;
+  final api.GangSummary? list;
   final String? role;
   final bool ready;
   final bool wonRoleRoll;
   final bool wonDeploymentRoll;
-  final List<Agenda> agendas;
+  final List<api.Agenda> agendas;
 
   const GamePlayer({
     required this.id,

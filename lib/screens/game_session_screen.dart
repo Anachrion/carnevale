@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 import '../main.dart';
+import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart' as models;
 import '../services/game_service.dart';
 import '../widgets/app_background.dart';
@@ -614,7 +615,7 @@ class _GangOptionTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final models.GangSummary gang;
+  final api.GangSummary gang;
   final bool selectable;
   final bool busy;
   final VoidCallback onTap;
