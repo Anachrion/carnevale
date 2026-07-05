@@ -41,9 +41,9 @@ class GameService extends ChangeNotifier {
     }
   }
 
-  Future<List<models.Scenario>> loadScenarios() => _guard(() async {
+  Future<List<api.Scenario>> loadScenarios() => _guard(() async {
     final res = await _client.scenarios.getScenarios();
-    return (res.data?.toList() ?? []).map(_mapScenario).toList();
+    return res.data?.toList() ?? [];
   });
 
   Future<List<models.Game>> loadMyGames({String visibility = 'active'}) =>
@@ -267,7 +267,7 @@ class GameService extends ChangeNotifier {
     status: wireEnum(g.status, const FullType(api.GameStatusEnum)),
     ducatLimit: g.ducatLimit,
     boardSize: g.boardSize,
-    scenario: _mapScenario(g.scenario),
+    scenario: g.scenario,
     viewerVisibility: g.viewerVisibility.name,
     players: g.players.map(_mapPlayer).toList(),
   );
@@ -283,20 +283,6 @@ class GameService extends ChangeNotifier {
     wonRoleRoll: p.wonRoleRoll,
     wonDeploymentRoll: p.wonDeploymentRoll,
     agendas: p.agendas.toList(),
-  );
-
-  models.Scenario _mapScenario(api.Scenario s) => models.Scenario(
-    id: s.id,
-    name: s.name,
-    ducats: s.ducats,
-    asymmetric: s.asymmetric,
-    setup: s.setup,
-    primaryObjective: s.primaryObjective,
-    agendas: s.agendas.toList(),
-    specialRules: s.specialRules.toList(),
-    duration: s.duration,
-    deploymentZones: s.deploymentZones.toList(),
-    illustration: s.illustration,
   );
 
   /// Converts a generated enum constant back to its wire value (e.g.
