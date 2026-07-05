@@ -9,6 +9,7 @@ import '../services/equipment_service.dart';
 import '../services/game_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
 const _kGold = Color(0xFFC4A050);
@@ -514,7 +515,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
   void _showEquipmentDetail(BuildContext context, Equipment e) {
     showDialog(
       context: context,
-      builder: (context) => _ThemedDialogCard(
+      builder: (context) => ThemedDialogCard(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -774,38 +775,6 @@ class _AddCounterButton extends StatelessWidget {
   }
 }
 
-/// Shared surface for the counter and stat edit popups: a rounded card that follows the app
-/// theme (cream in light, near-black in dark) with a gold border, rather than the fixed dark
-/// brown used for equipment cards — so the popup feels native in both themes.
-class _ThemedDialogCard extends StatelessWidget {
-  const _ThemedDialogCard({required this.child, this.padding = const EdgeInsets.fromLTRB(24, 24, 24, 12)});
-
-  final Widget child;
-
-  /// Defaults to a shorter bottom inset, tuned for dialogs that end in a "Done" button (which
-  /// carries its own padding); popups ending in plain content pass a symmetric inset instead.
-  final EdgeInsets padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.cardBgColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _kGold.withOpacity(0.6), width: 1.2),
-          ),
-          padding: padding,
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
 /// Popup opened by [_AddCounterButton]: lists all five counters with their current state;
 /// tapping a row toggles it (underwater cycles 0 → 1 → 2 → 0) and saves immediately — no
 /// confirm step, matching how quickly counters flip at the table. Every change lands on the
@@ -856,7 +825,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return _ThemedDialogCard(
+    return ThemedDialogCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1008,7 +977,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return _ThemedDialogCard(
+    return ThemedDialogCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
