@@ -8,6 +8,7 @@ import '../models/profile.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
+import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
 const _kBackground = Color(0xFFF0EDE6);
@@ -171,57 +172,47 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   void _showEquipmentDetail(BuildContext context, Equipment e) {
     showDialog(
       context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: _kEquipmentColor,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context) => ThemedDialogCard(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        e.name,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+                Expanded(
+                  child: Text(
+                    e.name,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${e.cost}',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: _kGold,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
-                const SizedBox(height: 12),
+                const SizedBox(width: 12),
                 Text(
-                  e.description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.85),
-                    height: 1.5,
+                  '${e.cost}',
+                  style: GoogleFonts.cinzel(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: _kGold,
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 12),
+            Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+            const SizedBox(height: 12),
+            Text(
+              e.description,
+              style: TextStyle(
+                fontSize: 13,
+                color: context.textColor,
+                height: 1.5,
+              ),
+            ),
+          ],
         ),
       ),
     );
