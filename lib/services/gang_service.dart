@@ -53,7 +53,7 @@ class GangService {
     return mapGang(res.data!);
   }
 
-  Future<Gang> removeEntry(int listId, int entryId) async {
+  Future<Gang> removeEntry(int entryId) async {
     final res = await _client.listEntries.deleteListEntry(id: entryId);
     return mapGang(res.data!);
   }

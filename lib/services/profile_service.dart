@@ -33,8 +33,6 @@ class ProfileService {
     return all.map((p) => p.faction).toSet().toList()..sort();
   }
 
-  void invalidateCache() => _cache = null;
-
   Profile _mapProfile(api.Profile p) {
     // A profile can have more than one printed card (e.g. "(A)"/"(B)" copies of the same
     // henchman, sharing identical art) - keep every card_reference id so a gang entry hired
