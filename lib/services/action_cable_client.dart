@@ -13,19 +13,36 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// broadcasts. There's no official Dart client for this, and the protocol is
 /// simple enough that hand-rolling it avoids depending on an unmaintained package.
 class ActionCableClient {
-  ActionCableClient(this.url);
+  ActionCableClient(this._connectionUrlProvider);
 
-  final String url;
+  /// Produces the URL to connect with. Called fresh on every attempt (initial and every reconnect)
+  /// because the URL carries a single-use, short-lived cable ticket that can't be reused.
+  final Future<String> Function() _connectionUrlProvider;
 
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
   final _handlers = <String, void Function(Map<String, dynamic>)>{};
   Timer? _reconnectTimer;
   bool _disposed = false;
+  bool _welcomedOnce = false;
 
-  void Function()? onConnected;
+  /// Invoked after a *reconnect* completes (not the first connection), so the owner can refetch
+  /// state that may have changed while the socket was down — broadcasts during downtime are lost.
+  void Function()? onReconnect;
 
-  void connect() {
+  Future<void> connect() async {
+    if (_disposed) return;
+
+    final String url;
+    try {
+      url = await _connectionUrlProvider();
+    } catch (_) {
+      // Couldn't mint a ticket (transient network / expired session); back off and retry.
+      _scheduleReconnect();
+      return;
+    }
+    if (_disposed) return; // may have been disposed while awaiting the ticket
+
     _channel = WebSocketChannel.connect(Uri.parse(url));
     _subscription = _channel!.stream.listen(
       _handleFrame,
@@ -60,11 +77,14 @@ class ActionCableClient {
       case 'confirm_subscription':
         return;
       case 'welcome':
-        onConnected?.call();
         // Re-subscribe to every channel after a fresh connection (initial or reconnect).
         for (final identifier in _handlers.keys) {
           _send({'command': 'subscribe', 'identifier': identifier});
         }
+        // A welcome after the first one means we just reconnected: let the owner resync state
+        // that may have drifted while the socket was down.
+        if (_welcomedOnce) onReconnect?.call();
+        _welcomedOnce = true;
         return;
       case 'disconnect':
       case 'reject_subscription':

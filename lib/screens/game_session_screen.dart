@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 import '../main.dart';
 import '../models/game.dart' as models;
-import '../services/api_client.dart';
 import '../services/game_service.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
@@ -59,7 +58,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   Future<void> _init() async {
     try {
-      await _service.watch(widget.gameId, authToken: ApiClient().authToken ?? '');
+      await _service.watch(widget.gameId);
     } catch (e) {
       setState(() => _error = 'Could not load this game.');
     } finally {
