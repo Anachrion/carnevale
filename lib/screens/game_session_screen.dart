@@ -14,8 +14,6 @@ import 'gang_viewer_screen.dart';
 const _kGangsVisibleStatuses = {'agenda_draw', 'deploying'};
 const _kScrollablePhaseStatuses = {'pending', 'gang_selection', 'agenda_draw', 'deploying'};
 
-const _kGold = Color(0xFFC4A050);
-
 /// One status-driven screen for the whole two-player setup flow, rather than a
 /// stack of pushed screens: on load (or reconnect) it fetches a snapshot and
 /// subscribes for live updates, then renders whichever phase the server's
@@ -164,7 +162,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   }
 
   Widget _buildBody(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator(color: _kGold));
+    if (_loading) return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
     if (_error != null) {
       return Center(
         child: Column(
@@ -181,7 +179,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
     final game = _game;
     final me = _me;
-    if (game == null || me == null) return const Center(child: CircularProgressIndicator(color: _kGold));
+    if (game == null || me == null) return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
 
     // in_progress/completed (and any future status) render full-bleed below the header instead
     // of inside a SingleChildScrollView, since the models tab view manages its own scrolling
@@ -225,9 +223,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: _kGold.withOpacity(0.15),
+              color: AppPalette.gold.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _kGold),
+              border: Border.all(color: AppPalette.gold),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -237,13 +235,13 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                   style: GoogleFonts.cinzel(fontSize: 26, fontWeight: FontWeight.w700, letterSpacing: 6, color: context.textColor),
                 ),
                 const SizedBox(width: 12),
-                const Icon(Icons.copy, color: _kGold, size: 18),
+                const Icon(Icons.copy, color: AppPalette.gold, size: 18),
               ],
             ),
           ),
         ),
         const SizedBox(height: 20),
-        const CircularProgressIndicator(color: _kGold),
+        const CircularProgressIndicator(color: AppPalette.gold),
       ],
     );
   }
@@ -273,13 +271,13 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       return _PhaseCard(title: 'Role roll-off', children: [
         Text('Waiting for $winnerName to choose a role...', style: TextStyle(color: context.subtleTextColor)),
         const SizedBox(height: 16),
-        const CircularProgressIndicator(color: _kGold),
+        const CircularProgressIndicator(color: AppPalette.gold),
       ]);
     }
     return _PhaseCard(title: 'Role roll-off', children: [
       Text('Determining who picks a role...', style: TextStyle(color: context.subtleTextColor)),
       const SizedBox(height: 16),
-      const CircularProgressIndicator(color: _kGold),
+      const CircularProgressIndicator(color: AppPalette.gold),
     ]);
   }
 
@@ -295,7 +293,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           style: TextStyle(color: context.subtleTextColor),
         ),
         const SizedBox(height: 16),
-        const CircularProgressIndicator(color: _kGold),
+        const CircularProgressIndicator(color: AppPalette.gold),
       ]);
     }
 
@@ -307,7 +305,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         FutureBuilder<List<AvailableGang>>(
           future: _availableGangsFuture,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: _kGold));
+            if (!snapshot.hasData) return const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppPalette.gold));
             final gangs = snapshot.data!;
             if (gangs.isEmpty) {
               return Text('You have no gangs yet — create one from the Gangs tab first.', style: TextStyle(color: context.subtleTextColor));
@@ -357,7 +355,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       const SizedBox(height: 8),
       Text('Waiting for the opponent to draw...', style: TextStyle(color: context.subtleTextColor)),
       const SizedBox(height: 16),
-      const CircularProgressIndicator(color: _kGold),
+      const CircularProgressIndicator(color: AppPalette.gold),
     ]);
   }
 
@@ -379,7 +377,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         else ...[
           Text('Waiting for the opponent to be ready...', style: TextStyle(color: context.subtleTextColor)),
           const SizedBox(height: 16),
-          const CircularProgressIndicator(color: _kGold),
+          const CircularProgressIndicator(color: AppPalette.gold),
         ],
       ],
     );
@@ -394,7 +392,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   Widget _buildInProgressPhase(BuildContext context, models.Game game, models.GamePlayer me) {
     final opponent = _opponent;
     if (opponent == null) {
-      return const Center(child: CircularProgressIndicator(color: _kGold));
+      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
     }
     return GangsTabView(
       gameId: game.id,
@@ -444,7 +442,7 @@ class _ActionButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: busy ? null : onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: _kGold,
+        backgroundColor: AppPalette.gold,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -499,7 +497,7 @@ class _GangOptionTile extends StatelessWidget {
               if (!selectable)
                 Text('Over limit', style: TextStyle(fontSize: 11, color: Colors.red.shade400, fontWeight: FontWeight.w600))
               else
-                const Icon(Icons.chevron_right, color: _kGold, size: 20),
+                const Icon(Icons.chevron_right, color: AppPalette.gold, size: 20),
             ],
           ),
         ),

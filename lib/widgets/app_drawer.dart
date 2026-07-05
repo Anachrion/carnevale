@@ -27,13 +27,13 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? const Color(0xFFB1986C) : const Color(0xFF8B1A1A);
+    final accent = isDark ? AppPalette.mutedGold : AppPalette.red;
     final borderColor = isDark
-        ? const Color(0xFFB1986C).withOpacity(0.25)
-        : const Color(0xFF2C2418).withOpacity(0.15);
+        ? AppPalette.mutedGold.withOpacity(0.25)
+        : AppPalette.ink.withOpacity(0.15);
 
     return Drawer(
-      backgroundColor: isDark ? const Color(0xFF14171F) : const Color(0xFFF0EDE6),
+      backgroundColor: isDark ? AppPalette.backgroundDark : AppPalette.background,
       child: SafeArea(
         child: Column(
           children: [
@@ -62,7 +62,7 @@ class AppDrawer extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => _navigate(context, AppDrawerRoute.account, const AccountScreen()),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC4A050),
+                        backgroundColor: AppPalette.gold,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

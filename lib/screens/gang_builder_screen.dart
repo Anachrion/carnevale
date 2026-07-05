@@ -11,29 +11,6 @@ import '../services/profile_service.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
-const _kGold = Color(0xFFC4A050);
-
-const _kFactionColors = {
-  'doctors':    Color(0xFF177282),
-  'strigoi':    Color(0xFF2a3d6e),
-  'gifted':     Color(0xFFb04510),
-  'rashaar':    Color(0xFF1a5a40),
-  'patricians': Color(0xFF5a1a7a),
-  'vatican':    Color(0xFF8a6018),
-  'guild':      Color(0xFF831822),
-};
-
-const _kFactionIcons = {
-  'doctors':    'assets/images/icons/doctors icon.png',
-  'gifted':     'assets/images/icons/gifted icon.png',
-  'guild':      'assets/images/icons/guild icon.png',
-  'patricians': 'assets/images/icons/patricians icon.png',
-  'rashaar':    'assets/images/icons/rashaar icon.png',
-  'strigoi':    'assets/images/icons/strigoi icon.png',
-  'vatican':    'assets/images/icons/vatican icon.png',
-};
-
 enum _Tab { list, hire }
 
 enum _HireSort { role, name, cost }
@@ -196,7 +173,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                   style: GoogleFonts.cinzel(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: _kGold,
+                    color: AppPalette.gold,
                   ),
                 ),
               ],
@@ -249,9 +226,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final factionColor = _kFactionColors[_gang.faction] ?? _kGold;
+    final factionColor = AppPalette.factionColors[_gang.faction] ?? AppPalette.gold;
     return Scaffold(
-      backgroundColor: _kBackground,
+      backgroundColor: AppPalette.background,
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -297,7 +274,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   }
 
   Widget _buildHeader(BuildContext context, Color factionColor) {
-    final iconPath = _kFactionIcons[_gang.faction];
+    final iconPath = AppPalette.factionIcons[_gang.faction];
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
       child: Row(
@@ -339,7 +316,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     final limit = _gang.points;
     final ratio = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
     final isOver = used > limit;
-    final barColor = isOver ? Colors.red.shade400 : _kGold;
+    final barColor = isOver ? Colors.red.shade400 : AppPalette.gold;
     final remaining = limit - used;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -361,14 +338,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFFF5F2EE).withOpacity(0.30),
-                        const Color(0xFFF5F2EE).withOpacity(0.75),
+                        AppPalette.paper.withOpacity(0.30),
+                        AppPalette.paper.withOpacity(0.75),
                       ],
                     ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? const Color(0xFFB1986C).withOpacity(0.45)
+                    ? AppPalette.mutedGold.withOpacity(0.45)
                     : Colors.white.withOpacity(0.3),
                 width: 1.0,
               ),
@@ -422,8 +399,6 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     );
   }
 
-  static const _kAccentRed = Color(0xFFC0392B);
-
   TextSpan _highlightNumbers(String text, TextStyle base) {
     final spans = <InlineSpan>[];
     final re = RegExp(r'\d+');
@@ -451,7 +426,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: _kAccentRed,
+          color: AppPalette.brightRed,
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -499,14 +474,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFFF5F2EE).withOpacity(0.30),
-                        const Color(0xFFF5F2EE).withOpacity(0.75),
+                        AppPalette.paper.withOpacity(0.30),
+                        AppPalette.paper.withOpacity(0.75),
                       ],
                     ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFFB1986C).withOpacity(0.45)
+                    ? AppPalette.mutedGold.withOpacity(0.45)
                     : Colors.white.withOpacity(0.3),
                 width: 1.0,
               ),
@@ -536,7 +511,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 
   Widget _buildTabContent(Color factionColor) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: _kGold));
+      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
     }
     return IndexedStack(
       index: _tab == _Tab.list ? 0 : 1,
@@ -590,9 +565,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             ? _equipment.where((e) => e.id == entry.entryId).firstOrNull
             : null;
         final entryColor = entry.entryType == 'Equipment'
-            ? _kEquipmentColor
+            ? AppPalette.equipment
             : profile?.faction == 'gifted'
-                ? (_kFactionColors['gifted'] ?? factionColor)
+                ? (AppPalette.factionColors['gifted'] ?? factionColor)
                 : factionColor;
         final role = profile == null
             ? null
@@ -780,14 +755,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            const Color(0xFFF5F2EE).withOpacity(0.30),
-                            const Color(0xFFF5F2EE).withOpacity(0.75),
+                            AppPalette.paper.withOpacity(0.30),
+                            AppPalette.paper.withOpacity(0.75),
                           ],
                         ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFFB1986C).withOpacity(0.45)
+                        ? AppPalette.mutedGold.withOpacity(0.45)
                         : Colors.white.withOpacity(0.3),
                     width: 1.0,
                   ),
@@ -801,8 +776,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     prefixIcon: Icon(
                       Icons.search,
                       color: Theme.of(context).brightness == Brightness.dark
-                          ? _kGold
-                          : const Color(0xFF8B1A1A),
+                          ? AppPalette.gold
+                          : AppPalette.red,
                       size: 20,
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
@@ -886,8 +861,8 @@ class _SortChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = Theme.of(context).brightness == Brightness.dark
-        ? _kGold
-        : const Color(0xFF8B1A1A);
+        ? AppPalette.gold
+        : AppPalette.red;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1142,7 +1117,7 @@ class _HireCardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inList = count > 0;
-    final base = _kFactionColors[profile.faction] ?? factionColor;
+    final base = AppPalette.factionColors[profile.faction] ?? factionColor;
     final bgColor = inList ? Color.lerp(base, Colors.black, 0.45)! : base;
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -1291,8 +1266,6 @@ class _HireToggleButton extends StatelessWidget {
   }
 }
 
-const _kEquipmentColor = Color(0xFF4A3F35);
-
 class _HireEquipmentTile extends StatelessWidget {
   const _HireEquipmentTile({
     required this.equipment,
@@ -1314,10 +1287,10 @@ class _HireEquipmentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final inList = count > 0;
     final bgColor = inList
-        ? Color.lerp(_kEquipmentColor, Colors.black, 0.35)!
+        ? Color.lerp(AppPalette.equipment, Colors.black, 0.35)!
         : canAdd
-            ? _kEquipmentColor
-            : Color.lerp(_kEquipmentColor, Colors.white, 0.28)!;
+            ? AppPalette.equipment
+            : Color.lerp(AppPalette.equipment, Colors.white, 0.28)!;
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(

@@ -8,9 +8,6 @@ import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import 'account_screen.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
-const _kGold = Color(0xFFC4A050);
-
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key, required this.token});
   final String token;
@@ -65,14 +62,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   InputDecoration _decoration(String label) => InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
-        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
-        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
+        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
       );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBackground,
+      backgroundColor: AppPalette.background,
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           width: constraints.maxWidth,
@@ -159,7 +156,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               child: ElevatedButton(
                                 onPressed: _submitting ? null : _submit,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _kGold,
+                                  backgroundColor: AppPalette.gold,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

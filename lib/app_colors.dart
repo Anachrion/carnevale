@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'app_palette.dart';
 
+// Re-exported so a single `import '../app_colors.dart'` reaches both the theme-aware getters
+// below and the raw AppPalette tokens.
+export 'app_palette.dart';
+
+/// Theme-aware semantic colors: these resolve to a light or dark [AppPalette] token based on the
+/// current brightness. Prefer these over reaching for a raw palette token when a value should
+/// flip between themes.
 extension AppColors on BuildContext {
   bool get _isDark => Theme.of(this).brightness == Brightness.dark;
 
-  Color get textColor =>
-      _isDark ? const Color(0xFFEDE8DF) : const Color(0xFF2C2418);
+  Color get textColor => _isDark ? AppPalette.inkLight : AppPalette.ink;
 
-  Color get subtleTextColor =>
-      _isDark ? const Color(0xFFAA9E92) : const Color(0xFF7A6E62);
+  Color get subtleTextColor => _isDark ? AppPalette.inkLightSubtle : AppPalette.inkSubtle;
 
-  Color get cardBgColor =>
-      _isDark ? const Color(0xFF191D27) : const Color(0xFFF5F2EE);
+  Color get cardBgColor => _isDark ? AppPalette.surfaceDark : AppPalette.paper;
+
+  /// Scaffold / drawer background.
+  Color get backgroundColor => _isDark ? AppPalette.backgroundDark : AppPalette.background;
 }

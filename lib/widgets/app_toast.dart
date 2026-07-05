@@ -1,8 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-const _kGold = Color(0xFFC4A050);
 
 void showAppToast(BuildContext context, String message) {
   final overlay = Overlay.of(context);
@@ -64,10 +63,10 @@ class _AppToastState extends State<_AppToast> with SingleTickerProviderStateMixi
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: (isDark ? const Color(0xFF14171F) : const Color(0xFFF5F2EE))
+                    color: (isDark ? AppPalette.backgroundDark : AppPalette.paper)
                         .withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: _kGold.withValues(alpha: 0.6), width: 1.2),
+                    border: Border.all(color: AppPalette.gold.withValues(alpha: 0.6), width: 1.2),
                     boxShadow: [
                       BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 12, offset: const Offset(0, 4)),
                     ],
@@ -76,7 +75,7 @@ class _AppToastState extends State<_AppToast> with SingleTickerProviderStateMixi
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_circle, color: _kGold, size: 20),
+                      const Icon(Icons.check_circle, color: AppPalette.gold, size: 20),
                       const SizedBox(width: 10),
                       Flexible(
                         child: Text(
@@ -84,7 +83,7 @@ class _AppToastState extends State<_AppToast> with SingleTickerProviderStateMixi
                           style: GoogleFonts.cinzel(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
-                            color: isDark ? const Color(0xFFEDE8DF) : const Color(0xFF2C2418),
+                            color: isDark ? AppPalette.inkLight : AppPalette.ink,
                           ),
                         ),
                       ),
