@@ -60,6 +60,8 @@ Serializers _$serializers =
           ..add(SpecialRule.serializer)
           ..add(UpdateAccountInput.serializer)
           ..add(UpdateAccountInputUser.serializer)
+          ..add(UpdateCountersInput.serializer)
+          ..add(UpdateCountersInputCounters.serializer)
           ..add(ValidationErrors.serializer)
           ..add(Weapon.serializer)
           ..addBuilderFactory(

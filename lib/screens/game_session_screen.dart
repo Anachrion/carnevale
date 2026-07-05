@@ -389,7 +389,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   // Setup is complete the moment the game reaches in_progress (or beyond, e.g. completed): both
   // players' models are shown side by side, each tagged with its remaining/starting HP, WP, and
-  // CP and its status counters. Editing those values isn't supported yet — this is read-only.
+  // CP and its status counters. Counters on your own models are editable via the + button on
+  // each tile; HP/WP/CP editing isn't supported yet.
   Widget _buildInProgressPhase(BuildContext context, models.Game game, models.GamePlayer me) {
     final opponent = _opponent;
     if (opponent == null) {

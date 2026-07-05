@@ -118,6 +118,31 @@ class GameService extends ChangeNotifier {
     return GangService().mapGang(res.data!);
   }
 
+  /// Updates status counters on one of the current player's own models — only the values
+  /// passed change, the rest keep their current state. Returns the model's full updated
+  /// state; the server also broadcasts a game_state event to both players.
+  Future<EntryState> updateCounters(
+    int gameId,
+    int listEntryId, {
+    bool? stunned,
+    bool? hidden,
+    bool? guarding,
+    bool? carryingObjective,
+    int? underwaterCounters,
+  }) async {
+    final res = await _client.games.updateCounters(
+      id: gameId,
+      listEntryId: listEntryId,
+      updateCountersInput: api.UpdateCountersInput((b) => b
+        ..counters.stunned = stunned
+        ..counters.hidden = hidden
+        ..counters.guarding = guarding
+        ..counters.carryingObjective = carryingObjective
+        ..counters.underwaterCounters = underwaterCounters),
+    );
+    return GangService().mapEntryState(res.data!);
+  }
+
   /// Fetches an initial snapshot and opens a live ActionCable subscription for
   /// [gameId], keeping [currentGame] in sync until [stopWatching] is called.
   Future<models.Game> watch(int gameId, {required String authToken}) async {
