@@ -514,45 +514,35 @@ class _ReadOnlyGangBody extends StatelessWidget {
   void _showEquipmentDetail(BuildContext context, Equipment e) {
     showDialog(
       context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: _kEquipmentColor,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context) => _ThemedDialogCard(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        e.name,
-                        style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${e.cost}',
-                      style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: _kGold),
-                    ),
-                  ],
+                Expanded(
+                  child: Text(
+                    e.name,
+                    style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
-                const SizedBox(height: 12),
+                const SizedBox(width: 12),
                 Text(
-                  e.description,
-                  style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.85), height: 1.5),
+                  '${e.cost}',
+                  style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: _kGold),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 12),
+            Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+            const SizedBox(height: 12),
+            Text(
+              e.description,
+              style: TextStyle(fontSize: 13, color: context.textColor, height: 1.5),
+            ),
+          ],
         ),
       ),
     );
@@ -788,9 +778,13 @@ class _AddCounterButton extends StatelessWidget {
 /// theme (cream in light, near-black in dark) with a gold border, rather than the fixed dark
 /// brown used for equipment cards — so the popup feels native in both themes.
 class _ThemedDialogCard extends StatelessWidget {
-  const _ThemedDialogCard({required this.child});
+  const _ThemedDialogCard({required this.child, this.padding = const EdgeInsets.fromLTRB(24, 24, 24, 12)});
 
   final Widget child;
+
+  /// Defaults to a shorter bottom inset, tuned for dialogs that end in a "Done" button (which
+  /// carries its own padding); popups ending in plain content pass a symmetric inset instead.
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -804,7 +798,7 @@ class _ThemedDialogCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _kGold.withOpacity(0.6), width: 1.2),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+          padding: padding,
           child: child,
         ),
       ),
