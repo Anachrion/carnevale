@@ -724,13 +724,13 @@ class _AddCounterButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 26,
-          height: 26,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.2),
           ),
-          child: const Icon(Icons.add, size: 16, color: Colors.white),
+          child: const Icon(Icons.add, size: 22, color: Colors.white),
         ),
       ),
     );
