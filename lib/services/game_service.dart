@@ -144,7 +144,7 @@ class GameService extends ChangeNotifier {
   /// Updates status counters on one of the current player's own models — only the values
   /// passed change, the rest keep their current state. Returns the model's full updated
   /// state; the server also broadcasts a game_state event to both players.
-  Future<EntryState> updateCounters(
+  Future<api.EntryState> updateCounters(
     int gameId,
     int listEntryId, {
     bool? stunned,
@@ -165,13 +165,13 @@ class GameService extends ChangeNotifier {
           ..counters.underwaterCounters = underwaterCounters,
       ),
     );
-    return GangService().mapEntryState(res.data!);
+    return res.data!;
   });
 
   /// Sets current HP/WP/CP on one of the current player's own models — only the stats passed
   /// change (absolute values, not deltas), the rest keep their current value. Returns the
   /// model's full updated state; the server also broadcasts a game_state event to both players.
-  Future<EntryState> updateStats(
+  Future<api.EntryState> updateStats(
     int gameId,
     int listEntryId, {
     int? lifePoints,
@@ -188,7 +188,7 @@ class GameService extends ChangeNotifier {
           ..stats.commandPoints = commandPoints,
       ),
     );
-    return GangService().mapEntryState(res.data!);
+    return res.data!;
   });
 
   /// Fetches an initial snapshot and opens a live ActionCable subscription for

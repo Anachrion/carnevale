@@ -1,31 +1,4 @@
-class EntryStatValue {
-  final int current;
-  final int starting;
-
-  const EntryStatValue({required this.current, required this.starting});
-}
-
-class EntryState {
-  final EntryStatValue lifePoints;
-  final EntryStatValue willPoints;
-  final EntryStatValue commandPoints;
-  final bool stunned;
-  final bool hidden;
-  final bool guarding;
-  final bool carryingObjective;
-  final int underwaterCounters;
-
-  const EntryState({
-    required this.lifePoints,
-    required this.willPoints,
-    required this.commandPoints,
-    required this.stunned,
-    required this.hidden,
-    required this.guarding,
-    required this.carryingObjective,
-    required this.underwaterCounters,
-  });
-}
+import 'package:carnevale_api/carnevale_api.dart' as api;
 
 class Spell {
   final int id;
@@ -54,7 +27,7 @@ class ListEntry {
   final int entryId;
   final String name;
   final int cost;
-  final EntryState? state;
+  final api.EntryState? state;
 
   // Spell selection (rulebook p24). Only Mage models can be given spells.
   final bool mage;
@@ -80,7 +53,7 @@ class ListEntry {
     this.spells = const [],
   });
 
-  ListEntry copyWith({EntryState? state}) => ListEntry(
+  ListEntry copyWith({api.EntryState? state}) => ListEntry(
         id: id,
         position: position,
         entryType: entryType,
