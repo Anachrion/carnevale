@@ -374,7 +374,6 @@ class _ReadOnlyGangBody extends StatelessWidget {
     final used = gang.totalCost;
     final limit = gang.points;
     final ratio = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: ClipRRect(
@@ -383,23 +382,10 @@ class _ReadOnlyGangBody extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Container(
             decoration: BoxDecoration(
-              gradient: isDark
-                  ? const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Color(0x10000000), Color(0x88000000)],
-                    )
-                  : LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppPalette.paper.withOpacity(0.30),
-                        AppPalette.paper.withOpacity(0.75),
-                      ],
-                    ),
+              gradient: context.panelGradient,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark ? AppPalette.mutedGold.withOpacity(0.45) : Colors.white.withOpacity(0.3),
+                color: context.panelBorderColor,
                 width: 1.0,
               ),
             ),
