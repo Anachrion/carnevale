@@ -1,5 +1,6 @@
 import 'package:carnevale_api/carnevale_api.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._();
@@ -60,6 +61,11 @@ class ApiClient {
   }
 
   late final Dio _dio;
+
+  /// The underlying Dio, exposed only so tests can swap in a fake HttpClientAdapter and drive the
+  /// services against canned responses.
+  @visibleForTesting
+  Dio get dio => _dio;
 
   /// Fetches a short-lived, single-use cable ticket over authenticated REST and returns the full
   /// ActionCable URL to connect with. Only the disposable ticket — never the reusable JWT — rides
