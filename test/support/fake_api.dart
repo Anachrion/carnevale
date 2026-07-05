@@ -56,6 +56,8 @@ Object _serialize(Object value, FullType type) =>
 Object listBody<T>(Iterable<T> items, FullType itemType) =>
     _serialize(BuiltList<T>(items), FullType(BuiltList, [itemType]));
 
+Object gameBody(api.Game game) => _serialize(game, const FullType(api.Game));
+
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
 api.Profile fakeProfile({
