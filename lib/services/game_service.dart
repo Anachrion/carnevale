@@ -205,10 +205,17 @@ class GameService extends ChangeNotifier {
 
   void _onChannelMessage(Map<String, dynamic> message) {
     if (message['event'] != 'game_state') return;
-    final decoded = api.standardSerializers.deserializeWith(api.Game.serializer, message['game']);
-    if (decoded == null) return;
-    currentGame = _mapGame(decoded);
-    notifyListeners();
+    try {
+      // A malformed or schema-drifted payload makes deserializeWith throw; that would escape the
+      // stream.listen callback (which has no onError) and kill live updates. Swallow it and keep
+      // the last-known snapshot — the next broadcast or a reconnect resync will recover.
+      final decoded = api.standardSerializers.deserializeWith(api.Game.serializer, message['game']);
+      if (decoded == null) return;
+      currentGame = _mapGame(decoded);
+      notifyListeners();
+    } catch (e, st) {
+      debugPrint('GameService: ignoring malformed game_state broadcast: $e\n$st');
+    }
   }
 
   models.Game _mapGame(api.Game g) => models.Game(
