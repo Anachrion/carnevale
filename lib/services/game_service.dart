@@ -3,7 +3,6 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import '../models/game.dart' as models;
 import '../models/gang.dart';
 import 'action_cable_client.dart';
 import 'api_client.dart';
@@ -30,7 +29,7 @@ class GameService extends ChangeNotifier {
   ActionCableClient? _cable;
   int? _watchedGameId;
 
-  models.Game? currentGame;
+  api.Game? currentGame;
 
   // Wraps a call so a DioException surfaces as a uniform, user-presentable ApiException (F-P2-2).
   Future<T> _guard<T>(Future<T> Function() call) async {
@@ -46,27 +45,27 @@ class GameService extends ChangeNotifier {
     return res.data?.toList() ?? [];
   });
 
-  Future<List<models.Game>> loadMyGames({String visibility = 'active'}) =>
+  Future<List<api.Game>> loadMyGames({String visibility = 'active'}) =>
       _guard(() async {
         final res = await _client.games.getGames(visibility: visibility);
-        return (res.data?.toList() ?? []).map(_mapGame).toList();
+        return res.data?.toList() ?? [];
       });
 
-  Future<models.Game> archiveGame(int gameId) => _guard(() async {
+  Future<api.Game> archiveGame(int gameId) => _guard(() async {
     final res = await _client.games.archiveGame(id: gameId);
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
-  Future<models.Game> unarchiveGame(int gameId) => _guard(() async {
+  Future<api.Game> unarchiveGame(int gameId) => _guard(() async {
     final res = await _client.games.unarchiveGame(id: gameId);
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
   Future<void> deleteGame(int gameId) => _guard(() async {
     await _client.games.deleteGame(id: gameId);
   });
 
-  Future<models.Game> createGame({
+  Future<api.Game> createGame({
     required int scenarioId,
     String? name,
     int? ducatLimit,
@@ -81,22 +80,22 @@ class GameService extends ChangeNotifier {
           ..boardSize = boardSize,
       ),
     );
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
-  Future<models.Game> joinGame(String joinCode) => _guard(() async {
+  Future<api.Game> joinGame(String joinCode) => _guard(() async {
     final res = await _client.games.joinGame(
       joinGameInput: api.JoinGameInput((b) => b..joinCode = joinCode),
     );
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
-  Future<models.Game> getGame(int id) => _guard(() async {
+  Future<api.Game> getGame(int id) => _guard(() async {
     final res = await _client.games.getGame(id: id);
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
-  Future<models.Game> pickRole(int gameId, String role) => _guard(() async {
+  Future<api.Game> pickRole(int gameId, String role) => _guard(() async {
     final roleEnum = role == 'attacker'
         ? api.RoleInputRoleEnum.attacker
         : api.RoleInputRoleEnum.defender;
@@ -104,24 +103,22 @@ class GameService extends ChangeNotifier {
       id: gameId,
       roleInput: api.RoleInput((b) => b..role = roleEnum),
     );
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
   Future<List<AvailableGang>> availableGangs(int gameId) => _guard(() async {
     final res = await _client.games.getAvailableGangs(id: gameId);
     return (res.data?.toList() ?? [])
-        .map(
-          (a) => AvailableGang(gang: a.list, selectable: a.selectable),
-        )
+        .map((a) => AvailableGang(gang: a.list, selectable: a.selectable))
         .toList();
   });
 
-  Future<models.Game> selectGang(int gameId, int listId) => _guard(() async {
+  Future<api.Game> selectGang(int gameId, int listId) => _guard(() async {
     final res = await _client.games.selectGang(
       id: gameId,
       selectGangInput: api.SelectGangInput((b) => b..listId = listId),
     );
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
   Future<List<api.Agenda>> drawAgendas(int gameId) => _guard(() async {
@@ -129,9 +126,9 @@ class GameService extends ChangeNotifier {
     return res.data?.agendas.toList() ?? [];
   });
 
-  Future<models.Game> markReady(int gameId) => _guard(() async {
+  Future<api.Game> markReady(int gameId) => _guard(() async {
     final res = await _client.games.markReady(id: gameId);
-    return _mapGame(res.data!);
+    return res.data!;
   });
 
   /// Either player's selected gang, in full — available once that player has picked one,
@@ -196,7 +193,7 @@ class GameService extends ChangeNotifier {
 
   /// Fetches an initial snapshot and opens a live ActionCable subscription for
   /// [gameId], keeping [currentGame] in sync until [stopWatching] is called.
-  Future<models.Game> watch(int gameId) async {
+  Future<api.Game> watch(int gameId) async {
     stopWatching();
 
     final game = await getGame(gameId);
@@ -251,7 +248,7 @@ class GameService extends ChangeNotifier {
         message['game'],
       );
       if (decoded == null) return;
-      currentGame = _mapGame(decoded);
+      currentGame = decoded;
       notifyListeners();
     } catch (e, st) {
       debugPrint(
@@ -259,31 +256,6 @@ class GameService extends ChangeNotifier {
       );
     }
   }
-
-  models.Game _mapGame(api.Game g) => models.Game(
-    id: g.id,
-    name: g.name,
-    joinCode: g.joinCode,
-    status: wireEnum(g.status, const FullType(api.GameStatusEnum)),
-    ducatLimit: g.ducatLimit,
-    boardSize: g.boardSize,
-    scenario: g.scenario,
-    viewerVisibility: g.viewerVisibility.name,
-    players: g.players.map(_mapPlayer).toList(),
-  );
-
-  models.GamePlayer _mapPlayer(api.GamePlayer p) => models.GamePlayer(
-    id: p.id,
-    userId: p.userId,
-    username: p.username,
-    host: p.host,
-    list: p.list,
-    role: p.role?.name,
-    ready: p.ready,
-    wonRoleRoll: p.wonRoleRoll,
-    wonDeploymentRoll: p.wonDeploymentRoll,
-    agendas: p.agendas.toList(),
-  );
 
   /// Converts a generated enum constant back to its wire value (e.g.
   /// `GameStatusEnum.gangSelection` -> `'gang_selection'`) via the same
