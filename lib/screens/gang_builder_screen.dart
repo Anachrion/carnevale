@@ -27,6 +27,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   late Gang _gang;
   List<Profile> _profiles = [];
   List<Equipment> _equipment = [];
+  List<Spell> _spells = [];
   bool _loading = true;
   bool _busy = false;
   _Tab _tab = _Tab.list;
@@ -82,12 +83,30 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     final results = await Future.wait([
       ProfileService().search('', factions: {_gang.faction, 'gifted'}),
       EquipmentService().getAll(),
+      GangService().loadSpells(),
     ]);
     setState(() {
       _profiles = results[0] as List<Profile>;
       _equipment = results[1] as List<Equipment>;
+      _spells = results[2] as List<Spell>;
       _loading = false;
     });
+  }
+
+  Future<void> _editSpells(ListEntry entry) async {
+    if (_busy) return;
+    final result = await showDialog<_SpellSelection>(
+      context: context,
+      builder: (_) => _SpellPickerDialog(entry: entry, allSpells: _spells),
+    );
+    if (result == null) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await GangService().setEntrySpells(entry.id, result.discipline, result.spellIds);
+      setState(() => _gang = updated);
+    } finally {
+      setState(() => _busy = false);
+    }
   }
 
   int _entryCount(Profile p) =>
@@ -572,6 +591,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               busy: _busy,
               onRemove: () => _removeEntry(entry),
               onTap: onTap,
+              onEditSpells: entry.mage ? () => _editSpells(entry) : null,
             ),
           ),
         );
@@ -905,6 +925,7 @@ class _EntryTile extends StatefulWidget {
     required this.onRemove,
     this.role,
     this.onTap,
+    this.onEditSpells,
   });
 
   final ListEntry entry;
@@ -913,6 +934,8 @@ class _EntryTile extends StatefulWidget {
   final bool busy;
   final VoidCallback onRemove;
   final VoidCallback? onTap;
+  // Non-null only for Mage models; opens the spell picker for this model (rulebook p24).
+  final VoidCallback? onEditSpells;
 
   @override
   State<_EntryTile> createState() => _EntryTileState();
@@ -976,7 +999,11 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                    Row(
                     children: [
                       Expanded(
                         child: Row(
@@ -1033,10 +1060,129 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
                       ),
                     ],
                   ),
+                  if (widget.onEditSpells != null) _buildSpellRow(),
+                  ],
+                  ),
                 ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpellRow() {
+    final entry = widget.entry;
+    final known = entry.spells.where((s) => !s.cantrip).toList();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          _spellsButton(),
+          if (entry.cantrip != null) _spellPill(entry.cantrip!, isCantrip: true),
+          ...known.map((s) => _spellPill(s, isCantrip: false)),
+          if (entry.cantrip == null && known.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'No spells',
+                style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.6), fontStyle: FontStyle.italic),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _spellsButton() {
+    return GestureDetector(
+      onTap: widget.busy ? null : widget.onEditSpells,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.18),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.35), width: 0.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.auto_fix_high, size: 12, color: Colors.white.withOpacity(0.9)),
+            const SizedBox(width: 5),
+            Text(
+              'Spells',
+              style: GoogleFonts.cinzel(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _spellPill(Spell spell, {required bool isCantrip}) {
+    return GestureDetector(
+      onTap: () => _showSpellDetail(spell),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.28), width: 0.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isCantrip) ...[
+              Icon(Icons.star, size: 10, color: Colors.white.withOpacity(0.75)),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              spell.name,
+              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, color: Colors.white.withOpacity(0.9)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSpellDetail(Spell spell) {
+    showDialog(
+      context: context,
+      builder: (context) => ThemedDialogCard(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    spell.name,
+                    style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+                  ),
+                ),
+                if (spell.cantrip) ...[
+                  const SizedBox(width: 12),
+                  Text('Cantrip', style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w700, color: AppPalette.gold)),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${_disciplineLabel(spell.discipline)}  ·  WP ${spell.cost}  ·  Difficulty ${spell.difficulty}',
+              style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+            ),
+            const SizedBox(height: 12),
+            Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+            const SizedBox(height: 12),
+            Text(spell.description, style: TextStyle(fontSize: 13, color: context.textColor, height: 1.5)),
+          ],
         ),
       ),
     );
@@ -1299,5 +1445,270 @@ class _HireEquipmentTile extends StatelessWidget {
         ),
       ),
     ));
+  }
+}
+
+const Map<String, String> _disciplineLabels = {
+  'blood_rites': 'Blood Rites',
+  'divinity': 'Divinity',
+  'fateweaving': 'Fateweaving',
+  'runes_of_sovereignty': 'Runes of Sovereignty',
+  'wild_magic': 'Wild Magic',
+};
+
+String _disciplineLabel(String slug) => _disciplineLabels[slug] ?? slug;
+
+/// The result of the spell picker: the committed Discipline and the chosen non-Cantrip spell ids.
+class _SpellSelection {
+  final String? discipline;
+  final List<int> spellIds;
+  const _SpellSelection(this.discipline, this.spellIds);
+}
+
+class _SpellPickerDialog extends StatefulWidget {
+  const _SpellPickerDialog({required this.entry, required this.allSpells});
+
+  final ListEntry entry;
+  final List<Spell> allSpells;
+
+  @override
+  State<_SpellPickerDialog> createState() => _SpellPickerDialogState();
+}
+
+class _SpellPickerDialogState extends State<_SpellPickerDialog> {
+  String? _discipline;
+  late Set<int> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    final disciplines = widget.entry.disciplines;
+    // Default to the model's committed Discipline, or the only one it has access to.
+    _discipline = widget.entry.spellDiscipline ?? (disciplines.length == 1 ? disciplines.first : null);
+    _selected = widget.entry.spells.where((s) => !s.cantrip).map((s) => s.id).toSet();
+  }
+
+  List<Spell> get _choosable =>
+      widget.allSpells.where((s) => s.discipline == _discipline && !s.cantrip).toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+
+  Spell? get _cantrip {
+    try {
+      return widget.allSpells.firstWhere((s) => s.discipline == _discipline && s.cantrip);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int get _slots => widget.entry.spellSlots;
+
+  void _selectDiscipline(String slug) {
+    if (slug == _discipline) return;
+    // Spells must all share one Discipline (rulebook p24), so switching clears the picks.
+    setState(() {
+      _discipline = slug;
+      _selected = {};
+    });
+  }
+
+  void _toggle(Spell spell) {
+    setState(() {
+      if (_selected.contains(spell.id)) {
+        _selected.remove(spell.id);
+      } else if (_selected.length < _slots) {
+        _selected.add(spell.id);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final disciplines = widget.entry.disciplines;
+    final accent = Theme.of(context).brightness == Brightness.dark ? AppPalette.gold : AppPalette.red;
+    return ThemedDialogCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.entry.name,
+            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Spells known — ${_selected.length}/$_slots',
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+          ),
+          const SizedBox(height: 14),
+          if (disciplines.length > 1) ...[
+            Text(
+              'Discipline',
+              style: TextStyle(fontSize: 11, color: context.subtleTextColor, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: disciplines.map((slug) {
+                final selected = slug == _discipline;
+                return GestureDetector(
+                  onTap: () => _selectDiscipline(slug),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: selected ? accent.withOpacity(0.85) : Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: selected ? accent : context.subtleTextColor.withOpacity(0.3), width: 0.5),
+                    ),
+                    child: Text(
+                      _disciplineLabel(slug),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        color: selected ? Colors.white : context.textColor,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 14),
+          ] else if (disciplines.length == 1) ...[
+            Text(
+              'Discipline: ${_disciplineLabel(disciplines.first)}',
+              style: TextStyle(fontSize: 12, color: context.textColor, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (_discipline == null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Text('Pick a Discipline to choose spells.', style: TextStyle(color: context.subtleTextColor, fontSize: 13)),
+              ),
+            )
+          else
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_cantrip != null)
+                      _SpellRow(
+                        spell: _cantrip!,
+                        checked: true,
+                        enabled: false,
+                        trailingLabel: 'always known',
+                        onTap: null,
+                      ),
+                    ..._choosable.map((spell) {
+                      final checked = _selected.contains(spell.id);
+                      final enabled = checked || _selected.length < _slots;
+                      return _SpellRow(
+                        spell: spell,
+                        checked: checked,
+                        enabled: enabled,
+                        onTap: enabled ? () => _toggle(spell) : null,
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Cancel', style: TextStyle(color: context.subtleTextColor)),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: accent, foregroundColor: Colors.white),
+                onPressed: () => Navigator.of(context).pop(_SpellSelection(_discipline, _selected.toList())),
+                child: const Text('Save'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpellRow extends StatelessWidget {
+  const _SpellRow({
+    required this.spell,
+    required this.checked,
+    required this.enabled,
+    this.trailingLabel,
+    this.onTap,
+  });
+
+  final Spell spell;
+  final bool checked;
+  final bool enabled;
+  final String? trailingLabel;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = Theme.of(context).brightness == Brightness.dark ? AppPalette.gold : AppPalette.red;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              checked ? Icons.check_circle : Icons.circle_outlined,
+              size: 20,
+              color: checked ? accent : context.subtleTextColor.withOpacity(enabled ? 0.6 : 0.25),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          spell.name,
+                          style: GoogleFonts.cinzel(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: enabled ? context.textColor : context.subtleTextColor,
+                          ),
+                        ),
+                      ),
+                      if (trailingLabel != null)
+                        Text(
+                          trailingLabel!,
+                          style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: context.subtleTextColor),
+                        )
+                      else
+                        Text(
+                          'WP ${spell.cost} · Diff ${spell.difficulty}',
+                          style: TextStyle(fontSize: 10, color: context.subtleTextColor),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    spell.description,
+                    style: TextStyle(fontSize: 11, color: context.subtleTextColor, height: 1.35),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

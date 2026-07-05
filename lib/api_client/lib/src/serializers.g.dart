@@ -57,7 +57,12 @@ Serializers _$serializers =
           ..add(SelectGangInput.serializer)
           ..add(Session.serializer)
           ..add(SessionUser.serializer)
+          ..add(SetEntrySpellsInput.serializer)
+          ..add(SetEntrySpellsInputEntry.serializer)
+          ..add(SetEntrySpellsInputEntryDisciplineEnum.serializer)
           ..add(SpecialRule.serializer)
+          ..add(Spell.serializer)
+          ..add(SpellDisciplineEnum.serializer)
           ..add(UpdateAccountInput.serializer)
           ..add(UpdateAccountInputUser.serializer)
           ..add(UpdateCountersInput.serializer)
@@ -101,6 +106,18 @@ Serializers _$serializers =
             () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(Spell)]),
+            () => ListBuilder<Spell>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),
             () => ListBuilder<String>(),
           )
@@ -127,6 +144,10 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(CardReference)]),
             () => ListBuilder<CardReference>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(int)]),
+            () => ListBuilder<int>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltMap, const [

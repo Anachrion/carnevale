@@ -85,6 +85,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**updateStats**](doc/GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
+[*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntrySpells**](doc/ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline) a Mage model knows
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 [*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list owned by the current user
 [*ListsApi*](doc/ListsApi.md) | [**deleteList**](doc/ListsApi.md#deletelist) | **DELETE** /lists/{id} | Delete a list
@@ -100,6 +101,7 @@ Class | Method | HTTP request | Description
 [*SessionApi*](doc/SessionApi.md) | [**resetPassword**](doc/SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [*SessionApi*](doc/SessionApi.md) | [**signup**](doc/SessionApi.md#signup) | **POST** /signup | Register a new user
 [*SessionApi*](doc/SessionApi.md) | [**updateAccount**](doc/SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
+[*SpellsApi*](doc/SpellsApi.md) | [**getSpells**](doc/SpellsApi.md#getspells) | **GET** /spells | List all spells, optionally filtered by Discipline
 
 
 ## Documentation For Models
@@ -143,7 +145,10 @@ Class | Method | HTTP request | Description
  - [SelectGangInput](doc/SelectGangInput.md)
  - [Session](doc/Session.md)
  - [SessionUser](doc/SessionUser.md)
+ - [SetEntrySpellsInput](doc/SetEntrySpellsInput.md)
+ - [SetEntrySpellsInputEntry](doc/SetEntrySpellsInputEntry.md)
  - [SpecialRule](doc/SpecialRule.md)
+ - [Spell](doc/Spell.md)
  - [UpdateAccountInput](doc/UpdateAccountInput.md)
  - [UpdateAccountInputUser](doc/UpdateAccountInputUser.md)
  - [UpdateCountersInput](doc/UpdateCountersInput.md)

@@ -42,6 +42,12 @@ class _$Profile extends Profile {
   @override
   final String version;
   @override
+  final bool mage;
+  @override
+  final int spellSlots;
+  @override
+  final BuiltList<String> disciplines;
+  @override
   final BuiltList<Weapon> weapons;
   @override
   final BuiltList<SpecialRule> specialRules;
@@ -69,6 +75,9 @@ class _$Profile extends Profile {
     required this.abilities,
     required this.keywords,
     required this.version,
+    required this.mage,
+    required this.spellSlots,
+    required this.disciplines,
     required this.weapons,
     required this.specialRules,
     required this.cardReferences,
@@ -101,6 +110,9 @@ class _$Profile extends Profile {
         abilities == other.abilities &&
         keywords == other.keywords &&
         version == other.version &&
+        mage == other.mage &&
+        spellSlots == other.spellSlots &&
+        disciplines == other.disciplines &&
         weapons == other.weapons &&
         specialRules == other.specialRules &&
         cardReferences == other.cardReferences;
@@ -126,6 +138,9 @@ class _$Profile extends Profile {
     _$hash = $jc(_$hash, abilities.hashCode);
     _$hash = $jc(_$hash, keywords.hashCode);
     _$hash = $jc(_$hash, version.hashCode);
+    _$hash = $jc(_$hash, mage.hashCode);
+    _$hash = $jc(_$hash, spellSlots.hashCode);
+    _$hash = $jc(_$hash, disciplines.hashCode);
     _$hash = $jc(_$hash, weapons.hashCode);
     _$hash = $jc(_$hash, specialRules.hashCode);
     _$hash = $jc(_$hash, cardReferences.hashCode);
@@ -153,6 +168,9 @@ class _$Profile extends Profile {
           ..add('abilities', abilities)
           ..add('keywords', keywords)
           ..add('version', version)
+          ..add('mage', mage)
+          ..add('spellSlots', spellSlots)
+          ..add('disciplines', disciplines)
           ..add('weapons', weapons)
           ..add('specialRules', specialRules)
           ..add('cardReferences', cardReferences))
@@ -235,6 +253,20 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
   String? get version => _$this._version;
   set version(String? version) => _$this._version = version;
 
+  bool? _mage;
+  bool? get mage => _$this._mage;
+  set mage(bool? mage) => _$this._mage = mage;
+
+  int? _spellSlots;
+  int? get spellSlots => _$this._spellSlots;
+  set spellSlots(int? spellSlots) => _$this._spellSlots = spellSlots;
+
+  ListBuilder<String>? _disciplines;
+  ListBuilder<String> get disciplines =>
+      _$this._disciplines ??= ListBuilder<String>();
+  set disciplines(ListBuilder<String>? disciplines) =>
+      _$this._disciplines = disciplines;
+
   ListBuilder<Weapon>? _weapons;
   ListBuilder<Weapon> get weapons => _$this._weapons ??= ListBuilder<Weapon>();
   set weapons(ListBuilder<Weapon>? weapons) => _$this._weapons = weapons;
@@ -275,6 +307,9 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
       _abilities = $v.abilities.toBuilder();
       _keywords = $v.keywords.toBuilder();
       _version = $v.version;
+      _mage = $v.mage;
+      _spellSlots = $v.spellSlots;
+      _disciplines = $v.disciplines.toBuilder();
       _weapons = $v.weapons.toBuilder();
       _specialRules = $v.specialRules.toBuilder();
       _cardReferences = $v.cardReferences.toBuilder();
@@ -375,6 +410,17 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
               r'Profile',
               'version',
             ),
+            mage: BuiltValueNullFieldError.checkNotNull(
+              mage,
+              r'Profile',
+              'mage',
+            ),
+            spellSlots: BuiltValueNullFieldError.checkNotNull(
+              spellSlots,
+              r'Profile',
+              'spellSlots',
+            ),
+            disciplines: disciplines.build(),
             weapons: weapons.build(),
             specialRules: specialRules.build(),
             cardReferences: cardReferences.build(),
@@ -387,6 +433,8 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
         _$failedField = 'keywords';
         keywords.build();
 
+        _$failedField = 'disciplines';
+        disciplines.build();
         _$failedField = 'weapons';
         weapons.build();
         _$failedField = 'specialRules';

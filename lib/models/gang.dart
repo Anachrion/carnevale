@@ -27,6 +27,26 @@ class EntryState {
   });
 }
 
+class Spell {
+  final int id;
+  final String name;
+  final String discipline;
+  final int cost;
+  final int difficulty;
+  final bool cantrip;
+  final String description;
+
+  const Spell({
+    required this.id,
+    required this.name,
+    required this.discipline,
+    required this.cost,
+    required this.difficulty,
+    required this.cantrip,
+    required this.description,
+  });
+}
+
 class ListEntry {
   final int id;
   final int position;
@@ -36,6 +56,14 @@ class ListEntry {
   final int cost;
   final EntryState? state;
 
+  // Spell selection (rulebook p24). Only Mage models can be given spells.
+  final bool mage;
+  final int spellSlots;
+  final List<String> disciplines;
+  final String? spellDiscipline;
+  final Spell? cantrip;
+  final List<Spell> spells;
+
   const ListEntry({
     required this.id,
     required this.position,
@@ -44,6 +72,12 @@ class ListEntry {
     required this.name,
     required this.cost,
     this.state,
+    this.mage = false,
+    this.spellSlots = 0,
+    this.disciplines = const [],
+    this.spellDiscipline,
+    this.cantrip,
+    this.spells = const [],
   });
 }
 
