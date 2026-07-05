@@ -155,26 +155,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _GoldDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(width: 64, height: 1, color: AppPalette.gold),
-        const SizedBox(width: 8),
-        Container(
-          width: 5,
-          height: 5,
-          decoration: const BoxDecoration(color: AppPalette.gold, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
-        Container(width: 64, height: 1, color: AppPalette.gold),
-      ],
-    );
-  }
-}
-
 class _MenuItem extends StatelessWidget {
   const _MenuItem({
     required this.icon,
@@ -253,68 +233,6 @@ class _MenuItem extends StatelessWidget {
           ),
         ),
       ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NewsCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppPalette.newsCard,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-            child: Row(
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.campaign_outlined, color: Colors.white70, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'News & Updates',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Stay informed about the\nlatest Carnevale news.',
-                        style: TextStyle(
-                          fontFamily: 'Georgia',
-                          fontSize: 13,
-                          color: Colors.white70,
-                          height: 1.55,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.arrow_forward, color: Colors.white60, size: 20),
-              ],
-            ),
-          ),
         ),
       ),
     );

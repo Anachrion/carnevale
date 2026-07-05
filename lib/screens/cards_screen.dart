@@ -291,40 +291,6 @@ class _CardsScreenState extends State<CardsScreen> {
     );
   }
 
-  String _factionLabel(String f) => f[0].toUpperCase() + f.substring(1);
-}
-
-class _AllChip extends StatelessWidget {
-  const _AllChip({required this.selected, required this.onTap});
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        decoration: BoxDecoration(
-          color: selected ? AppPalette.gold : Colors.white.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? AppPalette.gold : Colors.white.withOpacity(0.4),
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Text(
-          'All',
-          style: GoogleFonts.cinzel(
-            fontSize: 11,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-            color: selected ? Colors.white : context.textColor,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _FactionIconChip extends StatelessWidget {
@@ -423,15 +389,4 @@ class _ProfileTile extends StatelessWidget {
       ),
     );
   }
-
-  Widget _statBadge(String label, int value) {
-    return Column(
-      children: [
-        Text(value.toString(), style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
-        Text(label, style: const TextStyle(fontSize: 9, color: Colors.white70, letterSpacing: 0.5)),
-      ],
-    );
-  }
-
-  String _factionLabel(String f) => f[0].toUpperCase() + f.substring(1);
 }

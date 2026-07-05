@@ -152,7 +152,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (entry == null || _busy) return;
     setState(() => _busy = true);
     try {
-      final updated = await GangService().removeEntry(_gang.id, entry.id);
+      final updated = await GangService().removeEntry(entry.id);
       if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
@@ -164,7 +164,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      final updated = await GangService().removeEntry(_gang.id, entry.id);
+      final updated = await GangService().removeEntry(entry.id);
       if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
