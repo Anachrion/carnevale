@@ -9,6 +9,7 @@ import '../services/equipment_service.dart';
 import '../services/game_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
@@ -247,17 +248,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
           selectionValid: gang.selectionValid,
           selectionErrors: gang.selectionErrors,
           entries: gang.entries
-              .map((e) => e.id == listEntryId
-                  ? ListEntry(
-                      id: e.id,
-                      position: e.position,
-                      entryType: e.entryType,
-                      entryId: e.entryId,
-                      name: e.name,
-                      cost: e.cost,
-                      state: state,
-                    )
-                  : e)
+              .map((e) => e.id == listEntryId ? e.copyWith(state: state) : e)
               .toList(),
         ),
         profiles: data.profiles,
@@ -600,12 +591,19 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                   ],
                 ),
               ],
+              if (_spellChips.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Wrap(spacing: 6, runSpacing: 6, children: _spellChips),
+              ],
             ],
           ),
         ),
       ),
     );
   }
+
+  // Known spells for a Mage model (Cantrip first), tappable for details. Empty for everything else.
+  List<Widget> get _spellChips => entry.mage ? spellChipsFor(entry) : const [];
 
   // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
   // entirely, so a clean model shows no counter icons at all. Editing happens through the +

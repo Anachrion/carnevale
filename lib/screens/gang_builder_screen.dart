@@ -8,6 +8,7 @@ import '../models/profile.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
+import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
@@ -1074,7 +1075,7 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
 
   Widget _buildSpellRow() {
     final entry = widget.entry;
-    final known = entry.spells.where((s) => !s.cantrip).toList();
+    final chips = spellChipsFor(entry);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Wrap(
@@ -1083,16 +1084,16 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           _spellsButton(),
-          if (entry.cantrip != null) _spellPill(entry.cantrip!, isCantrip: true),
-          ...known.map((s) => _spellPill(s, isCantrip: false)),
-          if (entry.cantrip == null && known.isEmpty)
+          if (chips.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
                 'No spells',
                 style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.6), fontStyle: FontStyle.italic),
               ),
-            ),
+            )
+          else
+            ...chips,
         ],
       ),
     );
@@ -1117,71 +1118,6 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
               'Spells',
               style: GoogleFonts.cinzel(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 0.5),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _spellPill(Spell spell, {required bool isCantrip}) {
-    return GestureDetector(
-      onTap: () => _showSpellDetail(spell),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.28), width: 0.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isCantrip) ...[
-              Icon(Icons.star, size: 10, color: Colors.white.withOpacity(0.75)),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              spell.name,
-              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, color: Colors.white.withOpacity(0.9)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showSpellDetail(Spell spell) {
-    showDialog(
-      context: context,
-      builder: (context) => ThemedDialogCard(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    spell.name,
-                    style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
-                  ),
-                ),
-                if (spell.cantrip) ...[
-                  const SizedBox(width: 12),
-                  Text('Cantrip', style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w700, color: AppPalette.gold)),
-                ],
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${_disciplineLabel(spell.discipline)}  ·  WP ${spell.cost}  ·  Difficulty ${spell.difficulty}',
-              style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-            ),
-            const SizedBox(height: 12),
-            Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
-            const SizedBox(height: 12),
-            Text(spell.description, style: TextStyle(fontSize: 13, color: context.textColor, height: 1.5)),
           ],
         ),
       ),
@@ -1448,16 +1384,6 @@ class _HireEquipmentTile extends StatelessWidget {
   }
 }
 
-const Map<String, String> _disciplineLabels = {
-  'blood_rites': 'Blood Rites',
-  'divinity': 'Divinity',
-  'fateweaving': 'Fateweaving',
-  'runes_of_sovereignty': 'Runes of Sovereignty',
-  'wild_magic': 'Wild Magic',
-};
-
-String _disciplineLabel(String slug) => _disciplineLabels[slug] ?? slug;
-
 /// The result of the spell picker: the committed Discipline and the chosen non-Cantrip spell ids.
 class _SpellSelection {
   final String? discipline;
@@ -1562,7 +1488,7 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
                       border: Border.all(color: selected ? accent : context.subtleTextColor.withOpacity(0.3), width: 0.5),
                     ),
                     child: Text(
-                      _disciplineLabel(slug),
+                      disciplineLabel(slug),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
@@ -1576,7 +1502,7 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
             const SizedBox(height: 14),
           ] else if (disciplines.length == 1) ...[
             Text(
-              'Discipline: ${_disciplineLabel(disciplines.first)}',
+              'Discipline: ${disciplineLabel(disciplines.first)}',
               style: TextStyle(fontSize: 12, color: context.textColor, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
