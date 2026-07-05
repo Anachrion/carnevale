@@ -96,6 +96,61 @@ api.Profile fakeProfile({
     ),
 );
 
+api.Scenario fakeScenario({int id = 1, String name = 'Gang War'}) => api.Scenario(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..ducats = 150
+    ..asymmetric = false
+    ..setup = 'Setup text.'
+    ..primaryObjective = 'Objective text.'
+    ..agendas = ListBuilder<String>(['3 agendas.'])
+    ..specialRules = ListBuilder<String>()
+    ..duration = '5 rounds.'
+    ..turns = 5
+    ..deploymentZones = ListBuilder<String>(['Opposite edges.']),
+);
+
+api.GamePlayer fakeGamePlayer({
+  int id = 1,
+  int userId = 1,
+  String username = 'tester',
+  bool host = true,
+}) => api.GamePlayer(
+  (b) => b
+    ..id = id
+    ..userId = userId
+    ..username = username
+    ..host = host
+    ..ready = false
+    ..wonRoleRoll = false
+    ..wonDeploymentRoll = false
+    ..score = 0
+    ..agendas = ListBuilder<api.Agenda>()
+    ..agendaHistory = ListBuilder<api.AgendaHistoryEntry>(),
+);
+
+api.Game fakeGame({
+  int id = 1,
+  String name = 'Gang War',
+  String joinCode = 'ABC123',
+  api.GameStatusEnum status = api.GameStatusEnum.pending,
+  List<api.GamePlayer> players = const [],
+}) => api.Game(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..joinCode = joinCode
+    ..status = status
+    ..ducatLimit = 150
+    ..currentTurn = 1
+    ..viewerVisibility = api.GameViewerVisibilityEnum.active
+    ..scenario = fakeScenario().toBuilder()
+    ..players = ListBuilder<api.GamePlayer>(
+      players.isEmpty ? [fakeGamePlayer()] : players,
+    ),
+);
+
 api.CardReference fakeCardReference({
   int id = 10,
   String identifier = 'guild-capodecina',
