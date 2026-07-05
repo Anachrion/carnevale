@@ -26,34 +26,6 @@ class GamePlayer {
   });
 }
 
-class Scenario {
-  final int id;
-  final String name;
-  final int ducats;
-  final bool asymmetric;
-  final String setup;
-  final String primaryObjective;
-  final List<String> agendas;
-  final List<String> specialRules;
-  final String duration;
-  final List<String> deploymentZones;
-  final String? illustration;
-
-  const Scenario({
-    required this.id,
-    required this.name,
-    required this.ducats,
-    required this.asymmetric,
-    required this.setup,
-    required this.primaryObjective,
-    required this.agendas,
-    required this.specialRules,
-    required this.duration,
-    required this.deploymentZones,
-    this.illustration,
-  });
-}
-
 class Game {
   final int id;
   final String name;
@@ -61,7 +33,7 @@ class Game {
   final String status;
   final int ducatLimit;
   final String? boardSize;
-  final Scenario scenario;
+  final api.Scenario scenario;
   final String viewerVisibility;
   final List<GamePlayer> players;
 

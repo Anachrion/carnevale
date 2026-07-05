@@ -3,6 +3,7 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
+import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart' as models;
 import '../services/game_service.dart';
 import '../widgets/app_background.dart';
@@ -668,8 +669,8 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
   final _nameController = TextEditingController();
   final _ducatController = TextEditingController();
   final _boardSizeController = TextEditingController();
-  List<models.Scenario> _scenarios = [];
-  models.Scenario? _selected;
+  List<api.Scenario> _scenarios = [];
+  api.Scenario? _selected;
   bool _loading = true;
   bool _saving = false;
   String? _error;
@@ -707,7 +708,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
     }
   }
 
-  void _selectScenario(models.Scenario s) {
+  void _selectScenario(api.Scenario s) {
     setState(() {
       _selected = s;
       _ducatController.text = '${s.ducats}';
@@ -944,7 +945,7 @@ class _ScenarioTile extends StatelessWidget {
     required this.selected,
     required this.onTap,
   });
-  final models.Scenario scenario;
+  final api.Scenario scenario;
   final bool selected;
   final VoidCallback onTap;
 
