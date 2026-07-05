@@ -60,6 +60,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     try {
       await _service.watch(widget.gameId);
     } catch (e) {
+      if (!mounted) return;
       setState(() => _error = 'Could not load this game.');
     } finally {
       if (mounted) setState(() => _loading = false);

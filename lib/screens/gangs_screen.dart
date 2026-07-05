@@ -59,9 +59,11 @@ class _GangsScreenState extends State<GangsScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       final gangs = await _service.loadAll();
+      if (!mounted) return;
       setState(() { _gangs = gangs; _loading = false; });
     } catch (e, st) {
       debugPrint('GangsScreen error: $e\n$st');
+      if (!mounted) return;
       setState(() { _error = e.toString(); _loading = false; });
     }
   }
