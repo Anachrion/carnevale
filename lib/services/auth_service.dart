@@ -6,9 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'api_client.dart';
+import 'api_exception.dart';
 
 class AuthUser {
-  const AuthUser({required this.id, required this.email, required this.username});
+  const AuthUser({
+    required this.id,
+    required this.email,
+    required this.username,
+  });
 
   final int id;
   final String email;
@@ -62,12 +67,16 @@ class AuthService extends ChangeNotifier {
   }) async {
     try {
       await _client.session.signup(
-        registrationInput: api.RegistrationInput((b) => b
-          ..user = api.RegistrationInputUser((ub) => ub
-            ..username = username
-            ..email = email
-            ..password = password
-            ..passwordConfirmation = passwordConfirmation).toBuilder()),
+        registrationInput: api.RegistrationInput(
+          (b) => b
+            ..user = api.RegistrationInputUser(
+              (ub) => ub
+                ..username = username
+                ..email = email
+                ..password = password
+                ..passwordConfirmation = passwordConfirmation,
+            ).toBuilder(),
+        ),
       );
     } on DioException catch (e) {
       throw AuthException(parseAuthError(e));
@@ -77,18 +86,30 @@ class AuthService extends ChangeNotifier {
   Future<void> logIn({required String email, required String password}) async {
     try {
       final res = await _client.session.login(
-        loginInput: api.LoginInput((b) => b
-          ..user = api.LoginInputUser((ub) => ub
-            ..email = email
-            ..password = password).toBuilder()),
+        loginInput: api.LoginInput(
+          (b) => b
+            ..user = api.LoginInputUser(
+              (ub) => ub
+                ..email = email
+                ..password = password,
+            ).toBuilder(),
+        ),
       );
       final authHeader = res.headers.value('authorization');
-      final token = authHeader?.replaceFirst(RegExp(r'^Bearer\s+', caseSensitive: false), '').trim();
+      final token = authHeader
+          ?.replaceFirst(RegExp(r'^Bearer\s+', caseSensitive: false), '')
+          .trim();
       if (token == null || token.isEmpty) {
-        throw AuthException('Login succeeded but no session token was returned.');
+        throw AuthException(
+          'Login succeeded but no session token was returned.',
+        );
       }
       final user = res.data!.user;
-      final authUser = AuthUser(id: user.id, email: user.email, username: user.username);
+      final authUser = AuthUser(
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      );
 
       _client.authToken = token;
       _currentUser = authUser;
@@ -96,18 +117,24 @@ class AuthService extends ChangeNotifier {
       await _storage.write(key: _userKey, value: _userToJson(authUser));
       notifyListeners();
     } on DioException catch (e) {
-      throw AuthException(parseAuthError(
-        e,
-        fallback: 'Invalid email or password, or account not yet confirmed.',
-      ));
+      throw AuthException(
+        parseAuthError(
+          e,
+          fallback: 'Invalid email or password, or account not yet confirmed.',
+        ),
+      );
     }
   }
 
   Future<void> forgotPassword(String email) async {
     try {
       await _client.session.forgotPassword(
-        forgotPasswordInput: api.ForgotPasswordInput((b) => b
-          ..user = api.ForgotPasswordInputUser((ub) => ub..email = email).toBuilder()),
+        forgotPasswordInput: api.ForgotPasswordInput(
+          (b) => b
+            ..user = api.ForgotPasswordInputUser(
+              (ub) => ub..email = email,
+            ).toBuilder(),
+        ),
       );
     } on DioException catch (e) {
       throw AuthException(parseAuthError(e));
@@ -121,11 +148,15 @@ class AuthService extends ChangeNotifier {
   }) async {
     try {
       await _client.session.resetPassword(
-        resetPasswordInput: api.ResetPasswordInput((b) => b
-          ..user = api.ResetPasswordInputUser((ub) => ub
-            ..resetPasswordToken = token
-            ..password = password
-            ..passwordConfirmation = passwordConfirmation).toBuilder()),
+        resetPasswordInput: api.ResetPasswordInput(
+          (b) => b
+            ..user = api.ResetPasswordInputUser(
+              (ub) => ub
+                ..resetPasswordToken = token
+                ..password = password
+                ..passwordConfirmation = passwordConfirmation,
+            ).toBuilder(),
+        ),
       );
     } on DioException catch (e) {
       throw AuthException(parseAuthError(e));
@@ -135,11 +166,19 @@ class AuthService extends ChangeNotifier {
   Future<void> updateUsername(String username) async {
     try {
       final res = await _client.session.updateAccount(
-        updateAccountInput: api.UpdateAccountInput((b) => b
-          ..user = api.UpdateAccountInputUser((ub) => ub..username = username).toBuilder()),
+        updateAccountInput: api.UpdateAccountInput(
+          (b) => b
+            ..user = api.UpdateAccountInputUser(
+              (ub) => ub..username = username,
+            ).toBuilder(),
+        ),
       );
       final user = res.data!.user;
-      final authUser = AuthUser(id: user.id, email: user.email, username: user.username);
+      final authUser = AuthUser(
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      );
       _currentUser = authUser;
       await _storage.write(key: _userKey, value: _userToJson(authUser));
       notifyListeners();
@@ -170,10 +209,14 @@ class AuthService extends ChangeNotifier {
     final parts = token.split('.');
     if (parts.length != 3) return true;
     try {
-      final payload = json.decode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+      final payload = json.decode(
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+      );
       final exp = payload['exp'];
       if (exp is! int) return false;
-      return DateTime.fromMillisecondsSinceEpoch(exp * 1000).isBefore(DateTime.now());
+      return DateTime.fromMillisecondsSinceEpoch(
+        exp * 1000,
+      ).isBefore(DateTime.now());
     } catch (_) {
       return true;
     }
@@ -184,20 +227,15 @@ class AuthService extends ChangeNotifier {
 
   AuthUser _userFromJson(String raw) {
     final map = json.decode(raw) as Map<String, dynamic>;
-    return AuthUser(id: map['id'] as int, email: map['email'] as String, username: map['username'] as String);
+    return AuthUser(
+      id: map['id'] as int,
+      email: map['email'] as String,
+      username: map['username'] as String,
+    );
   }
 
+  // Delegates to the shared parser so auth and the other services share one error contract (F-P2-2).
   @visibleForTesting
-  String parseAuthError(DioException e, {String? fallback}) {
-    final data = e.response?.data;
-    if (data is Map && data['errors'] is Map) {
-      final errors = data['errors'] as Map;
-      return errors.entries.map((entry) {
-        final field = entry.key.toString();
-        final messages = (entry.value as List).map((m) => m.toString()).join(', ');
-        return field == 'base' ? messages : '$field $messages';
-      }).join('\n');
-    }
-    return fallback ?? 'Something went wrong. Please try again.';
-  }
+  String parseAuthError(DioException e, {String? fallback}) =>
+      ApiException.from(e, fallback: fallback).message;
 }
