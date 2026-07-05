@@ -166,7 +166,7 @@ class GameService extends ChangeNotifier {
 
   /// Fetches an initial snapshot and opens a live ActionCable subscription for
   /// [gameId], keeping [currentGame] in sync until [stopWatching] is called.
-  Future<models.Game> watch(int gameId, {required String authToken}) async {
+  Future<models.Game> watch(int gameId) async {
     stopWatching();
 
     final game = await getGame(gameId);
@@ -174,9 +174,23 @@ class GameService extends ChangeNotifier {
     notifyListeners();
 
     _watchedGameId = gameId;
-    _cable = ActionCableClient('${ApiClient.cableUrl}?token=$authToken')..connect();
+    // The client mints a fresh single-use cable ticket for every connection attempt; on reconnect
+    // we refetch the snapshot, since any broadcasts sent while the socket was down are lost.
+    _cable = ActionCableClient(_client.cableConnectionUrl)..onReconnect = _resyncSnapshot;
     _cable!.subscribe({'channel': 'GameChannel', 'game_id': gameId}, _onChannelMessage);
+    await _cable!.connect();
     return game;
+  }
+
+  Future<void> _resyncSnapshot() async {
+    final id = _watchedGameId;
+    if (id == null) return;
+    try {
+      currentGame = await getGame(id);
+      notifyListeners();
+    } catch (_) {
+      // Keep the last-known snapshot; a later broadcast or reconnect will refresh it.
+    }
   }
 
   void stopWatching() {

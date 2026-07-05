@@ -26,13 +26,13 @@ class ApiClient {
   static const _apiKey = String.fromEnvironment('API_KEY');
 
   ApiClient._() {
-    final dio = Dio(BaseOptions(
+    _dio = Dio(BaseOptions(
       baseUrl: '$_httpScheme://$_host/api/v1',
       // Without this, Devise's failure app treats requests as HTML and redirects
       // (302) instead of returning the documented JSON error body on 401/422.
       headers: {'Accept': 'application/json'},
     ));
-    dio.interceptors.add(InterceptorsWrapper(
+    _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         if (_apiKey.isNotEmpty) {
           options.headers['X-Api-Key'] = _apiKey;
@@ -49,14 +49,29 @@ class ApiClient {
         handler.next(error);
       },
     ));
-    session = SessionApi(dio, standardSerializers);
-    lists = ListsApi(dio, standardSerializers);
-    listEntries = ListEntriesApi(dio, standardSerializers);
-    profiles = ProfilesApi(dio, standardSerializers);
-    equipment = EquipmentApi(dio, standardSerializers);
-    games = GamesApi(dio, standardSerializers);
-    scenarios = ScenariosApi(dio, standardSerializers);
-    spells = SpellsApi(dio, standardSerializers);
+    session = SessionApi(_dio, standardSerializers);
+    lists = ListsApi(_dio, standardSerializers);
+    listEntries = ListEntriesApi(_dio, standardSerializers);
+    profiles = ProfilesApi(_dio, standardSerializers);
+    equipment = EquipmentApi(_dio, standardSerializers);
+    games = GamesApi(_dio, standardSerializers);
+    scenarios = ScenariosApi(_dio, standardSerializers);
+    spells = SpellsApi(_dio, standardSerializers);
+  }
+
+  late final Dio _dio;
+
+  /// Fetches a short-lived, single-use cable ticket over authenticated REST and returns the full
+  /// ActionCable URL to connect with. Only the disposable ticket — never the reusable JWT — rides
+  /// in the query string, so a URL that leaks into logs is already worthless. Called fresh for
+  /// every connection attempt, including reconnects, since each ticket opens exactly one socket.
+  Future<String> cableConnectionUrl() async {
+    final res = await _dio.post<Map<String, dynamic>>('/cable_tickets');
+    final ticket = res.data?['ticket'] as String?;
+    if (ticket == null || ticket.isEmpty) {
+      throw StateError('cable ticket missing from response');
+    }
+    return '$cableUrl?ticket=$ticket';
   }
 
   /// Set by [AuthService] once a user is logged in; sent as a Bearer token on every request.
