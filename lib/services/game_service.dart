@@ -11,7 +11,7 @@ import 'api_exception.dart';
 import 'gang_service.dart';
 
 class AvailableGang {
-  final models.GangSummary gang;
+  final api.GangSummary gang;
   final bool selectable;
 
   const AvailableGang({required this.gang, required this.selectable});
@@ -111,10 +111,7 @@ class GameService extends ChangeNotifier {
     final res = await _client.games.getAvailableGangs(id: gameId);
     return (res.data?.toList() ?? [])
         .map(
-          (a) => AvailableGang(
-            gang: _mapGangSummary(a.list),
-            selectable: a.selectable,
-          ),
+          (a) => AvailableGang(gang: a.list, selectable: a.selectable),
         )
         .toList();
   });
@@ -127,9 +124,9 @@ class GameService extends ChangeNotifier {
     return _mapGame(res.data!);
   });
 
-  Future<List<models.Agenda>> drawAgendas(int gameId) => _guard(() async {
+  Future<List<api.Agenda>> drawAgendas(int gameId) => _guard(() async {
     final res = await _client.games.drawAgendas(id: gameId);
-    return (res.data?.agendas.toList() ?? []).map(_mapAgenda).toList();
+    return res.data?.agendas.toList() ?? [];
   });
 
   Future<models.Game> markReady(int gameId) => _guard(() async {
@@ -280,20 +277,12 @@ class GameService extends ChangeNotifier {
     userId: p.userId,
     username: p.username,
     host: p.host,
-    list: p.list == null ? null : _mapGangSummary(p.list!),
+    list: p.list,
     role: p.role?.name,
     ready: p.ready,
     wonRoleRoll: p.wonRoleRoll,
     wonDeploymentRoll: p.wonDeploymentRoll,
-    agendas: p.agendas.map(_mapAgenda).toList(),
-  );
-
-  models.GangSummary _mapGangSummary(api.GangSummary g) => models.GangSummary(
-    id: g.id,
-    name: g.name,
-    faction: g.faction,
-    points: g.points,
-    totalCost: g.totalCost,
+    agendas: p.agendas.toList(),
   );
 
   models.Scenario _mapScenario(api.Scenario s) => models.Scenario(
@@ -309,9 +298,6 @@ class GameService extends ChangeNotifier {
     deploymentZones: s.deploymentZones.toList(),
     illustration: s.illustration,
   );
-
-  models.Agenda _mapAgenda(api.Agenda a) =>
-      models.Agenda(id: a.id, name: a.name, description: a.description);
 
   /// Converts a generated enum constant back to its wire value (e.g.
   /// `GameStatusEnum.gangSelection` -> `'gang_selection'`) via the same
