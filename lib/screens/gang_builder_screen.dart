@@ -3,7 +3,6 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import '../models/gang.dart';
 import '../models/profile.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
@@ -19,17 +18,17 @@ enum _HireSort { role, name, cost }
 
 class GangBuilderScreen extends StatefulWidget {
   const GangBuilderScreen({super.key, required this.gang});
-  final Gang gang;
+  final api.ModelList gang;
 
   @override
   State<GangBuilderScreen> createState() => _GangBuilderScreenState();
 }
 
 class _GangBuilderScreenState extends State<GangBuilderScreen> {
-  late Gang _gang;
+  late api.ModelList _gang;
   List<Profile> _profiles = [];
   List<api.Equipment> _equipment = [];
-  List<Spell> _spells = [];
+  List<api.Spell> _spells = [];
   bool _loading = true;
   bool _busy = false;
   _Tab _tab = _Tab.list;
@@ -91,12 +90,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     setState(() {
       _profiles = results[0] as List<Profile>;
       _equipment = results[1] as List<api.Equipment>;
-      _spells = results[2] as List<Spell>;
+      _spells = results[2] as List<api.Spell>;
       _loading = false;
     });
   }
 
-  Future<void> _editSpells(ListEntry entry) async {
+  Future<void> _editSpells(api.ListEntry entry) async {
     if (_busy) return;
     final result = await showDialog<_SpellSelection>(
       context: context,
@@ -120,16 +119,18 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   int _entryCount(Profile p) => _gang.entries
       .where(
         (e) =>
-            e.entryType == 'CardReference' &&
+            e.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonCardReference &&
             p.cardReferenceIds.contains(e.entryId),
       )
       .length;
 
-  ListEntry? _entryFor(Profile p) {
+  api.ListEntry? _entryFor(Profile p) {
     try {
       return _gang.entries.firstWhere(
         (e) =>
-            e.entryType == 'CardReference' &&
+            e.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonCardReference &&
             p.cardReferenceIds.contains(e.entryId),
       );
     } catch (_) {
@@ -178,7 +179,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
-  Future<void> _removeEntry(ListEntry entry) async {
+  Future<void> _removeEntry(api.ListEntry entry) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
@@ -247,20 +248,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (newIndex > oldIndex) newIndex--;
     if (newIndex == oldIndex) return;
     final entry = _gang.entries[oldIndex];
-    final reordered = List<ListEntry>.from(_gang.entries)
+    final reordered = List<api.ListEntry>.from(_gang.entries)
       ..removeAt(oldIndex)
       ..insert(newIndex, entry);
     setState(() {
-      _gang = Gang(
-        id: _gang.id,
-        name: _gang.name,
-        faction: _gang.faction,
-        points: _gang.points,
-        totalCost: _gang.totalCost,
-        selectionValid: _gang.selectionValid,
-        selectionErrors: _gang.selectionErrors,
-        entries: reordered,
-      );
+      _gang = _gang.rebuild((b) => b..entries.replace(reordered));
       _busy = true;
     });
     try {
@@ -308,7 +300,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
           const SizedBox(width: 4),
           Expanded(
             child: Text(
-              _gang.name,
+              _gang.name ?? '',
               style: GoogleFonts.cinzel(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
@@ -561,7 +553,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       );
     }
     final hiredProfiles = entries
-        .where((e) => e.entryType == 'CardReference')
+        .where(
+          (e) =>
+              e.entryType ==
+              api.ListEntryEntryTypeEnum.catalogColonColonCardReference,
+        )
         .map(
           (e) => _profiles
               .where((p) => p.cardReferenceIds.contains(e.entryId))
@@ -577,16 +573,22 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       itemCount: entries.length,
       itemBuilder: (_, i) {
         final entry = entries[i];
-        final profileIdx = entry.entryType == 'CardReference'
+        final profileIdx =
+            entry.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonCardReference
             ? _profiles.indexWhere(
                 (p) => p.cardReferenceIds.contains(entry.entryId),
               )
             : -1;
         final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
-        final equipmentItem = entry.entryType == 'Equipment'
+        final equipmentItem =
+            entry.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonEquipment
             ? _equipment.where((e) => e.id == entry.entryId).firstOrNull
             : null;
-        final entryColor = entry.entryType == 'Equipment'
+        final entryColor =
+            entry.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonEquipment
             ? AppPalette.equipment
             : profile?.faction == 'gifted'
             ? (AppPalette.factionColors['gifted'] ?? factionColor)
@@ -722,7 +724,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                             final count = _gang.entries
                                 .where(
                                   (en) =>
-                                      en.entryType == 'Equipment' &&
+                                      en.entryType ==
+                                          api
+                                              .ListEntryEntryTypeEnum
+                                              .catalogColonColonEquipment &&
                                       en.entryId == e.id,
                                 )
                                 .length;
@@ -995,7 +1000,7 @@ class _EntryTile extends StatefulWidget {
     this.onEditSpells,
   });
 
-  final ListEntry entry;
+  final api.ListEntry entry;
   final Color factionColor;
   final String? role;
   final bool busy;
@@ -1522,8 +1527,8 @@ class _SpellSelection {
 class _SpellPickerDialog extends StatefulWidget {
   const _SpellPickerDialog({required this.entry, required this.allSpells});
 
-  final ListEntry entry;
-  final List<Spell> allSpells;
+  final api.ListEntry entry;
+  final List<api.Spell> allSpells;
 
   @override
   State<_SpellPickerDialog> createState() => _SpellPickerDialogState();
@@ -1547,16 +1552,18 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
         .toSet();
   }
 
-  List<Spell> get _choosable =>
+  List<api.Spell> get _choosable =>
       widget.allSpells
-          .where((s) => s.discipline == _discipline && !s.cantrip)
+          .where(
+            (s) => disciplineSlug(s.discipline) == _discipline && !s.cantrip,
+          )
           .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
 
-  Spell? get _cantrip {
+  api.Spell? get _cantrip {
     try {
       return widget.allSpells.firstWhere(
-        (s) => s.discipline == _discipline && s.cantrip,
+        (s) => disciplineSlug(s.discipline) == _discipline && s.cantrip,
       );
     } catch (_) {
       return null;
@@ -1574,7 +1581,7 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
     });
   }
 
-  void _toggle(Spell spell) {
+  void _toggle(api.Spell spell) {
     setState(() {
       if (_selected.contains(spell.id)) {
         _selected.remove(spell.id);
@@ -1751,7 +1758,7 @@ class _SpellRow extends StatelessWidget {
     this.onTap,
   });
 
-  final Spell spell;
+  final api.Spell spell;
   final bool checked;
   final bool enabled;
   final String? trailingLabel;
