@@ -33,7 +33,7 @@ class AppDrawer extends StatelessWidget {
         : const Color(0xFF2C2418).withOpacity(0.15);
 
     return Drawer(
-      backgroundColor: isDark ? const Color(0xFF1A1612) : const Color(0xFFF0EDE6),
+      backgroundColor: isDark ? const Color(0xFF14171F) : const Color(0xFFF0EDE6),
       child: SafeArea(
         child: Column(
           children: [
