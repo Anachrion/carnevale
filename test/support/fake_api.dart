@@ -58,6 +58,51 @@ Object listBody<T>(Iterable<T> items, FullType itemType) =>
 
 Object gameBody(api.Game game) => _serialize(game, const FullType(api.Game));
 
+Object modelListBody(api.ModelList list) => _serialize(list, const FullType(api.ModelList));
+
+api.ListEntry fakeListEntry({
+  int id = 1,
+  int position = 1,
+  api.ListEntryEntryTypeEnum entryType =
+      api.ListEntryEntryTypeEnum.catalogColonColonCardReference,
+  int entryId = 10,
+  String name = 'Capodecina',
+  int cost = 20,
+}) => api.ListEntry(
+  (b) => b
+    ..id = id
+    ..position = position
+    ..entryType = entryType
+    ..entryId = entryId
+    ..name = name
+    ..cost = cost
+    ..mage = false
+    ..spellSlots = 0
+    ..disciplines = ListBuilder<String>()
+    ..spells = ListBuilder<api.Spell>(),
+);
+
+api.ModelList fakeModelList({
+  int id = 1,
+  String name = 'The Rooks',
+  String faction = 'guild',
+  int points = 200,
+  int totalCost = 20,
+  List<api.ListEntry> entries = const [],
+}) => api.ModelList(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..faction = faction
+    ..points = points
+    ..totalCost = totalCost
+    ..selectionValid = true
+    ..selectionErrors = ListBuilder<String>()
+    ..entries = ListBuilder<api.ListEntry>(
+      entries.isEmpty ? [fakeListEntry()] : entries,
+    ),
+);
+
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
 api.Profile fakeProfile({
