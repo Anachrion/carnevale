@@ -60,6 +60,8 @@ export 'package:carnevale_api/src/model/session_user.dart';
 export 'package:carnevale_api/src/model/special_rule.dart';
 export 'package:carnevale_api/src/model/update_account_input.dart';
 export 'package:carnevale_api/src/model/update_account_input_user.dart';
+export 'package:carnevale_api/src/model/update_counters_input.dart';
+export 'package:carnevale_api/src/model/update_counters_input_counters.dart';
 export 'package:carnevale_api/src/model/validation_errors.dart';
 export 'package:carnevale_api/src/model/weapon.dart';
 

@@ -56,6 +56,8 @@ import 'package:carnevale_api/src/model/session_user.dart';
 import 'package:carnevale_api/src/model/special_rule.dart';
 import 'package:carnevale_api/src/model/update_account_input.dart';
 import 'package:carnevale_api/src/model/update_account_input_user.dart';
+import 'package:carnevale_api/src/model/update_counters_input.dart';
+import 'package:carnevale_api/src/model/update_counters_input_counters.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 import 'package:carnevale_api/src/model/weapon.dart';
 
@@ -104,6 +106,8 @@ part 'serializers.g.dart';
   SpecialRule,
   UpdateAccountInput,
   UpdateAccountInputUser,
+  UpdateCountersInput,
+  UpdateCountersInputCounters,
   ValidationErrors,
   Weapon,
 ])

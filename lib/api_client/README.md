@@ -81,6 +81,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**scoreAgenda**](doc/GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [*GamesApi*](doc/GamesApi.md) | [**unarchiveGame**](doc/GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
+[*GamesApi*](doc/GamesApi.md) | [**updateCounters**](doc/GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
@@ -144,6 +145,8 @@ Class | Method | HTTP request | Description
  - [SpecialRule](doc/SpecialRule.md)
  - [UpdateAccountInput](doc/UpdateAccountInput.md)
  - [UpdateAccountInputUser](doc/UpdateAccountInputUser.md)
+ - [UpdateCountersInput](doc/UpdateCountersInput.md)
+ - [UpdateCountersInputCounters](doc/UpdateCountersInputCounters.md)
  - [ValidationErrors](doc/ValidationErrors.md)
  - [Weapon](doc/Weapon.md)
 
