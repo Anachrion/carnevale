@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
@@ -192,6 +193,15 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   _GangTabData? _data;
   bool _failed = false;
 
+  // game_state broadcasts don't carry entry states, so each one triggers a player-list refetch.
+  // This timer coalesces a burst of broadcasts into a single fetch instead of one per frame.
+  Timer? _refetchTimer;
+
+  // Bumped on every local optimistic update. A refetch captures it at the start and refuses to
+  // apply its (now staler) result if a newer optimistic update landed while it was in flight, so
+  // the just-tapped counter never flickers back to a stale server value.
+  int _mutationSeq = 0;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -204,11 +214,13 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
 
   @override
   void dispose() {
+    _refetchTimer?.cancel();
     _gameService.removeListener(_onGameUpdate);
     super.dispose();
   }
 
   Future<void> _load() async {
+    final seq = _mutationSeq;
     try {
       final gang = await _gameService.playerList(widget.gameId, widget.playerId);
       // The catalog halves never change mid-game — only re-fetch the gang on refresh.
@@ -223,6 +235,9 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
         equipment = results[1] as List<Equipment>;
       }
       if (!mounted) return;
+      // A local optimistic update landed while this fetch was in flight — keep the fresher local
+      // state and let a later broadcast reconcile, rather than clobbering it with a stale snapshot.
+      if (seq != _mutationSeq) return;
       setState(() {
         _data = _GangTabData(gang: gang, profiles: profiles!, equipment: equipment!);
         _failed = false;
@@ -233,15 +248,20 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  // game_state broadcasts don't carry entry states (those live in the player-list payload),
-  // so any broadcast — e.g. the opponent toggling a counter — triggers a silent re-fetch.
-  void _onGameUpdate() => _load();
+  // game_state broadcasts don't carry entry states (those live in the player-list payload), so any
+  // broadcast — e.g. the opponent toggling a counter — needs a refetch. Debounce it so a chatty
+  // game doesn't trigger a continuous stream of full player-list fetches.
+  void _onGameUpdate() {
+    _refetchTimer?.cancel();
+    _refetchTimer = Timer(const Duration(milliseconds: 300), _load);
+  }
 
   // Applies a PATCH response locally right away rather than waiting for the echo broadcast's
   // re-fetch, so the tapped counter never lags behind the dialog.
   void _applyEntryState(int listEntryId, EntryState state) {
     final data = _data;
     if (data == null) return;
+    _mutationSeq++;
     final gang = data.gang;
     setState(() {
       _data = _GangTabData(
