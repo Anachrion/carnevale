@@ -2,7 +2,7 @@ import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/equipment.dart';
+import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/gang.dart';
 import '../models/profile.dart';
 import '../services/equipment_service.dart';
@@ -28,7 +28,7 @@ class GangBuilderScreen extends StatefulWidget {
 class _GangBuilderScreenState extends State<GangBuilderScreen> {
   late Gang _gang;
   List<Profile> _profiles = [];
-  List<Equipment> _equipment = [];
+  List<api.Equipment> _equipment = [];
   List<Spell> _spells = [];
   bool _loading = true;
   bool _busy = false;
@@ -90,7 +90,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (!mounted) return;
     setState(() {
       _profiles = results[0] as List<Profile>;
-      _equipment = results[1] as List<Equipment>;
+      _equipment = results[1] as List<api.Equipment>;
       _spells = results[2] as List<Spell>;
       _loading = false;
     });
@@ -153,7 +153,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
-  Future<void> _addEquipment(Equipment e) async {
+  Future<void> _addEquipment(api.Equipment e) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
@@ -190,7 +190,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
-  void _showEquipmentDetail(BuildContext context, Equipment e) {
+  void _showEquipmentDetail(BuildContext context, api.Equipment e) {
     showDialog(
       context: context,
       builder: (context) => ThemedDialogCard(
@@ -1432,7 +1432,7 @@ class _HireEquipmentTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final Equipment equipment;
+  final api.Equipment equipment;
   final int count;
   final bool canAdd;
   final bool busy;

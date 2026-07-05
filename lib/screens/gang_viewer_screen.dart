@@ -3,7 +3,7 @@ import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/equipment.dart';
+import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/gang.dart';
 import '../models/profile.dart';
 import '../services/equipment_service.dart';
@@ -173,7 +173,7 @@ class _GangTabData {
   const _GangTabData({required this.gang, required this.profiles, required this.equipment});
   final Gang gang;
   final List<Profile> profiles;
-  final List<Equipment> equipment;
+  final List<api.Equipment> equipment;
 }
 
 class _GangTab extends StatefulWidget {
@@ -232,7 +232,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
           EquipmentService().getAll(),
         ]);
         profiles = results[0] as List<Profile>;
-        equipment = results[1] as List<Equipment>;
+        equipment = results[1] as List<api.Equipment>;
       }
       if (!mounted) return;
       // A local optimistic update landed while this fetch was in flight — keep the fresher local
@@ -340,7 +340,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
 
   final Gang gang;
   final List<Profile> profiles;
-  final List<Equipment> equipment;
+  final List<api.Equipment> equipment;
 
   /// Whether to show the gang name/faction header and ducats bar above the models.
   final bool showHeader;
@@ -495,7 +495,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     );
   }
 
-  void _showEquipmentDetail(BuildContext context, Equipment e) {
+  void _showEquipmentDetail(BuildContext context, api.Equipment e) {
     showDialog(
       context: context,
       builder: (context) => ThemedDialogCard(
