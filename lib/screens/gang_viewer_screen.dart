@@ -784,6 +784,34 @@ class _AddCounterButton extends StatelessWidget {
   }
 }
 
+/// Shared surface for the counter and stat edit popups: a rounded card that follows the app
+/// theme (cream in light, near-black in dark) with a gold border, rather than the fixed dark
+/// brown used for equipment cards — so the popup feels native in both themes.
+class _ThemedDialogCard extends StatelessWidget {
+  const _ThemedDialogCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: context.cardBgColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _kGold.withOpacity(0.6), width: 1.2),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Popup opened by [_AddCounterButton]: lists all five counters with their current state;
 /// tapping a row toggles it (underwater cycles 0 → 1 → 2 → 0) and saves immediately — no
 /// confirm step, matching how quickly counters flip at the table. Every change lands on the
@@ -834,86 +862,81 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: _kEquipmentColor,
-            borderRadius: BorderRadius.all(Radius.circular(16)),
+    return _ThemedDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.entry.name,
+            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.entry.name,
-                style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Tap a counter to toggle it.',
-                style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.6)),
-              ),
-              const SizedBox(height: 12),
-              Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
-              const SizedBox(height: 4),
-              _counterRow(
-                asset: 'assets/images/counters/stunned.png',
-                label: 'Stunned',
-                active: _state.stunned,
-                onTap: () => _update(stunned: !_state.stunned),
-              ),
-              _counterRow(
-                asset: 'assets/images/counters/hidden.png',
-                label: 'Hidden',
-                active: _state.hidden,
-                onTap: () => _update(hidden: !_state.hidden),
-              ),
-              _counterRow(
-                asset: 'assets/images/counters/guard.png',
-                label: 'Guarding',
-                active: _state.guarding,
-                onTap: () => _update(guarding: !_state.guarding),
-              ),
-              _counterRow(
-                asset: 'assets/images/counters/carry_objective.png',
-                label: 'Carrying objective',
-                active: _state.carryingObjective,
-                onTap: () => _update(carryingObjective: !_state.carryingObjective),
-              ),
-              _counterRow(
-                asset: 'assets/images/counters/underwater_counter.png',
-                label: 'Underwater',
-                active: _state.underwaterCounters > 0,
-                badge: _state.underwaterCounters > 0 ? _state.underwaterCounters : null,
-                trailing: Text(
-                  '${_state.underwaterCounters} / 2',
-                  style: GoogleFonts.cinzel(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: _state.underwaterCounters > 0 ? _kGold : Colors.white30,
-                  ),
-                ),
-                onTap: () => _update(underwaterCounters: (_state.underwaterCounters + 1) % 3),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: _kGold)),
-                ),
-              ),
-            ],
+          const SizedBox(height: 4),
+          Text(
+            'Tap a counter to toggle it.',
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
-        ),
+          const SizedBox(height: 12),
+          Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+          const SizedBox(height: 4),
+          _counterRow(
+            context,
+            asset: 'assets/images/counters/stunned.png',
+            label: 'Stunned',
+            active: _state.stunned,
+            onTap: () => _update(stunned: !_state.stunned),
+          ),
+          _counterRow(
+            context,
+            asset: 'assets/images/counters/hidden.png',
+            label: 'Hidden',
+            active: _state.hidden,
+            onTap: () => _update(hidden: !_state.hidden),
+          ),
+          _counterRow(
+            context,
+            asset: 'assets/images/counters/guard.png',
+            label: 'Guarding',
+            active: _state.guarding,
+            onTap: () => _update(guarding: !_state.guarding),
+          ),
+          _counterRow(
+            context,
+            asset: 'assets/images/counters/carry_objective.png',
+            label: 'Carrying objective',
+            active: _state.carryingObjective,
+            onTap: () => _update(carryingObjective: !_state.carryingObjective),
+          ),
+          _counterRow(
+            context,
+            asset: 'assets/images/counters/underwater_counter.png',
+            label: 'Underwater',
+            active: _state.underwaterCounters > 0,
+            badge: _state.underwaterCounters > 0 ? _state.underwaterCounters : null,
+            trailing: Text(
+              '${_state.underwaterCounters} / 2',
+              style: GoogleFonts.cinzel(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: _state.underwaterCounters > 0 ? _kGold : context.subtleTextColor,
+              ),
+            ),
+            onTap: () => _update(underwaterCounters: (_state.underwaterCounters + 1) % 3),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: _kGold)),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _counterRow({
+  Widget _counterRow(
+    BuildContext context, {
     required String asset,
     required String label,
     required bool active,
@@ -928,19 +951,19 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
-            _CounterIcon(asset: asset, label: label, active: active, badge: badge),
+            _CounterIcon(asset: asset, label: label, active: active, badge: badge, foreground: context.textColor),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
-                style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
+                style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, color: context.textColor),
               ),
             ),
             trailing ??
                 Icon(
                   active ? Icons.check_circle : Icons.circle_outlined,
                   size: 20,
-                  color: active ? _kGold : Colors.white30,
+                  color: active ? _kGold : context.subtleTextColor,
                 ),
           ],
         ),
@@ -991,59 +1014,52 @@ class _StatEditDialogState extends State<_StatEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: _kEquipmentColor,
-            borderRadius: BorderRadius.all(Radius.circular(16)),
+    return _ThemedDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.entry.name,
+            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.entry.name,
-                style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
-              ),
-              const SizedBox(height: 12),
-              Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
-              const SizedBox(height: 4),
-              _statStepperRow(
-                label: 'Life Points',
-                value: _state.lifePoints,
-                onChanged: (v) => _update(lifePoints: v),
-              ),
-              if (_state.willPoints.starting > 0)
-                _statStepperRow(
-                  label: 'Will Points',
-                  value: _state.willPoints,
-                  onChanged: (v) => _update(willPoints: v),
-                ),
-              if (_state.commandPoints.starting > 0)
-                _statStepperRow(
-                  label: 'Command Points',
-                  value: _state.commandPoints,
-                  onChanged: (v) => _update(commandPoints: v),
-                ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: _kGold)),
-                ),
-              ),
-            ],
+          const SizedBox(height: 12),
+          Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+          const SizedBox(height: 4),
+          _statStepperRow(
+            context,
+            label: 'Life Points',
+            value: _state.lifePoints,
+            onChanged: (v) => _update(lifePoints: v),
           ),
-        ),
+          if (_state.willPoints.starting > 0)
+            _statStepperRow(
+              context,
+              label: 'Will Points',
+              value: _state.willPoints,
+              onChanged: (v) => _update(willPoints: v),
+            ),
+          if (_state.commandPoints.starting > 0)
+            _statStepperRow(
+              context,
+              label: 'Command Points',
+              value: _state.commandPoints,
+              onChanged: (v) => _update(commandPoints: v),
+            ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: _kGold)),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _statStepperRow({
+  Widget _statStepperRow(
+    BuildContext context, {
     required String label,
     required EntryStatValue value,
     required ValueChanged<int> onChanged,
@@ -1055,10 +1071,11 @@ class _StatEditDialogState extends State<_StatEditDialog> {
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
+              style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, color: context.textColor),
             ),
           ),
           _stepperButton(
+            context,
             icon: Icons.remove,
             // Can't drop below 0 (the server rejects it too); disabled at the floor.
             onTap: _busy || value.current <= 0 ? null : () => onChanged(value.current - 1),
@@ -1068,10 +1085,11 @@ class _StatEditDialogState extends State<_StatEditDialog> {
             alignment: Alignment.center,
             child: Text(
               '${value.current} / ${value.starting}',
-              style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
+              style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: context.textColor),
             ),
           ),
           _stepperButton(
+            context,
             icon: Icons.add,
             onTap: _busy ? null : () => onChanged(value.current + 1),
           ),
@@ -1080,8 +1098,9 @@ class _StatEditDialogState extends State<_StatEditDialog> {
     );
   }
 
-  Widget _stepperButton({required IconData icon, required VoidCallback? onTap}) {
+  Widget _stepperButton(BuildContext context, {required IconData icon, required VoidCallback? onTap}) {
     final enabled = onTap != null;
+    final color = enabled ? context.textColor : context.subtleTextColor.withOpacity(0.4);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1089,9 +1108,9 @@ class _StatEditDialogState extends State<_StatEditDialog> {
         height: 34,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: enabled ? Colors.white.withOpacity(0.5) : Colors.white24, width: 1.2),
+          border: Border.all(color: enabled ? color.withOpacity(0.5) : color, width: 1.2),
         ),
-        child: Icon(icon, size: 20, color: enabled ? Colors.white : Colors.white24),
+        child: Icon(icon, size: 20, color: color),
       ),
     );
   }
@@ -1102,12 +1121,16 @@ class _StatEditDialogState extends State<_StatEditDialog> {
 /// active, dimmed with no ring when it isn't. Underwater additionally carries a count badge (it
 /// stacks up to 2, unlike the other four, which are simple on/off flags).
 class _CounterIcon extends StatelessWidget {
-  const _CounterIcon({required this.asset, required this.label, required this.active, this.badge});
+  const _CounterIcon({required this.asset, required this.label, required this.active, this.badge, this.foreground = Colors.white});
 
   final String asset;
   final String label;
   final bool active;
   final int? badge;
+
+  /// Tint for the icon glyph. Defaults to white, which reads on the tile's dark faction-colored
+  /// gradient; the edit popup passes the theme's text color so it reads on a light surface too.
+  final Color foreground;
 
   @override
   Widget build(BuildContext context) {
@@ -1127,7 +1150,7 @@ class _CounterIcon extends StatelessWidget {
           children: [
             Opacity(
               opacity: active ? 1.0 : 0.35,
-              child: Image.asset(asset, width: 26, height: 26, color: Colors.white, colorBlendMode: BlendMode.srcIn),
+              child: Image.asset(asset, width: 26, height: 26, color: foreground, colorBlendMode: BlendMode.srcIn),
             ),
             if (badge != null)
               Positioned(
