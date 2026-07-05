@@ -1,6 +1,8 @@
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import 'package:dio/dio.dart';
 import '../models/profile.dart';
 import 'api_client.dart';
+import 'api_exception.dart';
 
 class ProfileService {
   static final ProfileService _instance = ProfileService._();
@@ -12,17 +14,22 @@ class ProfileService {
 
   Future<List<Profile>> loadAll() async {
     if (_cache != null) return _cache!;
-    final res = await _client.profiles.getProfiles();
-    _cache = (res.data?.toList() ?? []).map(_mapProfile).toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
-    return _cache!;
+    try {
+      final res = await _client.profiles.getProfiles();
+      _cache = (res.data?.toList() ?? []).map(_mapProfile).toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+      return _cache!;
+    } on DioException catch (e) {
+      throw ApiException.from(e);
+    }
   }
 
   Future<List<Profile>> search(String query, {Set<String>? factions}) async {
     final all = await loadAll();
     final q = query.toLowerCase().trim();
     return all.where((p) {
-      final matchesFaction = factions == null || factions.isEmpty || factions.contains(p.faction);
+      final matchesFaction =
+          factions == null || factions.isEmpty || factions.contains(p.faction);
       final matchesQuery = q.isEmpty || p.name.toLowerCase().contains(q);
       return matchesFaction && matchesQuery;
     }).toList();
@@ -66,20 +73,20 @@ class ProfileService {
   }
 
   Weapon _mapWeapon(api.Weapon w) => Weapon(
-        name: w.name,
-        damage: w.damage,
-        range: w.range,
-        penetration: w.penetration,
-        evasion: w.evasion,
-        abilities: w.abilities.toList(),
-      );
+    name: w.name,
+    damage: w.damage,
+    range: w.range,
+    penetration: w.penetration,
+    evasion: w.evasion,
+    abilities: w.abilities.toList(),
+  );
 
   SpecialRule _mapSpecialRule(api.SpecialRule r) => SpecialRule(
-        name: r.name,
-        description: r.description,
-        spellName: r.spellName,
-        spellCost: r.spellCost,
-        spellDifficulty: r.spellDifficulty,
-        spellDescription: r.spellDescription,
-      );
+    name: r.name,
+    description: r.description,
+    spellName: r.spellName,
+    spellCost: r.spellCost,
+    spellDifficulty: r.spellDifficulty,
+    spellDescription: r.spellDescription,
+  );
 }

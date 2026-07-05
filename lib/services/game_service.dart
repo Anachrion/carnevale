@@ -1,11 +1,13 @@
 import 'package:built_value/serializer.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/game.dart' as models;
 import '../models/gang.dart';
 import 'action_cable_client.dart';
 import 'api_client.dart';
+import 'api_exception.dart';
 import 'gang_service.dart';
 
 class AvailableGang {
@@ -30,93 +32,120 @@ class GameService extends ChangeNotifier {
 
   models.Game? currentGame;
 
-  Future<List<models.Scenario>> loadScenarios() async {
+  // Wraps a call so a DioException surfaces as a uniform, user-presentable ApiException (F-P2-2).
+  Future<T> _guard<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on DioException catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  Future<List<models.Scenario>> loadScenarios() => _guard(() async {
     final res = await _client.scenarios.getScenarios();
     return (res.data?.toList() ?? []).map(_mapScenario).toList();
-  }
+  });
 
-  Future<List<models.Game>> loadMyGames({String visibility = 'active'}) async {
-    final res = await _client.games.getGames(visibility: visibility);
-    return (res.data?.toList() ?? []).map(_mapGame).toList();
-  }
+  Future<List<models.Game>> loadMyGames({String visibility = 'active'}) =>
+      _guard(() async {
+        final res = await _client.games.getGames(visibility: visibility);
+        return (res.data?.toList() ?? []).map(_mapGame).toList();
+      });
 
-  Future<models.Game> archiveGame(int gameId) async {
+  Future<models.Game> archiveGame(int gameId) => _guard(() async {
     final res = await _client.games.archiveGame(id: gameId);
     return _mapGame(res.data!);
-  }
+  });
 
-  Future<models.Game> unarchiveGame(int gameId) async {
+  Future<models.Game> unarchiveGame(int gameId) => _guard(() async {
     final res = await _client.games.unarchiveGame(id: gameId);
     return _mapGame(res.data!);
-  }
+  });
 
-  Future<void> deleteGame(int gameId) async {
+  Future<void> deleteGame(int gameId) => _guard(() async {
     await _client.games.deleteGame(id: gameId);
-  }
+  });
 
-  Future<models.Game> createGame({required int scenarioId, String? name, int? ducatLimit, String? boardSize}) async {
+  Future<models.Game> createGame({
+    required int scenarioId,
+    String? name,
+    int? ducatLimit,
+    String? boardSize,
+  }) => _guard(() async {
     final res = await _client.games.createGame(
-      createGameInput: api.CreateGameInput((b) => b
-        ..scenarioId = scenarioId
-        ..name = name
-        ..ducatLimit = ducatLimit
-        ..boardSize = boardSize),
+      createGameInput: api.CreateGameInput(
+        (b) => b
+          ..scenarioId = scenarioId
+          ..name = name
+          ..ducatLimit = ducatLimit
+          ..boardSize = boardSize,
+      ),
     );
     return _mapGame(res.data!);
-  }
+  });
 
-  Future<models.Game> joinGame(String joinCode) async {
+  Future<models.Game> joinGame(String joinCode) => _guard(() async {
     final res = await _client.games.joinGame(
       joinGameInput: api.JoinGameInput((b) => b..joinCode = joinCode),
     );
     return _mapGame(res.data!);
-  }
+  });
 
-  Future<models.Game> getGame(int id) async {
+  Future<models.Game> getGame(int id) => _guard(() async {
     final res = await _client.games.getGame(id: id);
     return _mapGame(res.data!);
-  }
+  });
 
-  Future<models.Game> pickRole(int gameId, String role) async {
-    final roleEnum = role == 'attacker' ? api.RoleInputRoleEnum.attacker : api.RoleInputRoleEnum.defender;
+  Future<models.Game> pickRole(int gameId, String role) => _guard(() async {
+    final roleEnum = role == 'attacker'
+        ? api.RoleInputRoleEnum.attacker
+        : api.RoleInputRoleEnum.defender;
     final res = await _client.games.pickRole(
       id: gameId,
       roleInput: api.RoleInput((b) => b..role = roleEnum),
     );
     return _mapGame(res.data!);
-  }
+  });
 
-  Future<List<AvailableGang>> availableGangs(int gameId) async {
+  Future<List<AvailableGang>> availableGangs(int gameId) => _guard(() async {
     final res = await _client.games.getAvailableGangs(id: gameId);
     return (res.data?.toList() ?? [])
-        .map((a) => AvailableGang(gang: _mapGangSummary(a.list), selectable: a.selectable))
+        .map(
+          (a) => AvailableGang(
+            gang: _mapGangSummary(a.list),
+            selectable: a.selectable,
+          ),
+        )
         .toList();
-  }
+  });
 
-  Future<models.Game> selectGang(int gameId, int listId) async {
+  Future<models.Game> selectGang(int gameId, int listId) => _guard(() async {
     final res = await _client.games.selectGang(
       id: gameId,
       selectGangInput: api.SelectGangInput((b) => b..listId = listId),
     );
     return _mapGame(res.data!);
-  }
+  });
 
-  Future<List<models.Agenda>> drawAgendas(int gameId) async {
+  Future<List<models.Agenda>> drawAgendas(int gameId) => _guard(() async {
     final res = await _client.games.drawAgendas(id: gameId);
     return (res.data?.agendas.toList() ?? []).map(_mapAgenda).toList();
-  }
+  });
 
-  Future<models.Game> markReady(int gameId) async {
+  Future<models.Game> markReady(int gameId) => _guard(() async {
     final res = await _client.games.markReady(id: gameId);
     return _mapGame(res.data!);
-  }
+  });
 
   /// Either player's selected gang, in full — available once that player has picked one,
   /// regardless of whose turn it currently is.
-  Future<Gang> playerList(int gameId, int playerId) async {
-    final res = await _client.games.getPlayerList(id: gameId, playerId: playerId);
+  Future<Gang> playerList(int gameId, int playerId) => _guard(() async {
+    final res = await _client.games.getPlayerList(
+      id: gameId,
+      playerId: playerId,
+    );
     return GangService().mapGang(res.data!);
-  }
+  });
 
   /// Updates status counters on one of the current player's own models — only the values
   /// passed change, the rest keep their current state. Returns the model's full updated
@@ -129,19 +158,21 @@ class GameService extends ChangeNotifier {
     bool? guarding,
     bool? carryingObjective,
     int? underwaterCounters,
-  }) async {
+  }) => _guard(() async {
     final res = await _client.games.updateCounters(
       id: gameId,
       listEntryId: listEntryId,
-      updateCountersInput: api.UpdateCountersInput((b) => b
-        ..counters.stunned = stunned
-        ..counters.hidden = hidden
-        ..counters.guarding = guarding
-        ..counters.carryingObjective = carryingObjective
-        ..counters.underwaterCounters = underwaterCounters),
+      updateCountersInput: api.UpdateCountersInput(
+        (b) => b
+          ..counters.stunned = stunned
+          ..counters.hidden = hidden
+          ..counters.guarding = guarding
+          ..counters.carryingObjective = carryingObjective
+          ..counters.underwaterCounters = underwaterCounters,
+      ),
     );
     return GangService().mapEntryState(res.data!);
-  }
+  });
 
   /// Sets current HP/WP/CP on one of the current player's own models — only the stats passed
   /// change (absolute values, not deltas), the rest keep their current value. Returns the
@@ -152,17 +183,19 @@ class GameService extends ChangeNotifier {
     int? lifePoints,
     int? willPoints,
     int? commandPoints,
-  }) async {
+  }) => _guard(() async {
     final res = await _client.games.updateStats(
       id: gameId,
       listEntryId: listEntryId,
-      updateStatsInput: api.UpdateStatsInput((b) => b
-        ..stats.lifePoints = lifePoints
-        ..stats.willPoints = willPoints
-        ..stats.commandPoints = commandPoints),
+      updateStatsInput: api.UpdateStatsInput(
+        (b) => b
+          ..stats.lifePoints = lifePoints
+          ..stats.willPoints = willPoints
+          ..stats.commandPoints = commandPoints,
+      ),
     );
     return GangService().mapEntryState(res.data!);
-  }
+  });
 
   /// Fetches an initial snapshot and opens a live ActionCable subscription for
   /// [gameId], keeping [currentGame] in sync until [stopWatching] is called.
@@ -176,8 +209,12 @@ class GameService extends ChangeNotifier {
     _watchedGameId = gameId;
     // The client mints a fresh single-use cable ticket for every connection attempt; on reconnect
     // we refetch the snapshot, since any broadcasts sent while the socket was down are lost.
-    _cable = ActionCableClient(_client.cableConnectionUrl)..onReconnect = _resyncSnapshot;
-    _cable!.subscribe({'channel': 'GameChannel', 'game_id': gameId}, _onChannelMessage);
+    _cable = ActionCableClient(_client.cableConnectionUrl)
+      ..onReconnect = _resyncSnapshot;
+    _cable!.subscribe({
+      'channel': 'GameChannel',
+      'game_id': gameId,
+    }, _onChannelMessage);
     await _cable!.connect();
     return game;
   }
@@ -195,7 +232,10 @@ class GameService extends ChangeNotifier {
 
   void stopWatching() {
     if (_watchedGameId != null) {
-      _cable?.unsubscribe({'channel': 'GameChannel', 'game_id': _watchedGameId});
+      _cable?.unsubscribe({
+        'channel': 'GameChannel',
+        'game_id': _watchedGameId,
+      });
     }
     _cable?.dispose();
     _cable = null;
@@ -209,63 +249,69 @@ class GameService extends ChangeNotifier {
       // A malformed or schema-drifted payload makes deserializeWith throw; that would escape the
       // stream.listen callback (which has no onError) and kill live updates. Swallow it and keep
       // the last-known snapshot — the next broadcast or a reconnect resync will recover.
-      final decoded = api.standardSerializers.deserializeWith(api.Game.serializer, message['game']);
+      final decoded = api.standardSerializers.deserializeWith(
+        api.Game.serializer,
+        message['game'],
+      );
       if (decoded == null) return;
       currentGame = _mapGame(decoded);
       notifyListeners();
     } catch (e, st) {
-      debugPrint('GameService: ignoring malformed game_state broadcast: $e\n$st');
+      debugPrint(
+        'GameService: ignoring malformed game_state broadcast: $e\n$st',
+      );
     }
   }
 
   models.Game _mapGame(api.Game g) => models.Game(
-        id: g.id,
-        name: g.name,
-        joinCode: g.joinCode,
-        status: wireEnum(g.status, const FullType(api.GameStatusEnum)),
-        ducatLimit: g.ducatLimit,
-        boardSize: g.boardSize,
-        scenario: _mapScenario(g.scenario),
-        viewerVisibility: g.viewerVisibility.name,
-        players: g.players.map(_mapPlayer).toList(),
-      );
+    id: g.id,
+    name: g.name,
+    joinCode: g.joinCode,
+    status: wireEnum(g.status, const FullType(api.GameStatusEnum)),
+    ducatLimit: g.ducatLimit,
+    boardSize: g.boardSize,
+    scenario: _mapScenario(g.scenario),
+    viewerVisibility: g.viewerVisibility.name,
+    players: g.players.map(_mapPlayer).toList(),
+  );
 
   models.GamePlayer _mapPlayer(api.GamePlayer p) => models.GamePlayer(
-        id: p.id,
-        userId: p.userId,
-        username: p.username,
-        host: p.host,
-        list: p.list == null ? null : _mapGangSummary(p.list!),
-        role: p.role?.name,
-        ready: p.ready,
-        wonRoleRoll: p.wonRoleRoll,
-        wonDeploymentRoll: p.wonDeploymentRoll,
-        agendas: p.agendas.map(_mapAgenda).toList(),
-      );
+    id: p.id,
+    userId: p.userId,
+    username: p.username,
+    host: p.host,
+    list: p.list == null ? null : _mapGangSummary(p.list!),
+    role: p.role?.name,
+    ready: p.ready,
+    wonRoleRoll: p.wonRoleRoll,
+    wonDeploymentRoll: p.wonDeploymentRoll,
+    agendas: p.agendas.map(_mapAgenda).toList(),
+  );
 
   models.GangSummary _mapGangSummary(api.GangSummary g) => models.GangSummary(
-        id: g.id,
-        name: g.name,
-        faction: g.faction,
-        points: g.points,
-        totalCost: g.totalCost,
-      );
+    id: g.id,
+    name: g.name,
+    faction: g.faction,
+    points: g.points,
+    totalCost: g.totalCost,
+  );
 
   models.Scenario _mapScenario(api.Scenario s) => models.Scenario(
-        id: s.id,
-        name: s.name,
-        ducats: s.ducats,
-        asymmetric: s.asymmetric,
-        setup: s.setup,
-        primaryObjective: s.primaryObjective,
-        agendas: s.agendas.toList(),
-        specialRules: s.specialRules.toList(),
-        duration: s.duration,
-        deploymentZones: s.deploymentZones.toList(),
-        illustration: s.illustration,
-      );
+    id: s.id,
+    name: s.name,
+    ducats: s.ducats,
+    asymmetric: s.asymmetric,
+    setup: s.setup,
+    primaryObjective: s.primaryObjective,
+    agendas: s.agendas.toList(),
+    specialRules: s.specialRules.toList(),
+    duration: s.duration,
+    deploymentZones: s.deploymentZones.toList(),
+    illustration: s.illustration,
+  );
 
-  models.Agenda _mapAgenda(api.Agenda a) => models.Agenda(id: a.id, name: a.name, description: a.description);
+  models.Agenda _mapAgenda(api.Agenda a) =>
+      models.Agenda(id: a.id, name: a.name, description: a.description);
 
   /// Converts a generated enum constant back to its wire value (e.g.
   /// `GameStatusEnum.gangSelection` -> `'gang_selection'`) via the same
@@ -273,5 +319,6 @@ class GameService extends ChangeNotifier {
   /// separate camelCase-to-snake_case mapping.
   @visibleForTesting
   String wireEnum(Object enumValue, FullType type) =>
-      api.standardSerializers.serialize(enumValue, specifiedType: type) as String;
+      api.standardSerializers.serialize(enumValue, specifiedType: type)
+          as String;
 }
