@@ -5,10 +5,19 @@ class ApiClient {
   static final ApiClient _instance = ApiClient._();
   factory ApiClient() => _instance;
 
-  static const _host = 'localhost:3000';
+  /// Backend host (and port), overridable at build time via `--dart-define=API_HOST=...`. Defaults
+  /// to the local dev server so `flutter run` works with no extra flags.
+  static const _host = String.fromEnvironment('API_HOST', defaultValue: 'localhost:3000');
+
+  /// Whether to talk to the backend over TLS. Off by default (local dev is plain http/ws); set
+  /// `--dart-define=API_USE_TLS=true` for any deployed environment so REST goes over https and the
+  /// WebSocket over wss. Serving the backend itself over TLS is a deployment concern.
+  static const _useTls = bool.fromEnvironment('API_USE_TLS', defaultValue: false);
+  static const _httpScheme = _useTls ? 'https' : 'http';
+  static const _wsScheme = _useTls ? 'wss' : 'ws';
 
   /// Base URL for the ActionCable WebSocket endpoint, shared with [GameService].
-  static const cableUrl = 'ws://$_host/cable';
+  static const cableUrl = '$_wsScheme://$_host/cable';
 
   /// Shared client key identifying this build as an official Carnevale frontend, injected at
   /// build time via `--dart-define=API_KEY=...`. Sent as `X-Api-Key` on every request. When the
@@ -18,7 +27,7 @@ class ApiClient {
 
   ApiClient._() {
     final dio = Dio(BaseOptions(
-      baseUrl: 'http://$_host/api/v1',
+      baseUrl: '$_httpScheme://$_host/api/v1',
       // Without this, Devise's failure app treats requests as HTML and redirects
       // (302) instead of returning the documented JSON error body on 401/422.
       headers: {'Accept': 'application/json'},
