@@ -26,6 +26,7 @@ Method | HTTP request | Description
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [**updateCounters**](GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
+[**updateStats**](GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
 
 
 # **advanceTurn**
@@ -758,6 +759,53 @@ Name | Type | Description  | Notes
  **id** | **int**|  | 
  **listEntryId** | **int**|  | 
  **updateCountersInput** | [**UpdateCountersInput**](UpdateCountersInput.md)|  | 
+
+### Return type
+
+[**EntryState**](EntryState.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateStats**
+> EntryState updateStats(id, listEntryId, updateStatsInput)
+
+Update current HP/WP/CP on one of the current player's own models
+
+Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. Send just the stats to change (absolute values, not deltas); omitted ones keep their current values and none may go below 0. The change is broadcast to both players as a `game_state` event. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int listEntryId = 56; // int | 
+final UpdateStatsInput updateStatsInput = ; // UpdateStatsInput | 
+
+try {
+    final response = api.updateStats(id, listEntryId, updateStatsInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->updateStats: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **listEntryId** | **int**|  | 
+ **updateStatsInput** | [**UpdateStatsInput**](UpdateStatsInput.md)|  | 
 
 ### Return type
 

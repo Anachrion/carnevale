@@ -62,6 +62,8 @@ Serializers _$serializers =
           ..add(UpdateAccountInputUser.serializer)
           ..add(UpdateCountersInput.serializer)
           ..add(UpdateCountersInputCounters.serializer)
+          ..add(UpdateStatsInput.serializer)
+          ..add(UpdateStatsInputStats.serializer)
           ..add(ValidationErrors.serializer)
           ..add(Weapon.serializer)
           ..addBuilderFactory(
