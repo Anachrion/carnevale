@@ -143,6 +143,27 @@ class GameService extends ChangeNotifier {
     return GangService().mapEntryState(res.data!);
   }
 
+  /// Sets current HP/WP/CP on one of the current player's own models — only the stats passed
+  /// change (absolute values, not deltas), the rest keep their current value. Returns the
+  /// model's full updated state; the server also broadcasts a game_state event to both players.
+  Future<EntryState> updateStats(
+    int gameId,
+    int listEntryId, {
+    int? lifePoints,
+    int? willPoints,
+    int? commandPoints,
+  }) async {
+    final res = await _client.games.updateStats(
+      id: gameId,
+      listEntryId: listEntryId,
+      updateStatsInput: api.UpdateStatsInput((b) => b
+        ..stats.lifePoints = lifePoints
+        ..stats.willPoints = willPoints
+        ..stats.commandPoints = commandPoints),
+    );
+    return GangService().mapEntryState(res.data!);
+  }
+
   /// Fetches an initial snapshot and opens a live ActionCable subscription for
   /// [gameId], keeping [currentGame] in sync until [stopWatching] is called.
   Future<models.Game> watch(int gameId, {required String authToken}) async {

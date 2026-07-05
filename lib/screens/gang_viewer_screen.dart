@@ -303,6 +303,17 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  void _editStats(ListEntry entry) {
+    showDialog(
+      context: context,
+      builder: (_) => _StatEditDialog(
+        gameId: widget.gameId,
+        entry: entry,
+        onStateChanged: _applyEntryState,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -320,12 +331,19 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       profiles: data.profiles,
       equipment: data.equipment,
       onEditCounters: widget.editable ? _editCounters : null,
+      onEditStats: widget.editable ? _editStats : null,
     );
   }
 }
 
 class _ReadOnlyGangBody extends StatelessWidget {
-  const _ReadOnlyGangBody({required this.gang, required this.profiles, required this.equipment, this.onEditCounters});
+  const _ReadOnlyGangBody({
+    required this.gang,
+    required this.profiles,
+    required this.equipment,
+    this.onEditCounters,
+    this.onEditStats,
+  });
 
   final Gang gang;
   final List<Profile> profiles;
@@ -333,6 +351,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
 
   /// When set, model tiles with an entry state get a + button that opens the counter popup.
   final void Function(ListEntry entry)? onEditCounters;
+
+  /// When set, tapping a model's HP/WP/CP pill opens the stat stepper popup.
+  final void Function(ListEntry entry)? onEditStats;
 
   @override
   Widget build(BuildContext context) {
@@ -484,6 +505,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
           color: entryColor,
           onTap: onTap,
           onEditCounters: onEditCounters != null && entry.state != null ? () => onEditCounters!(entry) : null,
+          onEditStats: onEditStats != null && entry.state != null ? () => onEditStats!(entry) : null,
         );
       },
     );
@@ -538,12 +560,13 @@ class _ReadOnlyGangBody extends StatelessWidget {
 }
 
 class _ReadOnlyEntryTile extends StatelessWidget {
-  const _ReadOnlyEntryTile({required this.entry, required this.color, this.onTap, this.onEditCounters});
+  const _ReadOnlyEntryTile({required this.entry, required this.color, this.onTap, this.onEditCounters, this.onEditStats});
 
   final ListEntry entry;
   final Color color;
   final VoidCallback? onTap;
   final VoidCallback? onEditCounters;
+  final VoidCallback? onEditStats;
 
   @override
   Widget build(BuildContext context) {
@@ -590,17 +613,28 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _StatPill(label: 'HP', value: state.lifePoints, borderColors: _kHpBorderColors),
+                          _StatPill(label: 'HP', value: state.lifePoints, borderColors: _kHpBorderColors, onTap: onEditStats),
                           // Hidden (not omitted) when the model was never given this stat at
                           // all (starting 0) — keeps the pill in the tree/layout, just invisible,
-                          // rather than skipping it and shifting everything after it over.
+                          // rather than skipping it and shifting everything after it over. An
+                          // invisible pill isn't tappable (onTap null).
                           Opacity(
                             opacity: state.willPoints.starting == 0 ? 0 : 1,
-                            child: _StatPill(label: 'WP', value: state.willPoints, borderColors: _kWpBorderColors),
+                            child: _StatPill(
+                              label: 'WP',
+                              value: state.willPoints,
+                              borderColors: _kWpBorderColors,
+                              onTap: state.willPoints.starting == 0 ? null : onEditStats,
+                            ),
                           ),
                           Opacity(
                             opacity: state.commandPoints.starting == 0 ? 0 : 1,
-                            child: _StatPill(label: 'CP', value: state.commandPoints, borderColors: _kCpBorderColors),
+                            child: _StatPill(
+                              label: 'CP',
+                              value: state.commandPoints,
+                              borderColors: _kCpBorderColors,
+                              onTap: state.commandPoints.starting == 0 ? null : onEditStats,
+                            ),
                           ),
                         ],
                       ),
@@ -650,11 +684,15 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 /// Compact "HP 6/10"-style pill: current value first, starting value after the slash — matches
 /// the "A/B" shorthand used at the table (A = remaining, B = starting).
 class _StatPill extends StatelessWidget {
-  const _StatPill({required this.label, required this.value, required this.borderColors});
+  const _StatPill({required this.label, required this.value, required this.borderColors, this.onTap});
 
   final String label;
   final EntryStatValue value;
   final List<Color> borderColors;
+
+  /// When set (own models only, and only for stats the model actually has), tapping the pill
+  /// opens the stat stepper popup.
+  final VoidCallback? onTap;
 
   static const _radius = 8.0;
   static const _strokeWidth = 1.4;
@@ -667,7 +705,7 @@ class _StatPill extends StatelessWidget {
   // keep an inner/outer corner radius pair in sync (the nested-container approach used earlier).
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
+    final pill = CustomPaint(
       foregroundPainter: _GradientBorderPainter(colors: borderColors, radius: _radius, strokeWidth: _strokeWidth),
       child: Container(
         width: _width,
@@ -684,6 +722,10 @@ class _StatPill extends StatelessWidget {
         ),
       ),
     );
+    if (onTap == null) return pill;
+    // A GestureDetector here (a descendant of the whole tile's GestureDetector) wins the tap on
+    // the pill, so editing a stat doesn't also trigger the tile's tap-to-view-card.
+    return GestureDetector(onTap: onTap, child: pill);
   }
 }
 
@@ -902,6 +944,154 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
                 ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Popup opened by tapping an HP/WP/CP pill: a −/+ stepper per stat the model has (WP and CP are
+/// omitted for models that never had them, i.e. starting 0). Each tap saves the new absolute
+/// value to the server immediately and can't push a stat below 0; the change echoes to both
+/// players. Only the model's own player can open it (the opponent's pills aren't tappable).
+class _StatEditDialog extends StatefulWidget {
+  const _StatEditDialog({required this.gameId, required this.entry, required this.onStateChanged});
+
+  final int gameId;
+  final ListEntry entry;
+  final void Function(int listEntryId, EntryState state) onStateChanged;
+
+  @override
+  State<_StatEditDialog> createState() => _StatEditDialogState();
+}
+
+class _StatEditDialogState extends State<_StatEditDialog> {
+  late EntryState _state = widget.entry.state!;
+  bool _busy = false;
+
+  Future<void> _update({int? lifePoints, int? willPoints, int? commandPoints}) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final newState = await GameService().updateStats(
+        widget.gameId,
+        widget.entry.id,
+        lifePoints: lifePoints,
+        willPoints: willPoints,
+        commandPoints: commandPoints,
+      );
+      if (!mounted) return;
+      setState(() => _state = newState);
+      widget.onStateChanged(widget.entry.id, newState);
+    } catch (_) {
+      if (mounted) showAppToast(context, 'Could not update the stat. Please try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: _kEquipmentColor,
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.entry.name,
+                style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              Divider(color: Colors.white.withOpacity(0.2), thickness: 0.5),
+              const SizedBox(height: 4),
+              _statStepperRow(
+                label: 'Life Points',
+                value: _state.lifePoints,
+                onChanged: (v) => _update(lifePoints: v),
+              ),
+              if (_state.willPoints.starting > 0)
+                _statStepperRow(
+                  label: 'Will Points',
+                  value: _state.willPoints,
+                  onChanged: (v) => _update(willPoints: v),
+                ),
+              if (_state.commandPoints.starting > 0)
+                _statStepperRow(
+                  label: 'Command Points',
+                  value: _state.commandPoints,
+                  onChanged: (v) => _update(commandPoints: v),
+                ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: _kGold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statStepperRow({
+    required String label,
+    required EntryStatValue value,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
+            ),
+          ),
+          _stepperButton(
+            icon: Icons.remove,
+            // Can't drop below 0 (the server rejects it too); disabled at the floor.
+            onTap: _busy || value.current <= 0 ? null : () => onChanged(value.current - 1),
+          ),
+          Container(
+            width: 56,
+            alignment: Alignment.center,
+            child: Text(
+              '${value.current} / ${value.starting}',
+              style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
+            ),
+          ),
+          _stepperButton(
+            icon: Icons.add,
+            onTap: _busy ? null : () => onChanged(value.current + 1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepperButton({required IconData icon, required VoidCallback? onTap}) {
+    final enabled = onTap != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: enabled ? Colors.white.withOpacity(0.5) : Colors.white24, width: 1.2),
+        ),
+        child: Icon(icon, size: 20, color: enabled ? Colors.white : Colors.white24),
       ),
     );
   }
