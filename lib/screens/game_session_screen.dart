@@ -4,19 +4,22 @@ import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import '../models/game.dart' as models;
+import '../models/game.dart';
 import '../services/game_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import 'gang_viewer_screen.dart';
 
-const _kGangsVisibleStatuses = {'agenda_draw', 'deploying'};
+const _kGangsVisibleStatuses = {
+  api.GameStatusEnum.agendaDraw,
+  api.GameStatusEnum.deploying,
+};
 const _kScrollablePhaseStatuses = {
-  'pending',
-  'gang_selection',
-  'agenda_draw',
-  'deploying',
+  api.GameStatusEnum.pending,
+  api.GameStatusEnum.gangSelection,
+  api.GameStatusEnum.agendaDraw,
+  api.GameStatusEnum.deploying,
 };
 
 /// One status-driven screen for the whole two-player setup flow, rather than a
@@ -39,9 +42,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   String? _error;
   Future<List<AvailableGang>>? _availableGangsFuture;
 
-  models.Game? get _game => _service.currentGame;
-  models.GamePlayer? get _me => _game?.playerFor(authService.currentUser!.id);
-  models.GamePlayer? get _opponent => _game?.players
+  api.Game? get _game => _service.currentGame;
+  api.GamePlayer? get _me => _game?.playerFor(authService.currentUser!.id);
+  api.GamePlayer? get _opponent => _game?.players
       .where((p) => p.userId != authService.currentUser!.id)
       .firstOrNull;
 
@@ -196,26 +199,34 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       child: switch (game.status) {
-        'pending' => _buildLobbyPhase(context, game, me),
-        'gang_selection'
+        api.GameStatusEnum.pending => _buildLobbyPhase(context, game, me),
+        api.GameStatusEnum.gangSelection
             when game.scenario.asymmetric && _roleRolloffPending(game, me) =>
           _buildRoleRolloffPhase(context, game, me),
-        'gang_selection' => _buildGangSelectionPhase(context, game, me),
-        'agenda_draw' => _buildAgendaDrawPhase(context, game, me),
+        api.GameStatusEnum.gangSelection => _buildGangSelectionPhase(
+          context,
+          game,
+          me,
+        ),
+        api.GameStatusEnum.agendaDraw => _buildAgendaDrawPhase(
+          context,
+          game,
+          me,
+        ),
         _ => _buildDeployingPhase(context, game, me),
       },
     );
   }
 
-  bool _roleRolloffPending(models.Game game, models.GamePlayer me) =>
+  bool _roleRolloffPending(api.Game game, api.GamePlayer me) =>
       me.role == null || (_opponent?.role == null);
 
   // ── Lobby ────────────────────────────────────────────────────────────────
 
   Widget _buildLobbyPhase(
     BuildContext context,
-    models.Game game,
-    models.GamePlayer me,
+    api.Game game,
+    api.GamePlayer me,
   ) {
     return _PhaseCard(
       title: 'Waiting for an opponent',
@@ -265,8 +276,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   Widget _buildRoleRolloffPhase(
     BuildContext context,
-    models.Game game,
-    models.GamePlayer me,
+    api.Game game,
+    api.GamePlayer me,
   ) {
     final opponentWon = _opponent?.wonRoleRoll ?? false;
     if (me.wonRoleRoll && me.role == null) {
@@ -335,8 +346,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   Widget _buildGangSelectionPhase(
     BuildContext context,
-    models.Game game,
-    models.GamePlayer me,
+    api.Game game,
+    api.GamePlayer me,
   ) {
     if (me.list != null) {
       return _PhaseCard(
@@ -402,8 +413,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   Widget _buildAgendaDrawPhase(
     BuildContext context,
-    models.Game game,
-    models.GamePlayer me,
+    api.Game game,
+    api.GamePlayer me,
   ) {
     if (me.agendas.isEmpty) {
       return _PhaseCard(
@@ -463,8 +474,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   Widget _buildDeployingPhase(
     BuildContext context,
-    models.Game game,
-    models.GamePlayer me,
+    api.Game game,
+    api.GamePlayer me,
   ) {
     final opponent = _opponent;
     final winnerName = me.wonDeploymentRoll
@@ -510,8 +521,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   // each tile; HP/WP/CP editing isn't supported yet.
   Widget _buildInProgressPhase(
     BuildContext context,
-    models.Game game,
-    models.GamePlayer me,
+    api.Game game,
+    api.GamePlayer me,
   ) {
     final opponent = _opponent;
     if (opponent == null) {

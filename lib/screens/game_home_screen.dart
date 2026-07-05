@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import '../models/game.dart' as models;
 import '../services/game_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
@@ -28,8 +27,8 @@ class _GameHomeScreenState extends State<GameHomeScreen>
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _service = GameService();
   late final _tabController = TabController(length: 2, vsync: this);
-  List<models.Game> _activeGames = [];
-  List<models.Game> _archivedGames = [];
+  List<api.Game> _activeGames = [];
+  List<api.Game> _archivedGames = [];
   bool _loading = true;
   String? _error;
 
@@ -134,7 +133,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
   }
 
   Future<void> _showCreateSheet() async {
-    final game = await showModalBottomSheet<models.Game>(
+    final game = await showModalBottomSheet<api.Game>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -145,7 +144,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
 
   Future<void> _showJoinSheet({String? prefill}) async {
     if (!mounted) return;
-    final game = await showModalBottomSheet<models.Game>(
+    final game = await showModalBottomSheet<api.Game>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -330,7 +329,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
   }
 
   Widget _buildGameList({
-    required List<models.Game> games,
+    required List<api.Game> games,
     required bool isArchivedTab,
     required IconData emptyIcon,
     required String emptyTitle,
@@ -391,7 +390,7 @@ class _GameTile extends StatefulWidget {
     required this.onDelete,
     required this.onArchiveToggle,
   });
-  final models.Game game;
+  final api.Game game;
   final bool isArchived;
   final VoidCallback onPlay;
   final VoidCallback onDelete;
@@ -404,8 +403,14 @@ class _GameTile extends StatefulWidget {
 class _GameTileState extends State<_GameTile> {
   bool _expanded = false;
 
-  models.Game get _game => widget.game;
-  String get _statusLabel => _game.status.replaceAll('_', ' ');
+  api.Game get _game => widget.game;
+  String get _statusLabel =>
+      (api.standardSerializers.serializeWith(
+                api.GameStatusEnum.serializer,
+                _game.status,
+              )
+              as String)
+          .replaceAll('_', ' ');
 
   @override
   Widget build(BuildContext context) {
@@ -567,7 +572,7 @@ class _GameTileState extends State<_GameTile> {
     );
   }
 
-  Widget _buildPlayerListLine(BuildContext context, models.GamePlayer p) {
+  Widget _buildPlayerListLine(BuildContext context, api.GamePlayer p) {
     final listName = p.list?.name ?? p.list?.faction;
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
