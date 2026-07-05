@@ -1,9 +1,9 @@
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
+import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
@@ -39,49 +39,22 @@ class _AccountScreenState extends State<AccountScreen> {
       key: _scaffoldKey,
       backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.account),
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/images/bg_dark.png'
-                    : 'assets/images/bg_light.png',
+      body: AppBackground(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                children: [
+                  authService.isLoggedIn
+                      ? _LoggedInPanel(user: authService.currentUser!)
+                      : const _AuthForm(),
+                ],
               ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
             ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withValues(alpha: 0.05)),
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-                        children: [
-                          authService.isLoggedIn
-                              ? _LoggedInPanel(user: authService.currentUser!)
-                              : const _AuthForm(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -159,14 +132,19 @@ class _LoggedInPanelState extends State<_LoggedInPanel> {
                 backgroundColor: AppPalette.gold,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
               child: _loggingOut
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
                   : const Text('Log Out'),
             ),
@@ -240,7 +218,10 @@ class _AuthFormState extends State<_AuthForm> {
         );
       }
       if (!mounted) return;
-      showAppToast(context, _isSignUp ? 'Account created!' : 'Logged in successfully!');
+      showAppToast(
+        context,
+        _isSignUp ? 'Account created!' : 'Logged in successfully!',
+      );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (route) => false,
@@ -255,16 +236,24 @@ class _AuthFormState extends State<_AuthForm> {
   void _showForgotPasswordDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => _ForgotPasswordDialog(initialEmail: _emailController.text.trim()),
+      builder: (_) =>
+          _ForgotPasswordDialog(initialEmail: _emailController.text.trim()),
     );
   }
 
   InputDecoration _decoration(String label) => InputDecoration(
-        labelText: label,
-        labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
-        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
-        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
-      );
+    labelText: label,
+    labelStyle: GoogleFonts.notoSans(
+      color: context.subtleTextColor,
+      fontSize: 13,
+    ),
+    enabledBorder: UnderlineInputBorder(
+      borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5)),
+    ),
+    focusedBorder: const UnderlineInputBorder(
+      borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -290,9 +279,13 @@ class _AuthFormState extends State<_AuthForm> {
                 focusNode: _usernameFocus,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _emailFocus.requestFocus(),
-                style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+                style: GoogleFonts.notoSans(
+                  color: context.textColor,
+                  fontSize: 15,
+                ),
                 decoration: _decoration('Username'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
               const SizedBox(height: 16),
             ],
@@ -302,7 +295,10 @@ class _AuthFormState extends State<_AuthForm> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
-              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+              style: GoogleFonts.notoSans(
+                color: context.textColor,
+                fontSize: 15,
+              ),
               decoration: _decoration('Email'),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
@@ -315,10 +311,16 @@ class _AuthFormState extends State<_AuthForm> {
               controller: _passwordController,
               focusNode: _passwordFocus,
               obscureText: true,
-              textInputAction: _isSignUp ? TextInputAction.next : TextInputAction.done,
-              onFieldSubmitted: (_) =>
-                  _isSignUp ? _passwordConfirmationFocus.requestFocus() : _submit(),
-              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+              textInputAction: _isSignUp
+                  ? TextInputAction.next
+                  : TextInputAction.done,
+              onFieldSubmitted: (_) => _isSignUp
+                  ? _passwordConfirmationFocus.requestFocus()
+                  : _submit(),
+              style: GoogleFonts.notoSans(
+                color: context.textColor,
+                fontSize: 15,
+              ),
               decoration: _decoration('Password'),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Required';
@@ -334,7 +336,11 @@ class _AuthFormState extends State<_AuthForm> {
                   onTap: () => _showForgotPasswordDialog(context),
                   child: Text(
                     'Forgot password?',
-                    style: GoogleFonts.notoSans(fontSize: 13, color: AppPalette.gold, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.notoSans(
+                      fontSize: 13,
+                      color: AppPalette.gold,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -347,17 +353,24 @@ class _AuthFormState extends State<_AuthForm> {
                 obscureText: true,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _submit(),
-                style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+                style: GoogleFonts.notoSans(
+                  color: context.textColor,
+                  fontSize: 15,
+                ),
                 decoration: _decoration('Confirm Password'),
                 validator: (v) {
-                  if (v != _passwordController.text) return 'Passwords do not match';
+                  if (v != _passwordController.text)
+                    return 'Passwords do not match';
                   return null;
                 },
               ),
             ],
             if (_error != null) ...[
               const SizedBox(height: 16),
-              Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.red, fontSize: 13),
+              ),
             ],
             const SizedBox(height: 24),
             SizedBox(
@@ -368,14 +381,19 @@ class _AuthFormState extends State<_AuthForm> {
                   backgroundColor: AppPalette.gold,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 0,
                 ),
                 child: _submitting
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
                     : Text(_isSignUp ? 'Sign Up' : 'Log In'),
               ),
@@ -386,14 +404,22 @@ class _AuthFormState extends State<_AuthForm> {
                 onTap: () => _switchMode(!_isSignUp),
                 child: RichText(
                   text: TextSpan(
-                    style: GoogleFonts.notoSans(fontSize: 13, color: context.subtleTextColor),
+                    style: GoogleFonts.notoSans(
+                      fontSize: 13,
+                      color: context.subtleTextColor,
+                    ),
                     children: [
                       TextSpan(
-                        text: _isSignUp ? 'Already have an account? ' : "Don't have an account yet? ",
+                        text: _isSignUp
+                            ? 'Already have an account? '
+                            : "Don't have an account yet? ",
                       ),
                       TextSpan(
                         text: _isSignUp ? 'Log In' : 'Sign Up',
-                        style: TextStyle(color: AppPalette.gold, fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                          color: AppPalette.gold,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ],
                   ),
@@ -417,7 +443,9 @@ class _ForgotPasswordDialog extends StatefulWidget {
 
 class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   final _formKey = GlobalKey<FormState>();
-  late final _emailController = TextEditingController(text: widget.initialEmail);
+  late final _emailController = TextEditingController(
+    text: widget.initialEmail,
+  );
   bool _sending = false;
   String? _error;
 
@@ -448,7 +476,10 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Reset Password', style: GoogleFonts.cinzel(color: context.textColor)),
+      title: Text(
+        'Reset Password',
+        style: GoogleFonts.cinzel(color: context.textColor),
+      ),
       content: Form(
         key: _formKey,
         child: Column(
@@ -457,7 +488,10 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
           children: [
             Text(
               "Enter your email and we'll send you a link to reset your password.",
-              style: GoogleFonts.notoSans(fontSize: 13, color: context.subtleTextColor),
+              style: GoogleFonts.notoSans(
+                fontSize: 13,
+                color: context.subtleTextColor,
+              ),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -466,12 +500,24 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _send(),
-              style: GoogleFonts.notoSans(color: context.textColor, fontSize: 15),
+              style: GoogleFonts.notoSans(
+                color: context.textColor,
+                fontSize: 15,
+              ),
               decoration: InputDecoration(
                 labelText: 'Email',
-                labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
-                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
+                labelStyle: GoogleFonts.notoSans(
+                  color: context.subtleTextColor,
+                  fontSize: 13,
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: AppPalette.gold.withOpacity(0.5),
+                  ),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
+                ),
               ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
@@ -481,7 +527,10 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.red, fontSize: 13),
+              ),
             ],
           ],
         ),
@@ -499,7 +548,13 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text('Send', style: TextStyle(color: AppPalette.gold, fontWeight: FontWeight.w700)),
+              : Text(
+                  'Send',
+                  style: TextStyle(
+                    color: AppPalette.gold,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
         ),
       ],
     );

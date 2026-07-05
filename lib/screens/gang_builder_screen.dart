@@ -8,6 +8,7 @@ import '../models/profile.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
+import '../widgets/app_background.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
@@ -104,7 +105,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (result == null || !mounted) return;
     setState(() => _busy = true);
     try {
-      final updated = await GangService().setEntrySpells(entry.id, result.discipline, result.spellIds);
+      final updated = await GangService().setEntrySpells(
+        entry.id,
+        result.discipline,
+        result.spellIds,
+      );
       if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
@@ -112,12 +117,21 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
-  int _entryCount(Profile p) =>
-      _gang.entries.where((e) => e.entryType == 'CardReference' && p.cardReferenceIds.contains(e.entryId)).length;
+  int _entryCount(Profile p) => _gang.entries
+      .where(
+        (e) =>
+            e.entryType == 'CardReference' &&
+            p.cardReferenceIds.contains(e.entryId),
+      )
+      .length;
 
   ListEntry? _entryFor(Profile p) {
     try {
-      return _gang.entries.firstWhere((e) => e.entryType == 'CardReference' && p.cardReferenceIds.contains(e.entryId));
+      return _gang.entries.firstWhere(
+        (e) =>
+            e.entryType == 'CardReference' &&
+            p.cardReferenceIds.contains(e.entryId),
+      );
     } catch (_) {
       return null;
     }
@@ -127,7 +141,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      final updated = await GangService().addEntry(_gang.id, p.cardReferenceId, 'CardReference');
+      final updated = await GangService().addEntry(
+        _gang.id,
+        p.cardReferenceId,
+        'CardReference',
+      );
       if (!mounted) return;
       setState(() => _gang = updated);
     } finally {
@@ -205,7 +223,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+            Divider(
+              color: context.subtleTextColor.withOpacity(0.3),
+              thickness: 0.5,
+            ),
             const SizedBox(height: 12),
             Text(
               e.description,
@@ -253,48 +274,22 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final factionColor = AppPalette.factionColors[_gang.faction] ?? AppPalette.gold;
+    final factionColor =
+        AppPalette.factionColors[_gang.faction] ?? AppPalette.gold;
     return Scaffold(
       backgroundColor: AppPalette.background,
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/images/bg_dark.png'
-                    : 'assets/images/bg_light.png',
-              ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withOpacity(0.05)),
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildHeader(context, factionColor),
-                    _buildPointsBar(factionColor),
-                    if (_gang.entries.isNotEmpty && !_gang.selectionValid)
-                      _buildValidityPanel(),
-                    const SizedBox(height: 12),
-                    _buildTabBar(factionColor),
-                    const SizedBox(height: 8),
-                    Expanded(child: _buildTabContent(factionColor)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+      body: AppBackground(
+        child: Column(
+          children: [
+            _buildHeader(context, factionColor),
+            _buildPointsBar(factionColor),
+            if (_gang.entries.isNotEmpty && !_gang.selectionValid)
+              _buildValidityPanel(),
+            const SizedBox(height: 12),
+            _buildTabBar(factionColor),
+            const SizedBox(height: 8),
+            Expanded(child: _buildTabContent(factionColor)),
+          ],
         ),
       ),
     );
@@ -327,10 +322,18 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
           Container(
             width: 38,
             height: 38,
-            decoration: BoxDecoration(color: factionColor, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: factionColor,
+              shape: BoxShape.circle,
+            ),
             padding: const EdgeInsets.all(7),
             child: iconPath != null
-                ? Image.asset(iconPath, fit: BoxFit.contain, color: Colors.white, colorBlendMode: BlendMode.srcIn)
+                ? Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    color: Colors.white,
+                    colorBlendMode: BlendMode.srcIn,
+                  )
                 : const Icon(Icons.flag, color: Colors.white, size: 18),
           ),
         ],
@@ -356,10 +359,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             decoration: BoxDecoration(
               gradient: context.panelGradient,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.panelBorderColor,
-                width: 1.0,
-              ),
+              border: Border.all(color: context.panelBorderColor, width: 1.0),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
@@ -379,14 +379,19 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     ),
                     Text(
                       ' / $limit ducats',
-                      style: GoogleFonts.cinzel(fontSize: 14, color: context.subtleTextColor),
+                      style: GoogleFonts.cinzel(
+                        fontSize: 14,
+                        color: context.subtleTextColor,
+                      ),
                     ),
                     const Spacer(),
                     Text(
                       isOver ? '−${-remaining} left' : '$remaining left',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isOver ? Colors.red.shade400 : context.subtleTextColor,
+                        color: isOver
+                            ? Colors.red.shade400
+                            : context.subtleTextColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -418,10 +423,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       if (m.start > last) {
         spans.add(TextSpan(text: text.substring(last, m.start), style: base));
       }
-      spans.add(TextSpan(
-        text: m.group(0),
-        style: base.copyWith(fontWeight: FontWeight.w700),
-      ));
+      spans.add(
+        TextSpan(
+          text: m.group(0),
+          style: base.copyWith(fontWeight: FontWeight.w700),
+        ),
+      );
       last = m.end;
     }
     if (last < text.length) {
@@ -444,7 +451,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: errors.map((e) {
-            final base = TextStyle(fontSize: 12, color: Colors.white, height: 1.4);
+            final base = TextStyle(
+              fontSize: 12,
+              color: Colors.white,
+              height: 1.4,
+            );
             return Padding(
               padding: const EdgeInsets.only(bottom: 5),
               child: Row(
@@ -453,7 +464,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                   Container(
                     width: 4,
                     height: 4,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                   const SizedBox(width: 9),
                   Expanded(child: RichText(text: _highlightNumbers(e, base))),
@@ -477,10 +491,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             decoration: BoxDecoration(
               gradient: context.panelGradient,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.panelBorderColor,
-                width: 1.0,
-              ),
+              border: Border.all(color: context.panelBorderColor, width: 1.0),
             ),
             padding: const EdgeInsets.all(4),
             child: Row(
@@ -507,14 +518,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 
   Widget _buildTabContent(Color factionColor) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
+      return const Center(
+        child: CircularProgressIndicator(color: AppPalette.gold),
+      );
     }
     return IndexedStack(
       index: _tab == _Tab.list ? 0 : 1,
-      children: [
-        _buildListTab(factionColor),
-        _buildHireTab(factionColor),
-      ],
+      children: [_buildListTab(factionColor), _buildHireTab(factionColor)],
     );
   }
 
@@ -525,16 +535,26 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.group_outlined, size: 48, color: context.subtleTextColor.withOpacity(0.4)),
+            Icon(
+              Icons.group_outlined,
+              size: 48,
+              color: context.subtleTextColor.withOpacity(0.4),
+            ),
             const SizedBox(height: 12),
             Text(
               'No models hired yet',
-              style: GoogleFonts.cinzel(fontSize: 15, color: context.subtleTextColor),
+              style: GoogleFonts.cinzel(
+                fontSize: 15,
+                color: context.subtleTextColor,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               'Go to Hire to add models',
-              style: TextStyle(fontSize: 12, color: context.subtleTextColor.withOpacity(0.7)),
+              style: TextStyle(
+                fontSize: 12,
+                color: context.subtleTextColor.withOpacity(0.7),
+              ),
             ),
           ],
         ),
@@ -542,7 +562,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
     final hiredProfiles = entries
         .where((e) => e.entryType == 'CardReference')
-        .map((e) => _profiles.where((p) => p.cardReferenceIds.contains(e.entryId)).firstOrNull)
+        .map(
+          (e) => _profiles
+              .where((p) => p.cardReferenceIds.contains(e.entryId))
+              .firstOrNull,
+        )
         .whereType<Profile>()
         .toList();
     return ReorderableListView.builder(
@@ -554,7 +578,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       itemBuilder: (_, i) {
         final entry = entries[i];
         final profileIdx = entry.entryType == 'CardReference'
-            ? _profiles.indexWhere((p) => p.cardReferenceIds.contains(entry.entryId))
+            ? _profiles.indexWhere(
+                (p) => p.cardReferenceIds.contains(entry.entryId),
+              )
             : -1;
         final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
         final equipmentItem = entry.entryType == 'Equipment'
@@ -563,27 +589,29 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         final entryColor = entry.entryType == 'Equipment'
             ? AppPalette.equipment
             : profile?.faction == 'gifted'
-                ? (AppPalette.factionColors['gifted'] ?? factionColor)
-                : factionColor;
+            ? (AppPalette.factionColors['gifted'] ?? factionColor)
+            : factionColor;
         final role = profile == null
             ? null
             : profile.keywords.contains('Leader')
-                ? 'leader'
-                : profile.keywords.contains('Hero')
-                    ? 'hero'
-                    : null;
+            ? 'leader'
+            : profile.keywords.contains('Hero')
+            ? 'hero'
+            : null;
         VoidCallback? onTap;
         if (profile != null) {
-          final hiredIndex = hiredProfiles.indexWhere((p) => p.cardReferenceId == profile.cardReferenceId);
+          final hiredIndex = hiredProfiles.indexWhere(
+            (p) => p.cardReferenceId == profile.cardReferenceId,
+          );
           onTap = () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CardViewerScreen(
-                    profiles: hiredProfiles,
-                    initialIndex: hiredIndex,
-                  ),
-                ),
-              );
+            context,
+            MaterialPageRoute(
+              builder: (_) => CardViewerScreen(
+                profiles: hiredProfiles,
+                initialIndex: hiredIndex,
+              ),
+            ),
+          );
         } else if (equipmentItem != null) {
           onTap = () => _showEquipmentDetail(context, equipmentItem);
         }
@@ -647,89 +675,111 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         Expanded(
           child: _profiles.isEmpty
               ? Center(
-                  child: Text('No profiles for this faction.', style: TextStyle(color: context.subtleTextColor)),
+                  child: Text(
+                    'No profiles for this faction.',
+                    style: TextStyle(color: context.subtleTextColor),
+                  ),
                 )
               : profiles.isEmpty
-                  ? Center(
-                      child: Text('No profiles match your search.', style: TextStyle(color: context.subtleTextColor)),
-                    )
-                  : CustomScrollView(
-                      slivers: [
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                          sliver: SliverList.separated(
-                            itemCount: factionProfiles.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 8),
-                            itemBuilder: (_, i) => buildTile(factionProfiles[i]),
-                          ),
-                        ),
-                        if (giftedProfiles.isNotEmpty) ...[
-                          _buildHireDivider('Mercenaries'),
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                            sliver: SliverList.separated(
-                              itemCount: giftedProfiles.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (_, i) => buildTile(giftedProfiles[i]),
-                            ),
-                          ),
-                        ],
-                        if (_equipment.isNotEmpty) ...[
-                          _buildHireDivider('Equipment'),
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                            sliver: SliverList.separated(
-                              itemCount: _equipment.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (_, i) {
-                                final e = _equipment[i];
-                                final count = _gang.entries
-                                    .where((en) => en.entryType == 'Equipment' && en.entryId == e.id)
-                                    .length;
-                                final canAdd = count == 0;
-                                return _HireEquipmentTile(
-                                  equipment: e,
-                                  count: count,
-                                  canAdd: canAdd,
-                                  busy: _busy,
-                                  onAdd: () => _addEquipment(e),
-                                  onTap: () => _showEquipmentDetail(context, e),
-                                );
-                              },
-                            ),
-                          ),
-                        ] else
-                          const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
-                      ],
+              ? Center(
+                  child: Text(
+                    'No profiles match your search.',
+                    style: TextStyle(color: context.subtleTextColor),
+                  ),
+                )
+              : CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                      sliver: SliverList.separated(
+                        itemCount: factionProfiles.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        itemBuilder: (_, i) => buildTile(factionProfiles[i]),
+                      ),
                     ),
+                    if (giftedProfiles.isNotEmpty) ...[
+                      _buildHireDivider('Mercenaries'),
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                        sliver: SliverList.separated(
+                          itemCount: giftedProfiles.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (_, i) => buildTile(giftedProfiles[i]),
+                        ),
+                      ),
+                    ],
+                    if (_equipment.isNotEmpty) ...[
+                      _buildHireDivider('Equipment'),
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                        sliver: SliverList.separated(
+                          itemCount: _equipment.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (_, i) {
+                            final e = _equipment[i];
+                            final count = _gang.entries
+                                .where(
+                                  (en) =>
+                                      en.entryType == 'Equipment' &&
+                                      en.entryId == e.id,
+                                )
+                                .length;
+                            final canAdd = count == 0;
+                            return _HireEquipmentTile(
+                              equipment: e,
+                              count: count,
+                              canAdd: canAdd,
+                              busy: _busy,
+                              onAdd: () => _addEquipment(e),
+                              onTap: () => _showEquipmentDetail(context, e),
+                            );
+                          },
+                        ),
+                      ),
+                    ] else
+                      const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+                  ],
+                ),
         ),
       ],
     );
   }
 
   SliverToBoxAdapter _buildHireDivider(String label) => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-          child: Row(
-            children: [
-              Expanded(child: Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5)),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  label.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: context.subtleTextColor.withOpacity(0.7),
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ),
-              Expanded(child: Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5)),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Divider(
+              color: context.subtleTextColor.withOpacity(0.3),
+              thickness: 0.5,
+            ),
           ),
-        ),
-      );
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                fontSize: 11,
+                color: context.subtleTextColor.withOpacity(0.7),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Divider(
+              color: context.subtleTextColor.withOpacity(0.3),
+              thickness: 0.5,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _buildHireControls() {
     return Padding(
@@ -754,7 +804,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                   style: TextStyle(color: context.textColor, fontSize: 15),
                   decoration: InputDecoration(
                     hintText: 'Search profiles...',
-                    hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.7), fontSize: 15),
+                    hintStyle: TextStyle(
+                      color: context.subtleTextColor.withOpacity(0.7),
+                      fontSize: 15,
+                    ),
                     prefixIcon: Icon(
                       Icons.search,
                       color: Theme.of(context).brightness == Brightness.dark
@@ -764,7 +817,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: Icon(Icons.clear, color: context.subtleTextColor.withOpacity(0.6), size: 18),
+                            icon: Icon(
+                              Icons.clear,
+                              color: context.subtleTextColor.withOpacity(0.6),
+                              size: 18,
+                            ),
                             onPressed: () => _searchController.clear(),
                           )
                         : null,
@@ -850,7 +907,9 @@ class _SortChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: selected ? accent.withOpacity(0.85) : Colors.white.withOpacity(0.35),
+          color: selected
+              ? accent.withOpacity(0.85)
+              : Colors.white.withOpacity(0.35),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected ? accent : Colors.white.withOpacity(0.4),
@@ -949,7 +1008,8 @@ class _EntryTile extends StatefulWidget {
   State<_EntryTile> createState() => _EntryTileState();
 }
 
-class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMixin {
+class _EntryTileState extends State<_EntryTile>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<Offset> _slide;
   late final Animation<double> _fade;
@@ -958,15 +1018,27 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 320));
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
     _slide = Tween(begin: Offset.zero, end: const Offset(1.2, 0)).animate(
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.7, curve: Curves.easeIn)),
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeIn),
+      ),
     );
     _fade = Tween(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.65, curve: Curves.easeIn)),
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.65, curve: Curves.easeIn),
+      ),
     );
     _size = Tween(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.55, 1.0, curve: Curves.easeInOut)),
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.55, 1.0, curve: Curves.easeInOut),
+      ),
     );
   }
 
@@ -1011,65 +1083,72 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                    Row(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                widget.entry.name,
-                                style: GoogleFonts.cinzel(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    widget.entry.name,
+                                    style: GoogleFonts.cinzel(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                overflow: TextOverflow.ellipsis,
+                                if (widget.role != null) ...[
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    widget.role!,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.white.withOpacity(0.65),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${widget.entry.cost}',
+                            style: GoogleFonts.cinzel(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: widget.busy ? null : _handleRemove,
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.15),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.remove,
+                                size: 14,
+                                color: Colors.white.withOpacity(0.85),
                               ),
                             ),
-                            if (widget.role != null) ...[
-                              const SizedBox(width: 6),
-                              Text(
-                                widget.role!,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white.withOpacity(0.65),
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${widget.entry.cost}',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: widget.busy ? null : _handleRemove,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
-                            border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
                           ),
-                          child: Icon(Icons.remove, size: 14, color: Colors.white.withOpacity(0.85)),
-                        ),
+                        ],
                       ),
+                      if (widget.onEditSpells != null) _buildSpellRow(),
                     ],
-                  ),
-                  if (widget.onEditSpells != null) _buildSpellRow(),
-                  ],
                   ),
                 ),
               ),
@@ -1096,7 +1175,11 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
                 'No spells',
-                style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.6), fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.white.withOpacity(0.6),
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             )
           else
@@ -1119,11 +1202,20 @@ class _EntryTileState extends State<_EntryTile> with SingleTickerProviderStateMi
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.auto_fix_high, size: 12, color: Colors.white.withOpacity(0.9)),
+            Icon(
+              Icons.auto_fix_high,
+              size: 12,
+              color: Colors.white.withOpacity(0.9),
+            ),
             const SizedBox(width: 5),
             Text(
               'Spells',
-              style: GoogleFonts.cinzel(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 0.5),
+              style: GoogleFonts.cinzel(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
             ),
           ],
         ),
@@ -1166,7 +1258,8 @@ class _HireCardTile extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => CardViewerScreen(profiles: allProfiles, initialIndex: index),
+          builder: (_) =>
+              CardViewerScreen(profiles: allProfiles, initialIndex: index),
         ),
       ),
       child: ClipRRect(
@@ -1180,11 +1273,7 @@ class _HireCardTile extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(10, 12, 14, 12),
             child: Row(
               children: [
-                _HireToggleButton(
-                  canAdd: canAdd,
-                  busy: busy,
-                  onAdd: onAdd,
-                ),
+                _HireToggleButton(canAdd: canAdd, busy: busy, onAdd: onAdd),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Row(
@@ -1205,10 +1294,13 @@ class _HireCardTile extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (profile.keywords.contains('Leader') || profile.keywords.contains('Hero')) ...[
+                            if (profile.keywords.contains('Leader') ||
+                                profile.keywords.contains('Hero')) ...[
                               const SizedBox(width: 6),
                               Text(
-                                profile.keywords.contains('Leader') ? 'leader' : 'hero',
+                                profile.keywords.contains('Leader')
+                                    ? 'leader'
+                                    : 'hero',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.white.withOpacity(0.65),
@@ -1222,14 +1314,21 @@ class _HireCardTile extends StatelessWidget {
                       if (inList)
                         Container(
                           margin: const EdgeInsets.only(left: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             isUnique ? 'Hired' : '×$count',
-                            style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.white.withOpacity(0.9),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       const SizedBox(width: 8),
@@ -1251,9 +1350,16 @@ class _HireCardTile extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white.withOpacity(0.15),
-                              border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 0.5,
+                              ),
                             ),
-                            child: Icon(Icons.remove, size: 14, color: Colors.white.withOpacity(0.85)),
+                            child: Icon(
+                              Icons.remove,
+                              size: 14,
+                              color: Colors.white.withOpacity(0.85),
+                            ),
                           ),
                         )
                       else
@@ -1285,19 +1391,26 @@ class _HireToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (busy) {
       return const SizedBox(
-        width: 32, height: 32,
+        width: 32,
+        height: 32,
         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
       );
     }
-    if (!canAdd) return SizedBox(
-      width: 32,
-      height: 32,
-      child: Icon(Icons.block, size: 28, color: Colors.white.withOpacity(0.30)),
-    );
+    if (!canAdd)
+      return SizedBox(
+        width: 32,
+        height: 32,
+        child: Icon(
+          Icons.block,
+          size: 28,
+          color: Colors.white.withOpacity(0.30),
+        ),
+      );
     return GestureDetector(
       onTap: onAdd,
       child: Container(
-        width: 32, height: 32,
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white.withOpacity(0.2),
@@ -1332,62 +1445,70 @@ class _HireEquipmentTile extends StatelessWidget {
     final bgColor = inList
         ? Color.lerp(AppPalette.equipment, Colors.black, 0.35)!
         : canAdd
-            ? AppPalette.equipment
-            : Color.lerp(AppPalette.equipment, Colors.white, 0.28)!;
+        ? AppPalette.equipment
+        : Color.lerp(AppPalette.equipment, Colors.white, 0.28)!;
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 12, 14, 12),
-          child: Row(
-            children: [
-              _HireToggleButton(canAdd: canAdd, busy: busy, onAdd: onAdd),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  equipment.name,
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 12, 14, 12),
+            child: Row(
+              children: [
+                _HireToggleButton(canAdd: canAdd, busy: busy, onAdd: onAdd),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    equipment.name,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (inList) ...[
+                  Container(
+                    margin: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '×$count',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.white.withOpacity(0.9),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(width: 8),
+                Text(
+                  '${equipment.cost}',
                   style: GoogleFonts.cinzel(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (inList) ...[
-                Container(
-                  margin: const EdgeInsets.only(left: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '×$count',
-                    style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
-              const SizedBox(width: 8),
-              Text(
-                '${equipment.cost}',
-                style: GoogleFonts.cinzel(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }
 
@@ -1417,17 +1538,26 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
     super.initState();
     final disciplines = widget.entry.disciplines;
     // Default to the model's committed Discipline, or the only one it has access to.
-    _discipline = widget.entry.spellDiscipline ?? (disciplines.length == 1 ? disciplines.first : null);
-    _selected = widget.entry.spells.where((s) => !s.cantrip).map((s) => s.id).toSet();
+    _discipline =
+        widget.entry.spellDiscipline ??
+        (disciplines.length == 1 ? disciplines.first : null);
+    _selected = widget.entry.spells
+        .where((s) => !s.cantrip)
+        .map((s) => s.id)
+        .toSet();
   }
 
   List<Spell> get _choosable =>
-      widget.allSpells.where((s) => s.discipline == _discipline && !s.cantrip).toList()
+      widget.allSpells
+          .where((s) => s.discipline == _discipline && !s.cantrip)
+          .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
 
   Spell? get _cantrip {
     try {
-      return widget.allSpells.firstWhere((s) => s.discipline == _discipline && s.cantrip);
+      return widget.allSpells.firstWhere(
+        (s) => s.discipline == _discipline && s.cantrip,
+      );
     } catch (_) {
       return null;
     }
@@ -1457,7 +1587,9 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final disciplines = widget.entry.disciplines;
-    final accent = Theme.of(context).brightness == Brightness.dark ? AppPalette.gold : AppPalette.red;
+    final accent = Theme.of(context).brightness == Brightness.dark
+        ? AppPalette.gold
+        : AppPalette.red;
     return ThemedDialogCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -1466,7 +1598,11 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
         children: [
           Text(
             widget.entry.name,
-            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+            style: GoogleFonts.cinzel(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
@@ -1477,7 +1613,12 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
           if (disciplines.length > 1) ...[
             Text(
               'Discipline',
-              style: TextStyle(fontSize: 11, color: context.subtleTextColor, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+              style: TextStyle(
+                fontSize: 11,
+                color: context.subtleTextColor,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -1488,17 +1629,29 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
                 return GestureDetector(
                   onTap: () => _selectDiscipline(slug),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: selected ? accent.withOpacity(0.85) : Colors.white.withOpacity(0.15),
+                      color: selected
+                          ? accent.withOpacity(0.85)
+                          : Colors.white.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: selected ? accent : context.subtleTextColor.withOpacity(0.3), width: 0.5),
+                      border: Border.all(
+                        color: selected
+                            ? accent
+                            : context.subtleTextColor.withOpacity(0.3),
+                        width: 0.5,
+                      ),
                     ),
                     child: Text(
                       disciplineLabel(slug),
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: selected ? Colors.white : context.textColor,
                       ),
                     ),
@@ -1510,7 +1663,11 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
           ] else if (disciplines.length == 1) ...[
             Text(
               'Discipline: ${disciplineLabel(disciplines.first)}',
-              style: TextStyle(fontSize: 12, color: context.textColor, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12,
+                color: context.textColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 12),
           ],
@@ -1518,7 +1675,13 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
-                child: Text('Pick a Discipline to choose spells.', style: TextStyle(color: context.subtleTextColor, fontSize: 13)),
+                child: Text(
+                  'Pick a Discipline to choose spells.',
+                  style: TextStyle(
+                    color: context.subtleTextColor,
+                    fontSize: 13,
+                  ),
+                ),
               ),
             )
           else
@@ -1555,12 +1718,20 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
             children: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text('Cancel', style: TextStyle(color: context.subtleTextColor)),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: context.subtleTextColor),
+                ),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: accent, foregroundColor: Colors.white),
-                onPressed: () => Navigator.of(context).pop(_SpellSelection(_discipline, _selected.toList())),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () => Navigator.of(
+                  context,
+                ).pop(_SpellSelection(_discipline, _selected.toList())),
                 child: const Text('Save'),
               ),
             ],
@@ -1588,7 +1759,9 @@ class _SpellRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = Theme.of(context).brightness == Brightness.dark ? AppPalette.gold : AppPalette.red;
+    final accent = Theme.of(context).brightness == Brightness.dark
+        ? AppPalette.gold
+        : AppPalette.red;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -1600,7 +1773,9 @@ class _SpellRow extends StatelessWidget {
             Icon(
               checked ? Icons.check_circle : Icons.circle_outlined,
               size: 20,
-              color: checked ? accent : context.subtleTextColor.withOpacity(enabled ? 0.6 : 0.25),
+              color: checked
+                  ? accent
+                  : context.subtleTextColor.withOpacity(enabled ? 0.6 : 0.25),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -1615,26 +1790,39 @@ class _SpellRow extends StatelessWidget {
                           style: GoogleFonts.cinzel(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: enabled ? context.textColor : context.subtleTextColor,
+                            color: enabled
+                                ? context.textColor
+                                : context.subtleTextColor,
                           ),
                         ),
                       ),
                       if (trailingLabel != null)
                         Text(
                           trailingLabel!,
-                          style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: context.subtleTextColor),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontStyle: FontStyle.italic,
+                            color: context.subtleTextColor,
+                          ),
                         )
                       else
                         Text(
                           'WP ${spell.cost} · Diff ${spell.difficulty}',
-                          style: TextStyle(fontSize: 10, color: context.subtleTextColor),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: context.subtleTextColor,
+                          ),
                         ),
                     ],
                   ),
                   const SizedBox(height: 2),
                   Text(
                     spell.description,
-                    style: TextStyle(fontSize: 11, color: context.subtleTextColor, height: 1.35),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: context.subtleTextColor,
+                      height: 1.35,
+                    ),
                   ),
                 ],
               ),

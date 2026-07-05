@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/profile.dart';
 import '../services/profile_service.dart';
+import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import 'card_viewer_screen.dart';
 
@@ -88,43 +89,16 @@ class _CardsScreenState extends State<CardsScreen> {
       key: _scaffoldKey,
       backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.cards),
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/images/bg_dark.png'
-                    : 'assets/images/bg_light.png',
-              ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withOpacity(0.05)),
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildHeader(context),
-                    _buildSearchBar(),
-                    _buildFactionFilter(),
-                    _buildSortChips(),
-                    const SizedBox(height: 8),
-                    Expanded(child: _buildList()),
-                  ],
-                ),
-              ),
-            ],
-          ),
+      body: AppBackground(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            _buildSearchBar(),
+            _buildFactionFilter(),
+            _buildSortChips(),
+            const SizedBox(height: 8),
+            Expanded(child: _buildList()),
+          ],
         ),
       ),
     );
@@ -170,18 +144,22 @@ class _CardsScreenState extends State<CardsScreen> {
             decoration: BoxDecoration(
               gradient: context.panelGradient,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.panelBorderColor,
-                width: 1.0,
-              ),
+              border: Border.all(color: context.panelBorderColor, width: 1.0),
             ),
             child: TextField(
               controller: _searchController,
               style: TextStyle(color: context.textColor, fontSize: 15),
               decoration: InputDecoration(
                 hintText: 'Search profiles...',
-                hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.7), fontSize: 15),
-                prefixIcon: const Icon(Icons.search, color: AppPalette.gold, size: 20),
+                hintStyle: TextStyle(
+                  color: context.subtleTextColor.withOpacity(0.7),
+                  fontSize: 15,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppPalette.gold,
+                  size: 20,
+                ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
@@ -210,7 +188,9 @@ class _CardsScreenState extends State<CardsScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: selected ? accent.withOpacity(0.85) : Colors.white.withOpacity(0.35),
+            color: selected
+                ? accent.withOpacity(0.85)
+                : Colors.white.withOpacity(0.35),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: selected ? accent : Colors.white.withOpacity(0.4),
@@ -256,18 +236,28 @@ class _CardsScreenState extends State<CardsScreen> {
   }
 
   Widget _buildFactionFilter() {
-    final factions = ['guild', 'doctors', 'vatican', 'patricians', 'strigoi', 'gifted', 'rashaar'];
+    final factions = [
+      'guild',
+      'doctors',
+      'vatican',
+      'patricians',
+      'strigoi',
+      'gifted',
+      'rashaar',
+    ];
     return SizedBox(
       height: 60,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          ...factions.map((f) => _FactionIconChip(
-                faction: f,
-                selected: _selectedFactions.contains(f),
-                onTap: () => _toggleFaction(f),
-              )),
+          ...factions.map(
+            (f) => _FactionIconChip(
+              faction: f,
+              selected: _selectedFactions.contains(f),
+              onTap: () => _toggleFaction(f),
+            ),
+          ),
         ],
       ),
     );
@@ -275,11 +265,16 @@ class _CardsScreenState extends State<CardsScreen> {
 
   Widget _buildList() {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
+      return const Center(
+        child: CircularProgressIndicator(color: AppPalette.gold),
+      );
     }
     if (_results.isEmpty) {
       return Center(
-        child: Text('No profiles found.', style: TextStyle(color: context.subtleTextColor, fontSize: 14)),
+        child: Text(
+          'No profiles found.',
+          style: TextStyle(color: context.subtleTextColor, fontSize: 14),
+        ),
       );
     }
     final sorted = _sortedResults;
@@ -287,14 +282,18 @@ class _CardsScreenState extends State<CardsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       itemCount: sorted.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) => _ProfileTile(profile: sorted[i], profiles: sorted, index: i),
+      itemBuilder: (_, i) =>
+          _ProfileTile(profile: sorted[i], profiles: sorted, index: i),
     );
   }
-
 }
 
 class _FactionIconChip extends StatelessWidget {
-  const _FactionIconChip({required this.faction, required this.selected, required this.onTap});
+  const _FactionIconChip({
+    required this.faction,
+    required this.selected,
+    required this.onTap,
+  });
   final String faction;
   final bool selected;
   final VoidCallback onTap;
@@ -326,7 +325,11 @@ class _FactionIconChip extends StatelessWidget {
 }
 
 class _ProfileTile extends StatelessWidget {
-  const _ProfileTile({required this.profile, required this.profiles, required this.index});
+  const _ProfileTile({
+    required this.profile,
+    required this.profiles,
+    required this.index,
+  });
   final Profile profile;
   final List<Profile> profiles;
   final int index;
@@ -336,16 +339,18 @@ class _ProfileTile extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => CardViewerScreen(
-          profiles: profiles,
-          initialIndex: index,
-        )),
+        MaterialPageRoute(
+          builder: (_) =>
+              CardViewerScreen(profiles: profiles, initialIndex: index),
+        ),
       ),
       child: ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
           decoration: BoxDecoration(
-            color: AppPalette.factionColors[profile.faction] ?? context.cardBgColor,
+            color:
+                AppPalette.factionColors[profile.faction] ??
+                context.cardBgColor,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
@@ -360,14 +365,21 @@ class _ProfileTile extends StatelessWidget {
                       Flexible(
                         child: Text(
                           profile.name,
-                          style: GoogleFonts.cinzel(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                          style: GoogleFonts.cinzel(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (profile.keywords.contains('Leader') || profile.keywords.contains('Hero')) ...[
+                      if (profile.keywords.contains('Leader') ||
+                          profile.keywords.contains('Hero')) ...[
                         const SizedBox(width: 6),
                         Text(
-                          profile.keywords.contains('Leader') ? 'leader' : 'hero',
+                          profile.keywords.contains('Leader')
+                              ? 'leader'
+                              : 'hero',
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.white.withOpacity(0.65),
@@ -380,7 +392,11 @@ class _ProfileTile extends StatelessWidget {
                 ),
                 Text(
                   '${profile.ducats}',
-                  style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                  style: GoogleFonts.cinzel(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),

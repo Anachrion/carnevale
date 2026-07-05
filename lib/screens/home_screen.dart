@@ -2,6 +2,7 @@ import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import 'cards_screen.dart';
 import 'game_home_screen.dart';
@@ -16,64 +17,67 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.home),
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/images/bg_dark.png'
-                    : 'assets/images/bg_light.png',
-              ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          child: Stack(
+      body: AppBackground(
+        blurScrim: false,
+        safeArea: false,
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              SingleChildScrollView(
+              _Header(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(72, 80, 72, 32),
                 child: Column(
                   children: [
-                    _Header(),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(72, 80, 72, 32),
-                      child: Column(
-                        children: [
-                          _MenuItem(
-                            icon: Icons.style_outlined,
-                            imagePath: 'assets/images/cards_icon.png',
-                            title: 'Cards',
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen())),
-                          ),
-                          const SizedBox(height: 12),
-                          _MenuItem(
-                            icon: Icons.flag_outlined,
-                            imagePath: 'assets/images/list_icon.png',
-                            imageScale: 1.2,
-                            title: 'Gangs',
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GangsScreen())),
-                          ),
-                          const SizedBox(height: 12),
-                          _MenuItem(
-                            icon: Icons.sports_esports_outlined,
-                            imagePath: 'assets/images/games_icon.png',
-                            imageScale: 1.10,
-                            title: 'Games',
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameHomeScreen())),
-                          ),
-                          const SizedBox(height: 12),
-                          _MenuItem(icon: Icons.menu_book_outlined, imagePath: 'assets/images/book_icon.png', title: 'Rules'),
-                          const SizedBox(height: 12),
-                          _MenuItem(
-                            icon: Icons.settings_outlined,
-                            imagePath: 'assets/images/gear_icon.png',
-                            imageScale: 1.2,
-                            title: 'Settings',
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-                          ),
-                        ],
+                    _MenuItem(
+                      icon: Icons.style_outlined,
+                      imagePath: 'assets/images/cards_icon.png',
+                      title: 'Cards',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CardsScreen()),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _MenuItem(
+                      icon: Icons.flag_outlined,
+                      imagePath: 'assets/images/list_icon.png',
+                      imageScale: 1.2,
+                      title: 'Gangs',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const GangsScreen()),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _MenuItem(
+                      icon: Icons.sports_esports_outlined,
+                      imagePath: 'assets/images/games_icon.png',
+                      imageScale: 1.10,
+                      title: 'Games',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const GameHomeScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _MenuItem(
+                      icon: Icons.menu_book_outlined,
+                      imagePath: 'assets/images/book_icon.png',
+                      title: 'Rules',
+                    ),
+                    const SizedBox(height: 12),
+                    _MenuItem(
+                      icon: Icons.settings_outlined,
+                      imagePath: 'assets/images/gear_icon.png',
+                      imageScale: 1.2,
+                      title: 'Settings',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsScreen(),
+                        ),
                       ),
                     ),
                   ],
@@ -114,28 +118,28 @@ class _Header extends StatelessWidget {
                   Transform.translate(
                     offset: const Offset(0, -14),
                     child: Text(
-                    'CARNEVALE',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w400,
-                      color: context.textColor,
-                      letterSpacing: 10,
+                      'CARNEVALE',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w400,
+                        color: context.textColor,
+                        letterSpacing: 10,
+                      ),
                     ),
-                  ),
                   ),
                   Transform.translate(
                     offset: const Offset(0, -8),
                     child: SizedBox(
-                    width: 180,
-                    height: 25,
-                    child: Image.asset(
-                      'assets/images/divider.png',
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                      color: isLight ? AppPalette.red : AppPalette.mutedGold,
-                      colorBlendMode: BlendMode.srcIn,
+                      width: 180,
+                      height: 25,
+                      child: Image.asset(
+                        'assets/images/divider.png',
+                        fit: BoxFit.cover,
+                        alignment: Alignment.center,
+                        color: isLight ? AppPalette.red : AppPalette.mutedGold,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
                     ),
-                  ),
                   ),
                 ],
               ),
@@ -180,10 +184,7 @@ class _MenuItem extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: context.panelGradient,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: context.panelBorderColor,
-              width: 1.0,
-            ),
+            border: Border.all(color: context.panelBorderColor, width: 1.0),
           ),
           child: Material(
             color: Colors.transparent,
@@ -191,48 +192,52 @@ class _MenuItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: onTap,
               child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 64,
-                  height: 64,
-                  child: imagePath != null
-                      ? Transform.scale(
-                          scale: imageScale,
-                          child: Image.asset(
-                            imagePath!,
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.high,
-                            color: Theme.of(context).brightness == Brightness.light
-                                ? AppPalette.red
-                                : AppPalette.mutedGold,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
-                        )
-                      : Icon(icon, color: context.textColor, size: 26),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: GoogleFonts.cinzel(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: context.textColor,
+                padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: imagePath != null
+                          ? Transform.scale(
+                              scale: imageScale,
+                              child: Image.asset(
+                                imagePath!,
+                                fit: BoxFit.contain,
+                                filterQuality: FilterQuality.high,
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? AppPalette.red
+                                    : AppPalette.mutedGold,
+                                colorBlendMode: BlendMode.srcIn,
+                              ),
+                            )
+                          : Icon(icon, color: context.textColor, size: 26),
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: context.textColor,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppPalette.gold
+                          : AppPalette.red,
+                      size: 22,
+                    ),
+                  ],
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: Theme.of(context).brightness == Brightness.dark ? AppPalette.gold : AppPalette.red,
-                  size: 22,
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
         ),
       ),
     );
