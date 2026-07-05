@@ -400,6 +400,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       myLabel: 'My Models',
       opponentPlayerId: opponent.id,
       opponentLabel: opponent.username,
+      // Mid-game the list is fixed; drop the per-gang name/faction/ducats summary as noise.
+      showListHeader: false,
     );
   }
 }

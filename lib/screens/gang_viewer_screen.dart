@@ -115,6 +115,7 @@ class GangsTabView extends StatelessWidget {
     required this.myLabel,
     required this.opponentPlayerId,
     required this.opponentLabel,
+    this.showListHeader = true,
   });
 
   final int gameId;
@@ -122,6 +123,10 @@ class GangsTabView extends StatelessWidget {
   final String myLabel;
   final int opponentPlayerId;
   final String opponentLabel;
+
+  /// Whether each tab shows the gang's name/faction header and ducats bar. Hidden once a game is
+  /// in progress, where the list is fixed and that summary is just noise above the models.
+  final bool showListHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -136,8 +141,8 @@ class GangsTabView extends StatelessWidget {
               children: [
                 // Players only ever edit their own models' counters; the opponent's tab stays
                 // read-only (their changes still stream in live via game_state broadcasts).
-                _GangTab(gameId: gameId, playerId: myPlayerId, editable: true),
-                _GangTab(gameId: gameId, playerId: opponentPlayerId, editable: false),
+                _GangTab(gameId: gameId, playerId: myPlayerId, editable: true, showListHeader: showListHeader),
+                _GangTab(gameId: gameId, playerId: opponentPlayerId, editable: false, showListHeader: showListHeader),
               ],
             ),
           ),
@@ -171,11 +176,12 @@ class _GangTabData {
 }
 
 class _GangTab extends StatefulWidget {
-  const _GangTab({required this.gameId, required this.playerId, required this.editable});
+  const _GangTab({required this.gameId, required this.playerId, required this.editable, this.showListHeader = true});
 
   final int gameId;
   final int playerId;
   final bool editable;
+  final bool showListHeader;
 
   @override
   State<_GangTab> createState() => _GangTabState();
@@ -295,6 +301,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       gang: data.gang,
       profiles: data.profiles,
       equipment: data.equipment,
+      showHeader: widget.showListHeader,
       onEditCounters: widget.editable ? _editCounters : null,
       onEditStats: widget.editable ? _editStats : null,
     );
@@ -306,6 +313,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     required this.gang,
     required this.profiles,
     required this.equipment,
+    this.showHeader = true,
     this.onEditCounters,
     this.onEditStats,
   });
@@ -313,6 +321,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
   final Gang gang;
   final List<Profile> profiles;
   final List<Equipment> equipment;
+
+  /// Whether to show the gang name/faction header and ducats bar above the models.
+  final bool showHeader;
 
   /// When set, model tiles with an entry state get a + button that opens the counter popup.
   final void Function(ListEntry entry)? onEditCounters;
@@ -325,9 +336,11 @@ class _ReadOnlyGangBody extends StatelessWidget {
     final factionColor = AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
     return Column(
       children: [
-        _buildGangHeader(context, factionColor),
-        _buildPointsBar(context, factionColor),
-        const SizedBox(height: 12),
+        if (showHeader) ...[
+          _buildGangHeader(context, factionColor),
+          _buildPointsBar(context, factionColor),
+          const SizedBox(height: 12),
+        ],
         Expanded(child: _buildEntries(context, factionColor)),
       ],
     );
