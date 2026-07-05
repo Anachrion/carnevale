@@ -25,6 +25,10 @@ Request a password reset email
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getSessionApi();
 final ForgotPasswordInput forgotPasswordInput = ; // ForgotPasswordInput | 
@@ -48,7 +52,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[ApiKeyAuth](../README.md#ApiKeyAuth)
 
 ### HTTP request headers
 
@@ -67,6 +71,10 @@ On success, the JWT is returned in the `Authorization` response header as `Beare
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getSessionApi();
 final LoginInput loginInput = ; // LoginInput | 
@@ -91,7 +99,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[ApiKeyAuth](../README.md#ApiKeyAuth)
 
 ### HTTP request headers
 
@@ -108,6 +116,10 @@ Revoke the current JWT
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getSessionApi();
 
@@ -127,7 +139,7 @@ void (empty response body)
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -144,6 +156,10 @@ Set a new password using a reset token
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getSessionApi();
 final ResetPasswordInput resetPasswordInput = ; // ResetPasswordInput | 
@@ -168,7 +184,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[ApiKeyAuth](../README.md#ApiKeyAuth)
 
 ### HTTP request headers
 
@@ -185,6 +201,10 @@ Register a new user
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getSessionApi();
 final RegistrationInput registrationInput = ; // RegistrationInput | 
@@ -209,7 +229,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[ApiKeyAuth](../README.md#ApiKeyAuth)
 
 ### HTTP request headers
 
@@ -226,6 +246,10 @@ Update the current user's username
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getSessionApi();
 final UpdateAccountInput updateAccountInput = ; // UpdateAccountInput | 
@@ -250,7 +274,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

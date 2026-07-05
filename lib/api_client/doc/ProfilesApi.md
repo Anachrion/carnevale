@@ -21,6 +21,10 @@ Get a profile
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getProfilesApi();
 final int id = 56; // int | 
@@ -45,7 +49,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[ApiKeyAuth](../README.md#ApiKeyAuth)
 
 ### HTTP request headers
 
@@ -62,6 +66,10 @@ List all profiles
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getProfilesApi();
 final String faction = faction_example; // String | 
@@ -86,7 +94,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[ApiKeyAuth](../README.md#ApiKeyAuth)
 
 ### HTTP request headers
 

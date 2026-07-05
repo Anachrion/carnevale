@@ -39,6 +39,10 @@ Callable by either player — like the roll winners and role pick, this app trac
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -63,7 +67,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -82,6 +86,10 @@ Hides the game from the current user's default game list (`GET /games`), but it 
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -106,7 +114,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -125,6 +133,10 @@ ducat_limit and name default from the scenario if omitted.
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final CreateGameInput createGameInput = ; // CreateGameInput | 
@@ -149,7 +161,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -168,6 +180,10 @@ Hides the game from the current user permanently (they can no longer GET or list
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -191,7 +207,7 @@ void (empty response body)
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -210,6 +226,10 @@ Only valid while the game is `in_progress`, and only for an agenda currently in 
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -238,7 +258,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -257,6 +277,10 @@ Never broadcast or visible to the opponent. Behavior depends on game status: whi
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -283,7 +307,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -300,6 +324,10 @@ The current user's lists, flagged selectable against this game's ducat_limit
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -324,7 +352,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -343,6 +371,10 @@ Returns 404 if the game doesn't exist or the current user isn't a participant. A
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -367,7 +399,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -386,6 +418,10 @@ Never includes games the current user has deleted, regardless of the other playe
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final String visibility = visibility_example; // String | Which of the current user's games to return.
@@ -410,7 +446,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -429,6 +465,10 @@ Available for consultation by both participants once that player has picked a ga
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -455,7 +495,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -474,6 +514,10 @@ Idempotent if the current user has already joined. Returns 422 if the game is al
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final JoinGameInput joinGameInput = ; // JoinGameInput | 
@@ -498,7 +542,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -517,6 +561,10 @@ Once both players are ready, the game's status becomes in_progress and an EntryS
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -541,7 +589,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -560,6 +608,10 @@ The roll-off winner is picked at random, server-side, as soon as the second play
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -586,7 +638,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -605,6 +657,10 @@ Only valid while the game is `in_progress`, and only for an agenda currently in 
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -633,7 +689,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -650,6 +706,10 @@ Select a list as the current user's gang for this game
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -676,7 +736,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -695,6 +755,10 @@ Reverses `archive` for the current user only.
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -719,7 +783,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -738,6 +802,10 @@ Only available while the game is in_progress, and only for entries in the reques
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -766,7 +834,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -785,6 +853,10 @@ Only available while the game is in_progress, and only for entries in the reques
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
@@ -813,7 +885,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

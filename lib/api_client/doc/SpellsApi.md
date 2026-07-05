@@ -20,6 +20,10 @@ List all spells, optionally filtered by Discipline
 ### Example
 ```dart
 import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
 
 final api = CarnevaleApi().getSpellsApi();
 final String discipline = discipline_example; // String | 
@@ -44,7 +48,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
