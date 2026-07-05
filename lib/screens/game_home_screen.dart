@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../models/game.dart' as models;
 import '../services/game_service.dart';
+import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
@@ -21,7 +22,8 @@ class GameHomeScreen extends StatefulWidget {
   State<GameHomeScreen> createState() => _GameHomeScreenState();
 }
 
-class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProviderStateMixin {
+class _GameHomeScreenState extends State<GameHomeScreen>
+    with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _service = GameService();
   late final _tabController = TabController(length: 2, vsync: this);
@@ -40,7 +42,9 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
       _loading = false;
     }
     if (widget.initialJoinCode != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _showJoinSheet(prefill: widget.initialJoinCode));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _showJoinSheet(prefill: widget.initialJoinCode),
+      );
     }
   }
 
@@ -91,7 +95,10 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
   }
 
   void _openGame(int gameId) async {
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => GameSessionScreen(gameId: gameId)));
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => GameSessionScreen(gameId: gameId)),
+    );
     await _load();
   }
 
@@ -178,42 +185,17 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
               child: const Icon(Icons.add),
             )
           : null,
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark ? 'assets/images/bg_dark.png' : 'assets/images/bg_light.png',
-              ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withOpacity(0.05)),
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildHeader(context),
-                    if (authService.isLoggedIn) ...[
-                      const SizedBox(height: 8),
-                      _buildTabBar(context),
-                    ],
-                    const SizedBox(height: 8),
-                    Expanded(child: _buildBody()),
-                  ],
-                ),
-              ),
+      body: AppBackground(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            if (authService.isLoggedIn) ...[
+              const SizedBox(height: 8),
+              _buildTabBar(context),
             ],
-          ),
+            const SizedBox(height: 8),
+            Expanded(child: _buildBody()),
+          ],
         ),
       ),
     );
@@ -231,7 +213,12 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
           const SizedBox(width: 4),
           Text(
             'Games',
-            style: GoogleFonts.cinzel(fontSize: 24, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 3),
+            style: GoogleFonts.cinzel(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+              letterSpacing: 3,
+            ),
           ),
         ],
       ),
@@ -247,9 +234,20 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
         unselectedLabelColor: context.subtleTextColor,
         indicatorColor: AppPalette.gold,
         dividerColor: context.subtleTextColor.withOpacity(0.2),
-        labelStyle: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 13, letterSpacing: 1),
-        unselectedLabelStyle: GoogleFonts.cinzel(fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 1),
-        tabs: const [Tab(text: 'Active'), Tab(text: 'Archived')],
+        labelStyle: GoogleFonts.cinzel(
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+          letterSpacing: 1,
+        ),
+        unselectedLabelStyle: GoogleFonts.cinzel(
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+          letterSpacing: 1,
+        ),
+        tabs: const [
+          Tab(text: 'Active'),
+          Tab(text: 'Archived'),
+        ],
       ),
     );
   }
@@ -270,8 +268,14 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountScreen())),
-              style: ElevatedButton.styleFrom(backgroundColor: AppPalette.gold, foregroundColor: Colors.white),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AccountScreen()),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppPalette.gold,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Log In'),
             ),
           ],
@@ -282,7 +286,10 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
 
   Widget _buildBody() {
     if (!authService.isLoggedIn) return _buildLoggedOut();
-    if (_loading) return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
+    if (_loading)
+      return const Center(
+        child: CircularProgressIndicator(color: AppPalette.gold),
+      );
     if (_error != null) {
       return Center(
         child: Column(
@@ -290,7 +297,10 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
           children: [
             Icon(Icons.wifi_off, size: 40, color: context.subtleTextColor),
             const SizedBox(height: 12),
-            Text('Could not reach server', style: TextStyle(color: context.subtleTextColor)),
+            Text(
+              'Could not reach server',
+              style: TextStyle(color: context.subtleTextColor),
+            ),
             const SizedBox(height: 8),
             TextButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -330,11 +340,27 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(emptyIcon, size: 56, color: context.subtleTextColor.withOpacity(0.4)),
+            Icon(
+              emptyIcon,
+              size: 56,
+              color: context.subtleTextColor.withOpacity(0.4),
+            ),
             const SizedBox(height: 16),
-            Text(emptyTitle, style: GoogleFonts.cinzel(fontSize: 16, color: context.subtleTextColor)),
+            Text(
+              emptyTitle,
+              style: GoogleFonts.cinzel(
+                fontSize: 16,
+                color: context.subtleTextColor,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(emptySubtitle, style: TextStyle(fontSize: 13, color: context.subtleTextColor.withOpacity(0.7))),
+            Text(
+              emptySubtitle,
+              style: TextStyle(
+                fontSize: 13,
+                color: context.subtleTextColor.withOpacity(0.7),
+              ),
+            ),
           ],
         ),
       );
@@ -348,7 +374,9 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
         isArchived: isArchivedTab,
         onPlay: () => _openGame(games[i].id),
         onDelete: () => _deleteGame(games[i].id),
-        onArchiveToggle: () => isArchivedTab ? _unarchiveGame(games[i].id) : _archiveGame(games[i].id),
+        onArchiveToggle: () => isArchivedTab
+            ? _unarchiveGame(games[i].id)
+            : _archiveGame(games[i].id),
       ),
     );
   }
@@ -397,12 +425,19 @@ class _GameTileState extends State<_GameTile> {
                       children: [
                         Text(
                           _game.name,
-                          style: GoogleFonts.cinzel(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor),
+                          style: GoogleFonts.cinzel(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: context.textColor,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${_statusLabel[0].toUpperCase()}${_statusLabel.substring(1)} · Code ${_game.joinCode}',
-                          style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.subtleTextColor,
+                          ),
                         ),
                       ],
                     ),
@@ -410,7 +445,11 @@ class _GameTileState extends State<_GameTile> {
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 200),
-                    child: Icon(Icons.expand_more, color: isDark ? AppPalette.gold : AppPalette.red, size: 22),
+                    child: Icon(
+                      Icons.expand_more,
+                      color: isDark ? AppPalette.gold : AppPalette.red,
+                      size: 22,
+                    ),
                   ),
                 ],
               ),
@@ -419,7 +458,9 @@ class _GameTileState extends State<_GameTile> {
           AnimatedCrossFade(
             firstChild: const SizedBox(width: double.infinity),
             secondChild: _buildDetails(context),
-            crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: _expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 200),
             sizeCurve: Curves.easeInOut,
           ),
@@ -440,17 +481,27 @@ class _GameTileState extends State<_GameTile> {
         children: [
           Divider(color: context.subtleTextColor.withOpacity(0.2), height: 1),
           const SizedBox(height: 12),
-          Text(_game.scenario.name, style: TextStyle(fontSize: 12, color: context.subtleTextColor)),
+          Text(
+            _game.scenario.name,
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+          ),
           const SizedBox(height: 6),
           Text(
             '${p1?.username ?? '—'} vs ${p2?.username ?? 'waiting for an opponent'}',
-            style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: context.textColor),
+            style: GoogleFonts.cinzel(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: context.textColor,
+            ),
           ),
           const SizedBox(height: 6),
           if (p1 != null) _buildPlayerListLine(context, p1),
           if (p2 != null) _buildPlayerListLine(context, p2),
           const SizedBox(height: 8),
-          Text('${_game.ducatLimit} ducats', style: TextStyle(fontSize: 12, color: context.subtleTextColor)),
+          Text(
+            '${_game.ducatLimit} ducats',
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+          ),
           const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -464,7 +515,11 @@ class _GameTileState extends State<_GameTile> {
               const SizedBox(width: 4),
               IconButton(
                 onPressed: widget.onArchiveToggle,
-                icon: Icon(widget.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined),
+                icon: Icon(
+                  widget.isArchived
+                      ? Icons.unarchive_outlined
+                      : Icons.archive_outlined,
+                ),
                 color: context.subtleTextColor,
                 tooltip: widget.isArchived ? 'Restore game' : 'Archive game',
               ),
@@ -487,8 +542,13 @@ class _GameTileState extends State<_GameTile> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Delete Game', style: GoogleFonts.cinzel(color: context.textColor)),
-        content: const Text('Delete this game? You won\'t be able to see it again, even if your opponent still can.'),
+        title: Text(
+          'Delete Game',
+          style: GoogleFonts.cinzel(color: context.textColor),
+        ),
+        content: const Text(
+          'Delete this game? You won\'t be able to see it again, even if your opponent still can.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -533,7 +593,10 @@ class _GameActionSheet extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.cardBgColor.withOpacity(0.92),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.5),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.4),
+              width: 0.5,
+            ),
           ),
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
           child: Column(
@@ -543,21 +606,27 @@ class _GameActionSheet extends StatelessWidget {
                 child: Container(
                   width: 40,
                   height: 4,
-                  decoration: BoxDecoration(color: context.subtleTextColor.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
+                  decoration: BoxDecoration(
+                    color: context.subtleTextColor.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.of(context).pop(_GameAction.create),
+                  onPressed: () =>
+                      Navigator.of(context).pop(_GameAction.create),
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('Create Game'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppPalette.gold,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     elevation: 0,
                   ),
                 ),
@@ -573,7 +642,9 @@ class _GameActionSheet extends StatelessWidget {
                     foregroundColor: AppPalette.gold,
                     side: const BorderSide(color: AppPalette.gold),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -675,8 +746,13 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
           child: Container(
             decoration: BoxDecoration(
               color: context.cardBgColor.withOpacity(0.92),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.5),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.4),
+                width: 0.5,
+              ),
             ),
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
             child: SingleChildScrollView(
@@ -688,78 +764,167 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                     child: Container(
                       width: 40,
                       height: 4,
-                      decoration: BoxDecoration(color: context.subtleTextColor.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
+                      decoration: BoxDecoration(
+                        color: context.subtleTextColor.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     'New Game',
-                    style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 2),
+                    style: GoogleFonts.cinzel(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor,
+                      letterSpacing: 2,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   if (_loading)
-                    const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppPalette.gold)))
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: CircularProgressIndicator(
+                          color: AppPalette.gold,
+                        ),
+                      ),
+                    )
                   else if (_error != null)
                     Text(_error!, style: const TextStyle(color: Colors.red))
                   else ...[
-                    Text('Scenario', style: TextStyle(fontSize: 12, color: context.subtleTextColor, letterSpacing: 1)),
+                    Text(
+                      'Scenario',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.subtleTextColor,
+                        letterSpacing: 1,
+                      ),
+                    ),
                     const SizedBox(height: 10),
-                    ..._scenarios.map((s) => _ScenarioTile(
-                          scenario: s,
-                          selected: _selected?.id == s.id,
-                          onTap: () => _selectScenario(s),
-                        )),
+                    ..._scenarios.map(
+                      (s) => _ScenarioTile(
+                        scenario: s,
+                        selected: _selected?.id == s.id,
+                        onTap: () => _selectScenario(s),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _nameController,
-                      style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                      style: GoogleFonts.cinzel(
+                        color: context.textColor,
+                        fontSize: 15,
+                      ),
                       decoration: InputDecoration(
                         labelText: 'Game name (optional)',
                         hintText: _selected?.name,
-                        hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.6), fontSize: 15),
-                        labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
-                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
+                        hintStyle: TextStyle(
+                          color: context.subtleTextColor.withOpacity(0.6),
+                          fontSize: 15,
+                        ),
+                        labelStyle: TextStyle(
+                          color: context.subtleTextColor,
+                          fontSize: 13,
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppPalette.gold.withOpacity(0.5),
+                          ),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppPalette.gold,
+                            width: 1.5,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _ducatController,
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                      style: GoogleFonts.cinzel(
+                        color: context.textColor,
+                        fontSize: 15,
+                      ),
                       decoration: InputDecoration(
                         labelText: 'Ducat limit',
-                        labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
-                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
+                        labelStyle: TextStyle(
+                          color: context.subtleTextColor,
+                          fontSize: 13,
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppPalette.gold.withOpacity(0.5),
+                          ),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppPalette.gold,
+                            width: 1.5,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _boardSizeController,
-                      style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                      style: GoogleFonts.cinzel(
+                        color: context.textColor,
+                        fontSize: 15,
+                      ),
                       decoration: InputDecoration(
                         labelText: 'Board size (optional override)',
-                        labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
-                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
+                        labelStyle: TextStyle(
+                          color: context.subtleTextColor,
+                          fontSize: 13,
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppPalette.gold.withOpacity(0.5),
+                          ),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppPalette.gold,
+                            width: 1.5,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _selected == null || _saving ? null : _submit,
+                        onPressed: _selected == null || _saving
+                            ? null
+                            : _submit,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppPalette.gold,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           elevation: 0,
                         ),
                         child: _saving
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : Text('Create Game', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 15)),
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Create Game',
+                                style: GoogleFonts.cinzel(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -774,7 +939,11 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
 }
 
 class _ScenarioTile extends StatelessWidget {
-  const _ScenarioTile({required this.scenario, required this.selected, required this.onTap});
+  const _ScenarioTile({
+    required this.scenario,
+    required this.selected,
+    required this.onTap,
+  });
   final models.Scenario scenario;
   final bool selected;
   final VoidCallback onTap;
@@ -788,9 +957,15 @@ class _ScenarioTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: selected ? AppPalette.gold.withOpacity(0.18) : Colors.transparent,
+            color: selected
+                ? AppPalette.gold.withOpacity(0.18)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: selected ? AppPalette.gold : context.subtleTextColor.withOpacity(0.25)),
+            border: Border.all(
+              color: selected
+                  ? AppPalette.gold
+                  : context.subtleTextColor.withOpacity(0.25),
+            ),
           ),
           child: Row(
             children: [
@@ -798,15 +973,30 @@ class _ScenarioTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(scenario.name, style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: context.textColor)),
+                    Text(
+                      scenario.name,
+                      style: GoogleFonts.cinzel(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.textColor,
+                      ),
+                    ),
                     Text(
                       '${scenario.ducats} ducats · ${scenario.duration}${scenario.asymmetric ? ' · Attacker/Defender' : ''}',
-                      style: TextStyle(fontSize: 11, color: context.subtleTextColor),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.subtleTextColor,
+                      ),
                     ),
                   ],
                 ),
               ),
-              if (selected) const Icon(Icons.check_circle, color: AppPalette.gold, size: 20),
+              if (selected)
+                const Icon(
+                  Icons.check_circle,
+                  color: AppPalette.gold,
+                  size: 20,
+                ),
             ],
           ),
         ),
@@ -868,8 +1058,13 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
           child: Container(
             decoration: BoxDecoration(
               color: context.cardBgColor.withOpacity(0.92),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.5),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.4),
+                width: 0.5,
+              ),
             ),
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
             child: Column(
@@ -880,32 +1075,59 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
                   child: Container(
                     width: 40,
                     height: 4,
-                    decoration: BoxDecoration(color: context.subtleTextColor.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
+                    decoration: BoxDecoration(
+                      color: context.subtleTextColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   'Join Game',
-                  style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 2),
+                  style: GoogleFonts.cinzel(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                    letterSpacing: 2,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _codeController,
                   autofocus: true,
                   textCapitalization: TextCapitalization.characters,
-                  style: GoogleFonts.cinzel(color: context.textColor, fontSize: 20, letterSpacing: 4),
+                  style: GoogleFonts.cinzel(
+                    color: context.textColor,
+                    fontSize: 20,
+                    letterSpacing: 4,
+                  ),
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     labelText: 'Join code',
-                    labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
-                    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
+                    labelStyle: TextStyle(
+                      color: context.subtleTextColor,
+                      fontSize: 13,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppPalette.gold.withOpacity(0.5),
+                      ),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppPalette.gold,
+                        width: 1.5,
+                      ),
+                    ),
                   ),
                   onSubmitted: (_) => _submit(),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                  Text(
+                    _error!,
+                    style: const TextStyle(color: Colors.red, fontSize: 13),
+                  ),
                 ],
                 const SizedBox(height: 24),
                 SizedBox(
@@ -916,12 +1138,27 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
                       backgroundColor: AppPalette.gold,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: _saving
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : Text('Join', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 15)),
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'Join',
+                            style: GoogleFonts.cinzel(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
                   ),
                 ),
               ],

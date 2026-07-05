@@ -5,12 +5,21 @@ import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../models/gang.dart';
 import '../services/gang_service.dart';
+import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import 'account_screen.dart';
 import 'gang_builder_screen.dart';
 
 // Faction display order for the create-gang picker (distinct from AppPalette.factionColors' order).
-const _kFactions = ['guild', 'doctors', 'vatican', 'patricians', 'strigoi', 'gifted', 'rashaar'];
+const _kFactions = [
+  'guild',
+  'doctors',
+  'vatican',
+  'patricians',
+  'strigoi',
+  'gifted',
+  'rashaar',
+];
 
 class GangsScreen extends StatefulWidget {
   const GangsScreen({super.key});
@@ -56,15 +65,24 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final gangs = await _service.loadAll();
       if (!mounted) return;
-      setState(() { _gangs = gangs; _loading = false; });
+      setState(() {
+        _gangs = gangs;
+        _loading = false;
+      });
     } catch (e, st) {
       debugPrint('GangsScreen error: $e\n$st');
       if (!mounted) return;
-      setState(() { _error = e.toString(); _loading = false; });
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
@@ -79,7 +97,8 @@ class _GangsScreenState extends State<GangsScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _CreateGangSheet(
-        onCreate: (name, faction, points) => _service.create(name, faction, points),
+        onCreate: (name, faction, points) =>
+            _service.create(name, faction, points),
       ),
     );
     if (gang != null && mounted) {
@@ -106,40 +125,13 @@ class _GangsScreenState extends State<GangsScreen> {
               child: const Icon(Icons.add),
             )
           : null,
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/images/bg_dark.png'
-                    : 'assets/images/bg_light.png',
-              ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withOpacity(0.05)),
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildHeader(context),
-                    const SizedBox(height: 8),
-                    Expanded(child: _buildBody()),
-                  ],
-                ),
-              ),
-            ],
-          ),
+      body: AppBackground(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            const SizedBox(height: 8),
+            Expanded(child: _buildBody()),
+          ],
         ),
       ),
     );
@@ -212,7 +204,9 @@ class _GangsScreenState extends State<GangsScreen> {
       return _buildLoggedOut();
     }
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
+      return const Center(
+        child: CircularProgressIndicator(color: AppPalette.gold),
+      );
     }
     if (_error != null) {
       return Center(
@@ -221,7 +215,10 @@ class _GangsScreenState extends State<GangsScreen> {
           children: [
             Icon(Icons.wifi_off, size: 40, color: context.subtleTextColor),
             const SizedBox(height: 12),
-            Text('Could not reach server', style: TextStyle(color: context.subtleTextColor)),
+            Text(
+              'Could not reach server',
+              style: TextStyle(color: context.subtleTextColor),
+            ),
             const SizedBox(height: 8),
             TextButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -239,7 +236,9 @@ class _GangsScreenState extends State<GangsScreen> {
         onTap: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: _gangs[i])),
+            MaterialPageRoute(
+              builder: (_) => GangBuilderScreen(gang: _gangs[i]),
+            ),
           );
           await _load();
         },
@@ -252,16 +251,26 @@ class _GangsScreenState extends State<GangsScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.flag_outlined, size: 56, color: context.subtleTextColor.withOpacity(0.4)),
+          Icon(
+            Icons.flag_outlined,
+            size: 56,
+            color: context.subtleTextColor.withOpacity(0.4),
+          ),
           const SizedBox(height: 16),
           Text(
             'No gangs yet',
-            style: GoogleFonts.cinzel(fontSize: 16, color: context.subtleTextColor),
+            style: GoogleFonts.cinzel(
+              fontSize: 16,
+              color: context.subtleTextColor,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap + to create your first gang',
-            style: TextStyle(fontSize: 13, color: context.subtleTextColor.withOpacity(0.7)),
+            style: TextStyle(
+              fontSize: 13,
+              color: context.subtleTextColor.withOpacity(0.7),
+            ),
           ),
         ],
       ),
@@ -270,14 +279,19 @@ class _GangsScreenState extends State<GangsScreen> {
 }
 
 class _GangTile extends StatelessWidget {
-  const _GangTile({required this.gang, required this.onDelete, required this.onTap});
+  const _GangTile({
+    required this.gang,
+    required this.onDelete,
+    required this.onTap,
+  });
   final Gang gang;
   final VoidCallback onDelete;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final factionColor = AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
+    final factionColor =
+        AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
     final iconPath = AppPalette.factionIcons[gang.faction];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -289,10 +303,7 @@ class _GangTile extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: context.panelGradient,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: context.panelBorderColor,
-              width: 1.0,
-            ),
+            border: Border.all(color: context.panelBorderColor, width: 1.0),
           ),
           child: Material(
             color: Colors.transparent,
@@ -319,7 +330,11 @@ class _GangTile extends StatelessWidget {
                               color: Colors.white,
                               colorBlendMode: BlendMode.srcIn,
                             )
-                          : const Icon(Icons.flag, color: Colors.white, size: 24),
+                          : const Icon(
+                              Icons.flag,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -359,7 +374,10 @@ class _GangTile extends StatelessWidget {
                         ),
                         Text(
                           '/ ${gang.points} duc.',
-                          style: TextStyle(fontSize: 10, color: context.subtleTextColor),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: context.subtleTextColor,
+                          ),
                         ),
                       ],
                     ),
@@ -383,7 +401,10 @@ class _GangTile extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Delete Gang', style: GoogleFonts.cinzel(color: context.textColor)),
+        title: Text(
+          'Delete Gang',
+          style: GoogleFonts.cinzel(color: context.textColor),
+        ),
         content: Text('Delete "${gang.name}"?'),
         actions: [
           TextButton(
@@ -451,8 +472,13 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
           child: Container(
             decoration: BoxDecoration(
               color: context.cardBgColor.withOpacity(0.92),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.5),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.4),
+                width: 0.5,
+              ),
             ),
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
             child: SingleChildScrollView(
@@ -462,7 +488,8 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                 children: [
                   Center(
                     child: Container(
-                      width: 40, height: 4,
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
                         color: context.subtleTextColor.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(2),
@@ -483,15 +510,26 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                   TextField(
                     controller: _nameController,
                     autofocus: true,
-                    style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                    style: GoogleFonts.cinzel(
+                      color: context.textColor,
+                      fontSize: 15,
+                    ),
                     decoration: InputDecoration(
                       labelText: 'Gang name',
-                      labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
+                      labelStyle: TextStyle(
+                        color: context.subtleTextColor,
+                        fontSize: 13,
+                      ),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5)),
+                        borderSide: BorderSide(
+                          color: AppPalette.gold.withOpacity(0.5),
+                        ),
                       ),
                       focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
+                        borderSide: BorderSide(
+                          color: AppPalette.gold,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                     onSubmitted: (_) => _submit(),
@@ -500,22 +538,37 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                   TextField(
                     controller: _pointsController,
                     keyboardType: TextInputType.number,
-                    style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+                    style: GoogleFonts.cinzel(
+                      color: context.textColor,
+                      fontSize: 15,
+                    ),
                     decoration: InputDecoration(
                       labelText: 'Point limit',
-                      labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
+                      labelStyle: TextStyle(
+                        color: context.subtleTextColor,
+                        fontSize: 13,
+                      ),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5)),
+                        borderSide: BorderSide(
+                          color: AppPalette.gold.withOpacity(0.5),
+                        ),
                       ),
                       focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
+                        borderSide: BorderSide(
+                          color: AppPalette.gold,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Faction',
-                    style: TextStyle(fontSize: 12, color: context.subtleTextColor, letterSpacing: 1),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.subtleTextColor,
+                      letterSpacing: 1,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -524,7 +577,8 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                       scrollDirection: Axis.horizontal,
                       children: _kFactions.map((f) {
                         final selected = f == _selectedFaction;
-                        final color = AppPalette.factionColors[f] ?? AppPalette.gold;
+                        final color =
+                            AppPalette.factionColors[f] ?? AppPalette.gold;
                         final iconPath = AppPalette.factionIcons[f]!;
                         return GestureDetector(
                           onTap: () => setState(() => _selectedFaction = f),
@@ -539,7 +593,12 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                                   ? Border.all(color: Colors.white, width: 2.5)
                                   : null,
                               boxShadow: selected
-                                  ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 8)]
+                                  ? [
+                                      BoxShadow(
+                                        color: color.withOpacity(0.5),
+                                        blurRadius: 8,
+                                      ),
+                                    ]
                                   : null,
                             ),
                             padding: const EdgeInsets.all(9),
@@ -570,12 +629,19 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                       ),
                       child: _saving
                           ? const SizedBox(
-                              width: 20, height: 20,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             )
                           : Text(
                               'Create Gang',
-                              style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 15),
+                              style: GoogleFonts.cinzel(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
                             ),
                     ),
                   ),

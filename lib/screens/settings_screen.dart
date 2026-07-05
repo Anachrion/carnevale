@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
+import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
 import 'account_screen.dart';
@@ -49,7 +50,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) showAppToast(context, 'Password reset email sent!');
     } on AuthException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } finally {
       if (mounted) setState(() => _sendingReset = false);
@@ -62,128 +65,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
       key: _scaffoldKey,
       backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.settings),
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/images/bg_dark.png'
-                    : 'assets/images/bg_light.png',
-              ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withValues(alpha: 0.05)),
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      body: AppBackground(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                children: [
+                  Text(
+                    'APPEARANCE',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppPalette.gold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _SettingRow(
+                    label: 'Theme',
+                    child: _ThemePicker(
+                      value: settingsService.themeMode,
+                      onChanged: (mode) => settingsService.setThemeMode(mode),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  Text(
+                    'ACCOUNT',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppPalette.gold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  AnimatedBuilder(
+                    animation: authService,
+                    builder: (context, _) {
+                      final user = authService.currentUser;
+                      if (user == null) {
+                        return _SettingRow(
+                          label: 'Not logged in',
+                          child: TextButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AccountScreen(),
+                              ),
+                            ),
+                            child: Text(
+                              'Log In',
+                              style: GoogleFonts.cinzel(
+                                color: AppPalette.gold,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
+                      final logoutColor = isDark
+                          ? AppPalette.mutedGold
+                          : AppPalette.red;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'APPEARANCE',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppPalette.gold,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
                           _SettingRow(
-                            label: 'Theme',
-                            child: _ThemePicker(
-                              value: settingsService.themeMode,
-                              onChanged: (mode) => settingsService.setThemeMode(mode),
+                            label: 'Signed in as',
+                            child: Text(
+                              user.email,
+                              style: GoogleFonts.cinzel(
+                                color: context.textColor,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 28),
-                          Text(
-                            'ACCOUNT',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppPalette.gold,
-                              letterSpacing: 2,
-                            ),
+                          const SizedBox(height: 12),
+                          _UsernameEditor(
+                            key: ValueKey(user.username),
+                            initialUsername: user.username,
                           ),
-                          const SizedBox(height: 10),
-                          AnimatedBuilder(
-                            animation: authService,
-                            builder: (context, _) {
-                              final user = authService.currentUser;
-                              if (user == null) {
-                                return _SettingRow(
-                                  label: 'Not logged in',
-                                  child: TextButton(
-                                    onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (_) => const AccountScreen()),
-                                    ),
-                                    child: Text(
-                                      'Log In',
-                                      style: GoogleFonts.cinzel(color: AppPalette.gold, fontWeight: FontWeight.w700),
-                                    ),
-                                  ),
-                                );
-                              }
-                              final isDark = Theme.of(context).brightness == Brightness.dark;
-                              final logoutColor = isDark ? AppPalette.mutedGold : AppPalette.red;
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _SettingRow(
-                                    label: 'Signed in as',
-                                    child: Text(
-                                      user.email,
-                                      style: GoogleFonts.cinzel(color: context.textColor, fontWeight: FontWeight.w600),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _UsernameEditor(key: ValueKey(user.username), initialUsername: user.username),
-                                  const SizedBox(height: 12),
-                                  _AccountButton(
-                                    icon: Icons.vpn_key_outlined,
-                                    label: 'Reset Password',
-                                    color: AppPalette.toggleBlue,
-                                    onPressed: _sendingReset ? null : () => _sendResetEmail(user.email),
-                                    loading: _sendingReset,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _AccountButton(
-                                    icon: Icons.logout,
-                                    label: 'Log Out',
-                                    color: logoutColor,
-                                    tintColor: AppPalette.red,
-                                    onPressed: _loggingOut ? null : _logOut,
-                                    loading: _loggingOut,
-                                  ),
-                                ],
-                              );
-                            },
+                          const SizedBox(height: 12),
+                          _AccountButton(
+                            icon: Icons.vpn_key_outlined,
+                            label: 'Reset Password',
+                            color: AppPalette.toggleBlue,
+                            onPressed: _sendingReset
+                                ? null
+                                : () => _sendResetEmail(user.email),
+                            loading: _sendingReset,
+                          ),
+                          const SizedBox(height: 12),
+                          _AccountButton(
+                            icon: Icons.logout,
+                            label: 'Log Out',
+                            color: logoutColor,
+                            tintColor: AppPalette.red,
+                            onPressed: _loggingOut ? null : _logOut,
+                            loading: _loggingOut,
                           ),
                         ],
-                      ),
-                    ),
-                  ],
-                ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -223,8 +215,8 @@ class _ThemePicker extends StatelessWidget {
 
   String _label(ThemeMode m) => switch (m) {
     ThemeMode.system => 'Follow System',
-    ThemeMode.light  => 'Light',
-    ThemeMode.dark   => 'Dark',
+    ThemeMode.light => 'Light',
+    ThemeMode.dark => 'Dark',
   };
 
   @override
@@ -235,11 +227,16 @@ class _ThemePicker extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         final box = context.findRenderObject() as RenderBox;
-        final overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+        final overlay =
+            Navigator.of(context).overlay!.context.findRenderObject()
+                as RenderBox;
         final position = RelativeRect.fromRect(
           Rect.fromPoints(
             box.localToGlobal(Offset.zero, ancestor: overlay),
-            box.localToGlobal(box.size.bottomRight(Offset.zero), ancestor: overlay),
+            box.localToGlobal(
+              box.size.bottomRight(Offset.zero),
+              ancestor: overlay,
+            ),
           ),
           Offset.zero & overlay.size,
         );
@@ -300,10 +297,7 @@ class _SettingRow extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: context.panelGradient,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: context.panelBorderColor,
-              width: 1.0,
-            ),
+            border: Border.all(color: context.panelBorderColor, width: 1.0),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Row(
@@ -362,11 +356,20 @@ class _AccountButton extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: isDark
-                      ? [tint.withValues(alpha: 0.10), tint.withValues(alpha: 0.30)]
-                      : [tint.withValues(alpha: 0.06), tint.withValues(alpha: 0.16)],
+                      ? [
+                          tint.withValues(alpha: 0.10),
+                          tint.withValues(alpha: 0.30),
+                        ]
+                      : [
+                          tint.withValues(alpha: 0.06),
+                          tint.withValues(alpha: 0.16),
+                        ],
                 ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withValues(alpha: 0.6), width: 1.2),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.6),
+                  width: 1.2,
+                ),
               ),
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: loading
@@ -374,7 +377,10 @@ class _AccountButton extends StatelessWidget {
                       child: SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(color: color, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: color,
+                          strokeWidth: 2,
+                        ),
                       ),
                     )
                   : Row(
@@ -459,8 +465,14 @@ class _UsernameEditorState extends State<_UsernameEditor> {
                     onChanged: (_) => setState(() {}),
                     onSubmitted: (_) => _save(),
                     textAlign: TextAlign.right,
-                    style: GoogleFonts.cinzel(color: context.textColor, fontSize: 14),
-                    decoration: const InputDecoration(isDense: true, border: InputBorder.none),
+                    style: GoogleFonts.cinzel(
+                      color: context.textColor,
+                      fontSize: 14,
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -468,13 +480,18 @@ class _UsernameEditorState extends State<_UsernameEditor> {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppPalette.gold),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppPalette.gold,
+                        ),
                       )
                     : IconButton(
                         icon: Icon(
                           Icons.check,
                           size: 20,
-                          color: _changed ? AppPalette.gold : context.subtleTextColor.withValues(alpha: 0.3),
+                          color: _changed
+                              ? AppPalette.gold
+                              : context.subtleTextColor.withValues(alpha: 0.3),
                         ),
                         onPressed: _changed ? _save : null,
                         padding: EdgeInsets.zero,
@@ -487,7 +504,10 @@ class _UsernameEditorState extends State<_UsernameEditor> {
         if (_error != null)
           Padding(
             padding: const EdgeInsets.only(top: 6, left: 4),
-            child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+            child: Text(
+              _error!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
           ),
       ],
     );
