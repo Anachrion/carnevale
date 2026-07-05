@@ -27,7 +27,13 @@ class FakeApiAdapter implements HttpClientAdapter {
   ) async {
     final key = '${options.method} ${options.path}';
     final has = _routes.containsKey(key);
-    final body = has ? _routes[key] : {'errors': {'base': ['not stubbed: $key']}};
+    final body = has
+        ? _routes[key]
+        : {
+            'errors': {
+              'base': ['not stubbed: $key'],
+            },
+          };
     return ResponseBody.fromString(
       json.encode(body),
       has ? 200 : 404,
@@ -58,7 +64,8 @@ Object listBody<T>(Iterable<T> items, FullType itemType) =>
 
 Object gameBody(api.Game game) => _serialize(game, const FullType(api.Game));
 
-Object modelListBody(api.ModelList list) => _serialize(list, const FullType(api.ModelList));
+Object modelListBody(api.ModelList list) =>
+    _serialize(list, const FullType(api.ModelList));
 
 api.ListEntry fakeListEntry({
   int id = 1,
@@ -80,6 +87,22 @@ api.ListEntry fakeListEntry({
     ..spellSlots = 0
     ..disciplines = ListBuilder<String>()
     ..spells = ListBuilder<api.Spell>(),
+);
+
+api.Spell fakeSpell({
+  int id = 1,
+  String name = 'Blood Boil',
+  api.SpellDisciplineEnum discipline = api.SpellDisciplineEnum.bloodRites,
+  bool cantrip = false,
+}) => api.Spell(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..discipline = discipline
+    ..cost = 2
+    ..difficulty = 3
+    ..cantrip = cantrip
+    ..description = 'Boils the blood.',
 );
 
 api.ModelList fakeModelList({
@@ -143,20 +166,21 @@ api.Profile fakeProfile({
     ),
 );
 
-api.Scenario fakeScenario({int id = 1, String name = 'Gang War'}) => api.Scenario(
-  (b) => b
-    ..id = id
-    ..name = name
-    ..ducats = 150
-    ..asymmetric = false
-    ..setup = 'Setup text.'
-    ..primaryObjective = 'Objective text.'
-    ..agendas = ListBuilder<String>(['3 agendas.'])
-    ..specialRules = ListBuilder<String>()
-    ..duration = '5 rounds.'
-    ..turns = 5
-    ..deploymentZones = ListBuilder<String>(['Opposite edges.']),
-);
+api.Scenario fakeScenario({int id = 1, String name = 'Gang War'}) =>
+    api.Scenario(
+      (b) => b
+        ..id = id
+        ..name = name
+        ..ducats = 150
+        ..asymmetric = false
+        ..setup = 'Setup text.'
+        ..primaryObjective = 'Objective text.'
+        ..agendas = ListBuilder<String>(['3 agendas.'])
+        ..specialRules = ListBuilder<String>()
+        ..duration = '5 rounds.'
+        ..turns = 5
+        ..deploymentZones = ListBuilder<String>(['Opposite edges.']),
+    );
 
 api.GamePlayer fakeGamePlayer({
   int id = 1,

@@ -3,11 +3,9 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import '../models/gang.dart';
 import 'action_cable_client.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
-import 'gang_service.dart';
 
 class AvailableGang {
   final api.GangSummary gang;
@@ -133,13 +131,14 @@ class GameService extends ChangeNotifier {
 
   /// Either player's selected gang, in full — available once that player has picked one,
   /// regardless of whose turn it currently is.
-  Future<Gang> playerList(int gameId, int playerId) => _guard(() async {
-    final res = await _client.games.getPlayerList(
-      id: gameId,
-      playerId: playerId,
-    );
-    return GangService().mapGang(res.data!);
-  });
+  Future<api.ModelList> playerList(int gameId, int playerId) =>
+      _guard(() async {
+        final res = await _client.games.getPlayerList(
+          id: gameId,
+          playerId: playerId,
+        );
+        return res.data!;
+      });
 
   /// Updates status counters on one of the current player's own models — only the values
   /// passed change, the rest keep their current state. Returns the model's full updated

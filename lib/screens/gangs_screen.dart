@@ -2,8 +2,8 @@ import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../main.dart';
-import '../models/gang.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
@@ -31,7 +31,7 @@ class GangsScreen extends StatefulWidget {
 class _GangsScreenState extends State<GangsScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _service = GangService();
-  List<Gang> _gangs = [];
+  List<api.ModelList> _gangs = [];
   bool _loading = true;
   String? _error;
 
@@ -92,7 +92,7 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 
   void _showCreateDialog() async {
-    final gang = await showModalBottomSheet<Gang>(
+    final gang = await showModalBottomSheet<api.ModelList>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -284,7 +284,7 @@ class _GangTile extends StatelessWidget {
     required this.onDelete,
     required this.onTap,
   });
-  final Gang gang;
+  final api.ModelList gang;
   final VoidCallback onDelete;
   final VoidCallback onTap;
 
@@ -342,7 +342,7 @@ class _GangTile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            gang.name,
+                            gang.name ?? '',
                             style: GoogleFonts.cinzel(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -405,7 +405,7 @@ class _GangTile extends StatelessWidget {
           'Delete Gang',
           style: GoogleFonts.cinzel(color: context.textColor),
         ),
-        content: Text('Delete "${gang.name}"?'),
+        content: Text('Delete "${gang.name ?? ''}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -428,7 +428,8 @@ class _GangTile extends StatelessWidget {
 
 class _CreateGangSheet extends StatefulWidget {
   const _CreateGangSheet({required this.onCreate});
-  final Future<Gang> Function(String name, String faction, int points) onCreate;
+  final Future<api.ModelList> Function(String name, String faction, int points)
+  onCreate;
 
   @override
   State<_CreateGangSheet> createState() => _CreateGangSheetState();

@@ -4,7 +4,6 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import '../models/gang.dart';
 import '../models/profile.dart';
 import '../services/equipment_service.dart';
 import '../services/game_service.dart';
@@ -96,7 +95,12 @@ class GameGangsScreen extends StatelessWidget {
           Expanded(
             child: Text(
               'Gangs',
-              style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 2),
+              style: GoogleFonts.cinzel(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+                letterSpacing: 2,
+              ),
             ),
           ),
         ],
@@ -142,8 +146,18 @@ class GangsTabView extends StatelessWidget {
               children: [
                 // Players only ever edit their own models' counters; the opponent's tab stays
                 // read-only (their changes still stream in live via game_state broadcasts).
-                _GangTab(gameId: gameId, playerId: myPlayerId, editable: true, showListHeader: showListHeader),
-                _GangTab(gameId: gameId, playerId: opponentPlayerId, editable: false, showListHeader: showListHeader),
+                _GangTab(
+                  gameId: gameId,
+                  playerId: myPlayerId,
+                  editable: true,
+                  showListHeader: showListHeader,
+                ),
+                _GangTab(
+                  gameId: gameId,
+                  playerId: opponentPlayerId,
+                  editable: false,
+                  showListHeader: showListHeader,
+                ),
               ],
             ),
           ),
@@ -159,7 +173,11 @@ class GangsTabView extends StatelessWidget {
         labelColor: AppPalette.gold,
         unselectedLabelColor: context.subtleTextColor,
         indicatorColor: AppPalette.gold,
-        labelStyle: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 1),
+        labelStyle: GoogleFonts.cinzel(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1,
+        ),
         tabs: [
           Tab(text: myLabel),
           Tab(text: opponentLabel),
@@ -170,14 +188,23 @@ class GangsTabView extends StatelessWidget {
 }
 
 class _GangTabData {
-  const _GangTabData({required this.gang, required this.profiles, required this.equipment});
-  final Gang gang;
+  const _GangTabData({
+    required this.gang,
+    required this.profiles,
+    required this.equipment,
+  });
+  final api.ModelList gang;
   final List<Profile> profiles;
   final List<api.Equipment> equipment;
 }
 
 class _GangTab extends StatefulWidget {
-  const _GangTab({required this.gameId, required this.playerId, required this.editable, this.showListHeader = true});
+  const _GangTab({
+    required this.gameId,
+    required this.playerId,
+    required this.editable,
+    this.showListHeader = true,
+  });
 
   final int gameId;
   final int playerId;
@@ -222,7 +249,10 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   Future<void> _load() async {
     final seq = _mutationSeq;
     try {
-      final gang = await _gameService.playerList(widget.gameId, widget.playerId);
+      final gang = await _gameService.playerList(
+        widget.gameId,
+        widget.playerId,
+      );
       // The catalog halves never change mid-game — only re-fetch the gang on refresh.
       var profiles = _data?.profiles;
       var equipment = _data?.equipment;
@@ -239,7 +269,11 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       // state and let a later broadcast reconcile, rather than clobbering it with a stale snapshot.
       if (seq != _mutationSeq) return;
       setState(() {
-        _data = _GangTabData(gang: gang, profiles: profiles!, equipment: equipment!);
+        _data = _GangTabData(
+          gang: gang,
+          profiles: profiles!,
+          equipment: equipment!,
+        );
         _failed = false;
       });
     } catch (e) {
@@ -265,17 +299,14 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     final gang = data.gang;
     setState(() {
       _data = _GangTabData(
-        gang: Gang(
-          id: gang.id,
-          name: gang.name,
-          faction: gang.faction,
-          points: gang.points,
-          totalCost: gang.totalCost,
-          selectionValid: gang.selectionValid,
-          selectionErrors: gang.selectionErrors,
-          entries: gang.entries
-              .map((e) => e.id == listEntryId ? e.copyWith(state: state) : e)
-              .toList(),
+        gang: gang.rebuild(
+          (b) => b.entries.replace(
+            gang.entries.map(
+              (e) => e.id == listEntryId
+                  ? e.rebuild((eb) => eb..state.replace(state))
+                  : e,
+            ),
+          ),
         ),
         profiles: data.profiles,
         equipment: data.equipment,
@@ -283,7 +314,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  void _editCounters(ListEntry entry) {
+  void _editCounters(api.ListEntry entry) {
     showDialog(
       context: context,
       builder: (_) => _CounterEditDialog(
@@ -294,7 +325,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  void _editStats(ListEntry entry) {
+  void _editStats(api.ListEntry entry) {
     showDialog(
       context: context,
       builder: (_) => _StatEditDialog(
@@ -310,12 +341,17 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     super.build(context);
     if (_failed) {
       return Center(
-        child: Text('Could not load this gang.', style: TextStyle(color: context.subtleTextColor)),
+        child: Text(
+          'Could not load this gang.',
+          style: TextStyle(color: context.subtleTextColor),
+        ),
       );
     }
     final data = _data;
     if (data == null) {
-      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
+      return const Center(
+        child: CircularProgressIndicator(color: AppPalette.gold),
+      );
     }
     return _ReadOnlyGangBody(
       gang: data.gang,
@@ -338,7 +374,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     this.onEditStats,
   });
 
-  final Gang gang;
+  final api.ModelList gang;
   final List<Profile> profiles;
   final List<api.Equipment> equipment;
 
@@ -346,14 +382,15 @@ class _ReadOnlyGangBody extends StatelessWidget {
   final bool showHeader;
 
   /// When set, model tiles with an entry state get a + button that opens the counter popup.
-  final void Function(ListEntry entry)? onEditCounters;
+  final void Function(api.ListEntry entry)? onEditCounters;
 
   /// When set, tapping a model's HP/WP/CP pill opens the stat stepper popup.
-  final void Function(ListEntry entry)? onEditStats;
+  final void Function(api.ListEntry entry)? onEditStats;
 
   @override
   Widget build(BuildContext context) {
-    final factionColor = AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
+    final factionColor =
+        AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
     return Column(
       children: [
         if (showHeader) ...[
@@ -374,8 +411,13 @@ class _ReadOnlyGangBody extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              gang.name,
-              style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, color: context.textColor, letterSpacing: 1),
+              gang.name ?? '',
+              style: GoogleFonts.cinzel(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+                letterSpacing: 1,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -383,10 +425,18 @@ class _ReadOnlyGangBody extends StatelessWidget {
           Container(
             width: 32,
             height: 32,
-            decoration: BoxDecoration(color: factionColor, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: factionColor,
+              shape: BoxShape.circle,
+            ),
             padding: const EdgeInsets.all(6),
             child: iconPath != null
-                ? Image.asset(iconPath, fit: BoxFit.contain, color: Colors.white, colorBlendMode: BlendMode.srcIn)
+                ? Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    color: Colors.white,
+                    colorBlendMode: BlendMode.srcIn,
+                  )
                 : const Icon(Icons.flag, color: Colors.white, size: 16),
           ),
         ],
@@ -408,10 +458,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: context.panelGradient,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.panelBorderColor,
-                width: 1.0,
-              ),
+              border: Border.all(color: context.panelBorderColor, width: 1.0),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
@@ -421,8 +468,21 @@ class _ReadOnlyGangBody extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text('$used', style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, color: context.textColor)),
-                    Text(' / $limit ducats', style: GoogleFonts.cinzel(fontSize: 13, color: context.subtleTextColor)),
+                    Text(
+                      '$used',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: context.textColor,
+                      ),
+                    ),
+                    Text(
+                      ' / $limit ducats',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 13,
+                        color: context.subtleTextColor,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -447,12 +507,26 @@ class _ReadOnlyGangBody extends StatelessWidget {
     final entries = gang.entries;
     if (entries.isEmpty) {
       return Center(
-        child: Text('No models hired.', style: GoogleFonts.cinzel(fontSize: 14, color: context.subtleTextColor)),
+        child: Text(
+          'No models hired.',
+          style: GoogleFonts.cinzel(
+            fontSize: 14,
+            color: context.subtleTextColor,
+          ),
+        ),
       );
     }
     final hiredProfiles = entries
-        .where((e) => e.entryType == 'CardReference')
-        .map((e) => profiles.where((p) => p.cardReferenceIds.contains(e.entryId)).firstOrNull)
+        .where(
+          (e) =>
+              e.entryType ==
+              api.ListEntryEntryTypeEnum.catalogColonColonCardReference,
+        )
+        .map(
+          (e) => profiles
+              .where((p) => p.cardReferenceIds.contains(e.entryId))
+              .firstOrNull,
+        )
         .whereType<Profile>()
         .toList();
     return ListView.separated(
@@ -461,26 +535,39 @@ class _ReadOnlyGangBody extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final entry = entries[i];
-        final profile = entry.entryType == 'CardReference'
-            ? profiles.where((p) => p.cardReferenceIds.contains(entry.entryId)).firstOrNull
+        final profile =
+            entry.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonCardReference
+            ? profiles
+                  .where((p) => p.cardReferenceIds.contains(entry.entryId))
+                  .firstOrNull
             : null;
-        final equipmentItem = entry.entryType == 'Equipment'
+        final equipmentItem =
+            entry.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonEquipment
             ? equipment.where((e) => e.id == entry.entryId).firstOrNull
             : null;
-        final entryColor = entry.entryType == 'Equipment'
+        final entryColor =
+            entry.entryType ==
+                api.ListEntryEntryTypeEnum.catalogColonColonEquipment
             ? AppPalette.equipment
             : profile?.faction == 'gifted'
-                ? (AppPalette.factionColors['gifted'] ?? factionColor)
-                : factionColor;
+            ? (AppPalette.factionColors['gifted'] ?? factionColor)
+            : factionColor;
         VoidCallback? onTap;
         if (profile != null) {
-          final hiredIndex = hiredProfiles.indexWhere((p) => p.cardReferenceId == profile.cardReferenceId);
+          final hiredIndex = hiredProfiles.indexWhere(
+            (p) => p.cardReferenceId == profile.cardReferenceId,
+          );
           onTap = () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CardViewerScreen(profiles: hiredProfiles, initialIndex: hiredIndex),
-                ),
-              );
+            context,
+            MaterialPageRoute(
+              builder: (_) => CardViewerScreen(
+                profiles: hiredProfiles,
+                initialIndex: hiredIndex,
+              ),
+            ),
+          );
         } else if (equipmentItem != null) {
           onTap = () => _showEquipmentDetail(context, equipmentItem);
         }
@@ -488,8 +575,12 @@ class _ReadOnlyGangBody extends StatelessWidget {
           entry: entry,
           color: entryColor,
           onTap: onTap,
-          onEditCounters: onEditCounters != null && entry.state != null ? () => onEditCounters!(entry) : null,
-          onEditStats: onEditStats != null && entry.state != null ? () => onEditStats!(entry) : null,
+          onEditCounters: onEditCounters != null && entry.state != null
+              ? () => onEditCounters!(entry)
+              : null,
+          onEditStats: onEditStats != null && entry.state != null
+              ? () => onEditStats!(entry)
+              : null,
         );
       },
     );
@@ -509,22 +600,37 @@ class _ReadOnlyGangBody extends StatelessWidget {
                 Expanded(
                   child: Text(
                     e.name,
-                    style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+                    style: GoogleFonts.cinzel(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   '${e.cost}',
-                  style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: AppPalette.gold),
+                  style: GoogleFonts.cinzel(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppPalette.gold,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+            Divider(
+              color: context.subtleTextColor.withOpacity(0.3),
+              thickness: 0.5,
+            ),
             const SizedBox(height: 12),
             Text(
               e.description,
-              style: TextStyle(fontSize: 13, color: context.textColor, height: 1.5),
+              style: TextStyle(
+                fontSize: 13,
+                color: context.textColor,
+                height: 1.5,
+              ),
             ),
           ],
         ),
@@ -534,9 +640,15 @@ class _ReadOnlyGangBody extends StatelessWidget {
 }
 
 class _ReadOnlyEntryTile extends StatelessWidget {
-  const _ReadOnlyEntryTile({required this.entry, required this.color, this.onTap, this.onEditCounters, this.onEditStats});
+  const _ReadOnlyEntryTile({
+    required this.entry,
+    required this.color,
+    this.onTap,
+    this.onEditCounters,
+    this.onEditStats,
+  });
 
-  final ListEntry entry;
+  final api.ListEntry entry;
   final Color color;
   final VoidCallback? onTap;
   final VoidCallback? onEditCounters;
@@ -566,14 +678,22 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       entry.name,
-                      style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                      style: GoogleFonts.cinzel(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${entry.cost}',
-                    style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
+                    style: GoogleFonts.cinzel(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -587,7 +707,12 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _StatPill(label: 'HP', value: state.lifePoints, borderColors: AppPalette.hpBorder, onTap: onEditStats),
+                          _StatPill(
+                            label: 'HP',
+                            value: state.lifePoints,
+                            borderColors: AppPalette.hpBorder,
+                            onTap: onEditStats,
+                          ),
                           // Hidden (not omitted) when the model was never given this stat at
                           // all (starting 0) — keeps the pill in the tree/layout, just invisible,
                           // rather than skipping it and shifting everything after it over. An
@@ -598,7 +723,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                               label: 'WP',
                               value: state.willPoints,
                               borderColors: AppPalette.wpBorder,
-                              onTap: state.willPoints.starting == 0 ? null : onEditStats,
+                              onTap: state.willPoints.starting == 0
+                                  ? null
+                                  : onEditStats,
                             ),
                           ),
                           Opacity(
@@ -607,7 +734,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                               label: 'CP',
                               value: state.commandPoints,
                               borderColors: AppPalette.cpBorder,
-                              onTap: state.commandPoints.starting == 0 ? null : onEditStats,
+                              onTap: state.commandPoints.starting == 0
+                                  ? null
+                                  : onEditStats,
                             ),
                           ),
                         ],
@@ -618,7 +747,8 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                       spacing: 6,
                       children: [
                         ..._counterIcons(state),
-                        if (onEditCounters != null) _AddCounterButton(onTap: onEditCounters!),
+                        if (onEditCounters != null)
+                          _AddCounterButton(onTap: onEditCounters!),
                       ],
                     ),
                   ],
@@ -644,13 +774,29 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   List<Widget> _counterIcons(api.EntryState state) {
     return [
       if (state.stunned)
-        _CounterIcon(asset: 'assets/images/counters/stunned.png', label: 'Stunned', active: true),
+        _CounterIcon(
+          asset: 'assets/images/counters/stunned.png',
+          label: 'Stunned',
+          active: true,
+        ),
       if (state.hidden)
-        _CounterIcon(asset: 'assets/images/counters/hidden.png', label: 'Hidden', active: true),
+        _CounterIcon(
+          asset: 'assets/images/counters/hidden.png',
+          label: 'Hidden',
+          active: true,
+        ),
       if (state.guarding)
-        _CounterIcon(asset: 'assets/images/counters/guard.png', label: 'Guarding', active: true),
+        _CounterIcon(
+          asset: 'assets/images/counters/guard.png',
+          label: 'Guarding',
+          active: true,
+        ),
       if (state.carryingObjective)
-        _CounterIcon(asset: 'assets/images/counters/carry_objective.png', label: 'Carrying objective', active: true),
+        _CounterIcon(
+          asset: 'assets/images/counters/carry_objective.png',
+          label: 'Carrying objective',
+          active: true,
+        ),
       if (state.underwaterCounters > 0)
         _CounterIcon(
           asset: 'assets/images/counters/underwater_counter.png',
@@ -665,7 +811,12 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 /// Compact "HP 6/10"-style pill: current value first, starting value after the slash — matches
 /// the "A/B" shorthand used at the table (A = remaining, B = starting).
 class _StatPill extends StatelessWidget {
-  const _StatPill({required this.label, required this.value, required this.borderColors, this.onTap});
+  const _StatPill({
+    required this.label,
+    required this.value,
+    required this.borderColors,
+    this.onTap,
+  });
 
   final String label;
   final api.EntryStatValue value;
@@ -687,7 +838,11 @@ class _StatPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pill = CustomPaint(
-      foregroundPainter: _GradientBorderPainter(colors: borderColors, radius: _radius, strokeWidth: _strokeWidth),
+      foregroundPainter: _GradientBorderPainter(
+        colors: borderColors,
+        radius: _radius,
+        strokeWidth: _strokeWidth,
+      ),
       child: Container(
         width: _width,
         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
@@ -699,7 +854,11 @@ class _StatPill extends StatelessWidget {
         child: Text(
           '$label ${value.current}/${value.starting}',
           textAlign: TextAlign.center,
-          style: GoogleFonts.cinzel(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+          style: GoogleFonts.cinzel(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
       ),
     );
@@ -711,7 +870,11 @@ class _StatPill extends StatelessWidget {
 }
 
 class _GradientBorderPainter extends CustomPainter {
-  _GradientBorderPainter({required this.colors, required this.radius, required this.strokeWidth});
+  _GradientBorderPainter({
+    required this.colors,
+    required this.radius,
+    required this.strokeWidth,
+  });
 
   final List<Color> colors;
   final double radius;
@@ -725,7 +888,10 @@ class _GradientBorderPainter extends CustomPainter {
       size.width - strokeWidth,
       size.height - strokeWidth,
     );
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius - strokeWidth / 2));
+    final rrect = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(radius - strokeWidth / 2),
+    );
     final paint = Paint()
       ..shader = LinearGradient(colors: colors).createShader(rect)
       ..style = PaintingStyle.stroke
@@ -735,7 +901,9 @@ class _GradientBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _GradientBorderPainter oldDelegate) =>
-      oldDelegate.colors != colors || oldDelegate.radius != radius || oldDelegate.strokeWidth != strokeWidth;
+      oldDelegate.colors != colors ||
+      oldDelegate.radius != radius ||
+      oldDelegate.strokeWidth != strokeWidth;
 }
 
 /// The small + next to a model's counter icons (own models only): opens the popup for toggling
@@ -756,7 +924,10 @@ class _AddCounterButton extends StatelessWidget {
           height: 34,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.2),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.5),
+              width: 1.2,
+            ),
           ),
           child: const Icon(Icons.add, size: 22, color: Colors.white),
         ),
@@ -770,10 +941,14 @@ class _AddCounterButton extends StatelessWidget {
 /// confirm step, matching how quickly counters flip at the table. Every change lands on the
 /// server before the row updates, so the popup never shows a state the opponent won't get.
 class _CounterEditDialog extends StatefulWidget {
-  const _CounterEditDialog({required this.gameId, required this.entry, required this.onStateChanged});
+  const _CounterEditDialog({
+    required this.gameId,
+    required this.entry,
+    required this.onStateChanged,
+  });
 
   final int gameId;
-  final ListEntry entry;
+  final api.ListEntry entry;
   final void Function(int listEntryId, api.EntryState state) onStateChanged;
 
   @override
@@ -807,7 +982,11 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
       setState(() => _state = newState);
       widget.onStateChanged(widget.entry.id, newState);
     } catch (_) {
-      if (mounted) showAppToast(context, 'Could not update the counter. Please try again.');
+      if (mounted)
+        showAppToast(
+          context,
+          'Could not update the counter. Please try again.',
+        );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -822,7 +1001,11 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
         children: [
           Text(
             widget.entry.name,
-            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+            style: GoogleFonts.cinzel(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -830,7 +1013,10 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
           const SizedBox(height: 12),
-          Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+          Divider(
+            color: context.subtleTextColor.withOpacity(0.3),
+            thickness: 0.5,
+          ),
           const SizedBox(height: 4),
           _counterRow(
             context,
@@ -865,22 +1051,34 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
             asset: 'assets/images/counters/underwater_counter.png',
             label: 'Underwater',
             active: _state.underwaterCounters > 0,
-            badge: _state.underwaterCounters > 0 ? _state.underwaterCounters : null,
+            badge: _state.underwaterCounters > 0
+                ? _state.underwaterCounters
+                : null,
             trailing: Text(
               '${_state.underwaterCounters} / 2',
               style: GoogleFonts.cinzel(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: _state.underwaterCounters > 0 ? AppPalette.gold : context.subtleTextColor,
+                color: _state.underwaterCounters > 0
+                    ? AppPalette.gold
+                    : context.subtleTextColor,
               ),
             ),
-            onTap: () => _update(underwaterCounters: (_state.underwaterCounters + 1) % 3),
+            onTap: () => _update(
+              underwaterCounters: (_state.underwaterCounters + 1) % 3,
+            ),
           ),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: AppPalette.gold)),
+              child: Text(
+                'Done',
+                style: GoogleFonts.cinzel(
+                  fontWeight: FontWeight.w700,
+                  color: AppPalette.gold,
+                ),
+              ),
             ),
           ),
         ],
@@ -904,12 +1102,22 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
-            _CounterIcon(asset: asset, label: label, active: active, badge: badge, foreground: context.textColor),
+            _CounterIcon(
+              asset: asset,
+              label: label,
+              active: active,
+              badge: badge,
+              foreground: context.textColor,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
-                style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, color: context.textColor),
+                style: GoogleFonts.cinzel(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: context.textColor,
+                ),
               ),
             ),
             trailing ??
@@ -930,10 +1138,14 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
 /// value to the server immediately and can't push a stat below 0; the change echoes to both
 /// players. Only the model's own player can open it (the opponent's pills aren't tappable).
 class _StatEditDialog extends StatefulWidget {
-  const _StatEditDialog({required this.gameId, required this.entry, required this.onStateChanged});
+  const _StatEditDialog({
+    required this.gameId,
+    required this.entry,
+    required this.onStateChanged,
+  });
 
   final int gameId;
-  final ListEntry entry;
+  final api.ListEntry entry;
   final void Function(int listEntryId, api.EntryState state) onStateChanged;
 
   @override
@@ -944,7 +1156,11 @@ class _StatEditDialogState extends State<_StatEditDialog> {
   late api.EntryState _state = widget.entry.state!;
   bool _busy = false;
 
-  Future<void> _update({int? lifePoints, int? willPoints, int? commandPoints}) async {
+  Future<void> _update({
+    int? lifePoints,
+    int? willPoints,
+    int? commandPoints,
+  }) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
@@ -959,7 +1175,8 @@ class _StatEditDialogState extends State<_StatEditDialog> {
       setState(() => _state = newState);
       widget.onStateChanged(widget.entry.id, newState);
     } catch (_) {
-      if (mounted) showAppToast(context, 'Could not update the stat. Please try again.');
+      if (mounted)
+        showAppToast(context, 'Could not update the stat. Please try again.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -974,10 +1191,17 @@ class _StatEditDialogState extends State<_StatEditDialog> {
         children: [
           Text(
             widget.entry.name,
-            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+            style: GoogleFonts.cinzel(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+            ),
           ),
           const SizedBox(height: 12),
-          Divider(color: context.subtleTextColor.withOpacity(0.3), thickness: 0.5),
+          Divider(
+            color: context.subtleTextColor.withOpacity(0.3),
+            thickness: 0.5,
+          ),
           const SizedBox(height: 4),
           _statStepperRow(
             context,
@@ -1003,7 +1227,13 @@ class _StatEditDialogState extends State<_StatEditDialog> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: AppPalette.gold)),
+              child: Text(
+                'Done',
+                style: GoogleFonts.cinzel(
+                  fontWeight: FontWeight.w700,
+                  color: AppPalette.gold,
+                ),
+              ),
             ),
           ),
         ],
@@ -1024,21 +1254,31 @@ class _StatEditDialogState extends State<_StatEditDialog> {
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, color: context.textColor),
+              style: GoogleFonts.cinzel(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: context.textColor,
+              ),
             ),
           ),
           _stepperButton(
             context,
             icon: Icons.remove,
             // Can't drop below 0 (the server rejects it too); disabled at the floor.
-            onTap: _busy || value.current <= 0 ? null : () => onChanged(value.current - 1),
+            onTap: _busy || value.current <= 0
+                ? null
+                : () => onChanged(value.current - 1),
           ),
           Container(
             width: 56,
             alignment: Alignment.center,
             child: Text(
               '${value.current} / ${value.starting}',
-              style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700, color: context.textColor),
+              style: GoogleFonts.cinzel(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+              ),
             ),
           ),
           _stepperButton(
@@ -1051,9 +1291,15 @@ class _StatEditDialogState extends State<_StatEditDialog> {
     );
   }
 
-  Widget _stepperButton(BuildContext context, {required IconData icon, required VoidCallback? onTap}) {
+  Widget _stepperButton(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback? onTap,
+  }) {
     final enabled = onTap != null;
-    final color = enabled ? context.textColor : context.subtleTextColor.withOpacity(0.4);
+    final color = enabled
+        ? context.textColor
+        : context.subtleTextColor.withOpacity(0.4);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1061,7 +1307,10 @@ class _StatEditDialogState extends State<_StatEditDialog> {
         height: 34,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: enabled ? color.withOpacity(0.5) : color, width: 1.2),
+          border: Border.all(
+            color: enabled ? color.withOpacity(0.5) : color,
+            width: 1.2,
+          ),
         ),
         child: Icon(icon, size: 20, color: color),
       ),
@@ -1074,7 +1323,13 @@ class _StatEditDialogState extends State<_StatEditDialog> {
 /// active, dimmed with no ring when it isn't. Underwater additionally carries a count badge (it
 /// stacks up to 2, unlike the other four, which are simple on/off flags).
 class _CounterIcon extends StatelessWidget {
-  const _CounterIcon({required this.asset, required this.label, required this.active, this.badge, this.foreground = Colors.white});
+  const _CounterIcon({
+    required this.asset,
+    required this.label,
+    required this.active,
+    this.badge,
+    this.foreground = Colors.white,
+  });
 
   final String asset;
   final String label;
@@ -1093,9 +1348,13 @@ class _CounterIcon extends StatelessWidget {
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: active ? AppPalette.gold.withOpacity(0.35) : Colors.black.withOpacity(0.2),
+          color: active
+              ? AppPalette.gold.withOpacity(0.35)
+              : Colors.black.withOpacity(0.2),
           shape: BoxShape.circle,
-          border: active ? Border.all(color: AppPalette.gold, width: 1.4) : null,
+          border: active
+              ? Border.all(color: AppPalette.gold, width: 1.4)
+              : null,
         ),
         child: Stack(
           clipBehavior: Clip.none,
@@ -1103,18 +1362,34 @@ class _CounterIcon extends StatelessWidget {
           children: [
             Opacity(
               opacity: active ? 1.0 : 0.35,
-              child: Image.asset(asset, width: 26, height: 26, color: foreground, colorBlendMode: BlendMode.srcIn),
+              child: Image.asset(
+                asset,
+                width: 26,
+                height: 26,
+                color: foreground,
+                colorBlendMode: BlendMode.srcIn,
+              ),
             ),
             if (badge != null)
               Positioned(
                 right: -4,
                 bottom: -4,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(color: AppPalette.gold, borderRadius: BorderRadius.circular(6)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppPalette.gold,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: Text(
                     '$badge',
-                    style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.black),
+                    style: GoogleFonts.cinzel(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
