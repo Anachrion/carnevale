@@ -26,7 +26,7 @@ class GangBuilderScreen extends StatefulWidget {
 
 class _GangBuilderScreenState extends State<GangBuilderScreen> {
   late api.ModelList _gang;
-  List<Profile> _profiles = [];
+  List<api.Profile> _profiles = [];
   List<api.Equipment> _equipment = [];
   List<api.Spell> _spells = [];
   bool _loading = true;
@@ -36,12 +36,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   bool _hireSortAsc = true;
   final _searchController = TextEditingController();
 
-  List<Profile> get _filteredProfiles {
+  List<api.Profile> get _filteredProfiles {
     final q = _searchController.text.trim().toLowerCase();
     final filtered = q.isEmpty
-        ? List<Profile>.from(_profiles)
+        ? List<api.Profile>.from(_profiles)
         : _profiles.where((p) => p.name.toLowerCase().contains(q)).toList();
-    int roleRank(Profile p) {
+    int roleRank(api.Profile p) {
       if (p.keywords.contains('Leader')) return 0;
       if (p.keywords.contains('Hero')) return 1;
       return 2;
@@ -88,7 +88,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     ]);
     if (!mounted) return;
     setState(() {
-      _profiles = results[0] as List<Profile>;
+      _profiles = results[0] as List<api.Profile>;
       _equipment = results[1] as List<api.Equipment>;
       _spells = results[2] as List<api.Spell>;
       _loading = false;
@@ -116,7 +116,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
-  int _entryCount(Profile p) => _gang.entries
+  int _entryCount(api.Profile p) => _gang.entries
       .where(
         (e) =>
             e.entryType ==
@@ -125,7 +125,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       )
       .length;
 
-  api.ListEntry? _entryFor(Profile p) {
+  api.ListEntry? _entryFor(api.Profile p) {
     try {
       return _gang.entries.firstWhere(
         (e) =>
@@ -138,7 +138,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
-  Future<void> _add(Profile p) async {
+  Future<void> _add(api.Profile p) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
@@ -166,7 +166,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     }
   }
 
-  Future<void> _remove(Profile p) async {
+  Future<void> _remove(api.Profile p) async {
     final entry = _entryFor(p);
     if (entry == null || _busy) return;
     setState(() => _busy = true);
@@ -563,7 +563,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               .where((p) => p.cardReferenceIds.contains(e.entryId))
               .firstOrNull,
         )
-        .whereType<Profile>()
+        .whereType<api.Profile>()
         .toList();
     return ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
@@ -644,14 +644,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         ? profiles
         : profiles.where((p) => p.faction == _gang.faction).toList();
     final giftedProfiles = _gang.faction == 'gifted'
-        ? <Profile>[]
+        ? <api.Profile>[]
         : profiles.where((p) => p.faction == 'gifted').toList();
 
     final hasLeader = _profiles.any(
       (p) => p.keywords.contains('Leader') && _entryCount(p) > 0,
     );
 
-    Widget buildTile(Profile p) {
+    Widget buildTile(api.Profile p) {
       final isUnique = p.keywords.contains('Unique');
       final isLeader = p.keywords.contains('Leader');
       final count = _entryCount(p);
@@ -1243,8 +1243,8 @@ class _HireCardTile extends StatelessWidget {
     required this.onRemove,
   });
 
-  final Profile profile;
-  final List<Profile> allProfiles;
+  final api.Profile profile;
+  final List<api.Profile> allProfiles;
   final int index;
   final int count;
   final bool isUnique;
