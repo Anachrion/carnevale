@@ -66,6 +66,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -147,6 +152,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -228,6 +238,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -329,6 +344,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -386,6 +406,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -489,6 +514,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -590,6 +620,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -671,6 +706,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -752,6 +792,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -840,6 +885,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -921,6 +971,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -1022,6 +1077,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -1105,6 +1165,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -1210,6 +1275,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -1313,6 +1383,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -1414,6 +1489,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -1499,6 +1579,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',
@@ -1604,6 +1689,11 @@ class GamesApi {
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
             'type': 'http',
             'scheme': 'bearer',
             'name': 'bearerAuth',

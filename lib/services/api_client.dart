@@ -10,6 +10,12 @@ class ApiClient {
   /// Base URL for the ActionCable WebSocket endpoint, shared with [GameService].
   static const cableUrl = 'ws://$_host/cable';
 
+  /// Shared client key identifying this build as an official Carnevale frontend, injected at
+  /// build time via `--dart-define=API_KEY=...`. Sent as `X-Api-Key` on every request. When the
+  /// backend has API_KEY configured it rejects requests without it; when this build has no key
+  /// baked in the header is omitted, matching the backend's fail-open behaviour for local dev.
+  static const _apiKey = String.fromEnvironment('API_KEY');
+
   ApiClient._() {
     final dio = Dio(BaseOptions(
       baseUrl: 'http://$_host/api/v1',
@@ -19,6 +25,9 @@ class ApiClient {
     ));
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
+        if (_apiKey.isNotEmpty) {
+          options.headers['X-Api-Key'] = _apiKey;
+        }
         if (authToken != null) {
           options.headers['Authorization'] = 'Bearer $authToken';
         }

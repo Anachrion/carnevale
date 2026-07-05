@@ -167,6 +167,12 @@ Authentication schemes defined for the API:
 
 - **Type**: HTTP Bearer Token authentication (JWT)
 
+### ApiKeyAuth
+
+- **Type**: API key
+- **API key parameter name**: X-Api-Key
+- **Location**: HTTP header
+
 
 ## Author
 

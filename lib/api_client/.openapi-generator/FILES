@@ -131,7 +131,3 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/set_entry_spells_input_entry_test.dart
-test/set_entry_spells_input_test.dart
-test/spell_test.dart
-test/spells_api_test.dart
