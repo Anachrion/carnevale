@@ -92,7 +92,7 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF14171F),
+        scaffoldBackgroundColor: const Color(0xFF1A1612),
         textTheme: GoogleFonts.cinzelTextTheme(ThemeData.dark().textTheme),
       ),
       home: const HomeScreen(),

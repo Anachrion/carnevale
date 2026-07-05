@@ -64,7 +64,7 @@ class _AppToastState extends State<_AppToast> with SingleTickerProviderStateMixi
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: (isDark ? const Color(0xFF14171F) : const Color(0xFFF5F2EE))
+                    color: (isDark ? const Color(0xFF1A1612) : const Color(0xFFF5F2EE))
                         .withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: _kGold.withValues(alpha: 0.6), width: 1.2),
