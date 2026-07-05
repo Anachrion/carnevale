@@ -194,7 +194,7 @@ class _GangTabData {
     required this.equipment,
   });
   final api.ModelList gang;
-  final List<Profile> profiles;
+  final List<api.Profile> profiles;
   final List<api.Equipment> equipment;
 }
 
@@ -261,7 +261,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
           ProfileService().search('', factions: {gang.faction, 'gifted'}),
           EquipmentService().getAll(),
         ]);
-        profiles = results[0] as List<Profile>;
+        profiles = results[0] as List<api.Profile>;
         equipment = results[1] as List<api.Equipment>;
       }
       if (!mounted) return;
@@ -375,7 +375,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
   });
 
   final api.ModelList gang;
-  final List<Profile> profiles;
+  final List<api.Profile> profiles;
   final List<api.Equipment> equipment;
 
   /// Whether to show the gang name/faction header and ducats bar above the models.
@@ -527,7 +527,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
               .where((p) => p.cardReferenceIds.contains(e.entryId))
               .firstOrNull,
         )
-        .whereType<Profile>()
+        .whereType<api.Profile>()
         .toList();
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),

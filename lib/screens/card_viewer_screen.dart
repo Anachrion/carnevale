@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/profile.dart';
 
 class CardViewerScreen extends StatefulWidget {
@@ -9,7 +10,7 @@ class CardViewerScreen extends StatefulWidget {
     required this.initialIndex,
   });
 
-  final List<Profile> profiles;
+  final List<api.Profile> profiles;
   final int initialIndex;
 
   @override
@@ -136,7 +137,8 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                         ? AnimatedBuilder(
                             animation: _flipAnimation,
                             builder: (_, __) {
-                              final angle = _flipAnimation.value * 3.14159 * _flipSign;
+                              final angle =
+                                  _flipAnimation.value * 3.14159 * _flipSign;
                               final showFront = angle.abs() < 1.5708;
                               return Transform(
                                 alignment: Alignment.center,
@@ -149,8 +151,9 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                                         alignment: Alignment.center,
                                         transform: Matrix4.identity()
                                           ..rotateY(3.14159),
-                                        child:
-                                            _CardImage(path: profile.backImage),
+                                        child: _CardImage(
+                                          path: profile.backImage,
+                                        ),
                                       ),
                               );
                             },
@@ -179,7 +182,9 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                 child: Text(
                   '${_currentIndex + 1} / ${widget.profiles.length}  •  tap/←→ flip  •  swipe ↑↓ navigate',
                   style: TextStyle(
-                      color: Colors.white.withOpacity(0.35), fontSize: 12),
+                    color: Colors.white.withOpacity(0.35),
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ),
@@ -198,7 +203,9 @@ class _CardImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final filename = path.split('/').last;
     if (filename.isEmpty) {
-      return const Center(child: Icon(Icons.broken_image, color: Colors.white38, size: 64));
+      return const Center(
+        child: Icon(Icons.broken_image, color: Colors.white38, size: 64),
+      );
     }
     return Image.asset(
       'assets/images/cards/$filename',

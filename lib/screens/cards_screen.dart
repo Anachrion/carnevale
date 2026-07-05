@@ -2,7 +2,7 @@ import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/profile.dart';
+import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
@@ -22,14 +22,14 @@ class _CardsScreenState extends State<CardsScreen> {
   final _searchController = TextEditingController();
   final _service = ProfileService();
 
-  List<Profile> _results = [];
+  List<api.Profile> _results = [];
   final Set<String> _selectedFactions = {};
   bool _loading = true;
   _CardSort _sort = _CardSort.name;
   bool _sortAsc = true;
 
-  List<Profile> get _sortedResults {
-    final list = List<Profile>.from(_results);
+  List<api.Profile> get _sortedResults {
+    final list = List<api.Profile>.from(_results);
     list.sort((a, b) {
       switch (_sort) {
         case _CardSort.cost:
@@ -330,8 +330,8 @@ class _ProfileTile extends StatelessWidget {
     required this.profiles,
     required this.index,
   });
-  final Profile profile;
-  final List<Profile> profiles;
+  final api.Profile profile;
+  final List<api.Profile> profiles;
   final int index;
 
   @override
