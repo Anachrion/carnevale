@@ -47,6 +47,15 @@ class AuthService extends ChangeNotifier {
   AuthUser? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
 
+  /// Puts the service into a logged-in state without touching secure storage, so tests can pump
+  /// auth-gated screens. Not used in production.
+  @visibleForTesting
+  void debugLogin(AuthUser user, {String token = 'test-token'}) {
+    _client.authToken = token;
+    _currentUser = user;
+    notifyListeners();
+  }
+
   Future<void> load() async {
     final token = await _storage.read(key: _tokenKey);
     final rawUser = await _storage.read(key: _userKey);
