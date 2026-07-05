@@ -79,6 +79,22 @@ class ListEntry {
     this.cantrip,
     this.spells = const [],
   });
+
+  ListEntry copyWith({EntryState? state}) => ListEntry(
+        id: id,
+        position: position,
+        entryType: entryType,
+        entryId: entryId,
+        name: name,
+        cost: cost,
+        state: state ?? this.state,
+        mage: mage,
+        spellSlots: spellSlots,
+        disciplines: disciplines,
+        spellDiscipline: spellDiscipline,
+        cantrip: cantrip,
+        spells: spells,
+      );
 }
 
 class Gang {
