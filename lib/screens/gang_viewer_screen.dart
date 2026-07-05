@@ -258,7 +258,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
 
   // Applies a PATCH response locally right away rather than waiting for the echo broadcast's
   // re-fetch, so the tapped counter never lags behind the dialog.
-  void _applyEntryState(int listEntryId, EntryState state) {
+  void _applyEntryState(int listEntryId, api.EntryState state) {
     final data = _data;
     if (data == null) return;
     _mutationSeq++;
@@ -641,7 +641,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
   // entirely, so a clean model shows no counter icons at all. Editing happens through the +
   // button next to them (own models only), not by tapping the icons themselves.
-  List<Widget> _counterIcons(EntryState state) {
+  List<Widget> _counterIcons(api.EntryState state) {
     return [
       if (state.stunned)
         _CounterIcon(asset: 'assets/images/counters/stunned.png', label: 'Stunned', active: true),
@@ -668,7 +668,7 @@ class _StatPill extends StatelessWidget {
   const _StatPill({required this.label, required this.value, required this.borderColors, this.onTap});
 
   final String label;
-  final EntryStatValue value;
+  final api.EntryStatValue value;
   final List<Color> borderColors;
 
   /// When set (own models only, and only for stats the model actually has), tapping the pill
@@ -774,14 +774,14 @@ class _CounterEditDialog extends StatefulWidget {
 
   final int gameId;
   final ListEntry entry;
-  final void Function(int listEntryId, EntryState state) onStateChanged;
+  final void Function(int listEntryId, api.EntryState state) onStateChanged;
 
   @override
   State<_CounterEditDialog> createState() => _CounterEditDialogState();
 }
 
 class _CounterEditDialogState extends State<_CounterEditDialog> {
-  late EntryState _state = widget.entry.state!;
+  late api.EntryState _state = widget.entry.state!;
   bool _busy = false;
 
   Future<void> _update({
@@ -934,14 +934,14 @@ class _StatEditDialog extends StatefulWidget {
 
   final int gameId;
   final ListEntry entry;
-  final void Function(int listEntryId, EntryState state) onStateChanged;
+  final void Function(int listEntryId, api.EntryState state) onStateChanged;
 
   @override
   State<_StatEditDialog> createState() => _StatEditDialogState();
 }
 
 class _StatEditDialogState extends State<_StatEditDialog> {
-  late EntryState _state = widget.entry.state!;
+  late api.EntryState _state = widget.entry.state!;
   bool _busy = false;
 
   Future<void> _update({int? lifePoints, int? willPoints, int? commandPoints}) async {
@@ -1014,7 +1014,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
   Widget _statStepperRow(
     BuildContext context, {
     required String label,
-    required EntryStatValue value,
+    required api.EntryStatValue value,
     required ValueChanged<int> onChanged,
   }) {
     return Padding(

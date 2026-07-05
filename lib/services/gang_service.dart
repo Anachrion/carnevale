@@ -134,7 +134,7 @@ class GangService {
     entryId: e.entryId,
     name: e.name,
     cost: e.cost,
-    state: e.state == null ? null : mapEntryState(e.state!),
+    state: e.state,
     mage: e.mage,
     spellSlots: e.spellSlots,
     disciplines: e.disciplines.toList(),
@@ -165,18 +165,4 @@ class GangService {
           api.SetEntrySpellsInputEntryDisciplineEnum.serializer,
           slug,
         );
-
-  EntryStatValue mapStatValue(api.EntryStatValue v) =>
-      EntryStatValue(current: v.current, starting: v.starting);
-
-  EntryState mapEntryState(api.EntryState s) => EntryState(
-    lifePoints: mapStatValue(s.lifePoints),
-    willPoints: mapStatValue(s.willPoints),
-    commandPoints: mapStatValue(s.commandPoints),
-    stunned: s.stunned,
-    hidden: s.hidden,
-    guarding: s.guarding,
-    carryingObjective: s.carryingObjective,
-    underwaterCounters: s.underwaterCounters,
-  );
 }
