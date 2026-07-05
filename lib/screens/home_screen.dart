@@ -8,20 +8,13 @@ import 'game_home_screen.dart';
 import 'gangs_screen.dart';
 import 'settings_screen.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
-const _kCardBackground = Color(0xFFF5F2EE);
-const _kRed = Color(0xFF8B1A1A);
-const _kGold = Color(0xFFC4A050);
-const _kNewsCard = Color(0xFF5A6B78);
-const _kCircle = Color(0xFFE5E1DA);
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBackground,
+      backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.home),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
@@ -114,7 +107,7 @@ class _Header extends StatelessWidget {
                       'assets/images/mask.png',
                       fit: BoxFit.contain,
                       alignment: Alignment.center,
-                      color: isLight ? _kRed : null,
+                      color: isLight ? AppPalette.red : null,
                       colorBlendMode: BlendMode.srcIn,
                     ),
                   ),
@@ -139,7 +132,7 @@ class _Header extends StatelessWidget {
                       'assets/images/divider.png',
                       fit: BoxFit.cover,
                       alignment: Alignment.center,
-                      color: isLight ? _kRed : const Color(0xFFB1986C),
+                      color: isLight ? AppPalette.red : AppPalette.mutedGold,
                       colorBlendMode: BlendMode.srcIn,
                     ),
                   ),
@@ -168,15 +161,15 @@ class _GoldDivider extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(width: 64, height: 1, color: _kGold),
+        Container(width: 64, height: 1, color: AppPalette.gold),
         const SizedBox(width: 8),
         Container(
           width: 5,
           height: 5,
-          decoration: const BoxDecoration(color: _kGold, shape: BoxShape.circle),
+          decoration: const BoxDecoration(color: AppPalette.gold, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
-        Container(width: 64, height: 1, color: _kGold),
+        Container(width: 64, height: 1, color: AppPalette.gold),
       ],
     );
   }
@@ -214,12 +207,12 @@ class _MenuItem extends StatelessWidget {
                 : LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [_kCardBackground.withOpacity(0.30), _kCardBackground.withOpacity(0.75)],
+                    colors: [AppPalette.paper.withOpacity(0.30), AppPalette.paper.withOpacity(0.75)],
                   ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFFB1986C).withOpacity(0.45)
+                  ? AppPalette.mutedGold.withOpacity(0.45)
                   : Colors.white.withOpacity(0.3),
               width: 1.0,
             ),
@@ -244,8 +237,8 @@ class _MenuItem extends StatelessWidget {
                             fit: BoxFit.contain,
                             filterQuality: FilterQuality.high,
                             color: Theme.of(context).brightness == Brightness.light
-                                ? _kRed
-                                : const Color(0xFFB1986C),
+                                ? AppPalette.red
+                                : AppPalette.mutedGold,
                             colorBlendMode: BlendMode.srcIn,
                           ),
                         )
@@ -264,7 +257,7 @@ class _MenuItem extends StatelessWidget {
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color: Theme.of(context).brightness == Brightness.dark ? _kGold : _kRed,
+                  color: Theme.of(context).brightness == Brightness.dark ? AppPalette.gold : AppPalette.red,
                   size: 22,
                 ),
               ],
@@ -283,7 +276,7 @@ class _NewsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _kNewsCard,
+        color: AppPalette.newsCard,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Material(

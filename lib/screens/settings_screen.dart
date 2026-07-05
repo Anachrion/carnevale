@@ -8,10 +8,6 @@ import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
 import 'account_screen.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
-const _kGold = Color(0xFFC4A050);
-const _kBlue = Color(0xFF6C9BC2);
-
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -64,7 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: _kBackground,
+      backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.settings),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
@@ -103,7 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: GoogleFonts.cinzel(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: _kGold,
+                              color: AppPalette.gold,
                               letterSpacing: 2,
                             ),
                           ),
@@ -121,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: GoogleFonts.cinzel(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: _kGold,
+                              color: AppPalette.gold,
                               letterSpacing: 2,
                             ),
                           ),
@@ -140,13 +136,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ),
                                     child: Text(
                                       'Log In',
-                                      style: GoogleFonts.cinzel(color: _kGold, fontWeight: FontWeight.w700),
+                                      style: GoogleFonts.cinzel(color: AppPalette.gold, fontWeight: FontWeight.w700),
                                     ),
                                   ),
                                 );
                               }
                               final isDark = Theme.of(context).brightness == Brightness.dark;
-                              final logoutColor = isDark ? const Color(0xFFB1986C) : const Color(0xFF8B1A1A);
+                              final logoutColor = isDark ? AppPalette.mutedGold : AppPalette.red;
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -163,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   _AccountButton(
                                     icon: Icons.vpn_key_outlined,
                                     label: 'Reset Password',
-                                    color: _kBlue,
+                                    color: AppPalette.toggleBlue,
                                     onPressed: _sendingReset ? null : () => _sendResetEmail(user.email),
                                     loading: _sendingReset,
                                   ),
@@ -172,7 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     icon: Icons.logout,
                                     label: 'Log Out',
                                     color: logoutColor,
-                                    tintColor: const Color(0xFF8B1A1A),
+                                    tintColor: AppPalette.red,
                                     onPressed: _loggingOut ? null : _logOut,
                                     loading: _loggingOut,
                                   ),
@@ -234,7 +230,7 @@ class _ThemePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor = isDark ? const Color(0xFFB1986C) : const Color(0xFF8B1A1A);
+    final accentColor = isDark ? AppPalette.mutedGold : AppPalette.red;
 
     return GestureDetector(
       onTap: () async {
@@ -251,7 +247,7 @@ class _ThemePicker extends StatelessWidget {
           context: context,
           position: position,
           elevation: 8,
-          color: isDark ? const Color(0xFF0E1828) : Colors.white,
+          color: isDark ? AppPalette.controlNavyDark : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
             side: BorderSide(color: accentColor.withOpacity(0.45), width: 1.0),
@@ -313,14 +309,14 @@ class _SettingRow extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.30),
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.75),
+                      AppPalette.paper.withValues(alpha: 0.30),
+                      AppPalette.paper.withValues(alpha: 0.75),
                     ],
                   ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark
-                  ? const Color(0xFFB1986C).withValues(alpha: 0.45)
+                  ? AppPalette.mutedGold.withValues(alpha: 0.45)
                   : Colors.white.withValues(alpha: 0.3),
               width: 1.0,
             ),
@@ -488,13 +484,13 @@ class _UsernameEditorState extends State<_UsernameEditor> {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: _kGold),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppPalette.gold),
                       )
                     : IconButton(
                         icon: Icon(
                           Icons.check,
                           size: 20,
-                          color: _changed ? _kGold : context.subtleTextColor.withValues(alpha: 0.3),
+                          color: _changed ? AppPalette.gold : context.subtleTextColor.withValues(alpha: 0.3),
                         ),
                         onPressed: _changed ? _save : null,
                         padding: EdgeInsets.zero,

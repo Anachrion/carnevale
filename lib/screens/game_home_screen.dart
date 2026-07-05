@@ -11,9 +11,6 @@ import '../widgets/glass_panel.dart';
 import 'account_screen.dart';
 import 'game_session_screen.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
-const _kGold = Color(0xFFC4A050);
-
 class GameHomeScreen extends StatefulWidget {
   const GameHomeScreen({super.key, this.initialJoinCode});
 
@@ -168,12 +165,12 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: _kBackground,
+      backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.game),
       floatingActionButton: authService.isLoggedIn
           ? FloatingActionButton(
               onPressed: _showActionSheet,
-              backgroundColor: _kGold,
+              backgroundColor: AppPalette.gold,
               foregroundColor: Colors.white,
               mini: true,
               child: const Icon(Icons.add),
@@ -244,9 +241,9 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TabBar(
         controller: _tabController,
-        labelColor: _kGold,
+        labelColor: AppPalette.gold,
         unselectedLabelColor: context.subtleTextColor,
-        indicatorColor: _kGold,
+        indicatorColor: AppPalette.gold,
         dividerColor: context.subtleTextColor.withOpacity(0.2),
         labelStyle: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 13, letterSpacing: 1),
         unselectedLabelStyle: GoogleFonts.cinzel(fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 1),
@@ -272,7 +269,7 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountScreen())),
-              style: ElevatedButton.styleFrom(backgroundColor: _kGold, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppPalette.gold, foregroundColor: Colors.white),
               child: const Text('Log In'),
             ),
           ],
@@ -283,7 +280,7 @@ class _GameHomeScreenState extends State<GameHomeScreen> with SingleTickerProvid
 
   Widget _buildBody() {
     if (!authService.isLoggedIn) return _buildLoggedOut();
-    if (_loading) return const Center(child: CircularProgressIndicator(color: _kGold));
+    if (_loading) return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
     if (_error != null) {
       return Center(
         child: Column(
@@ -411,7 +408,7 @@ class _GameTileState extends State<_GameTile> {
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 200),
-                    child: Icon(Icons.expand_more, color: isDark ? _kGold : const Color(0xFF8B1A1A), size: 22),
+                    child: Icon(Icons.expand_more, color: isDark ? AppPalette.gold : AppPalette.red, size: 22),
                   ),
                 ],
               ),
@@ -473,7 +470,7 @@ class _GameTileState extends State<_GameTile> {
               IconButton(
                 onPressed: widget.onPlay,
                 icon: const Icon(Icons.play_circle_fill),
-                color: _kGold,
+                color: AppPalette.gold,
                 iconSize: 28,
                 tooltip: 'Open game',
               ),
@@ -555,7 +552,7 @@ class _GameActionSheet extends StatelessWidget {
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('Create Game'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _kGold,
+                    backgroundColor: AppPalette.gold,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -571,8 +568,8 @@ class _GameActionSheet extends StatelessWidget {
                   icon: const Icon(Icons.meeting_room_outlined, size: 18),
                   label: const Text('Join Game'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: _kGold,
-                    side: const BorderSide(color: _kGold),
+                    foregroundColor: AppPalette.gold,
+                    side: const BorderSide(color: AppPalette.gold),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -697,7 +694,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                   ),
                   const SizedBox(height: 20),
                   if (_loading)
-                    const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: _kGold)))
+                    const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppPalette.gold)))
                   else if (_error != null)
                     Text(_error!, style: const TextStyle(color: Colors.red))
                   else ...[
@@ -717,8 +714,8 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                         hintText: _selected?.name,
                         hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.6), fontSize: 15),
                         labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
-                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
+                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -729,8 +726,8 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                       decoration: InputDecoration(
                         labelText: 'Ducat limit',
                         labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
-                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
+                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -740,8 +737,8 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                       decoration: InputDecoration(
                         labelText: 'Board size (optional override)',
                         labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
-                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
+                        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -750,7 +747,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                       child: ElevatedButton(
                         onPressed: _selected == null || _saving ? null : _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _kGold,
+                          backgroundColor: AppPalette.gold,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -787,9 +784,9 @@ class _ScenarioTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: selected ? _kGold.withOpacity(0.18) : Colors.transparent,
+            color: selected ? AppPalette.gold.withOpacity(0.18) : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: selected ? _kGold : context.subtleTextColor.withOpacity(0.25)),
+            border: Border.all(color: selected ? AppPalette.gold : context.subtleTextColor.withOpacity(0.25)),
           ),
           child: Row(
             children: [
@@ -805,7 +802,7 @@ class _ScenarioTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (selected) const Icon(Icons.check_circle, color: _kGold, size: 20),
+              if (selected) const Icon(Icons.check_circle, color: AppPalette.gold, size: 20),
             ],
           ),
         ),
@@ -897,8 +894,8 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
                   decoration: InputDecoration(
                     labelText: 'Join code',
                     labelStyle: TextStyle(color: context.subtleTextColor, fontSize: 13),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
-                    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
+                    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
                   ),
                   onSubmitted: (_) => _submit(),
                 ),
@@ -912,7 +909,7 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
                   child: ElevatedButton(
                     onPressed: _saving ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _kGold,
+                      backgroundColor: AppPalette.gold,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

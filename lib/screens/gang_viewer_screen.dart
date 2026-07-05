@@ -12,33 +12,6 @@ import '../widgets/app_toast.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
-const _kGold = Color(0xFFC4A050);
-const _kEquipmentColor = Color(0xFF4A3F35);
-
-const _kHpBorderColors = [ Color(0xFFCB9898), Color(0xFFA14343) ];
-const _kWpBorderColors = [ Color(0xFF93AED2), Color(0xFF3B6BAE) ];
-const _kCpBorderColors = [ Color(0xFF89AF97), Color(0xFF296E42) ];
-
-const _kFactionColors = {
-  'doctors':    Color(0xFF177282),
-  'strigoi':    Color(0xFF2a3d6e),
-  'gifted':     Color(0xFFb04510),
-  'rashaar':    Color(0xFF1a5a40),
-  'patricians': Color(0xFF5a1a7a),
-  'vatican':    Color(0xFF8a6018),
-  'guild':      Color(0xFF831822),
-};
-
-const _kFactionIcons = {
-  'doctors':    'assets/images/icons/doctors icon.png',
-  'gifted':     'assets/images/icons/gifted icon.png',
-  'guild':      'assets/images/icons/guild icon.png',
-  'patricians': 'assets/images/icons/patricians icon.png',
-  'rashaar':    'assets/images/icons/rashaar icon.png',
-  'strigoi':    'assets/images/icons/strigoi icon.png',
-  'vatican':    'assets/images/icons/vatican icon.png',
-};
-
 /// Read-only view of both players' gangs for a game once each has picked one — reuses the
 /// gang builder's visual language (faction colors, entry tiles, tap-to-view-card) but with no
 /// hire/reorder/remove actions, since gang lists are frozen for the game the moment selected.
@@ -176,9 +149,9 @@ class GangsTabView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TabBar(
-        labelColor: _kGold,
+        labelColor: AppPalette.gold,
         unselectedLabelColor: context.subtleTextColor,
-        indicatorColor: _kGold,
+        indicatorColor: AppPalette.gold,
         labelStyle: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 1),
         tabs: [
           Tab(text: myLabel),
@@ -325,7 +298,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
     final data = _data;
     if (data == null) {
-      return const Center(child: CircularProgressIndicator(color: _kGold));
+      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
     }
     return _ReadOnlyGangBody(
       gang: data.gang,
@@ -358,7 +331,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final factionColor = _kFactionColors[gang.faction] ?? _kGold;
+    final factionColor = AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
     return Column(
       children: [
         _buildGangHeader(context, factionColor),
@@ -370,7 +343,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
   }
 
   Widget _buildGangHeader(BuildContext context, Color factionColor) {
-    final iconPath = _kFactionIcons[gang.faction];
+    final iconPath = AppPalette.factionIcons[gang.faction];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: Row(
@@ -420,13 +393,13 @@ class _ReadOnlyGangBody extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFFF5F2EE).withOpacity(0.30),
-                        const Color(0xFFF5F2EE).withOpacity(0.75),
+                        AppPalette.paper.withOpacity(0.30),
+                        AppPalette.paper.withOpacity(0.75),
                       ],
                     ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark ? const Color(0xFFB1986C).withOpacity(0.45) : Colors.white.withOpacity(0.3),
+                color: isDark ? AppPalette.mutedGold.withOpacity(0.45) : Colors.white.withOpacity(0.3),
                 width: 1.0,
               ),
             ),
@@ -485,9 +458,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
             ? equipment.where((e) => e.id == entry.entryId).firstOrNull
             : null;
         final entryColor = entry.entryType == 'Equipment'
-            ? _kEquipmentColor
+            ? AppPalette.equipment
             : profile?.faction == 'gifted'
-                ? (_kFactionColors['gifted'] ?? factionColor)
+                ? (AppPalette.factionColors['gifted'] ?? factionColor)
                 : factionColor;
         VoidCallback? onTap;
         if (profile != null) {
@@ -532,7 +505,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   '${e.cost}',
-                  style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: _kGold),
+                  style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: AppPalette.gold),
                 ),
               ],
             ),
@@ -604,7 +577,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _StatPill(label: 'HP', value: state.lifePoints, borderColors: _kHpBorderColors, onTap: onEditStats),
+                          _StatPill(label: 'HP', value: state.lifePoints, borderColors: AppPalette.hpBorder, onTap: onEditStats),
                           // Hidden (not omitted) when the model was never given this stat at
                           // all (starting 0) — keeps the pill in the tree/layout, just invisible,
                           // rather than skipping it and shifting everything after it over. An
@@ -614,7 +587,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                             child: _StatPill(
                               label: 'WP',
                               value: state.willPoints,
-                              borderColors: _kWpBorderColors,
+                              borderColors: AppPalette.wpBorder,
                               onTap: state.willPoints.starting == 0 ? null : onEditStats,
                             ),
                           ),
@@ -623,7 +596,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                             child: _StatPill(
                               label: 'CP',
                               value: state.commandPoints,
-                              borderColors: _kCpBorderColors,
+                              borderColors: AppPalette.cpBorder,
                               onTap: state.commandPoints.starting == 0 ? null : onEditStats,
                             ),
                           ),
@@ -881,7 +854,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
               style: GoogleFonts.cinzel(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: _state.underwaterCounters > 0 ? _kGold : context.subtleTextColor,
+                color: _state.underwaterCounters > 0 ? AppPalette.gold : context.subtleTextColor,
               ),
             ),
             onTap: () => _update(underwaterCounters: (_state.underwaterCounters + 1) % 3),
@@ -890,7 +863,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: _kGold)),
+              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: AppPalette.gold)),
             ),
           ),
         ],
@@ -926,7 +899,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
                 Icon(
                   active ? Icons.check_circle : Icons.circle_outlined,
                   size: 20,
-                  color: active ? _kGold : context.subtleTextColor,
+                  color: active ? AppPalette.gold : context.subtleTextColor,
                 ),
           ],
         ),
@@ -1013,7 +986,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: _kGold)),
+              child: Text('Done', style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, color: AppPalette.gold)),
             ),
           ),
         ],
@@ -1103,9 +1076,9 @@ class _CounterIcon extends StatelessWidget {
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: active ? _kGold.withOpacity(0.35) : Colors.black.withOpacity(0.2),
+          color: active ? AppPalette.gold.withOpacity(0.35) : Colors.black.withOpacity(0.2),
           shape: BoxShape.circle,
-          border: active ? Border.all(color: _kGold, width: 1.4) : null,
+          border: active ? Border.all(color: AppPalette.gold, width: 1.4) : null,
         ),
         child: Stack(
           clipBehavior: Clip.none,
@@ -1121,7 +1094,7 @@ class _CounterIcon extends StatelessWidget {
                 bottom: -4,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(color: _kGold, borderRadius: BorderRadius.circular(6)),
+                  decoration: BoxDecoration(color: AppPalette.gold, borderRadius: BorderRadius.circular(6)),
                   child: Text(
                     '$badge',
                     style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.black),

@@ -9,9 +9,6 @@ import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import 'home_screen.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
-const _kGold = Color(0xFFC4A050);
-
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
@@ -40,7 +37,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: _kBackground,
+      backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.account),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
@@ -159,7 +156,7 @@ class _LoggedInPanelState extends State<_LoggedInPanel> {
             child: ElevatedButton(
               onPressed: _loggingOut ? null : _logOut,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kGold,
+                backgroundColor: AppPalette.gold,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -265,8 +262,8 @@ class _AuthFormState extends State<_AuthForm> {
   InputDecoration _decoration(String label) => InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
-        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
-        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
+        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
       );
 
   @override
@@ -337,7 +334,7 @@ class _AuthFormState extends State<_AuthForm> {
                   onTap: () => _showForgotPasswordDialog(context),
                   child: Text(
                     'Forgot password?',
-                    style: GoogleFonts.notoSans(fontSize: 13, color: _kGold, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.notoSans(fontSize: 13, color: AppPalette.gold, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -368,7 +365,7 @@ class _AuthFormState extends State<_AuthForm> {
               child: ElevatedButton(
                 onPressed: _submitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGold,
+                  backgroundColor: AppPalette.gold,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -396,7 +393,7 @@ class _AuthFormState extends State<_AuthForm> {
                       ),
                       TextSpan(
                         text: _isSignUp ? 'Log In' : 'Sign Up',
-                        style: TextStyle(color: _kGold, fontWeight: FontWeight.w700),
+                        style: TextStyle(color: AppPalette.gold, fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
@@ -473,8 +470,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
               decoration: InputDecoration(
                 labelText: 'Email',
                 labelStyle: GoogleFonts.notoSans(color: context.subtleTextColor, fontSize: 13),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kGold.withOpacity(0.5))),
-                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: _kGold, width: 1.5)),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5))),
+                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppPalette.gold, width: 1.5)),
               ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
@@ -502,7 +499,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text('Send', style: TextStyle(color: _kGold, fontWeight: FontWeight.w700)),
+              : Text('Send', style: TextStyle(color: AppPalette.gold, fontWeight: FontWeight.w700)),
         ),
       ],
     );

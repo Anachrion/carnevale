@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../app_colors.dart';
 
 class GlassPanel extends StatelessWidget {
   const GlassPanel({super.key, required this.child});
@@ -24,14 +25,14 @@ class GlassPanel extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.30),
-                      const Color(0xFFF5F2EE).withValues(alpha: 0.75),
+                      AppPalette.paper.withValues(alpha: 0.30),
+                      AppPalette.paper.withValues(alpha: 0.75),
                     ],
                   ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark
-                  ? const Color(0xFFB1986C).withValues(alpha: 0.45)
+                  ? AppPalette.mutedGold.withValues(alpha: 0.45)
                   : Colors.white.withValues(alpha: 0.3),
               width: 1.0,
             ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../app_colors.dart';
 
-const _kGold = Color(0xFFC4A050);
-
 /// Shared surface for the app's edit/detail popups: a rounded card that follows the app theme
 /// (cream in light, cool near-black in dark) with a gold border, so popups feel native in both
 /// themes rather than using a fixed color.
@@ -25,7 +23,7 @@ class ThemedDialogCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.cardBgColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _kGold.withOpacity(0.6), width: 1.2),
+            border: Border.all(color: AppPalette.gold.withOpacity(0.6), width: 1.2),
           ),
           padding: padding,
           child: child,

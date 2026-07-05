@@ -7,29 +7,6 @@ import '../services/profile_service.dart';
 import '../widgets/app_drawer.dart';
 import 'card_viewer_screen.dart';
 
-const _kBackground = Color(0xFFF0EDE6);
-const _kGold = Color(0xFFC4A050);
-
-const _kFactionColors = {
-  'doctors':    Color(0xFF177282),
-  'strigoi':    Color(0xFF2a3d6e),
-  'gifted':     Color(0xFFb04510),
-  'rashaar':    Color(0xFF1a5a40),
-  'patricians': Color(0xFF5a1a7a),
-  'vatican':    Color(0xFF8a6018),
-  'guild':      Color(0xFF831822),
-};
-
-const _kFactionIcons = {
-  'doctors':    'assets/images/icons/doctors icon.png',
-  'gifted':     'assets/images/icons/gifted icon.png',
-  'guild':      'assets/images/icons/guild icon.png',
-  'patricians': 'assets/images/icons/patricians icon.png',
-  'rashaar':    'assets/images/icons/rashaar icon.png',
-  'strigoi':    'assets/images/icons/strigoi icon.png',
-  'vatican':    'assets/images/icons/vatican icon.png',
-};
-
 enum _CardSort { name, cost }
 
 class CardsScreen extends StatefulWidget {
@@ -107,7 +84,7 @@ class _CardsScreenState extends State<CardsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: _kBackground,
+      backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.cards),
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
@@ -199,14 +176,14 @@ class _CardsScreenState extends State<CardsScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFFF5F2EE).withOpacity(0.30),
-                        const Color(0xFFF5F2EE).withOpacity(0.75),
+                        AppPalette.paper.withOpacity(0.30),
+                        AppPalette.paper.withOpacity(0.75),
                       ],
                     ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFFB1986C).withOpacity(0.45)
+                    ? AppPalette.mutedGold.withOpacity(0.45)
                     : Colors.white.withOpacity(0.3),
                 width: 1.0,
               ),
@@ -217,7 +194,7 @@ class _CardsScreenState extends State<CardsScreen> {
               decoration: InputDecoration(
                 hintText: 'Search profiles...',
                 hintStyle: TextStyle(color: context.subtleTextColor.withOpacity(0.7), fontSize: 15),
-                prefixIcon: const Icon(Icons.search, color: _kGold, size: 20),
+                prefixIcon: const Icon(Icons.search, color: AppPalette.gold, size: 20),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
@@ -230,8 +207,8 @@ class _CardsScreenState extends State<CardsScreen> {
 
   Widget _buildSortChips() {
     final accent = Theme.of(context).brightness == Brightness.dark
-        ? _kGold
-        : const Color(0xFF8B1A1A);
+        ? AppPalette.gold
+        : AppPalette.red;
     Widget chip(String label, _CardSort value) {
       final selected = _sort == value;
       return GestureDetector(
@@ -311,7 +288,7 @@ class _CardsScreenState extends State<CardsScreen> {
 
   Widget _buildList() {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: _kGold));
+      return const Center(child: CircularProgressIndicator(color: AppPalette.gold));
     }
     if (_results.isEmpty) {
       return Center(
@@ -343,10 +320,10 @@ class _AllChip extends StatelessWidget {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color: selected ? _kGold : Colors.white.withOpacity(0.5),
+          color: selected ? AppPalette.gold : Colors.white.withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? _kGold : Colors.white.withOpacity(0.4),
+            color: selected ? AppPalette.gold : Colors.white.withOpacity(0.4),
             width: selected ? 2 : 1,
           ),
         ),
@@ -371,8 +348,8 @@ class _FactionIconChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _kFactionColors[faction] ?? _kGold;
-    final iconPath = _kFactionIcons[faction]!;
+    final color = AppPalette.factionColors[faction] ?? AppPalette.gold;
+    final iconPath = AppPalette.factionIcons[faction]!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -415,7 +392,7 @@ class _ProfileTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
           decoration: BoxDecoration(
-            color: _kFactionColors[profile.faction] ?? context.cardBgColor,
+            color: AppPalette.factionColors[profile.faction] ?? context.cardBgColor,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(

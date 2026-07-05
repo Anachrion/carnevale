@@ -1,5 +1,6 @@
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/game_home_screen.dart';
 import 'screens/home_screen.dart';
@@ -87,12 +88,12 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
       themeMode: settingsService.themeMode,
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF0EDE6),
+        scaffoldBackgroundColor: AppPalette.background,
         textTheme: GoogleFonts.cinzelTextTheme(),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF14171F),
+        scaffoldBackgroundColor: AppPalette.backgroundDark,
         textTheme: GoogleFonts.cinzelTextTheme(ThemeData.dark().textTheme),
       ),
       home: const HomeScreen(),
