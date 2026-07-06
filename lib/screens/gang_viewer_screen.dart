@@ -129,15 +129,20 @@ class GangsTabView extends StatelessWidget {
             child: TabBarView(
               children: [
                 ...leadingTabs.map((t) => t.view),
-                // Players only ever edit their own models' counters; the opponent's tab stays
-                // read-only (their changes still stream in live via game_state broadcasts).
+                // Keyed by player so element reconciliation matches each tab to its own state even
+                // when the tab set's composition changes (e.g. a leading Score tab is added) —
+                // otherwise Flutter reuses state by position and a gang tab can show the wrong
+                // player's models. Players only ever edit their own models' counters; the
+                // opponent's tab stays read-only (changes still stream in via game_state broadcasts).
                 _GangTab(
+                  key: ValueKey('gang-$myPlayerId'),
                   gameId: gameId,
                   playerId: myPlayerId,
                   editable: true,
                   showListHeader: showListHeader,
                 ),
                 _GangTab(
+                  key: ValueKey('gang-$opponentPlayerId'),
                   gameId: gameId,
                   playerId: opponentPlayerId,
                   editable: false,
@@ -188,6 +193,7 @@ class _GangTabData {
 
 class _GangTab extends StatefulWidget {
   const _GangTab({
+    super.key,
     required this.gameId,
     required this.playerId,
     required this.editable,
