@@ -573,6 +573,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         (
           label: 'Score',
           view: ScoreTab(
+            key: const ValueKey('score-tab'),
             game: game,
             me: me,
             opponent: opponent,
