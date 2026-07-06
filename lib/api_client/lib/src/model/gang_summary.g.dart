@@ -10,6 +10,8 @@ class _$GangSummary extends GangSummary {
   @override
   final int id;
   @override
+  final int? sourceListId;
+  @override
   final String? name;
   @override
   final String faction;
@@ -23,6 +25,7 @@ class _$GangSummary extends GangSummary {
 
   _$GangSummary._({
     required this.id,
+    this.sourceListId,
     this.name,
     required this.faction,
     required this.points,
@@ -40,6 +43,7 @@ class _$GangSummary extends GangSummary {
     if (identical(other, this)) return true;
     return other is GangSummary &&
         id == other.id &&
+        sourceListId == other.sourceListId &&
         name == other.name &&
         faction == other.faction &&
         points == other.points &&
@@ -50,6 +54,7 @@ class _$GangSummary extends GangSummary {
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, id.hashCode);
+    _$hash = $jc(_$hash, sourceListId.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, faction.hashCode);
     _$hash = $jc(_$hash, points.hashCode);
@@ -62,6 +67,7 @@ class _$GangSummary extends GangSummary {
   String toString() {
     return (newBuiltValueToStringHelper(r'GangSummary')
           ..add('id', id)
+          ..add('sourceListId', sourceListId)
           ..add('name', name)
           ..add('faction', faction)
           ..add('points', points)
@@ -76,6 +82,10 @@ class GangSummaryBuilder implements Builder<GangSummary, GangSummaryBuilder> {
   int? _id;
   int? get id => _$this._id;
   set id(int? id) => _$this._id = id;
+
+  int? _sourceListId;
+  int? get sourceListId => _$this._sourceListId;
+  set sourceListId(int? sourceListId) => _$this._sourceListId = sourceListId;
 
   String? _name;
   String? get name => _$this._name;
@@ -101,6 +111,7 @@ class GangSummaryBuilder implements Builder<GangSummary, GangSummaryBuilder> {
     final $v = _$v;
     if ($v != null) {
       _id = $v.id;
+      _sourceListId = $v.sourceListId;
       _name = $v.name;
       _faction = $v.faction;
       _points = $v.points;
@@ -128,6 +139,7 @@ class GangSummaryBuilder implements Builder<GangSummary, GangSummaryBuilder> {
         _$v ??
         _$GangSummary._(
           id: BuiltValueNullFieldError.checkNotNull(id, r'GangSummary', 'id'),
+          sourceListId: sourceListId,
           name: name,
           faction: BuiltValueNullFieldError.checkNotNull(
             faction,

@@ -343,27 +343,6 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     api.Game game,
     api.GamePlayer me,
   ) {
-    if (me.list != null) {
-      return _PhaseCard(
-        title: 'Gang selected',
-        children: [
-          Text(
-            'You are playing "${me.list!.name ?? me.list!.faction}".',
-            style: TextStyle(color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _opponent?.list == null
-                ? 'Waiting for the opponent to pick a gang...'
-                : 'Both gangs are in!',
-            style: TextStyle(color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 16),
-          const CircularProgressIndicator(color: AppPalette.gold),
-        ],
-      );
-    }
-
     _availableGangsFuture ??= _service.availableGangs(game.id);
     return _PhaseCard(
       title: 'Pick your gang',
@@ -373,9 +352,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           future: _availableGangsFuture,
           builder: (context, snapshot) {
             if (!snapshot.hasData)
-              return const Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(color: AppPalette.gold),
+              return Padding(
+                padding: const EdgeInsets.all(24),
+                child: CircularProgressIndicator(color: context.accentColor),
               );
             final gangs = snapshot.data!;
             if (gangs.isEmpty) {
@@ -387,84 +366,132 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             return Column(
               children: [
                 for (final g in gangs) ...[
-                  GangTile(
-                    name: g.gang.name,
-                    faction: g.gang.faction,
-                    totalCost: g.gang.totalCost,
-                    points: g.gang.points,
-                    dimmed: !g.selectable,
-                    onTap: _busy
-                        ? null
-                        : () => _editGangInline(g.gang.id, game),
-                    trailing: g.selectable
-                        ? ElevatedButton(
-                            onPressed: _busy
-                                ? null
-                                : () => _run(
-                                    () => _service.selectGang(
-                                      game.id,
-                                      g.gang.id,
-                                    ),
-                                  ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppPalette.gold,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              'Select',
-                              style: GoogleFonts.cinzel(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            'Over limit',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.red.shade400,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                  ),
+                  _gangOptionTile(context, game, me, g),
                   const SizedBox(height: 10),
                 ],
               ],
             );
           },
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: _busy ? null : () => _createGangInline(game),
-            icon: const Icon(Icons.add, size: 18),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppPalette.gold,
-              side: const BorderSide(color: AppPalette.gold),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+        // Building a new gang is only offered while this player has none selected. Once a gang is
+        // locked in, the picker stays live for switching/deselecting, but a fresh build would sit
+        // unselected beside the current pick — deselect first to build a different one.
+        if (me.list == null) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _busy ? null : () => _createGangInline(game),
+              icon: const Icon(Icons.add, size: 18),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.accentColor,
+                side: BorderSide(color: context.accentColor),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-            ),
-            label: Text(
-              'Build a new gang',
-              style: GoogleFonts.cinzel(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+              label: Text(
+                'Build a new gang',
+                style: GoogleFonts.cinzel(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
-        ),
+        ],
+        // Once this player has locked in a gang, keep the picker live (they can still switch or
+        // deselect) but surface that we're now waiting on the opponent below it.
+        if (me.list != null) ...[
+          const SizedBox(height: 20),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: context.accentColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Waiting for the opponent to pick a gang...',
+                  style: TextStyle(color: context.subtleTextColor),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
+    );
+  }
+
+  /// One selectable gang row in the picker. The player's currently-selected gang (matched via the
+  /// snapshot's source list id) shows a Deselect button; the rest show Select, or "Over limit" when
+  /// the gang exceeds the ducat cap. Re-selecting or deselecting is allowed until both players lock in.
+  Widget _gangOptionTile(
+    BuildContext context,
+    api.Game game,
+    api.GamePlayer me,
+    AvailableGang g,
+  ) {
+    final isSelected = me.list?.sourceListId == g.gang.id;
+    final Widget trailing;
+    if (isSelected) {
+      trailing = OutlinedButton.icon(
+        onPressed: _busy ? null : () => _run(() => _service.deselectGang(game.id)),
+        icon: const Icon(Icons.check, size: 16),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: context.accentColor,
+          side: BorderSide(color: context.accentColor),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        label: Text(
+          'Deselect',
+          style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+      );
+    } else if (g.selectable) {
+      trailing = ElevatedButton(
+        onPressed: _busy
+            ? null
+            : () => _run(() => _service.selectGang(game.id, g.gang.id)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: context.accentColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        child: Text(
+          'Select',
+          style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+      );
+    } else {
+      trailing = Text(
+        'Over limit',
+        style: TextStyle(
+          fontSize: 11,
+          color: Colors.red.shade400,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    }
+    return GangTile(
+      name: g.gang.name,
+      faction: g.gang.faction,
+      totalCost: g.gang.totalCost,
+      points: g.gang.points,
+      dimmed: !g.selectable && !isSelected,
+      onTap: _busy ? null : () => _editGangInline(g.gang.id, game),
+      trailing: trailing,
     );
   }
 
@@ -533,9 +560,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             : 'Your opponent can see these — this scenario is not Secret.',
         children: [
           _ActionButton(
-            label: 'Draw Agendas',
+            label: 'Draw',
             onTap: () => _run(() => _service.drawAgendas(game.id)),
             busy: _busy,
+            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
           ),
         ],
       );
@@ -769,9 +797,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         ],
         if (!me.ready)
           _ActionButton(
-            label: "I'm Ready",
+            label: "Ready",
             onTap: () => _run(() => _service.markReady(game.id)),
             busy: _busy,
+            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
           )
         else ...[
           Text(
@@ -882,20 +911,22 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.onTap,
     required this.busy,
+    this.padding = const EdgeInsets.symmetric(vertical: 14),
   });
 
   final String label;
   final VoidCallback onTap;
   final bool busy;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: busy ? null : onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppPalette.gold,
+        backgroundColor: context.accentColor,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: padding,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),

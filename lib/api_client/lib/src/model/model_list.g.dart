@@ -10,6 +10,8 @@ class _$ModelList extends ModelList {
   @override
   final int id;
   @override
+  final int? sourceListId;
+  @override
   final String? name;
   @override
   final String faction;
@@ -29,6 +31,7 @@ class _$ModelList extends ModelList {
 
   _$ModelList._({
     required this.id,
+    this.sourceListId,
     this.name,
     required this.faction,
     required this.points,
@@ -49,6 +52,7 @@ class _$ModelList extends ModelList {
     if (identical(other, this)) return true;
     return other is ModelList &&
         id == other.id &&
+        sourceListId == other.sourceListId &&
         name == other.name &&
         faction == other.faction &&
         points == other.points &&
@@ -62,6 +66,7 @@ class _$ModelList extends ModelList {
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, id.hashCode);
+    _$hash = $jc(_$hash, sourceListId.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, faction.hashCode);
     _$hash = $jc(_$hash, points.hashCode);
@@ -77,6 +82,7 @@ class _$ModelList extends ModelList {
   String toString() {
     return (newBuiltValueToStringHelper(r'ModelList')
           ..add('id', id)
+          ..add('sourceListId', sourceListId)
           ..add('name', name)
           ..add('faction', faction)
           ..add('points', points)
@@ -94,6 +100,10 @@ class ModelListBuilder implements Builder<ModelList, ModelListBuilder> {
   int? _id;
   int? get id => _$this._id;
   set id(int? id) => _$this._id = id;
+
+  int? _sourceListId;
+  int? get sourceListId => _$this._sourceListId;
+  set sourceListId(int? sourceListId) => _$this._sourceListId = sourceListId;
 
   String? _name;
   String? get name => _$this._name;
@@ -135,6 +145,7 @@ class ModelListBuilder implements Builder<ModelList, ModelListBuilder> {
     final $v = _$v;
     if ($v != null) {
       _id = $v.id;
+      _sourceListId = $v.sourceListId;
       _name = $v.name;
       _faction = $v.faction;
       _points = $v.points;
@@ -167,6 +178,7 @@ class ModelListBuilder implements Builder<ModelList, ModelListBuilder> {
           _$v ??
           _$ModelList._(
             id: BuiltValueNullFieldError.checkNotNull(id, r'ModelList', 'id'),
+            sourceListId: sourceListId,
             name: name,
             faction: BuiltValueNullFieldError.checkNotNull(
               faction,

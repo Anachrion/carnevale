@@ -119,6 +119,13 @@ class GameService extends ChangeNotifier {
     return res.data!;
   });
 
+  /// Clears the current player's gang pick while still in gang selection, so they can choose a
+  /// different one (or none) before the opponent locks in and the game advances.
+  Future<api.Game> deselectGang(int gameId) => _guard(() async {
+    final res = await _client.games.deselectGang(id: gameId);
+    return res.data!;
+  });
+
   /// Draws agendas: the initial batch when [origin] is null (during `agenda_draw`), or a single
   /// in-play replacement when [origin] is `special_rule`/`command_point` (during `in_progress`).
   Future<List<api.Agenda>> drawAgendas(int gameId, {String? origin}) =>

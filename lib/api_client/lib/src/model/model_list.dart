@@ -14,6 +14,7 @@ part 'model_list.g.dart';
 ///
 /// Properties:
 /// * [id] 
+/// * [sourceListId] - The source list this gang was snapshotted from when selected for a game; null for a source list itself. Lets a client match a player's in-game gang to their available-lists picker.
 /// * [name] 
 /// * [faction] 
 /// * [points] 
@@ -25,6 +26,10 @@ part 'model_list.g.dart';
 abstract class ModelList implements Built<ModelList, ModelListBuilder> {
   @BuiltValueField(wireName: r'id')
   int get id;
+
+  /// The source list this gang was snapshotted from when selected for a game; null for a source list itself. Lets a client match a player's in-game gang to their available-lists picker.
+  @BuiltValueField(wireName: r'source_list_id')
+  int? get sourceListId;
 
   @BuiltValueField(wireName: r'name')
   String? get name;
@@ -76,6 +81,13 @@ class _$ModelListSerializer implements PrimitiveSerializer<ModelList> {
       object.id,
       specifiedType: const FullType(int),
     );
+    if (object.sourceListId != null) {
+      yield r'source_list_id';
+      yield serializers.serialize(
+        object.sourceListId,
+        specifiedType: const FullType.nullable(int),
+      );
+    }
     if (object.name != null) {
       yield r'name';
       yield serializers.serialize(
@@ -142,6 +154,14 @@ class _$ModelListSerializer implements PrimitiveSerializer<ModelList> {
             specifiedType: const FullType(int),
           ) as int;
           result.id = valueDes;
+          break;
+        case r'source_list_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          if (valueDes == null) continue;
+          result.sourceListId = valueDes;
           break;
         case r'name':
           final valueDes = serializers.deserialize(
