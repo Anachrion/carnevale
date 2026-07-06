@@ -9,6 +9,9 @@ import '../services/gang_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/equipment_detail.dart';
+import '../widgets/faction_badge.dart';
+import '../widgets/points_bar.dart';
+import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
@@ -223,7 +226,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         child: Column(
           children: [
             _buildHeader(context, factionColor),
-            _buildPointsBar(factionColor),
+            PointsBar(
+              used: _gang.totalCost,
+              limit: _gang.points,
+              factionColor: factionColor,
+              editable: true,
+            ),
             if (_gang.entries.isNotEmpty && !_gang.selectionValid)
               _buildValidityPanel(),
             const SizedBox(height: 12),
@@ -237,7 +245,6 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   }
 
   Widget _buildHeader(BuildContext context, Color factionColor) {
-    final iconPath = AppPalette.factionIcons[_gang.faction];
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
       child: Row(
@@ -260,98 +267,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: factionColor,
-              shape: BoxShape.circle,
-            ),
-            padding: const EdgeInsets.all(7),
-            child: iconPath != null
-                ? Image.asset(
-                    iconPath,
-                    fit: BoxFit.contain,
-                    color: Colors.white,
-                    colorBlendMode: BlendMode.srcIn,
-                  )
-                : const Icon(Icons.flag, color: Colors.white, size: 18),
-          ),
+          FactionBadge(faction: _gang.faction, color: factionColor, size: 38),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPointsBar(Color factionColor) {
-    final used = _gang.totalCost;
-    final limit = _gang.points;
-    final ratio = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
-    final isOver = used > limit;
-    final barColor = isOver ? Colors.red.shade400 : AppPalette.gold;
-    final remaining = limit - used;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: context.panelGradient,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.panelBorderColor, width: 1.0),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      '$used',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: isOver ? Colors.red.shade600 : context.textColor,
-                      ),
-                    ),
-                    Text(
-                      ' / $limit ducats',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 14,
-                        color: context.subtleTextColor,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      isOver ? '−${-remaining} left' : '$remaining left',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isOver
-                            ? Colors.red.shade400
-                            : context.subtleTextColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: ratio,
-                    backgroundColor: Colors.black.withOpacity(0.08),
-                    valueColor: AlwaysStoppedAnimation(barColor),
-                    minHeight: 6,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -790,109 +707,30 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
           const SizedBox(height: 6),
           Row(
             children: [
-              _SortChip(
-                label: 'Role',
-                selected: _hireSort == _HireSort.role,
-                ascending: _hireSortAsc,
-                onTap: () => setState(() {
-                  if (_hireSort == _HireSort.role) {
-                    _hireSortAsc = !_hireSortAsc;
-                  } else {
-                    _hireSort = _HireSort.role;
-                    _hireSortAsc = true;
-                  }
-                }),
-              ),
-              const SizedBox(width: 6),
-              _SortChip(
-                label: 'Name',
-                selected: _hireSort == _HireSort.name,
-                ascending: _hireSortAsc,
-                onTap: () => setState(() {
-                  if (_hireSort == _HireSort.name) {
-                    _hireSortAsc = !_hireSortAsc;
-                  } else {
-                    _hireSort = _HireSort.name;
-                    _hireSortAsc = true;
-                  }
-                }),
-              ),
-              const SizedBox(width: 6),
-              _SortChip(
-                label: 'Cost',
-                selected: _hireSort == _HireSort.cost,
-                ascending: _hireSortAsc,
-                onTap: () => setState(() {
-                  if (_hireSort == _HireSort.cost) {
-                    _hireSortAsc = !_hireSortAsc;
-                  } else {
-                    _hireSort = _HireSort.cost;
-                    _hireSortAsc = true;
-                  }
-                }),
-              ),
+              for (final option in const [
+                (label: 'Role', value: _HireSort.role),
+                (label: 'Name', value: _HireSort.name),
+                (label: 'Cost', value: _HireSort.cost),
+              ]) ...[
+                if (option.value != _HireSort.role) const SizedBox(width: 6),
+                SortChip(
+                  label: option.label,
+                  selected: _hireSort == option.value,
+                  ascending: _hireSortAsc,
+                  onTap: () => setState(() {
+                    final (field, asc) = applySortTap(
+                      option.value,
+                      _hireSort,
+                      _hireSortAsc,
+                    );
+                    _hireSort = field;
+                    _hireSortAsc = asc;
+                  }),
+                ),
+              ],
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SortChip extends StatelessWidget {
-  const _SortChip({
-    required this.label,
-    required this.selected,
-    required this.ascending,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final bool ascending;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = Theme.of(context).brightness == Brightness.dark
-        ? AppPalette.gold
-        : AppPalette.red;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: selected
-              ? accent.withOpacity(0.85)
-              : Colors.white.withOpacity(0.35),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? accent : Colors.white.withOpacity(0.4),
-            width: 0.5,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? Colors.white : context.subtleTextColor,
-                letterSpacing: 0.5,
-              ),
-            ),
-            if (selected) ...[
-              const SizedBox(width: 3),
-              Icon(
-                ascending ? Icons.arrow_upward : Icons.arrow_downward,
-                size: 10,
-                color: Colors.white,
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }
@@ -1022,14 +860,7 @@ class _EntryTileState extends State<_EntryTile>
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      widget.factionColor,
-                      Color.lerp(widget.factionColor, Colors.black, 0.45)!,
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  gradient: AppPalette.entryTileGradient(widget.factionColor),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
