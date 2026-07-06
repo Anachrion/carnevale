@@ -1,9 +1,9 @@
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/glass_panel.dart';
 import 'cards_screen.dart';
 import 'game_home_screen.dart';
 import 'gangs_screen.dart';
@@ -176,66 +176,55 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: context.panelGradient,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.panelBorderColor, width: 1.0),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: imagePath != null
-                          ? Transform.scale(
-                              scale: imageScale,
-                              child: Image.asset(
-                                imagePath!,
-                                fit: BoxFit.contain,
-                                filterQuality: FilterQuality.high,
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.light
-                                    ? AppPalette.red
-                                    : AppPalette.mutedGold,
-                                colorBlendMode: BlendMode.srcIn,
-                              ),
-                            )
-                          : Icon(icon, color: context.textColor, size: 26),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: context.textColor,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppPalette.gold
-                          : AppPalette.red,
-                      size: 22,
-                    ),
-                  ],
+    return GlassPanel(
+      padding: EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: imagePath != null
+                      ? Transform.scale(
+                          scale: imageScale,
+                          child: Image.asset(
+                            imagePath!,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                ? AppPalette.red
+                                : AppPalette.mutedGold,
+                            colorBlendMode: BlendMode.srcIn,
+                          ),
+                        )
+                      : Icon(icon, color: context.textColor, size: 26),
                 ),
-              ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: context.textColor,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppPalette.gold
+                      : AppPalette.red,
+                  size: 22,
+                ),
+              ],
             ),
           ),
         ),

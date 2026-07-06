@@ -7,6 +7,8 @@ import '../services/auth_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/glass_panel.dart';
+import '../widgets/screen_header.dart';
 import 'account_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -182,26 +184,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.menu, color: context.textColor),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Settings',
-            style: GoogleFonts.cinzel(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              letterSpacing: 3,
-            ),
-          ),
-        ],
-      ),
+    return ScreenHeader(
+      title: 'Settings',
+      onMenu: () => _scaffoldKey.currentState?.openDrawer(),
     );
   }
 }
@@ -289,32 +274,21 @@ class _SettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: context.panelGradient,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.panelBorderColor, width: 1.0),
+    return GlassPanel(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.cinzel(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: context.textColor,
+            ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Row(
-            children: [
-              Text(
-                label,
-                style: GoogleFonts.cinzel(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: context.textColor,
-                ),
-              ),
-              const Spacer(),
-              child,
-            ],
-          ),
-        ),
+          const Spacer(),
+          child,
+        ],
       ),
     );
   }

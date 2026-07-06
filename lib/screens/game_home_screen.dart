@@ -1,4 +1,3 @@
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,8 +6,12 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../services/game_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_input.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/bottom_sheet_surface.dart';
 import '../widgets/glass_panel.dart';
+import '../widgets/screen_header.dart';
+import '../widgets/status_views.dart';
 import 'account_screen.dart';
 import 'game_session_screen.dart';
 
@@ -202,26 +205,9 @@ class _GameHomeScreenState extends State<GameHomeScreen>
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.menu, color: context.textColor),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Games',
-            style: GoogleFonts.cinzel(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              letterSpacing: 3,
-            ),
-          ),
-        ],
-      ),
+    return ScreenHeader(
+      title: 'Games',
+      onMenu: () => _scaffoldKey.currentState?.openDrawer(),
     );
   }
 
@@ -253,59 +239,20 @@ class _GameHomeScreenState extends State<GameHomeScreen>
   }
 
   Widget _buildLoggedOut() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.lock_outline, size: 40, color: context.subtleTextColor),
-            const SizedBox(height: 12),
-            Text(
-              'Log in to create or join a game',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.subtleTextColor),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AccountScreen()),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppPalette.gold,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Log In'),
-            ),
-          ],
-        ),
+    return LoggedOutView(
+      message: 'Log in to create or join a game',
+      onLogin: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const AccountScreen()),
       ),
     );
   }
 
   Widget _buildBody() {
     if (!authService.isLoggedIn) return _buildLoggedOut();
-    if (_loading)
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
-      );
+    if (_loading) return const LoadingView();
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.wifi_off, size: 40, color: context.subtleTextColor),
-            const SizedBox(height: 12),
-            Text(
-              'Could not reach server',
-              style: TextStyle(color: context.subtleTextColor),
-            ),
-            const SizedBox(height: 8),
-            TextButton(onPressed: _load, child: const Text('Retry')),
-          ],
-        ),
-      );
+      return ErrorRetryView(onRetry: _load);
     }
     return TabBarView(
       controller: _tabController,
@@ -591,73 +538,43 @@ class _GameActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.cardBgColor.withOpacity(0.92),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.4),
-              width: 0.5,
+    return BottomSheetSurface(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => Navigator.of(context).pop(_GameAction.create),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Create Game'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppPalette.gold,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
             ),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.subtleTextColor.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).pop(_GameAction.join),
+            icon: const Icon(Icons.meeting_room_outlined, size: 18),
+            label: const Text('Join Game'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppPalette.gold,
+              side: const BorderSide(color: AppPalette.gold),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () =>
-                      Navigator.of(context).pop(_GameAction.create),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Create Game'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppPalette.gold,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).pop(_GameAction.join),
-                  icon: const Icon(Icons.meeting_room_outlined, size: 18),
-                  label: const Text('Join Game'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppPalette.gold,
-                    side: const BorderSide(color: AppPalette.gold),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -742,204 +659,96 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: context.cardBgColor.withOpacity(0.92),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.4),
-                width: 0.5,
-              ),
+    return BottomSheetSurface(
+      scrollable: true,
+      title: 'New Game',
+      children: [
+        if (_loading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(color: AppPalette.gold),
             ),
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: context.subtleTextColor.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'New Game',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: context.textColor,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  if (_loading)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(
-                          color: AppPalette.gold,
-                        ),
-                      ),
-                    )
-                  else if (_error != null)
-                    Text(_error!, style: const TextStyle(color: Colors.red))
-                  else ...[
-                    Text(
-                      'Scenario',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.subtleTextColor,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    ..._scenarios.map(
-                      (s) => _ScenarioTile(
-                        scenario: s,
-                        selected: _selected?.id == s.id,
-                        onTap: () => _selectScenario(s),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _nameController,
-                      style: GoogleFonts.cinzel(
-                        color: context.textColor,
-                        fontSize: 15,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Game name (optional)',
-                        hintText: _selected?.name,
-                        hintStyle: TextStyle(
-                          color: context.subtleTextColor.withOpacity(0.6),
-                          fontSize: 15,
-                        ),
-                        labelStyle: TextStyle(
-                          color: context.subtleTextColor,
-                          fontSize: 13,
-                        ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppPalette.gold.withOpacity(0.5),
-                          ),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppPalette.gold,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _ducatController,
-                      keyboardType: TextInputType.number,
-                      style: GoogleFonts.cinzel(
-                        color: context.textColor,
-                        fontSize: 15,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Ducat limit',
-                        labelStyle: TextStyle(
-                          color: context.subtleTextColor,
-                          fontSize: 13,
-                        ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppPalette.gold.withOpacity(0.5),
-                          ),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppPalette.gold,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _boardSizeController,
-                      style: GoogleFonts.cinzel(
-                        color: context.textColor,
-                        fontSize: 15,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Board size (optional override)',
-                        labelStyle: TextStyle(
-                          color: context.subtleTextColor,
-                          fontSize: 13,
-                        ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppPalette.gold.withOpacity(0.5),
-                          ),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppPalette.gold,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _selected == null || _saving
-                            ? null
-                            : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppPalette.gold,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: _saving
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                'Create Game',
-                                style: GoogleFonts.cinzel(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+          )
+        else if (_error != null)
+          Text(_error!, style: const TextStyle(color: Colors.red))
+        else ...[
+          Text(
+            'Scenario',
+            style: TextStyle(
+              fontSize: 12,
+              color: context.subtleTextColor,
+              letterSpacing: 1,
             ),
           ),
-        ),
-      ),
+          const SizedBox(height: 10),
+          ..._scenarios.map(
+            (s) => _ScenarioTile(
+              scenario: s,
+              selected: _selected?.id == s.id,
+              onTap: () => _selectScenario(s),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _nameController,
+            style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+            decoration: goldInputDecoration(
+              context,
+              label: 'Game name (optional)',
+              hint: _selected?.name,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _ducatController,
+            keyboardType: TextInputType.number,
+            style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+            decoration: goldInputDecoration(context, label: 'Ducat limit'),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _boardSizeController,
+            style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+            decoration: goldInputDecoration(
+              context,
+              label: 'Board size (optional override)',
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _selected == null || _saving ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppPalette.gold,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: _saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      'Create Game',
+                      style: GoogleFonts.cinzel(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -1054,124 +863,62 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: context.cardBgColor.withOpacity(0.92),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
+    return BottomSheetSurface(
+      title: 'Join Game',
+      children: [
+        TextField(
+          controller: _codeController,
+          autofocus: true,
+          textCapitalization: TextCapitalization.characters,
+          style: GoogleFonts.cinzel(
+            color: context.textColor,
+            fontSize: 20,
+            letterSpacing: 4,
+          ),
+          textAlign: TextAlign.center,
+          decoration: goldInputDecoration(context, label: 'Join code'),
+          onSubmitted: (_) => _submit(),
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _error!,
+            style: const TextStyle(color: Colors.red, fontSize: 13),
+          ),
+        ],
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _saving ? null : _submit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppPalette.gold,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.4),
-                width: 0.5,
-              ),
+              elevation: 0,
             ),
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: context.subtleTextColor.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
+            child: _saving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Join',
+                    style: GoogleFonts.cinzel(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Join Game',
-                  style: GoogleFonts.cinzel(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: context.textColor,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _codeController,
-                  autofocus: true,
-                  textCapitalization: TextCapitalization.characters,
-                  style: GoogleFonts.cinzel(
-                    color: context.textColor,
-                    fontSize: 20,
-                    letterSpacing: 4,
-                  ),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    labelText: 'Join code',
-                    labelStyle: TextStyle(
-                      color: context.subtleTextColor,
-                      fontSize: 13,
-                    ),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppPalette.gold.withOpacity(0.5),
-                      ),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppPalette.gold,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                  onSubmitted: (_) => _submit(),
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _error!,
-                    style: const TextStyle(color: Colors.red, fontSize: 13),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _saving ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppPalette.gold,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _saving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'Join',
-                            style: GoogleFonts.cinzel(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
