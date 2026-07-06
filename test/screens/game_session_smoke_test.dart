@@ -39,6 +39,14 @@ void main() {
       adapter.stub('POST', '/cable_tickets', {'ticket': 'test-ticket'});
 
       final agendas = [fakeAgenda(id: 7, name: 'Cut Them Down')];
+      final discarded = [
+        fakeAgendaHistoryEntry(
+          action: api.AgendaHistoryEntryActionEnum.discarded,
+          origin: api.AgendaHistoryEntryOriginEnum.unachievable,
+          agendaId: 9,
+          agendaName: 'Watery Grave',
+        ),
+      ];
 
       // Before confirming: the review/confirm button is offered, no waiting spinner text.
       adapter.stub(
@@ -48,7 +56,14 @@ void main() {
           fakeGame(
             id: 1,
             status: api.GameStatusEnum.agendaDraw,
-            players: [fakeGamePlayer(id: 1, userId: 1, agendas: agendas)],
+            players: [
+              fakeGamePlayer(
+                id: 1,
+                userId: 1,
+                agendas: agendas,
+                agendaHistory: discarded,
+              ),
+            ],
           ),
         ),
       );
@@ -58,8 +73,16 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.text("I've reviewed my Agendas"), findsOneWidget);
+      expect(find.text("Ready"), findsOneWidget);
       expect(find.text('Waiting for the opponent to be ready...'), findsNothing);
+      // Mulliganed agendas live under a collapsed "Discarded (N)" header; the name is hidden until
+      // the section is expanded by tapping it.
+      expect(find.text('Discarded (1)'), findsOneWidget);
+      expect(find.text('Watery Grave'), findsNothing);
+      await tester.tap(find.text('Discarded (1)'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('Watery Grave'), findsOneWidget);
 
       // Unmount so the second mount re-fetches (the const widget would otherwise reuse state).
       await tester.pumpWidget(const SizedBox());
@@ -89,7 +112,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.text("I've reviewed my Agendas"), findsNothing);
+      expect(find.text("Ready"), findsNothing);
       expect(
         find.text('Waiting for the opponent to be ready...'),
         findsOneWidget,

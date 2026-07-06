@@ -41,6 +41,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   final _service = GameService();
   bool _loading = true;
   bool _busy = false;
+  bool _discardedExpanded = false;
   String? _error;
   Future<List<AvailableGang>>? _availableGangsFuture;
 
@@ -422,20 +423,31 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         ],
       );
     }
+    // Agendas mulliganed away stay on screen (crossed out, title only) so both players keep a
+    // record of what was agreed unachievable.
+    final discarded = me.agendaHistory
+        .where((e) => e.action == api.AgendaHistoryEntryActionEnum.discarded)
+        .toList();
     return _PhaseCard(
       title: 'Your Agendas',
       subtitle:
           'Any agenda that is impossible or duplicated can be discarded and redrawn — agree with your opponent that it is unachievable.',
       children: [
-        ...me.agendas.map((a) => _agendaDrawCard(context, game, me, a)),
+        ...me.agendas.asMap().entries.map(
+          (e) => _agendaDrawCard(context, game, me, e.value, e.key + 1),
+        ),
+        if (discarded.isNotEmpty) _discardedSection(context, discarded),
         const SizedBox(height: 8),
         // Drawing doesn't auto-advance: the player reads (and optionally mulligans) their hand,
         // then confirms. Once both players confirm, the game moves on to deployment.
         if (!me.agendasConfirmed)
-          _ActionButton(
-            label: "I've reviewed my Agendas",
-            onTap: () => _run(() => _service.confirmAgendas(game.id)),
-            busy: _busy,
+          Align(
+            alignment: Alignment.centerRight,
+            child: _ActionButton(
+              label: "Ready",
+              onTap: () => _run(() => _service.confirmAgendas(game.id)),
+              busy: _busy,
+            ),
           )
         else ...[
           Text(
@@ -456,6 +468,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     api.Game game,
     api.GamePlayer me,
     api.Agenda a,
+    int index,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -463,40 +476,123 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       decoration: BoxDecoration(
         color: context.cardBgColor.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.panelBorderColor),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            a.name,
+            '$index - ${a.name}',
             style: GoogleFonts.cinzel(
               fontWeight: FontWeight.w700,
-              color: context.textColor,
+              color: context.accentColor,
             ),
           ),
-          const SizedBox(height: 4),
+          Divider(height: 16, thickness: 1, color: context.secondaryAccentColor),
           Text(
             a.description,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
           if (!me.agendasConfirmed) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton.icon(
+              child: OutlinedButton.icon(
                 onPressed: _busy ? null : () => _mulligan(game.id, a),
                 icon: const Icon(Icons.autorenew, size: 16),
                 label: const Text('Unachievable — redraw'),
-                style: TextButton.styleFrom(
-                  foregroundColor: context.subtleTextColor,
-                  padding: EdgeInsets.zero,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: context.secondaryAccentColor,
+                  side: BorderSide(color: context.secondaryAccentColor),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   visualDensity: VisualDensity.compact,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  // Collapsible "Discarded (N)" section holding the mulliganed agendas. Collapsed by default so it
+  // doesn't crowd the active hand; tapping the header toggles it.
+  Widget _discardedSection(
+    BuildContext context,
+    List<api.AgendaHistoryEntry> discarded,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () =>
+              setState(() => _discardedExpanded = !_discardedExpanded),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                AnimatedRotation(
+                  turns: _discardedExpanded ? 0.25 : 0.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: context.subtleTextColor,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Discarded (${discarded.length})',
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: context.subtleTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 150),
+          alignment: Alignment.topCenter,
+          child: _discardedExpanded
+              ? Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    ...discarded.map(
+                      (e) => _discardedAgendaTile(context, e.agenda.name),
+                    ),
+                  ],
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
+  }
+
+  // A mulliganed agenda: a compact tile showing only the struck-through title, kept on screen as
+  // a record that it was agreed unachievable.
+  Widget _discardedAgendaTile(BuildContext context, String name) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.panelBorderColor),
+      ),
+      child: Text(
+        name,
+        style: GoogleFonts.cinzel(
+          fontWeight: FontWeight.w700,
+          color: context.subtleTextColor,
+          decoration: TextDecoration.lineThrough,
+          decorationColor: context.subtleTextColor,
+        ),
       ),
     );
   }

@@ -15,6 +15,15 @@ extension AppColors on BuildContext {
 
   Color get subtleTextColor => _isDark ? AppPalette.inkLightSubtle : AppPalette.inkSubtle;
 
+  /// The primary brand accent, theme-aware: pale gold on the dark theme, deep red on the light
+  /// theme (the `gold`/`red` pairing used across the app).
+  Color get accentColor => _isDark ? AppPalette.gold : AppPalette.red;
+
+  /// The secondary brand accent, theme-aware and derived one step from [accentColor]: deep
+  /// antique gold on dark, brick terracotta on light. For a second tier that stays in the
+  /// primary's family without colliding with the destructive `brightRed`.
+  Color get secondaryAccentColor => _isDark ? AppPalette.antiqueGold : AppPalette.terracotta;
+
   Color get cardBgColor => _isDark ? AppPalette.surfaceDark : AppPalette.paper;
 
   /// Scaffold / drawer background.

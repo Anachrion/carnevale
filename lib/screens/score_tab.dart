@@ -270,7 +270,9 @@ class ScoreTab extends StatelessWidget {
           if (me.agendas.isEmpty)
             _emptyNote(context, 'No agendas in hand.')
           else
-            ...me.agendas.map((a) => _handTile(context, a)),
+            ...me.agendas.asMap().entries.map(
+                  (e) => _handTile(context, e.value, e.key + 1),
+                ),
           if (scored.isNotEmpty) ...[
             const SizedBox(height: 12),
             _sectionLabel(context, 'Scored'),
@@ -293,19 +295,26 @@ class ScoreTab extends StatelessWidget {
     );
   }
 
-  Widget _handTile(BuildContext context, api.Agenda a) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+  Widget _handTile(BuildContext context, api.Agenda a, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: context.cardBgColor.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.4)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            a.name,
+            '$index - ${a.name}',
             style: GoogleFonts.cinzel(
               fontWeight: FontWeight.w700,
-              color: context.textColor,
+              color: context.accentColor,
             ),
           ),
+          Divider(height: 16, thickness: 1, color: context.secondaryAccentColor),
           Text(
             a.description,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
