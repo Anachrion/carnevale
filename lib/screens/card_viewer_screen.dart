@@ -182,7 +182,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                 child: Text(
                   '${_currentIndex + 1} / ${widget.profiles.length}  •  tap/←→ flip  •  swipe ↑↓ navigate',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.35),
+                    color: Colors.white.withValues(alpha: 0.35),
                     fontSize: 12,
                   ),
                 ),

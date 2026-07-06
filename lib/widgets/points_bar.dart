@@ -88,7 +88,7 @@ class PointsBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: ratio,
-                    backgroundColor: Colors.black.withOpacity(0.08),
+                    backgroundColor: Colors.black.withValues(alpha: 0.08),
                     valueColor: AlwaysStoppedAnimation(barColor),
                     minHeight: 6,
                   ),

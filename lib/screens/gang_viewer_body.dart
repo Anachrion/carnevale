@@ -356,7 +356,7 @@ class _StatPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.25),
+          color: Colors.black.withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(_radius),
         ),
         child: Text(
@@ -433,7 +433,7 @@ class _AddCounterButton extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               width: 1.2,
             ),
           ),

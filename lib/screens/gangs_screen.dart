@@ -203,7 +203,7 @@ class _GangsScreenState extends State<GangsScreen> {
           Icon(
             Icons.flag_outlined,
             size: 56,
-            color: context.subtleTextColor.withOpacity(0.4),
+            color: context.subtleTextColor.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
           Text(
@@ -218,7 +218,7 @@ class _GangsScreenState extends State<GangsScreen> {
             'Tap + to create your first gang',
             style: TextStyle(
               fontSize: 13,
-              color: context.subtleTextColor.withOpacity(0.7),
+              color: context.subtleTextColor.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -442,14 +442,14 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
                   height: 48,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: selected ? color : color.withOpacity(0.35),
+                    color: selected ? color : color.withValues(alpha: 0.35),
                     border: selected
                         ? Border.all(color: Colors.white, width: 2.5)
                         : null,
                     boxShadow: selected
                         ? [
                             BoxShadow(
-                              color: color.withOpacity(0.5),
+                              color: color.withValues(alpha: 0.5),
                               blurRadius: 8,
                             ),
                           ]

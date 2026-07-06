@@ -40,7 +40,7 @@ void showEquipmentDetailDialog(BuildContext context, api.Equipment e) {
           ),
           const SizedBox(height: 12),
           Divider(
-            color: context.subtleTextColor.withOpacity(0.3),
+            color: context.subtleTextColor.withValues(alpha: 0.3),
             thickness: 0.5,
           ),
           const SizedBox(height: 12),

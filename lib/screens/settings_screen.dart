@@ -232,7 +232,7 @@ class _ThemePicker extends StatelessWidget {
           color: isDark ? AppPalette.controlNavyDark : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: accentColor.withOpacity(0.45), width: 1.0),
+            side: BorderSide(color: accentColor.withValues(alpha: 0.45), width: 1.0),
           ),
           items: _options.map((m) {
             final selected = m == value;

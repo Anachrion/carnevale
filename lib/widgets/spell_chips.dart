@@ -66,7 +66,7 @@ void showSpellDetailDialog(BuildContext context, api.Spell spell) {
           ),
           const SizedBox(height: 12),
           Divider(
-            color: context.subtleTextColor.withOpacity(0.3),
+            color: context.subtleTextColor.withValues(alpha: 0.3),
             thickness: 0.5,
           ),
           const SizedBox(height: 12),
@@ -98,15 +98,15 @@ class SpellChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
+          color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.28), width: 0.5),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.28), width: 0.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (spell.cantrip) ...[
-              Icon(Icons.star, size: 10, color: Colors.white.withOpacity(0.75)),
+              Icon(Icons.star, size: 10, color: Colors.white.withValues(alpha: 0.75)),
               const SizedBox(width: 4),
             ],
             Text(
@@ -114,7 +114,7 @@ class SpellChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
               ),
             ),
           ],

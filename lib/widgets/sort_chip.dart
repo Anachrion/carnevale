@@ -30,11 +30,11 @@ class SortChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: selected
-              ? accent.withOpacity(0.85)
-              : Colors.white.withOpacity(0.35),
+              ? accent.withValues(alpha: 0.85)
+              : Colors.white.withValues(alpha: 0.35),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? accent : Colors.white.withOpacity(0.4),
+            color: selected ? accent : Colors.white.withValues(alpha: 0.4),
             width: 0.5,
           ),
         ),

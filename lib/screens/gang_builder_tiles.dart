@@ -157,7 +157,7 @@ class _EntryTileState extends State<_EntryTile>
                                     widget.role!,
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.white.withOpacity(0.65),
+                                      color: Colors.white.withValues(alpha: 0.65),
                                       fontStyle: FontStyle.italic,
                                     ),
                                   ),
@@ -182,16 +182,16 @@ class _EntryTileState extends State<_EntryTile>
                               height: 28,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.15),
+                                color: Colors.white.withValues(alpha: 0.15),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                   width: 0.5,
                                 ),
                               ),
                               child: Icon(
                                 Icons.remove,
                                 size: 14,
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withValues(alpha: 0.85),
                               ),
                             ),
                           ),
@@ -227,7 +227,7 @@ class _EntryTileState extends State<_EntryTile>
                 'No spells',
                 style: TextStyle(
                   fontSize: 11,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -245,9 +245,9 @@ class _EntryTileState extends State<_EntryTile>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.18),
+          color: Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.35), width: 0.5),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 0.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -255,7 +255,7 @@ class _EntryTileState extends State<_EntryTile>
             Icon(
               Icons.auto_fix_high,
               size: 12,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
             const SizedBox(width: 5),
             Text(
@@ -353,7 +353,7 @@ class _HireCardTile extends StatelessWidget {
                                     : 'hero',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: Colors.white.withOpacity(0.65),
+                                  color: Colors.white.withValues(alpha: 0.65),
                                   fontStyle: FontStyle.italic,
                                 ),
                               ),
@@ -369,14 +369,14 @@ class _HireCardTile extends StatelessWidget {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             isUnique ? 'Hired' : '×$count',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -399,16 +399,16 @@ class _HireCardTile extends StatelessWidget {
                             height: 28,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                                 width: 0.5,
                               ),
                             ),
                             child: Icon(
                               Icons.remove,
                               size: 14,
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withValues(alpha: 0.85),
                             ),
                           ),
                         )
@@ -453,7 +453,7 @@ class _HireToggleButton extends StatelessWidget {
         child: Icon(
           Icons.block,
           size: 28,
-          color: Colors.white.withOpacity(0.30),
+          color: Colors.white.withValues(alpha: 0.30),
         ),
       );
     return GestureDetector(
@@ -463,8 +463,8 @@ class _HireToggleButton extends StatelessWidget {
         height: 32,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withOpacity(0.2),
-          border: Border.all(color: Colors.white.withOpacity(0.5)),
+          color: Colors.white.withValues(alpha: 0.2),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
         ),
         child: const Icon(Icons.add, size: 16, color: Colors.white),
       ),
@@ -531,14 +531,14 @@ class _HireEquipmentTile extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       '×$count',
                       style: TextStyle(
                         fontSize: 10,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
