@@ -1,4 +1,3 @@
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +6,11 @@ import '../main.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_input.dart';
+import '../widgets/bottom_sheet_surface.dart';
+import '../widgets/glass_panel.dart';
+import '../widgets/screen_header.dart';
+import '../widgets/status_views.dart';
 import 'account_screen.dart';
 import 'gang_builder_screen.dart';
 
@@ -138,63 +142,24 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.menu, color: context.textColor),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Gangs',
-            style: GoogleFonts.cinzel(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              letterSpacing: 3,
-            ),
-          ),
-          const Spacer(),
-          if (authService.isLoggedIn && !_loading && _error == null)
-            Text(
+    return ScreenHeader(
+      title: 'Gangs',
+      onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      trailing: authService.isLoggedIn && !_loading && _error == null
+          ? Text(
               '${_gangs.length} gang${_gangs.length == 1 ? '' : 's'}',
               style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-            ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 
   Widget _buildLoggedOut() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.lock_outline, size: 40, color: context.subtleTextColor),
-            const SizedBox(height: 12),
-            Text(
-              'Log in to build and manage your gangs',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.subtleTextColor),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AccountScreen()),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppPalette.gold,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Log In'),
-            ),
-          ],
-        ),
+    return LoggedOutView(
+      message: 'Log in to build and manage your gangs',
+      onLogin: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const AccountScreen()),
       ),
     );
   }
@@ -204,26 +169,10 @@ class _GangsScreenState extends State<GangsScreen> {
       return _buildLoggedOut();
     }
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
-      );
+      return const LoadingView();
     }
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.wifi_off, size: 40, color: context.subtleTextColor),
-            const SizedBox(height: 12),
-            Text(
-              'Could not reach server',
-              style: TextStyle(color: context.subtleTextColor),
-            ),
-            const SizedBox(height: 8),
-            TextButton(onPressed: _load, child: const Text('Retry')),
-          ],
-        ),
-      );
+      return ErrorRetryView(onRetry: _load);
     }
     if (_gangs.isEmpty) return _buildEmpty();
     return ListView.separated(
@@ -295,101 +244,87 @@ class _GangTile extends StatelessWidget {
     final iconPath = AppPalette.factionIcons[gang.faction];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: context.panelGradient,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.panelBorderColor, width: 1.0),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: onTap,
-              onLongPress: () => _confirmDelete(context),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(
+    return GlassPanel(
+      padding: EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          onLongPress: () => _confirmDelete(context),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: factionColor,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: iconPath != null
+                      ? Image.asset(
+                          iconPath,
+                          fit: BoxFit.contain,
+                          color: Colors.white,
+                          colorBlendMode: BlendMode.srcIn,
+                        )
+                      : const Icon(Icons.flag, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        gang.name ?? '',
+                        style: GoogleFonts.cinzel(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: context.textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _factionLabel(gang.faction),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: factionColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: factionColor,
-                        shape: BoxShape.circle,
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: iconPath != null
-                          ? Image.asset(
-                              iconPath,
-                              fit: BoxFit.contain,
-                              color: Colors.white,
-                              colorBlendMode: BlendMode.srcIn,
-                            )
-                          : const Icon(
-                              Icons.flag,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            gang.name ?? '',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: context.textColor,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _factionLabel(gang.faction),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: factionColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      '${gang.totalCost}',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppPalette.gold,
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${gang.totalCost}',
-                          style: GoogleFonts.cinzel(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppPalette.gold,
-                          ),
-                        ),
-                        Text(
-                          '/ ${gang.points} duc.',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: context.subtleTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.chevron_right,
-                      color: isDark ? AppPalette.gold : AppPalette.red,
-                      size: 20,
+                    Text(
+                      '/ ${gang.points} duc.',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: context.subtleTextColor,
+                      ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right,
+                  color: isDark ? AppPalette.gold : AppPalette.red,
+                  size: 20,
+                ),
+              ],
             ),
           ),
         ),
@@ -463,195 +398,108 @@ class _CreateGangSheetState extends State<_CreateGangSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: context.cardBgColor.withOpacity(0.92),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.4),
-                width: 0.5,
-              ),
-            ),
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: context.subtleTextColor.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'New Gang',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: context.textColor,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _nameController,
-                    autofocus: true,
-                    style: GoogleFonts.cinzel(
-                      color: context.textColor,
-                      fontSize: 15,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 'Gang name',
-                      labelStyle: TextStyle(
-                        color: context.subtleTextColor,
-                        fontSize: 13,
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: AppPalette.gold.withOpacity(0.5),
-                        ),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: AppPalette.gold,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    onSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _pointsController,
-                    keyboardType: TextInputType.number,
-                    style: GoogleFonts.cinzel(
-                      color: context.textColor,
-                      fontSize: 15,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 'Point limit',
-                      labelStyle: TextStyle(
-                        color: context.subtleTextColor,
-                        fontSize: 13,
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: AppPalette.gold.withOpacity(0.5),
-                        ),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: AppPalette.gold,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Faction',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.subtleTextColor,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 52,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: _kFactions.map((f) {
-                        final selected = f == _selectedFaction;
-                        final color =
-                            AppPalette.factionColors[f] ?? AppPalette.gold;
-                        final iconPath = AppPalette.factionIcons[f]!;
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedFaction = f),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 10),
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: selected ? color : color.withOpacity(0.35),
-                              border: selected
-                                  ? Border.all(color: Colors.white, width: 2.5)
-                                  : null,
-                              boxShadow: selected
-                                  ? [
-                                      BoxShadow(
-                                        color: color.withOpacity(0.5),
-                                        blurRadius: 8,
-                                      ),
-                                    ]
-                                  : null,
-                            ),
-                            padding: const EdgeInsets.all(9),
-                            child: Image.asset(
-                              iconPath,
-                              fit: BoxFit.contain,
-                              color: Colors.white,
-                              colorBlendMode: BlendMode.srcIn,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _saving ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppPalette.gold,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _saving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Create Gang',
-                              style: GoogleFonts.cinzel(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return BottomSheetSurface(
+      scrollable: true,
+      title: 'New Gang',
+      children: [
+        TextField(
+          controller: _nameController,
+          autofocus: true,
+          style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+          decoration: goldInputDecoration(context, label: 'Gang name'),
+          onSubmitted: (_) => _submit(),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _pointsController,
+          keyboardType: TextInputType.number,
+          style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
+          decoration: goldInputDecoration(context, label: 'Point limit'),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Faction',
+          style: TextStyle(
+            fontSize: 12,
+            color: context.subtleTextColor,
+            letterSpacing: 1,
           ),
         ),
-      ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 52,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: _kFactions.map((f) {
+              final selected = f == _selectedFaction;
+              final color = AppPalette.factionColors[f] ?? AppPalette.gold;
+              final iconPath = AppPalette.factionIcons[f]!;
+              return GestureDetector(
+                onTap: () => setState(() => _selectedFaction = f),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 10),
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: selected ? color : color.withOpacity(0.35),
+                    border: selected
+                        ? Border.all(color: Colors.white, width: 2.5)
+                        : null,
+                    boxShadow: selected
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.5),
+                              blurRadius: 8,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  padding: const EdgeInsets.all(9),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    color: Colors.white,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 28),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _saving ? null : _submit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppPalette.gold,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: _saving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Create Gang',
+                    style: GoogleFonts.cinzel(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

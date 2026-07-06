@@ -5,8 +5,10 @@ import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_input.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
+import '../widgets/screen_header.dart';
 import 'home_screen.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -61,26 +63,9 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.menu, color: context.textColor),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Account',
-            style: GoogleFonts.cinzel(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              letterSpacing: 3,
-            ),
-          ),
-        ],
-      ),
+    return ScreenHeader(
+      title: 'Account',
+      onMenu: () => _scaffoldKey.currentState?.openDrawer(),
     );
   }
 }
@@ -241,20 +226,6 @@ class _AuthFormState extends State<_AuthForm> {
     );
   }
 
-  InputDecoration _decoration(String label) => InputDecoration(
-    labelText: label,
-    labelStyle: GoogleFonts.notoSans(
-      color: context.subtleTextColor,
-      fontSize: 13,
-    ),
-    enabledBorder: UnderlineInputBorder(
-      borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5)),
-    ),
-    focusedBorder: const UnderlineInputBorder(
-      borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     return GlassPanel(
@@ -283,7 +254,7 @@ class _AuthFormState extends State<_AuthForm> {
                   color: context.textColor,
                   fontSize: 15,
                 ),
-                decoration: _decoration('Username'),
+                decoration: goldInputDecoration(context, label: 'Username'),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
@@ -299,7 +270,7 @@ class _AuthFormState extends State<_AuthForm> {
                 color: context.textColor,
                 fontSize: 15,
               ),
-              decoration: _decoration('Email'),
+              decoration: goldInputDecoration(context, label: 'Email'),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
                 if (!v.contains('@')) return 'Enter a valid email';
@@ -321,7 +292,7 @@ class _AuthFormState extends State<_AuthForm> {
                 color: context.textColor,
                 fontSize: 15,
               ),
-              decoration: _decoration('Password'),
+              decoration: goldInputDecoration(context, label: 'Password'),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Required';
                 if (_isSignUp && v.length < 6) return 'At least 6 characters';
@@ -357,7 +328,10 @@ class _AuthFormState extends State<_AuthForm> {
                   color: context.textColor,
                   fontSize: 15,
                 ),
-                decoration: _decoration('Confirm Password'),
+                decoration: goldInputDecoration(
+                  context,
+                  label: 'Confirm Password',
+                ),
                 validator: (v) {
                   if (v != _passwordController.text)
                     return 'Passwords do not match';

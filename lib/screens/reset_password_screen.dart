@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_background.dart';
+import '../widgets/app_input.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import 'account_screen.dart';
@@ -59,20 +60,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     }
   }
 
-  InputDecoration _decoration(String label) => InputDecoration(
-    labelText: label,
-    labelStyle: GoogleFonts.notoSans(
-      color: context.subtleTextColor,
-      fontSize: 13,
-    ),
-    enabledBorder: UnderlineInputBorder(
-      borderSide: BorderSide(color: AppPalette.gold.withOpacity(0.5)),
-    ),
-    focusedBorder: const UnderlineInputBorder(
-      borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,7 +103,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         color: context.textColor,
                         fontSize: 15,
                       ),
-                      decoration: _decoration('New Password'),
+                      decoration: goldInputDecoration(
+                        context,
+                        label: 'New Password',
+                      ),
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'Required';
                         if (v.length < 6) return 'At least 6 characters';
@@ -134,7 +124,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         color: context.textColor,
                         fontSize: 15,
                       ),
-                      decoration: _decoration('Confirm New Password'),
+                      decoration: goldInputDecoration(
+                        context,
+                        label: 'Confirm New Password',
+                      ),
                       validator: (v) {
                         if (v != _passwordController.text)
                           return 'Passwords do not match';

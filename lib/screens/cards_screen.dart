@@ -1,4 +1,3 @@
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +5,8 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/glass_panel.dart';
+import '../widgets/screen_header.dart';
 import '../widgets/sort_chip.dart';
 import 'card_viewer_screen.dart';
 
@@ -106,30 +107,12 @@ class _CardsScreenState extends State<CardsScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.menu, color: context.textColor),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Cards',
-            style: GoogleFonts.cinzel(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              letterSpacing: 3,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            '${_results.length} profiles',
-            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-          ),
-        ],
+    return ScreenHeader(
+      title: 'Cards',
+      onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      trailing: Text(
+        '${_results.length} profiles',
+        style: TextStyle(fontSize: 12, color: context.subtleTextColor),
       ),
     );
   }
@@ -137,34 +120,24 @@ class _CardsScreenState extends State<CardsScreen> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: context.panelGradient,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.panelBorderColor, width: 1.0),
+      child: GlassPanel(
+        padding: EdgeInsets.zero,
+        child: TextField(
+          controller: _searchController,
+          style: TextStyle(color: context.textColor, fontSize: 15),
+          decoration: InputDecoration(
+            hintText: 'Search profiles...',
+            hintStyle: TextStyle(
+              color: context.subtleTextColor.withOpacity(0.7),
+              fontSize: 15,
             ),
-            child: TextField(
-              controller: _searchController,
-              style: TextStyle(color: context.textColor, fontSize: 15),
-              decoration: InputDecoration(
-                hintText: 'Search profiles...',
-                hintStyle: TextStyle(
-                  color: context.subtleTextColor.withOpacity(0.7),
-                  fontSize: 15,
-                ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: AppPalette.gold,
-                  size: 20,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
-              ),
+            prefixIcon: const Icon(
+              Icons.search,
+              color: AppPalette.gold,
+              size: 20,
             ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
           ),
         ),
       ),

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +9,7 @@ import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
+import '../widgets/glass_panel.dart';
 import '../widgets/points_bar.dart';
 import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
@@ -341,34 +341,23 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   Widget _buildTabBar(Color factionColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: context.panelGradient,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.panelBorderColor, width: 1.0),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [
+            _TabButton(
+              label: 'List',
+              selected: _tab == _Tab.list,
+              factionColor: factionColor,
+              onTap: () => setState(() => _tab = _Tab.list),
             ),
-            padding: const EdgeInsets.all(4),
-            child: Row(
-              children: [
-                _TabButton(
-                  label: 'List',
-                  selected: _tab == _Tab.list,
-                  factionColor: factionColor,
-                  onTap: () => setState(() => _tab = _Tab.list),
-                ),
-                _TabButton(
-                  label: 'Hire',
-                  selected: _tab == _Tab.hire,
-                  factionColor: factionColor,
-                  onTap: () => setState(() => _tab = _Tab.hire),
-                ),
-              ],
+            _TabButton(
+              label: 'Hire',
+              selected: _tab == _Tab.hire,
+              factionColor: factionColor,
+              onTap: () => setState(() => _tab = _Tab.hire),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -658,49 +647,36 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Column(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: context.panelGradient,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: context.panelBorderColor,
-                    width: 1.0,
-                  ),
+          GlassPanel(
+            padding: EdgeInsets.zero,
+            child: TextField(
+              controller: _searchController,
+              style: TextStyle(color: context.textColor, fontSize: 15),
+              decoration: InputDecoration(
+                hintText: 'Search profiles...',
+                hintStyle: TextStyle(
+                  color: context.subtleTextColor.withOpacity(0.7),
+                  fontSize: 15,
                 ),
-                child: TextField(
-                  controller: _searchController,
-                  style: TextStyle(color: context.textColor, fontSize: 15),
-                  decoration: InputDecoration(
-                    hintText: 'Search profiles...',
-                    hintStyle: TextStyle(
-                      color: context.subtleTextColor.withOpacity(0.7),
-                      fontSize: 15,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppPalette.gold
-                          : AppPalette.red,
-                      size: 20,
-                    ),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(
-                              Icons.clear,
-                              color: context.subtleTextColor.withOpacity(0.6),
-                              size: 18,
-                            ),
-                            onPressed: () => _searchController.clear(),
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppPalette.gold
+                      : AppPalette.red,
+                  size: 20,
                 ),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.clear,
+                          color: context.subtleTextColor.withOpacity(0.6),
+                          size: 18,
+                        ),
+                        onPressed: () => _searchController.clear(),
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
           ),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +7,7 @@ import '../models/profile.dart';
 import '../services/equipment_service.dart';
 import '../services/game_service.dart';
 import '../services/profile_service.dart';
+import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
@@ -38,48 +38,21 @@ class GameGangsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/images/bg_dark.png'
-                    : 'assets/images/bg_light.png',
+      body: AppBackground(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            const SizedBox(height: 8),
+            Expanded(
+              child: GangsTabView(
+                gameId: gameId,
+                myPlayerId: myPlayerId,
+                myLabel: myLabel,
+                opponentPlayerId: opponentPlayerId,
+                opponentLabel: opponentLabel,
               ),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
             ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withOpacity(0.05)),
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildHeader(context),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: GangsTabView(
-                        gameId: gameId,
-                        myPlayerId: myPlayerId,
-                        myLabel: myLabel,
-                        opponentPlayerId: opponentPlayerId,
-                        opponentLabel: opponentLabel,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );

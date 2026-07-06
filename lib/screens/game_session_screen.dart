@@ -9,6 +9,7 @@ import '../services/game_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
+import '../widgets/status_views.dart';
 import 'gang_viewer_screen.dart';
 
 const _kGangsVisibleStatuses = {
@@ -157,29 +158,15 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   }
 
   Widget _buildBody(BuildContext context) {
-    if (_loading)
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
-      );
+    if (_loading) return const LoadingView();
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.wifi_off, size: 40, color: context.subtleTextColor),
-            const SizedBox(height: 12),
-            Text(_error!, style: TextStyle(color: context.subtleTextColor)),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => setState(() {
-                _loading = true;
-                _error = null;
-                _init();
-              }),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      return ErrorRetryView(
+        message: _error!,
+        onRetry: () => setState(() {
+          _loading = true;
+          _error = null;
+          _init();
+        }),
       );
     }
     final game = _game;
