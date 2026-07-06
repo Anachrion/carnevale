@@ -35,9 +35,11 @@ void main() {
       expect(auth.isTokenExpired(token), isFalse);
     });
 
-    test('returns false when the payload has no exp claim', () {
+    test('returns true when the payload has no exp claim', () {
+      // A token we can't read an expiry from is treated as expired, so we re-authenticate
+      // rather than trusting a credential of unknown validity (F-P3-5).
       final token = _fakeToken({'sub': '1'});
-      expect(auth.isTokenExpired(token), isFalse);
+      expect(auth.isTokenExpired(token), isTrue);
     });
 
     test('returns true for a malformed token', () {

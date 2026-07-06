@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,12 +27,15 @@ class _CardsScreenState extends State<CardsScreen> {
   final _service = ProfileService();
 
   List<api.Profile> _results = [];
+  // Cached sorted view of _results; recomputed only when the results or sort change (F-P3-6).
+  List<api.Profile> _sorted = [];
   final Set<String> _selectedFactions = {};
   bool _loading = true;
   _CardSort _sort = _CardSort.name;
   bool _sortAsc = true;
+  Timer? _searchDebounce;
 
-  List<api.Profile> get _sortedResults {
+  void _recomputeSorted() {
     final list = List<api.Profile>.from(_results);
     list.sort((a, b) {
       switch (_sort) {
@@ -42,18 +47,19 @@ class _CardsScreenState extends State<CardsScreen> {
           return _sortAsc ? c : -c;
       }
     });
-    return list;
+    _sorted = list;
   }
 
   @override
   void initState() {
     super.initState();
     _load();
-    _searchController.addListener(_onSearch);
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -64,16 +70,26 @@ class _CardsScreenState extends State<CardsScreen> {
     setState(() {
       _results = results;
       _loading = false;
+      _recomputeSorted();
     });
   }
 
-  Future<void> _onSearch() async {
+  // Debounce keystrokes so we fire at most one network search per pause, not one per character.
+  void _onSearchChanged() {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), _runSearch);
+  }
+
+  Future<void> _runSearch() async {
     final results = await _service.search(
       _searchController.text,
       factions: _selectedFactions,
     );
     if (!mounted) return;
-    setState(() => _results = results);
+    setState(() {
+      _results = results;
+      _recomputeSorted();
+    });
   }
 
   Future<void> _toggleFaction(String faction) async {
@@ -82,7 +98,7 @@ class _CardsScreenState extends State<CardsScreen> {
     } else {
       _selectedFactions.add(faction);
     }
-    await _onSearch();
+    await _runSearch();
   }
 
   @override
@@ -153,6 +169,7 @@ class _CardsScreenState extends State<CardsScreen> {
         final (field, asc) = applySortTap(value, _sort, _sortAsc);
         _sort = field;
         _sortAsc = asc;
+        _recomputeSorted();
       }),
     );
 
@@ -210,7 +227,7 @@ class _CardsScreenState extends State<CardsScreen> {
         ),
       );
     }
-    final sorted = _sortedResults;
+    final sorted = _sorted;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       itemCount: sorted.length,
