@@ -54,7 +54,7 @@ void main() {
     expect(find.text('Acquisition'), findsWidgets);
     expect(find.text('Turn 3 of 5'), findsOneWidget);
     expect(find.text('2'), findsWidgets); // my score
-    expect(find.text('No Mercy'), findsOneWidget); // my hand agenda
+    expect(find.text('1 - No Mercy'), findsOneWidget); // my hand agenda (numbered)
     expect(find.text('Secret'), findsOneWidget); // agenda-rule badge
     // Opponent's hand is hidden under the Secret rule.
     expect(

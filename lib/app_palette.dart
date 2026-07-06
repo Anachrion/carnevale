@@ -13,6 +13,8 @@ abstract final class AppPalette {
   static const mutedGold = Color(0xFFB1986C); // dark-mode accent / border partner
   static const red = Color(0xFF8B1A1A); // light-mode accent partner
   static const brightRed = Color(0xFFC0392B); // stronger red (over-limit, destructive)
+  static const antiqueGold = Color(0xFF8C6B2A); // secondary accent — dark theme (deeper gold)
+  static const terracotta = Color(0xFFB5604D); // secondary accent — light theme (brighter red)
 
   // ── Neutrals — light ───────────────────────────────────────────────────────
   static const background = Color(0xFFF0EDE6); // scaffold (light)
