@@ -9,12 +9,13 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**advanceTurn**](GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the game&#39;s shared turn counter
+[**advanceTurn**](GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the requesting player&#39;s turn cursor
 [**archiveGame**](GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
 [**createGame**](GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
 [**deleteGame**](GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [**discardAgenda**](GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
 [**drawAgendas**](GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
+[**finishGame**](GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side
 [**getAvailableGangs**](GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [**getGame**](GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
 [**getGames**](GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
@@ -22,9 +23,11 @@ Method | HTTP request | Description
 [**joinGame**](GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [**markReady**](GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
+[**rewindTurn**](GamesApi.md#rewindturn) | **POST** /games/{id}/turns/rewind | Rewind the requesting player&#39;s turn cursor
 [**scoreAgenda**](GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
+[**unfinishGame**](GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [**updateCounters**](GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
 [**updateStats**](GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
 
@@ -32,9 +35,9 @@ Method | HTTP request | Description
 # **advanceTurn**
 > Game advanceTurn(id)
 
-Advance the game's shared turn counter
+Advance the requesting player's turn cursor
 
-Callable by either player — like the roll winners and role pick, this app tracks the physical game rather than refereeing whose turn it is to act. On the scenario's final turn, this instead marks the game `completed`. 
+Moves only the requesting player's own turn cursor forward by one (never the opponent's), clamped to the scenario's turn count. The cursor is per-player and rewindable so a player can drop back to record a forgotten past-turn score, then step forward again. Blocked while the game isn't `in_progress` or the player has ended the game (see `finish`). 
 
 ### Example
 ```dart
@@ -312,6 +315,53 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **finishGame**
+> Game finishGame(id)
+
+End the game from the requesting player's side
+
+Marks the requesting player as finished and archives the game for them (moving it to their archived list); the opponent is untouched and keeps playing at their own pace. Only allowed on the scenario's final turn. Once both players finish, the game's `status` derives to `completed`. Reversible via `unfinish`. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.finishGame(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->finishGame: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -647,6 +697,53 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **rewindTurn**
+> Game rewindTurn(id)
+
+Rewind the requesting player's turn cursor
+
+Moves only the requesting player's own turn cursor back by one, clamped to turn 1. Used to drop back and record a forgotten past-turn score before advancing forward again. Blocked while the game isn't `in_progress` or the player has ended the game. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.rewindTurn(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->rewindTurn: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **scoreAgenda**
 > Game scoreAgenda(id, agendaId)
 
@@ -766,6 +863,53 @@ try {
     print(response);
 } on DioException catch (e) {
     print('Exception when calling GamesApi->unarchiveGame: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **unfinishGame**
+> Game unfinishGame(id)
+
+Undo ending the game for the requesting player
+
+Clears the requesting player's finished flag and un-archives the game (returning it to their active list), reopening play. If the game had derived to `completed`, it reverts to `in_progress`. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.unfinishGame(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->unfinishGame: $e\n');
 }
 ```
 

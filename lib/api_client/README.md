@@ -65,12 +65,13 @@ All URIs are relative to *http://localhost:3000/api/v1*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*EquipmentApi*](doc/EquipmentApi.md) | [**getEquipment**](doc/EquipmentApi.md#getequipment) | **GET** /equipment | List all equipment
-[*GamesApi*](doc/GamesApi.md) | [**advanceTurn**](doc/GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the game&#39;s shared turn counter
+[*GamesApi*](doc/GamesApi.md) | [**advanceTurn**](doc/GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the requesting player&#39;s turn cursor
 [*GamesApi*](doc/GamesApi.md) | [**archiveGame**](doc/GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
 [*GamesApi*](doc/GamesApi.md) | [**createGame**](doc/GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
 [*GamesApi*](doc/GamesApi.md) | [**deleteGame**](doc/GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [*GamesApi*](doc/GamesApi.md) | [**discardAgenda**](doc/GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
 [*GamesApi*](doc/GamesApi.md) | [**drawAgendas**](doc/GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
+[*GamesApi*](doc/GamesApi.md) | [**finishGame**](doc/GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side
 [*GamesApi*](doc/GamesApi.md) | [**getAvailableGangs**](doc/GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [*GamesApi*](doc/GamesApi.md) | [**getGame**](doc/GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
 [*GamesApi*](doc/GamesApi.md) | [**getGames**](doc/GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
@@ -78,9 +79,11 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**joinGame**](doc/GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [*GamesApi*](doc/GamesApi.md) | [**markReady**](doc/GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [*GamesApi*](doc/GamesApi.md) | [**pickRole**](doc/GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
+[*GamesApi*](doc/GamesApi.md) | [**rewindTurn**](doc/GamesApi.md#rewindturn) | **POST** /games/{id}/turns/rewind | Rewind the requesting player&#39;s turn cursor
 [*GamesApi*](doc/GamesApi.md) | [**scoreAgenda**](doc/GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [*GamesApi*](doc/GamesApi.md) | [**unarchiveGame**](doc/GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
+[*GamesApi*](doc/GamesApi.md) | [**unfinishGame**](doc/GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [*GamesApi*](doc/GamesApi.md) | [**updateCounters**](doc/GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
 [*GamesApi*](doc/GamesApi.md) | [**updateStats**](doc/GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list

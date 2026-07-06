@@ -199,12 +199,36 @@ api.Agenda fakeAgenda({
     ..description = description,
 );
 
+api.AgendaHistoryEntry fakeAgendaHistoryEntry({
+  int turn = 1,
+  api.AgendaHistoryEntryActionEnum action =
+      api.AgendaHistoryEntryActionEnum.scored,
+  api.AgendaHistoryEntryOriginEnum? origin,
+  int agendaId = 1,
+  String agendaName = 'No Mercy',
+}) => api.AgendaHistoryEntry(
+  (b) => b
+    ..turn = turn
+    ..action = action
+    ..origin = origin
+    ..causedByEventId = null
+    ..agenda.replace(
+      api.AgendaHistoryEntryAgenda(
+        (ab) => ab
+          ..id = agendaId
+          ..name = agendaName,
+      ),
+    ),
+);
+
 api.GamePlayer fakeGamePlayer({
   int id = 1,
   int userId = 1,
   String username = 'tester',
   bool host = true,
   int score = 0,
+  int currentTurn = 1,
+  bool finished = false,
   List<api.Agenda> agendas = const [],
   List<api.AgendaHistoryEntry> agendaHistory = const [],
 }) => api.GamePlayer(
@@ -217,6 +241,8 @@ api.GamePlayer fakeGamePlayer({
     ..wonRoleRoll = false
     ..wonDeploymentRoll = false
     ..score = score
+    ..currentTurn = currentTurn
+    ..finished = finished
     ..agendas = ListBuilder<api.Agenda>(agendas)
     ..agendaHistory = ListBuilder<api.AgendaHistoryEntry>(agendaHistory),
 );
@@ -226,7 +252,6 @@ api.Game fakeGame({
   String name = 'Gang War',
   String joinCode = 'ABC123',
   api.GameStatusEnum status = api.GameStatusEnum.pending,
-  int currentTurn = 1,
   api.Scenario? scenario,
   List<api.GamePlayer> players = const [],
 }) => api.Game(
@@ -236,7 +261,6 @@ api.Game fakeGame({
     ..joinCode = joinCode
     ..status = status
     ..ducatLimit = 150
-    ..currentTurn = currentTurn
     ..viewerVisibility = api.GameViewerVisibilityEnum.active
     ..scenario = (scenario ?? fakeScenario()).toBuilder()
     ..players = ListBuilder<api.GamePlayer>(
