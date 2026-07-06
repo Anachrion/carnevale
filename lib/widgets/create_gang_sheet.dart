@@ -139,7 +139,7 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
           child: ElevatedButton(
             onPressed: _saving ? null : _submit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppPalette.gold,
+              backgroundColor: context.accentColor,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(

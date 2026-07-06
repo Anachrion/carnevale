@@ -188,7 +188,7 @@ class ScoreTab extends StatelessWidget {
           icon: const Icon(Icons.flag, size: 18),
           label: const Text('End game'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppPalette.gold,
+            backgroundColor: context.accentColor,
             foregroundColor: Colors.white,
             elevation: 0,
           ),

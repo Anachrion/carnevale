@@ -62,7 +62,7 @@ class AppDrawer extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => _navigate(context, AppDrawerRoute.account, const AccountScreen()),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppPalette.gold,
+                        backgroundColor: context.accentColor,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
