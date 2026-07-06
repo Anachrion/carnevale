@@ -114,7 +114,7 @@ class _LoggedInPanelState extends State<_LoggedInPanel> {
             child: ElevatedButton(
               onPressed: _loggingOut ? null : _logOut,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppPalette.gold,
+                backgroundColor: context.accentColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -352,7 +352,7 @@ class _AuthFormState extends State<_AuthForm> {
               child: ElevatedButton(
                 onPressed: _submitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppPalette.gold,
+                  backgroundColor: context.accentColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(

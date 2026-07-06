@@ -182,7 +182,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
       floatingActionButton: authService.isLoggedIn
           ? FloatingActionButton(
               onPressed: _showActionSheet,
-              backgroundColor: AppPalette.gold,
+              backgroundColor: context.accentColor,
               foregroundColor: Colors.white,
               mini: true,
               child: const Icon(Icons.add),
@@ -547,7 +547,7 @@ class _GameActionSheet extends StatelessWidget {
             icon: const Icon(Icons.add, size: 18),
             label: const Text('Create Game'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppPalette.gold,
+              backgroundColor: context.accentColor,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -721,7 +721,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
             child: ElevatedButton(
               onPressed: _selected == null || _saving ? null : _submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppPalette.gold,
+                backgroundColor: context.accentColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -892,7 +892,7 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
           child: ElevatedButton(
             onPressed: _saving ? null : _submit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppPalette.gold,
+              backgroundColor: context.accentColor,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(

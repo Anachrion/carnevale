@@ -76,7 +76,7 @@ class LoggedOutView extends StatelessWidget {
             ElevatedButton(
               onPressed: onLogin,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppPalette.gold,
+                backgroundColor: context.accentColor,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Log In'),

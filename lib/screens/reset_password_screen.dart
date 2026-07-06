@@ -147,7 +147,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       child: ElevatedButton(
                         onPressed: _submitting ? null : _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppPalette.gold,
+                          backgroundColor: context.accentColor,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
