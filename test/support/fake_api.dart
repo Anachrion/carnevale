@@ -166,27 +166,47 @@ api.Profile fakeProfile({
     ),
 );
 
-api.Scenario fakeScenario({int id = 1, String name = 'Gang War'}) =>
-    api.Scenario(
-      (b) => b
-        ..id = id
-        ..name = name
-        ..ducats = 150
-        ..asymmetric = false
-        ..setup = 'Setup text.'
-        ..primaryObjective = 'Objective text.'
-        ..agendas = ListBuilder<String>(['3 agendas.'])
-        ..specialRules = ListBuilder<String>()
-        ..duration = '5 rounds.'
-        ..turns = 5
-        ..deploymentZones = ListBuilder<String>(['Opposite edges.']),
-    );
+api.Scenario fakeScenario({
+  int id = 1,
+  String name = 'Gang War',
+  List<api.ScenarioAgendaRulesEnum> agendaRules = const [],
+  int agendaCount = 3,
+}) => api.Scenario(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..ducats = 150
+    ..asymmetric = false
+    ..setup = 'Setup text.'
+    ..primaryObjective = 'Objective text.'
+    ..agendas = ListBuilder<String>(['3 agendas.'])
+    ..agendaRules = ListBuilder<api.ScenarioAgendaRulesEnum>(agendaRules)
+    ..agendaCount = agendaCount
+    ..specialRules = ListBuilder<String>()
+    ..duration = '5 rounds.'
+    ..turns = 5
+    ..deploymentZones = ListBuilder<String>(['Opposite edges.']),
+);
+
+api.Agenda fakeAgenda({
+  int id = 1,
+  String name = 'No Mercy',
+  String description = 'Cause at least 8 points of Damage in a single turn.',
+}) => api.Agenda(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..description = description,
+);
 
 api.GamePlayer fakeGamePlayer({
   int id = 1,
   int userId = 1,
   String username = 'tester',
   bool host = true,
+  int score = 0,
+  List<api.Agenda> agendas = const [],
+  List<api.AgendaHistoryEntry> agendaHistory = const [],
 }) => api.GamePlayer(
   (b) => b
     ..id = id
@@ -196,9 +216,9 @@ api.GamePlayer fakeGamePlayer({
     ..ready = false
     ..wonRoleRoll = false
     ..wonDeploymentRoll = false
-    ..score = 0
-    ..agendas = ListBuilder<api.Agenda>()
-    ..agendaHistory = ListBuilder<api.AgendaHistoryEntry>(),
+    ..score = score
+    ..agendas = ListBuilder<api.Agenda>(agendas)
+    ..agendaHistory = ListBuilder<api.AgendaHistoryEntry>(agendaHistory),
 );
 
 api.Game fakeGame({
@@ -206,6 +226,8 @@ api.Game fakeGame({
   String name = 'Gang War',
   String joinCode = 'ABC123',
   api.GameStatusEnum status = api.GameStatusEnum.pending,
+  int currentTurn = 1,
+  api.Scenario? scenario,
   List<api.GamePlayer> players = const [],
 }) => api.Game(
   (b) => b
@@ -214,9 +236,9 @@ api.Game fakeGame({
     ..joinCode = joinCode
     ..status = status
     ..ducatLimit = 150
-    ..currentTurn = 1
+    ..currentTurn = currentTurn
     ..viewerVisibility = api.GameViewerVisibilityEnum.active
-    ..scenario = fakeScenario().toBuilder()
+    ..scenario = (scenario ?? fakeScenario()).toBuilder()
     ..players = ListBuilder<api.GamePlayer>(
       players.isEmpty ? [fakeGamePlayer()] : players,
     ),

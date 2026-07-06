@@ -15,7 +15,7 @@ part 'agenda_history_entry.g.dart';
 /// Properties:
 /// * [turn] 
 /// * [action] 
-/// * [origin] - Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding mid-game is.
+/// * [origin] - Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding is. `unachievable` marks a pre-game mulligan discard.
 /// * [causedByEventId] - Set only when origin is `recycle` — the id of the scored/discarded event (within this same list) that triggered this replacement draw.
 /// * [agenda] 
 @BuiltValue()
@@ -27,10 +27,10 @@ abstract class AgendaHistoryEntry implements Built<AgendaHistoryEntry, AgendaHis
   AgendaHistoryEntryActionEnum get action;
   // enum actionEnum {  drawn,  scored,  discarded,  };
 
-  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding mid-game is.
+  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding is. `unachievable` marks a pre-game mulligan discard.
   @BuiltValueField(wireName: r'origin')
   AgendaHistoryEntryOriginEnum? get origin;
-  // enum originEnum {  initial,  special_rule,  command_point,  recycle,  };
+  // enum originEnum {  initial,  unachievable,  special_rule,  command_point,  recycle,  };
 
   /// Set only when origin is `recycle` — the id of the scored/discarded event (within this same list) that triggered this replacement draw.
   @BuiltValueField(wireName: r'caused_by_event_id')
@@ -195,16 +195,19 @@ class AgendaHistoryEntryActionEnum extends EnumClass {
 
 class AgendaHistoryEntryOriginEnum extends EnumClass {
 
-  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding mid-game is.
+  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding is. `unachievable` marks a pre-game mulligan discard.
   @BuiltValueEnumConst(wireName: r'initial')
   static const AgendaHistoryEntryOriginEnum initial = _$agendaHistoryEntryOriginEnum_initial;
-  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding mid-game is.
+  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding is. `unachievable` marks a pre-game mulligan discard.
+  @BuiltValueEnumConst(wireName: r'unachievable')
+  static const AgendaHistoryEntryOriginEnum unachievable = _$agendaHistoryEntryOriginEnum_unachievable;
+  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding is. `unachievable` marks a pre-game mulligan discard.
   @BuiltValueEnumConst(wireName: r'special_rule')
   static const AgendaHistoryEntryOriginEnum specialRule = _$agendaHistoryEntryOriginEnum_specialRule;
-  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding mid-game is.
+  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding is. `unachievable` marks a pre-game mulligan discard.
   @BuiltValueEnumConst(wireName: r'command_point')
   static const AgendaHistoryEntryOriginEnum commandPoint = _$agendaHistoryEntryOriginEnum_commandPoint;
-  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding mid-game is.
+  /// Why this event happened. Always null for `scored` events — scoring just resolves the Agenda's own printed condition, it isn't granted by an external rule the way drawing/discarding is. `unachievable` marks a pre-game mulligan discard.
   @BuiltValueEnumConst(wireName: r'recycle')
   static const AgendaHistoryEntryOriginEnum recycle = _$agendaHistoryEntryOriginEnum_recycle;
 

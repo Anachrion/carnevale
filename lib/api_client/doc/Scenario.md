@@ -14,7 +14,9 @@ Name | Type | Description | Notes
 **asymmetric** | **bool** | True for scenarios with Attacker/Defender roles (e.g. Street Fight), which run a role roll-off once both players have joined. | 
 **setup** | **String** |  | 
 **primaryObjective** | **String** |  | 
-**agendas** | **BuiltList&lt;String&gt;** |  | 
+**agendas** | **BuiltList&lt;String&gt;** | Free-text rendering of the scenario's agenda instructions (e.g. \"3 scoring 1 Victory Point each.\", \"Secret, Cycle, Double.\"). See `agenda_rules`/`agenda_count` for the structured form. | 
+**agendaRules** | **BuiltList&lt;String&gt;** | The agenda special rules in effect for this scenario (rulebook p.36). `secret` hides opponents' in-hand agendas; `cycle` auto-draws a replacement when an agenda is scored. | 
+**agendaCount** | **int** | How many agendas each player draws for their initial hand. | 
 **specialRules** | **BuiltList&lt;String&gt;** |  | 
 **duration** | **String** | Free-text rendering of the scenario's duration (e.g. \"5 rounds.\"). See `turns` for the structured count. | 
 **turns** | **int** | Number of turns the scenario lasts. | 

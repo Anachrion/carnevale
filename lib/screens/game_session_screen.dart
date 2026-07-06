@@ -11,6 +11,7 @@ import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/status_views.dart';
 import 'gang_viewer_screen.dart';
+import 'score_tab.dart';
 
 const _kGangsVisibleStatuses = {
   api.GameStatusEnum.agendaDraw,
@@ -403,10 +404,15 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     api.Game game,
     api.GamePlayer me,
   ) {
+    final secret = game.scenario.agendaRules.contains(
+      api.ScenarioAgendaRulesEnum.secret,
+    );
     if (me.agendas.isEmpty) {
       return _PhaseCard(
         title: 'Draw your Agendas',
-        subtitle: 'These are private — the opponent never sees them.',
+        subtitle: secret
+            ? 'Kept secret from your opponent until achieved (Secret scenario).'
+            : 'Your opponent can see these — this scenario is not Secret.',
         children: [
           _ActionButton(
             label: 'Draw Agendas',
@@ -418,31 +424,41 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
     return _PhaseCard(
       title: 'Your Agendas',
+      subtitle:
+          'Any agenda that is impossible or duplicated can be discarded and redrawn — agree with your opponent that it is unachievable.',
       children: [
         ...me.agendas.map(
           (a) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    a.name,
-                    style: GoogleFonts.cinzel(
-                      fontWeight: FontWeight.w700,
-                      color: context.textColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  a.name,
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                  ),
+                ),
+                Text(
+                  a.description,
+                  style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: _busy ? null : () => _mulligan(game.id, a),
+                    icon: const Icon(Icons.autorenew, size: 16),
+                    label: const Text('Unachievable — redraw'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.subtleTextColor,
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
                     ),
                   ),
-                  Text(
-                    a.description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.subtleTextColor,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -455,6 +471,34 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         const CircularProgressIndicator(color: AppPalette.gold),
       ],
     );
+  }
+
+  // Pre-game mulligan: confirm, then discard the impossible/duplicated agenda and redraw a
+  // replacement. Visible to the opponent so they can agree it was unachievable.
+  Future<void> _mulligan(int gameId, api.Agenda agenda) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Discard & redraw?'),
+        content: Text(
+          'Discard "${agenda.name}" as unachievable and draw a replacement? '
+          'Your opponent will see this.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Discard & redraw'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await _run(() => _service.discardUnachievable(gameId, agenda.id));
+    }
   }
 
   // ── Deploying ────────────────────────────────────────────────────────────
@@ -525,6 +569,25 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       opponentLabel: opponent.username,
       // Mid-game the list is fixed; drop the per-gang name/faction/ducats summary as noise.
       showListHeader: false,
+      leadingTabs: [
+        (
+          label: 'Score',
+          view: ScoreTab(
+            game: game,
+            me: me,
+            opponent: opponent,
+            busy: _busy,
+            onAdvanceTurn: () => _run(() => _service.advanceTurn(game.id)),
+            onDraw: (origin) =>
+                _run(() => _service.drawAgendas(game.id, origin: origin)),
+            onScore: (agendaId) =>
+                _run(() => _service.scoreAgenda(game.id, agendaId)),
+            onDiscard: (agendaId, origin) => _run(
+              () => _service.discardAgenda(game.id, agendaId, origin: origin),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

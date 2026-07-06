@@ -15,6 +15,7 @@ Serializers _$serializers =
           ..add(AgendaHistoryEntryOriginEnum.serializer)
           ..add(AvailableGang.serializer)
           ..add(CardReference.serializer)
+          ..add(CreateCableTicket201Response.serializer)
           ..add(CreateGameInput.serializer)
           ..add(DiscardAgendaInput.serializer)
           ..add(DiscardAgendaInputOriginEnum.serializer)
@@ -53,7 +54,7 @@ Serializers _$serializers =
           ..add(RoleInput.serializer)
           ..add(RoleInputRoleEnum.serializer)
           ..add(Scenario.serializer)
-          ..add(ScoreAgendaInput.serializer)
+          ..add(ScenarioAgendaRulesEnum.serializer)
           ..add(SelectGangInput.serializer)
           ..add(Session.serializer)
           ..add(SessionUser.serializer)
@@ -106,20 +107,26 @@ Serializers _$serializers =
             () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(ScenarioAgendaRulesEnum),
+            ]),
+            () => ListBuilder<ScenarioAgendaRulesEnum>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(Spell)]),
             () => ListBuilder<Spell>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, const [const FullType(String)]),
-            () => ListBuilder<String>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, const [const FullType(String)]),
-            () => ListBuilder<String>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, const [const FullType(String)]),
-            () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),

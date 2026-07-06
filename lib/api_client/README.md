@@ -95,6 +95,7 @@ Class | Method | HTTP request | Description
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfile**](doc/ProfilesApi.md#getprofile) | **GET** /profiles/{id} | Get a profile
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfiles**](doc/ProfilesApi.md#getprofiles) | **GET** /profiles | List all profiles
 [*ScenariosApi*](doc/ScenariosApi.md) | [**getScenarios**](doc/ScenariosApi.md#getscenarios) | **GET** /scenarios | List all scenarios
+[*SessionApi*](doc/SessionApi.md) | [**createCableTicket**](doc/SessionApi.md#createcableticket) | **POST** /cable_tickets | Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
 [*SessionApi*](doc/SessionApi.md) | [**forgotPassword**](doc/SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [*SessionApi*](doc/SessionApi.md) | [**login**](doc/SessionApi.md#login) | **POST** /login | Log in and receive a JWT
 [*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
@@ -111,6 +112,7 @@ Class | Method | HTTP request | Description
  - [AgendaHistoryEntryAgenda](doc/AgendaHistoryEntryAgenda.md)
  - [AvailableGang](doc/AvailableGang.md)
  - [CardReference](doc/CardReference.md)
+ - [CreateCableTicket201Response](doc/CreateCableTicket201Response.md)
  - [CreateGameInput](doc/CreateGameInput.md)
  - [DiscardAgendaInput](doc/DiscardAgendaInput.md)
  - [DrawAgendaInput](doc/DrawAgendaInput.md)
@@ -141,7 +143,6 @@ Class | Method | HTTP request | Description
  - [ResetPasswordInputUser](doc/ResetPasswordInputUser.md)
  - [RoleInput](doc/RoleInput.md)
  - [Scenario](doc/Scenario.md)
- - [ScoreAgendaInput](doc/ScoreAgendaInput.md)
  - [SelectGangInput](doc/SelectGangInput.md)
  - [Session](doc/Session.md)
  - [SessionUser](doc/SessionUser.md)

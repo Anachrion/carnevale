@@ -119,10 +119,65 @@ class GameService extends ChangeNotifier {
     return res.data!;
   });
 
-  Future<List<api.Agenda>> drawAgendas(int gameId) => _guard(() async {
-    final res = await _client.games.drawAgendas(id: gameId);
-    return res.data?.agendas.toList() ?? [];
+  /// Draws agendas: the initial batch when [origin] is null (during `agenda_draw`), or a single
+  /// in-play replacement when [origin] is `special_rule`/`command_point` (during `in_progress`).
+  Future<List<api.Agenda>> drawAgendas(int gameId, {String? origin}) =>
+      _guard(() async {
+        final res = await _client.games.drawAgendas(
+          id: gameId,
+          drawAgendaInput: origin == null
+              ? null
+              : api.DrawAgendaInput((b) => b..origin = _drawOrigin(origin)),
+        );
+        return res.data?.agendas.toList() ?? [];
+      });
+
+  /// Scores an agenda from the player's hand (flat 1 VP). Under a Cycle scenario the server
+  /// auto-draws a replacement — nothing to request here.
+  Future<api.Game> scoreAgenda(int gameId, int agendaId) => _guard(() async {
+    final res = await _client.games.scoreAgenda(id: gameId, agendaId: agendaId);
+    return res.data!;
   });
+
+  /// Discards an in-play agenda via [origin] (`special_rule`/`command_point`).
+  Future<api.Game> discardAgenda(
+    int gameId,
+    int agendaId, {
+    required String origin,
+  }) => _guard(() async {
+    final res = await _client.games.discardAgenda(
+      id: gameId,
+      agendaId: agendaId,
+      discardAgendaInput: api.DiscardAgendaInput(
+        (b) => b..origin = _discardOrigin(origin),
+      ),
+    );
+    return res.data!;
+  });
+
+  /// Pre-game mulligan: toss an impossible/duplicated agenda during setup; the server always
+  /// draws a replacement.
+  Future<api.Game> discardUnachievable(int gameId, int agendaId) =>
+      discardAgenda(gameId, agendaId, origin: 'unachievable');
+
+  Future<api.Game> advanceTurn(int gameId) => _guard(() async {
+    final res = await _client.games.advanceTurn(id: gameId);
+    return res.data!;
+  });
+
+  api.DrawAgendaInputOriginEnum _drawOrigin(String origin) => switch (origin) {
+    'special_rule' => api.DrawAgendaInputOriginEnum.specialRule,
+    'command_point' => api.DrawAgendaInputOriginEnum.commandPoint,
+    _ => throw ArgumentError('Unknown draw origin: $origin'),
+  };
+
+  api.DiscardAgendaInputOriginEnum _discardOrigin(String origin) =>
+      switch (origin) {
+        'unachievable' => api.DiscardAgendaInputOriginEnum.unachievable,
+        'special_rule' => api.DiscardAgendaInputOriginEnum.specialRule,
+        'command_point' => api.DiscardAgendaInputOriginEnum.commandPoint,
+        _ => throw ArgumentError('Unknown discard origin: $origin'),
+      };
 
   Future<api.Game> markReady(int gameId) => _guard(() async {
     final res = await _client.games.markReady(id: gameId);
