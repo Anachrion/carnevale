@@ -70,6 +70,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**confirmAgendas**](doc/GamesApi.md#confirmagendas) | **POST** /games/{id}/agendas/confirm | Confirm this player&#39;s opening Agenda hand
 [*GamesApi*](doc/GamesApi.md) | [**createGame**](doc/GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
 [*GamesApi*](doc/GamesApi.md) | [**deleteGame**](doc/GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
+[*GamesApi*](doc/GamesApi.md) | [**deselectGang**](doc/GamesApi.md#deselectgang) | **DELETE** /games/{id}/select_gang | Clear the current user&#39;s gang selection for this game (still in gang selection)
 [*GamesApi*](doc/GamesApi.md) | [**discardAgenda**](doc/GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
 [*GamesApi*](doc/GamesApi.md) | [**drawAgendas**](doc/GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
 [*GamesApi*](doc/GamesApi.md) | [**finishGame**](doc/GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side

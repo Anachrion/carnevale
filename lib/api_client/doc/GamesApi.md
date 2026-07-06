@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**confirmAgendas**](GamesApi.md#confirmagendas) | **POST** /games/{id}/agendas/confirm | Confirm this player&#39;s opening Agenda hand
 [**createGame**](GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
 [**deleteGame**](GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
+[**deselectGang**](GamesApi.md#deselectgang) | **DELETE** /games/{id}/select_gang | Clear the current user&#39;s gang selection for this game (still in gang selection)
 [**discardAgenda**](GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
 [**drawAgendas**](GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
 [**finishGame**](GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side
@@ -264,6 +265,51 @@ void (empty response body)
 
  - **Content-Type**: Not defined
  - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **deselectGang**
+> Game deselectGang(id)
+
+Clear the current user's gang selection for this game (still in gang selection)
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.deselectGang(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->deselectGang: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

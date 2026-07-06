@@ -12,6 +12,7 @@ part 'gang_summary.g.dart';
 ///
 /// Properties:
 /// * [id] 
+/// * [sourceListId] - The source list this gang was snapshotted from when selected for a game; null for a source list itself (e.g. entries in the available-lists picker). Lets a client match a player's in-game gang to the picker.
 /// * [name] 
 /// * [faction] 
 /// * [points] 
@@ -20,6 +21,10 @@ part 'gang_summary.g.dart';
 abstract class GangSummary implements Built<GangSummary, GangSummaryBuilder> {
   @BuiltValueField(wireName: r'id')
   int get id;
+
+  /// The source list this gang was snapshotted from when selected for a game; null for a source list itself (e.g. entries in the available-lists picker). Lets a client match a player's in-game gang to the picker.
+  @BuiltValueField(wireName: r'source_list_id')
+  int? get sourceListId;
 
   @BuiltValueField(wireName: r'name')
   String? get name;
@@ -61,6 +66,13 @@ class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
       object.id,
       specifiedType: const FullType(int),
     );
+    if (object.sourceListId != null) {
+      yield r'source_list_id';
+      yield serializers.serialize(
+        object.sourceListId,
+        specifiedType: const FullType.nullable(int),
+      );
+    }
     yield r'name';
     yield object.name == null ? null : serializers.serialize(
       object.name,
@@ -110,6 +122,14 @@ class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
             specifiedType: const FullType(int),
           ) as int;
           result.id = valueDes;
+          break;
+        case r'source_list_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          if (valueDes == null) continue;
+          result.sourceListId = valueDes;
           break;
         case r'name':
           final valueDes = serializers.deserialize(
