@@ -579,6 +579,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             opponent: opponent,
             busy: _busy,
             onAdvanceTurn: () => _run(() => _service.advanceTurn(game.id)),
+            onRewindTurn: () => _run(() => _service.rewindTurn(game.id)),
+            onFinish: () => _run(() => _service.finishGame(game.id)),
+            onUnfinish: () => _run(() => _service.unfinishGame(game.id)),
             onDraw: (origin) =>
                 _run(() => _service.drawAgendas(game.id, origin: origin)),
             onScore: (agendaId) =>

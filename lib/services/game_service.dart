@@ -165,6 +165,23 @@ class GameService extends ChangeNotifier {
     return res.data!;
   });
 
+  Future<api.Game> rewindTurn(int gameId) => _guard(() async {
+    final res = await _client.games.rewindTurn(id: gameId);
+    return res.data!;
+  });
+
+  /// Ends the game from this player's side (only valid on the last turn) — archives it for them
+  /// while the opponent keeps playing.
+  Future<api.Game> finishGame(int gameId) => _guard(() async {
+    final res = await _client.games.finishGame(id: gameId);
+    return res.data!;
+  });
+
+  Future<api.Game> unfinishGame(int gameId) => _guard(() async {
+    final res = await _client.games.unfinishGame(id: gameId);
+    return res.data!;
+  });
+
   api.DrawAgendaInputOriginEnum _drawOrigin(String origin) => switch (origin) {
     'special_rule' => api.DrawAgendaInputOriginEnum.specialRule,
     'command_point' => api.DrawAgendaInputOriginEnum.commandPoint,

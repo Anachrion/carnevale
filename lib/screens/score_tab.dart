@@ -17,6 +17,9 @@ class ScoreTab extends StatelessWidget {
     required this.opponent,
     required this.busy,
     required this.onAdvanceTurn,
+    required this.onRewindTurn,
+    required this.onFinish,
+    required this.onUnfinish,
     required this.onDraw,
     required this.onScore,
     required this.onDiscard,
@@ -28,11 +31,17 @@ class ScoreTab extends StatelessWidget {
   final bool busy;
 
   final VoidCallback onAdvanceTurn;
+  final VoidCallback onRewindTurn;
+  final VoidCallback onFinish;
+  final VoidCallback onUnfinish;
   final void Function(String origin) onDraw;
   final void Function(int agendaId) onScore;
   final void Function(int agendaId, String origin) onDiscard;
 
   bool get _inProgress => game.status == api.GameStatusEnum.inProgress;
+  // A finished player is soft-locked out of scoring/turn moves until they undo.
+  bool get _canAct => _inProgress && !me.finished;
+  bool get _onLastTurn => me.currentTurn >= game.scenario.turns;
   bool get _secret =>
       game.scenario.agendaRules.contains(api.ScenarioAgendaRulesEnum.secret);
 
@@ -95,37 +104,40 @@ class ScoreTab extends StatelessWidget {
     return GlassPanel(
       child: Column(
         children: [
+          // Per-player turn stepper: this only moves your own cursor, never the opponent's.
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Turn ${game.currentTurn} of ${game.scenario.turns}',
-                style: GoogleFonts.cinzel(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: context.textColor,
+              IconButton(
+                onPressed: (_canAct && me.currentTurn > 1 && !busy)
+                    ? onRewindTurn
+                    : null,
+                icon: const Icon(Icons.chevron_left),
+                tooltip: 'Rewind a turn',
+                color: AppPalette.gold,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'Turn ${me.currentTurn} of ${game.scenario.turns}',
+                  style: GoogleFonts.cinzel(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                  ),
                 ),
               ),
-              if (_inProgress)
-                TextButton.icon(
-                  onPressed: busy ? null : onAdvanceTurn,
-                  icon: const Icon(Icons.skip_next, size: 18),
-                  label: const Text('Advance'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppPalette.gold,
-                  ),
-                )
-              else
-                Text(
-                  'Game over',
-                  style: TextStyle(
-                    color: context.subtleTextColor,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
+              IconButton(
+                onPressed: (_canAct && !_onLastTurn && !busy)
+                    ? onAdvanceTurn
+                    : null,
+                icon: const Icon(Icons.chevron_right),
+                tooltip: 'Advance a turn',
+                color: AppPalette.gold,
+              ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             children: [
               _scoreColumn(context, me.username, me.score, isMe: true),
@@ -138,9 +150,52 @@ class ScoreTab extends StatelessWidget {
                   isMe: false),
             ],
           ),
+          _finishArea(context),
         ],
       ),
     );
+  }
+
+  // End-game controls, per player. The button only appears on the last turn; a finished player
+  // sees an Undo that reopens the game (and un-archives it) so they can keep scoring.
+  Widget _finishArea(BuildContext context) {
+    if (me.finished) {
+      return Column(
+        children: [
+          const SizedBox(height: 12),
+          Text(
+            "You've ended the game.",
+            style: TextStyle(
+              color: context.subtleTextColor,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: busy ? null : onUnfinish,
+            icon: const Icon(Icons.undo, size: 18),
+            label: const Text('Undo — keep scoring'),
+            style: OutlinedButton.styleFrom(foregroundColor: AppPalette.gold),
+          ),
+        ],
+      );
+    }
+    if (_inProgress && _onLastTurn) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: ElevatedButton.icon(
+          onPressed: busy ? null : onFinish,
+          icon: const Icon(Icons.flag, size: 18),
+          label: const Text('End game'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppPalette.gold,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   Widget _scoreColumn(BuildContext context, String name, int score,
@@ -194,15 +249,21 @@ class ScoreTab extends StatelessWidget {
                   color: context.textColor,
                 ),
               ),
-              if (_inProgress)
-                TextButton.icon(
-                  onPressed: busy ? null : () => _draw(context),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Draw'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppPalette.gold,
-                  ),
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _logButton(context, me, isMe: true),
+                  if (_canAct)
+                    TextButton.icon(
+                      onPressed: busy ? null : () => _draw(context),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('Draw'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppPalette.gold,
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -249,7 +310,7 @@ class ScoreTab extends StatelessWidget {
             a.description,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
-          if (_inProgress) ...[
+          if (_canAct) ...[
             const SizedBox(height: 6),
             Row(
               children: [
@@ -285,13 +346,22 @@ class ScoreTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "${opponent.username}'s Agendas",
-            style: GoogleFonts.cinzel(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "${opponent.username}'s Agendas",
+                  style: GoogleFonts.cinzel(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              _logButton(context, opponent, isMe: false),
+            ],
           ),
           const SizedBox(height: 8),
           _sectionLabel(context, 'In hand'),
@@ -412,6 +482,33 @@ class ScoreTab extends StatelessWidget {
             ),
             child: child,
           );
+  }
+
+  // ── Log ────────────────────────────────────────────────────────────────────
+
+  Widget _logButton(BuildContext context, api.GamePlayer player,
+      {required bool isMe}) {
+    return TextButton.icon(
+      onPressed: () => _showLog(context, player, isMe: isMe),
+      icon: const Icon(Icons.history, size: 18),
+      label: const Text('Log'),
+      style: TextButton.styleFrom(foregroundColor: context.subtleTextColor),
+    );
+  }
+
+  void _showLog(BuildContext context, api.GamePlayer player,
+      {required bool isMe}) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => _AgendaLogSheet(
+        player: player,
+        isMe: isMe,
+        totalTurns: game.scenario.turns,
+        secret: _secret,
+      ),
+    );
   }
 
   // ── Actions ──────────────────────────────────────────────────────────────
@@ -551,6 +648,148 @@ class _AgendaRuleChip extends StatelessWidget {
                 size: 13, color: context.subtleTextColor),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A per-player event log: that player's agenda draw/score/discard history grouped by turn.
+/// Under the Secret rule an opponent's log only carries resolved events (the backend already
+/// trims it), which the header notes.
+class _AgendaLogSheet extends StatelessWidget {
+  const _AgendaLogSheet({
+    required this.player,
+    required this.isMe,
+    required this.totalTurns,
+    required this.secret,
+  });
+
+  final api.GamePlayer player;
+  final bool isMe;
+  final int totalTurns;
+  final bool secret;
+
+  @override
+  Widget build(BuildContext context) {
+    final byTurn = <int, List<api.AgendaHistoryEntry>>{};
+    for (final e in player.agendaHistory) {
+      byTurn.putIfAbsent(e.turn, () => []).add(e);
+    }
+    final turns = byTurn.keys.toList()..sort();
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: GlassPanel(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isMe ? 'Your log' : "${player.username}'s log",
+                style: GoogleFonts.cinzel(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: context.textColor,
+                ),
+              ),
+              if (!isMe && secret) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Only resolved agendas are shown (Secret scenario).',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: context.subtleTextColor,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+              if (turns.isEmpty)
+                Text(
+                  'No events yet.',
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: context.subtleTextColor,
+                  ),
+                )
+              else
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: turns
+                          .map((t) => _turnBlock(context, t, byTurn[t]!))
+                          .toList(),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _turnBlock(
+      BuildContext context, int turn, List<api.AgendaHistoryEntry> events) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'TURN $turn',
+            style: const TextStyle(
+              fontSize: 11,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w600,
+              color: AppPalette.gold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          ...events.map((e) => _eventRow(context, e)),
+        ],
+      ),
+    );
+  }
+
+  Widget _eventRow(BuildContext context, api.AgendaHistoryEntry e) {
+    final (IconData icon, Color color, String verb) = switch (e.action) {
+      api.AgendaHistoryEntryActionEnum.scored => (
+          Icons.check_circle,
+          AppPalette.gold,
+          'Scored'
+        ),
+      api.AgendaHistoryEntryActionEnum.discarded => (
+          Icons.cancel,
+          context.subtleTextColor,
+          'Discarded'
+        ),
+      _ => (Icons.add_circle_outline, context.subtleTextColor, 'Drew'),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 15, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: 13, color: context.textColor),
+                children: [
+                  TextSpan(
+                    text: '$verb ',
+                    style: TextStyle(color: context.subtleTextColor),
+                  ),
+                  TextSpan(text: e.agenda.name),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

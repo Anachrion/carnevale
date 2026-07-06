@@ -17,10 +17,9 @@ part 'game.g.dart';
 /// * [id] 
 /// * [name] 
 /// * [joinCode] 
-/// * [status] 
+/// * [status] - `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
 /// * [ducatLimit] 
 /// * [boardSize] 
-/// * [currentTurn] - The shared turn counter, starting at 1. Advanced by either player via POST /games/{id}/turns/advance.
 /// * [scenario] 
 /// * [viewerVisibility] - The requesting user's own archive/delete state for this game — never reflects the opponent's.
 /// * [players] 
@@ -35,6 +34,7 @@ abstract class Game implements Built<Game, GameBuilder> {
   @BuiltValueField(wireName: r'join_code')
   String get joinCode;
 
+  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueField(wireName: r'status')
   GameStatusEnum get status;
   // enum statusEnum {  pending,  gang_selection,  agenda_draw,  deploying,  in_progress,  completed,  };
@@ -44,10 +44,6 @@ abstract class Game implements Built<Game, GameBuilder> {
 
   @BuiltValueField(wireName: r'board_size')
   String? get boardSize;
-
-  /// The shared turn counter, starting at 1. Advanced by either player via POST /games/{id}/turns/advance.
-  @BuiltValueField(wireName: r'current_turn')
-  int get currentTurn;
 
   @BuiltValueField(wireName: r'scenario')
   Scenario get scenario;
@@ -112,11 +108,6 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     yield object.boardSize == null ? null : serializers.serialize(
       object.boardSize,
       specifiedType: const FullType.nullable(String),
-    );
-    yield r'current_turn';
-    yield serializers.serialize(
-      object.currentTurn,
-      specifiedType: const FullType(int),
     );
     yield r'scenario';
     yield serializers.serialize(
@@ -199,13 +190,6 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
           if (valueDes == null) continue;
           result.boardSize = valueDes;
           break;
-        case r'current_turn':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
-          result.currentTurn = valueDes;
-          break;
         case r'scenario':
           final valueDes = serializers.deserialize(
             value,
@@ -258,16 +242,22 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
 
 class GameStatusEnum extends EnumClass {
 
+  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'pending')
   static const GameStatusEnum pending = _$gameStatusEnum_pending;
+  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'gang_selection')
   static const GameStatusEnum gangSelection = _$gameStatusEnum_gangSelection;
+  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'agenda_draw')
   static const GameStatusEnum agendaDraw = _$gameStatusEnum_agendaDraw;
+  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'deploying')
   static const GameStatusEnum deploying = _$gameStatusEnum_deploying;
+  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'in_progress')
   static const GameStatusEnum inProgress = _$gameStatusEnum_inProgress;
+  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'completed')
   static const GameStatusEnum completed = _$gameStatusEnum_completed;
 

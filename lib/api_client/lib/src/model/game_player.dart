@@ -25,6 +25,8 @@ part 'game_player.g.dart';
 /// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
 /// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
 /// * [score] - Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Always visible for both players.
+/// * [currentTurn] - This player's own turn cursor (starts at 1). Rewindable via the turns/advance and turns/rewind endpoints; agenda events are stamped with whatever turn the player is pointed at. Independent of the opponent's.
+/// * [finished] - Whether this player has ended the game from their side (see the finish/unfinish endpoints). When both players are finished the game's status derives to `completed`.
 /// * [agendas] - This player's current hand. Always populated for the requesting player's own entry. For the opponent's entry it is populated too, unless the scenario has the `secret` agenda rule, in which case it is empty (the hand stays hidden until achieved).
 /// * [agendaHistory] - Draw/score/discard events for this player, in turn order. Full history for the requesting player's own entry. For the opponent's entry under the `secret` rule it is trimmed to resolved events only (scored + discarded), so the hidden hand doesn't leak; otherwise it is the full history.
 @BuiltValue()
@@ -62,6 +64,14 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   /// Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Always visible for both players.
   @BuiltValueField(wireName: r'score')
   int get score;
+
+  /// This player's own turn cursor (starts at 1). Rewindable via the turns/advance and turns/rewind endpoints; agenda events are stamped with whatever turn the player is pointed at. Independent of the opponent's.
+  @BuiltValueField(wireName: r'current_turn')
+  int get currentTurn;
+
+  /// Whether this player has ended the game from their side (see the finish/unfinish endpoints). When both players are finished the game's status derives to `completed`.
+  @BuiltValueField(wireName: r'finished')
+  bool get finished;
 
   /// This player's current hand. Always populated for the requesting player's own entry. For the opponent's entry it is populated too, unless the scenario has the `secret` agenda rule, in which case it is empty (the hand stays hidden until achieved).
   @BuiltValueField(wireName: r'agendas')
@@ -143,6 +153,16 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     yield serializers.serialize(
       object.score,
       specifiedType: const FullType(int),
+    );
+    yield r'current_turn';
+    yield serializers.serialize(
+      object.currentTurn,
+      specifiedType: const FullType(int),
+    );
+    yield r'finished';
+    yield serializers.serialize(
+      object.finished,
+      specifiedType: const FullType(bool),
     );
     yield r'agendas';
     yield serializers.serialize(
@@ -248,6 +268,20 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
             specifiedType: const FullType(int),
           ) as int;
           result.score = valueDes;
+          break;
+        case r'current_turn':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.currentTurn = valueDes;
+          break;
+        case r'finished':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.finished = valueDes;
           break;
         case r'agendas':
           final valueDes = serializers.deserialize(

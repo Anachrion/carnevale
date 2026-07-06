@@ -86,6 +86,10 @@ class _$GamePlayer extends GamePlayer {
   @override
   final int score;
   @override
+  final int currentTurn;
+  @override
+  final bool finished;
+  @override
   final BuiltList<Agenda> agendas;
   @override
   final BuiltList<AgendaHistoryEntry> agendaHistory;
@@ -104,6 +108,8 @@ class _$GamePlayer extends GamePlayer {
     required this.wonRoleRoll,
     required this.wonDeploymentRoll,
     required this.score,
+    required this.currentTurn,
+    required this.finished,
     required this.agendas,
     required this.agendaHistory,
   }) : super._();
@@ -128,6 +134,8 @@ class _$GamePlayer extends GamePlayer {
         wonRoleRoll == other.wonRoleRoll &&
         wonDeploymentRoll == other.wonDeploymentRoll &&
         score == other.score &&
+        currentTurn == other.currentTurn &&
+        finished == other.finished &&
         agendas == other.agendas &&
         agendaHistory == other.agendaHistory;
   }
@@ -145,6 +153,8 @@ class _$GamePlayer extends GamePlayer {
     _$hash = $jc(_$hash, wonRoleRoll.hashCode);
     _$hash = $jc(_$hash, wonDeploymentRoll.hashCode);
     _$hash = $jc(_$hash, score.hashCode);
+    _$hash = $jc(_$hash, currentTurn.hashCode);
+    _$hash = $jc(_$hash, finished.hashCode);
     _$hash = $jc(_$hash, agendas.hashCode);
     _$hash = $jc(_$hash, agendaHistory.hashCode);
     _$hash = $jf(_$hash);
@@ -164,6 +174,8 @@ class _$GamePlayer extends GamePlayer {
           ..add('wonRoleRoll', wonRoleRoll)
           ..add('wonDeploymentRoll', wonDeploymentRoll)
           ..add('score', score)
+          ..add('currentTurn', currentTurn)
+          ..add('finished', finished)
           ..add('agendas', agendas)
           ..add('agendaHistory', agendaHistory))
         .toString();
@@ -214,6 +226,14 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
   int? get score => _$this._score;
   set score(int? score) => _$this._score = score;
 
+  int? _currentTurn;
+  int? get currentTurn => _$this._currentTurn;
+  set currentTurn(int? currentTurn) => _$this._currentTurn = currentTurn;
+
+  bool? _finished;
+  bool? get finished => _$this._finished;
+  set finished(bool? finished) => _$this._finished = finished;
+
   ListBuilder<Agenda>? _agendas;
   ListBuilder<Agenda> get agendas => _$this._agendas ??= ListBuilder<Agenda>();
   set agendas(ListBuilder<Agenda>? agendas) => _$this._agendas = agendas;
@@ -241,6 +261,8 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
       _wonRoleRoll = $v.wonRoleRoll;
       _wonDeploymentRoll = $v.wonDeploymentRoll;
       _score = $v.score;
+      _currentTurn = $v.currentTurn;
+      _finished = $v.finished;
       _agendas = $v.agendas.toBuilder();
       _agendaHistory = $v.agendaHistory.toBuilder();
       _$v = null;
@@ -304,6 +326,16 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
               score,
               r'GamePlayer',
               'score',
+            ),
+            currentTurn: BuiltValueNullFieldError.checkNotNull(
+              currentTurn,
+              r'GamePlayer',
+              'currentTurn',
+            ),
+            finished: BuiltValueNullFieldError.checkNotNull(
+              finished,
+              r'GamePlayer',
+              'finished',
             ),
             agendas: agendas.build(),
             agendaHistory: agendaHistory.build(),
