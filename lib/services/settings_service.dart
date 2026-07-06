@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService extends ChangeNotifier {
+  // Factory singleton, matching the other services (ApiClient/AuthService/GangService/…) so that
+  // `SettingsService()` anywhere resolves to the same instance the `settingsService` global holds,
+  // rather than silently constructing a second, listener-less copy.
+  static final SettingsService _instance = SettingsService._();
+  factory SettingsService() => _instance;
+  SettingsService._();
+
   static const _themeKey = 'theme_mode';
 
   ThemeMode _themeMode = ThemeMode.system;
