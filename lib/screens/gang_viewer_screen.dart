@@ -100,6 +100,7 @@ class GangsTabView extends StatelessWidget {
     required this.opponentPlayerId,
     required this.opponentLabel,
     this.showListHeader = true,
+    this.leadingTabs = const [],
   });
 
   final int gameId;
@@ -112,10 +113,14 @@ class GangsTabView extends StatelessWidget {
   /// in progress, where the list is fixed and that summary is just noise above the models.
   final bool showListHeader;
 
+  /// Extra tabs shown before the two gang tabs — e.g. the in-progress Score tab. Each carries its
+  /// own label and prebuilt view so this widget stays agnostic of what they contain.
+  final List<({String label, Widget view})> leadingTabs;
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 2 + leadingTabs.length,
       child: Column(
         children: [
           _buildTabBar(context),
@@ -123,6 +128,7 @@ class GangsTabView extends StatelessWidget {
           Expanded(
             child: TabBarView(
               children: [
+                ...leadingTabs.map((t) => t.view),
                 // Players only ever edit their own models' counters; the opponent's tab stays
                 // read-only (their changes still stream in live via game_state broadcasts).
                 _GangTab(
@@ -149,6 +155,8 @@ class GangsTabView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TabBar(
+        isScrollable: leadingTabs.isNotEmpty,
+        tabAlignment: leadingTabs.isNotEmpty ? TabAlignment.center : null,
         labelColor: AppPalette.gold,
         unselectedLabelColor: context.subtleTextColor,
         indicatorColor: AppPalette.gold,
@@ -158,6 +166,7 @@ class GangsTabView extends StatelessWidget {
           letterSpacing: 1,
         ),
         tabs: [
+          ...leadingTabs.map((t) => Tab(text: t.label)),
           Tab(text: myLabel),
           Tab(text: opponentLabel),
         ],

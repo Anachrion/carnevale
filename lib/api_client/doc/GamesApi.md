@@ -221,7 +221,7 @@ void (empty response body)
 
 Discard an Agenda from this player's hand
 
-Only valid while the game is `in_progress`, and only for an agenda currently in the requesting player's hand. Requires `origin` (`special_rule` or `command_point` — an agenda is never freely discarded, only via one of those). Set `recycle: true` if the scenario's \"Cycle\" rule applies, which immediately draws a replacement card (origin `recycle`, linked back to this discard). 
+Discards an agenda currently in the requesting player's hand. The valid `origin` depends on the game status:   * during setup (`agenda_draw`/`deploying`), `unachievable` — the pre-game mulligan for an     impossible or duplicated agenda, which always draws a replacement (origin `recycle`); or   * while `in_progress`, `special_rule` or `command_point` — an in-play discard granted by     one of those, which draws a replacement only when `recycle: true`. A discarded agenda is always visible to the opponent (even under the Secret rule). 
 
 ### Example
 ```dart
@@ -648,11 +648,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **scoreAgenda**
-> Game scoreAgenda(id, agendaId, scoreAgendaInput)
+> Game scoreAgenda(id, agendaId)
 
 Score an Agenda from this player's hand (flat 1 Victory Point)
 
-Only valid while the game is `in_progress`, and only for an agenda currently in the requesting player's hand. Set `recycle: true` if the scenario's \"Cycle\" rule applies, which immediately draws a replacement card (origin `recycle`, linked back to this score). 
+Only valid while the game is `in_progress`, and only for an agenda currently in the requesting player's hand. Takes no body. If the scenario carries the \"Cycle\" rule, scoring automatically draws a replacement card (origin `recycle`, linked back to this score) — this is driven by the scenario, not requested by the client. 
 
 ### Example
 ```dart
@@ -665,10 +665,9 @@ import 'package:carnevale_api/api.dart';
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
 final int agendaId = 56; // int | 
-final ScoreAgendaInput scoreAgendaInput = ; // ScoreAgendaInput | 
 
 try {
-    final response = api.scoreAgenda(id, agendaId, scoreAgendaInput);
+    final response = api.scoreAgenda(id, agendaId);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling GamesApi->scoreAgenda: $e\n');
@@ -681,7 +680,6 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **int**|  | 
  **agendaId** | **int**|  | 
- **scoreAgendaInput** | [**ScoreAgendaInput**](ScoreAgendaInput.md)|  | [optional] 
 
 ### Return type
 
@@ -693,7 +691,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

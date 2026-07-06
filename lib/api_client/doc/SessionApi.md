@@ -9,6 +9,7 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**createCableTicket**](SessionApi.md#createcableticket) | **POST** /cable_tickets | Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
 [**forgotPassword**](SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [**login**](SessionApi.md#login) | **POST** /login | Log in and receive a JWT
 [**logout**](SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
@@ -16,6 +17,49 @@ Method | HTTP request | Description
 [**signup**](SessionApi.md#signup) | **POST** /signup | Register a new user
 [**updateAccount**](SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
 
+
+# **createCableTicket**
+> CreateCableTicket201Response createCableTicket()
+
+Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
+
+Returns a one-time ticket to pass as the `ticket` query parameter when connecting to `/cable`, so the reusable JWT never travels in the (loggable) WebSocket URL. The ticket expires within seconds and is consumed the first time it is redeemed. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getSessionApi();
+
+try {
+    final response = api.createCableTicket();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling SessionApi->createCableTicket: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**CreateCableTicket201Response**](CreateCableTicket201Response.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **forgotPassword**
 > forgotPassword(forgotPasswordInput)

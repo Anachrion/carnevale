@@ -6,6 +6,7 @@ doc/AgendaHistoryEntry.md
 doc/AgendaHistoryEntryAgenda.md
 doc/AvailableGang.md
 doc/CardReference.md
+doc/CreateCableTicket201Response.md
 doc/CreateGameInput.md
 doc/DiscardAgendaInput.md
 doc/DrawAgendaInput.md
@@ -42,7 +43,6 @@ doc/ResetPasswordInputUser.md
 doc/RoleInput.md
 doc/Scenario.md
 doc/ScenariosApi.md
-doc/ScoreAgendaInput.md
 doc/SelectGangInput.md
 doc/Session.md
 doc/SessionApi.md
@@ -82,6 +82,7 @@ lib/src/model/agenda_history_entry.dart
 lib/src/model/agenda_history_entry_agenda.dart
 lib/src/model/available_gang.dart
 lib/src/model/card_reference.dart
+lib/src/model/create_cable_ticket201_response.dart
 lib/src/model/create_game_input.dart
 lib/src/model/date.dart
 lib/src/model/discard_agenda_input.dart
@@ -113,7 +114,6 @@ lib/src/model/reset_password_input.dart
 lib/src/model/reset_password_input_user.dart
 lib/src/model/role_input.dart
 lib/src/model/scenario.dart
-lib/src/model/score_agenda_input.dart
 lib/src/model/select_gang_input.dart
 lib/src/model/session.dart
 lib/src/model/session_user.dart
@@ -131,3 +131,4 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
+test/create_cable_ticket201_response_test.dart

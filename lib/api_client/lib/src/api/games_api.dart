@@ -20,7 +20,6 @@ import 'package:carnevale_api/src/model/entry_state.dart';
 import 'package:carnevale_api/src/model/game.dart';
 import 'package:carnevale_api/src/model/join_game_input.dart';
 import 'package:carnevale_api/src/model/role_input.dart';
-import 'package:carnevale_api/src/model/score_agenda_input.dart';
 import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
 import 'package:carnevale_api/src/model/update_stats_input.dart';
@@ -371,7 +370,7 @@ class GamesApi {
   }
 
   /// Discard an Agenda from this player&#39;s hand
-  /// Only valid while the game is &#x60;in_progress&#x60;, and only for an agenda currently in the requesting player&#39;s hand. Requires &#x60;origin&#x60; (&#x60;special_rule&#x60; or &#x60;command_point&#x60; — an agenda is never freely discarded, only via one of those). Set &#x60;recycle: true&#x60; if the scenario&#39;s \&quot;Cycle\&quot; rule applies, which immediately draws a replacement card (origin &#x60;recycle&#x60;, linked back to this discard). 
+  /// Discards an agenda currently in the requesting player&#39;s hand. The valid &#x60;origin&#x60; depends on the game status:   * during setup (&#x60;agenda_draw&#x60;/&#x60;deploying&#x60;), &#x60;unachievable&#x60; — the pre-game mulligan for an     impossible or duplicated agenda, which always draws a replacement (origin &#x60;recycle&#x60;); or   * while &#x60;in_progress&#x60;, &#x60;special_rule&#x60; or &#x60;command_point&#x60; — an in-play discard granted by     one of those, which draws a replacement only when &#x60;recycle: true&#x60;. A discarded agenda is always visible to the opponent (even under the Secret rule). 
   ///
   /// Parameters:
   /// * [id] 
@@ -1240,12 +1239,11 @@ class GamesApi {
   }
 
   /// Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
-  /// Only valid while the game is &#x60;in_progress&#x60;, and only for an agenda currently in the requesting player&#39;s hand. Set &#x60;recycle: true&#x60; if the scenario&#39;s \&quot;Cycle\&quot; rule applies, which immediately draws a replacement card (origin &#x60;recycle&#x60;, linked back to this score). 
+  /// Only valid while the game is &#x60;in_progress&#x60;, and only for an agenda currently in the requesting player&#39;s hand. Takes no body. If the scenario carries the \&quot;Cycle\&quot; rule, scoring automatically draws a replacement card (origin &#x60;recycle&#x60;, linked back to this score) — this is driven by the scenario, not requested by the client. 
   ///
   /// Parameters:
   /// * [id] 
   /// * [agendaId] 
-  /// * [scoreAgendaInput] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -1258,7 +1256,6 @@ class GamesApi {
   Future<Response<Game>> scoreAgenda({ 
     required int id,
     required int agendaId,
-    ScoreAgendaInput? scoreAgendaInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -1287,31 +1284,11 @@ class GamesApi {
         ],
         ...?extra,
       },
-      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
-    dynamic _bodyData;
-
-    try {
-      const _type = FullType(ScoreAgendaInput);
-      _bodyData = scoreAgendaInput == null ? null : _serializers.serialize(scoreAgendaInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
-      throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
-        type: DioExceptionType.unknown,
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
     final _response = await _dio.request<Object>(
       _path,
-      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,

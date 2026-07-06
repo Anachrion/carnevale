@@ -6,55 +6,51 @@
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
-part 'score_agenda_input.g.dart';
+part 'create_cable_ticket201_response.g.dart';
 
-/// ScoreAgendaInput
+/// CreateCableTicket201Response
 ///
 /// Properties:
-/// * [recycle] - If true, immediately draws a replacement card (origin `recycle`) linked back to this score.
+/// * [ticket] 
 @BuiltValue()
-abstract class ScoreAgendaInput implements Built<ScoreAgendaInput, ScoreAgendaInputBuilder> {
-  /// If true, immediately draws a replacement card (origin `recycle`) linked back to this score.
-  @BuiltValueField(wireName: r'recycle')
-  bool? get recycle;
+abstract class CreateCableTicket201Response implements Built<CreateCableTicket201Response, CreateCableTicket201ResponseBuilder> {
+  @BuiltValueField(wireName: r'ticket')
+  String get ticket;
 
-  ScoreAgendaInput._();
+  CreateCableTicket201Response._();
 
-  factory ScoreAgendaInput([void updates(ScoreAgendaInputBuilder b)]) = _$ScoreAgendaInput;
+  factory CreateCableTicket201Response([void updates(CreateCableTicket201ResponseBuilder b)]) = _$CreateCableTicket201Response;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(ScoreAgendaInputBuilder b) => b
-      ..recycle = false;
+  static void _defaults(CreateCableTicket201ResponseBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<ScoreAgendaInput> get serializer => _$ScoreAgendaInputSerializer();
+  static Serializer<CreateCableTicket201Response> get serializer => _$CreateCableTicket201ResponseSerializer();
 }
 
-class _$ScoreAgendaInputSerializer implements PrimitiveSerializer<ScoreAgendaInput> {
+class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<CreateCableTicket201Response> {
   @override
-  final Iterable<Type> types = const [ScoreAgendaInput, _$ScoreAgendaInput];
+  final Iterable<Type> types = const [CreateCableTicket201Response, _$CreateCableTicket201Response];
 
   @override
-  final String wireName = r'ScoreAgendaInput';
+  final String wireName = r'CreateCableTicket201Response';
 
   Iterable<Object?> _serializeProperties(
     Serializers serializers,
-    ScoreAgendaInput object, {
+    CreateCableTicket201Response object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
-    if (object.recycle != null) {
-      yield r'recycle';
-      yield serializers.serialize(
-        object.recycle,
-        specifiedType: const FullType(bool),
-      );
-    }
+    yield r'ticket';
+    yield serializers.serialize(
+      object.ticket,
+      specifiedType: const FullType(String),
+    );
   }
 
   @override
   Object serialize(
     Serializers serializers,
-    ScoreAgendaInput object, {
+    CreateCableTicket201Response object, {
     FullType specifiedType = FullType.unspecified,
   }) {
     return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
@@ -65,19 +61,19 @@ class _$ScoreAgendaInputSerializer implements PrimitiveSerializer<ScoreAgendaInp
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
     required List<Object?> serializedList,
-    required ScoreAgendaInputBuilder result,
+    required CreateCableTicket201ResponseBuilder result,
     required List<Object?> unhandled,
   }) {
     for (var i = 0; i < serializedList.length; i += 2) {
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
-        case r'recycle':
+        case r'ticket':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.recycle = valueDes;
+            specifiedType: const FullType(String),
+          ) as String;
+          result.ticket = valueDes;
           break;
         default:
           unhandled.add(key);
@@ -88,12 +84,12 @@ class _$ScoreAgendaInputSerializer implements PrimitiveSerializer<ScoreAgendaInp
   }
 
   @override
-  ScoreAgendaInput deserialize(
+  CreateCableTicket201Response deserialize(
     Serializers serializers,
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    final result = ScoreAgendaInputBuilder();
+    final result = CreateCableTicket201ResponseBuilder();
     final serializedList = (serialized as Iterable<Object?>).toList();
     final unhandled = <Object?>[];
     _deserializeProperties(

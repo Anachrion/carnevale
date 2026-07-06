@@ -24,9 +24,9 @@ part 'game_player.g.dart';
 /// * [ready] 
 /// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
 /// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
-/// * [score] - Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Visible for both players, unlike the hidden hand.
-/// * [agendas] - This player's current hand. Only populated for the requesting player's own entry — always empty for the opponent's.
-/// * [agendaHistory] - Every draw/score/discard event for this player, in turn order. Only populated for the requesting player's own entry — always empty for the opponent's.
+/// * [score] - Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Always visible for both players.
+/// * [agendas] - This player's current hand. Always populated for the requesting player's own entry. For the opponent's entry it is populated too, unless the scenario has the `secret` agenda rule, in which case it is empty (the hand stays hidden until achieved).
+/// * [agendaHistory] - Draw/score/discard events for this player, in turn order. Full history for the requesting player's own entry. For the opponent's entry under the `secret` rule it is trimmed to resolved events only (scored + discarded), so the hidden hand doesn't leak; otherwise it is the full history.
 @BuiltValue()
 abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -59,15 +59,15 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   @BuiltValueField(wireName: r'won_deployment_roll')
   bool get wonDeploymentRoll;
 
-  /// Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Visible for both players, unlike the hidden hand.
+  /// Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Always visible for both players.
   @BuiltValueField(wireName: r'score')
   int get score;
 
-  /// This player's current hand. Only populated for the requesting player's own entry — always empty for the opponent's.
+  /// This player's current hand. Always populated for the requesting player's own entry. For the opponent's entry it is populated too, unless the scenario has the `secret` agenda rule, in which case it is empty (the hand stays hidden until achieved).
   @BuiltValueField(wireName: r'agendas')
   BuiltList<Agenda> get agendas;
 
-  /// Every draw/score/discard event for this player, in turn order. Only populated for the requesting player's own entry — always empty for the opponent's.
+  /// Draw/score/discard events for this player, in turn order. Full history for the requesting player's own entry. For the opponent's entry under the `secret` rule it is trimmed to resolved events only (scored + discarded), so the hidden hand doesn't leak; otherwise it is the full history.
   @BuiltValueField(wireName: r'agenda_history')
   BuiltList<AgendaHistoryEntry> get agendaHistory;
 

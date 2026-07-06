@@ -6,6 +6,8 @@ part of 'discard_agenda_input.dart';
 // BuiltValueGenerator
 // **************************************************************************
 
+const DiscardAgendaInputOriginEnum _$discardAgendaInputOriginEnum_unachievable =
+    const DiscardAgendaInputOriginEnum._('unachievable');
 const DiscardAgendaInputOriginEnum _$discardAgendaInputOriginEnum_specialRule =
     const DiscardAgendaInputOriginEnum._('specialRule');
 const DiscardAgendaInputOriginEnum _$discardAgendaInputOriginEnum_commandPoint =
@@ -15,6 +17,8 @@ DiscardAgendaInputOriginEnum _$discardAgendaInputOriginEnumValueOf(
   String name,
 ) {
   switch (name) {
+    case 'unachievable':
+      return _$discardAgendaInputOriginEnum_unachievable;
     case 'specialRule':
       return _$discardAgendaInputOriginEnum_specialRule;
     case 'commandPoint':
@@ -27,6 +31,7 @@ DiscardAgendaInputOriginEnum _$discardAgendaInputOriginEnumValueOf(
 final BuiltSet<DiscardAgendaInputOriginEnum>
 _$discardAgendaInputOriginEnumValues =
     BuiltSet<DiscardAgendaInputOriginEnum>(const <DiscardAgendaInputOriginEnum>[
+      _$discardAgendaInputOriginEnum_unachievable,
       _$discardAgendaInputOriginEnum_specialRule,
       _$discardAgendaInputOriginEnum_commandPoint,
     ]);
@@ -38,10 +43,12 @@ _$discardAgendaInputOriginEnumSerializer =
 class _$DiscardAgendaInputOriginEnumSerializer
     implements PrimitiveSerializer<DiscardAgendaInputOriginEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
+    'unachievable': 'unachievable',
     'specialRule': 'special_rule',
     'commandPoint': 'command_point',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
+    'unachievable': 'unachievable',
     'special_rule': 'specialRule',
     'command_point': 'commandPoint',
   };

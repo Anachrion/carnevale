@@ -18,7 +18,9 @@ part 'scenario.g.dart';
 /// * [asymmetric] - True for scenarios with Attacker/Defender roles (e.g. Street Fight), which run a role roll-off once both players have joined.
 /// * [setup] 
 /// * [primaryObjective] 
-/// * [agendas] 
+/// * [agendas] - Free-text rendering of the scenario's agenda instructions (e.g. \"3 scoring 1 Victory Point each.\", \"Secret, Cycle, Double.\"). See `agenda_rules`/`agenda_count` for the structured form.
+/// * [agendaRules] - The agenda special rules in effect for this scenario (rulebook p.36). `secret` hides opponents' in-hand agendas; `cycle` auto-draws a replacement when an agenda is scored.
+/// * [agendaCount] - How many agendas each player draws for their initial hand.
 /// * [specialRules] 
 /// * [duration] - Free-text rendering of the scenario's duration (e.g. \"5 rounds.\"). See `turns` for the structured count.
 /// * [turns] - Number of turns the scenario lasts.
@@ -46,8 +48,18 @@ abstract class Scenario implements Built<Scenario, ScenarioBuilder> {
   @BuiltValueField(wireName: r'primary_objective')
   String get primaryObjective;
 
+  /// Free-text rendering of the scenario's agenda instructions (e.g. \"3 scoring 1 Victory Point each.\", \"Secret, Cycle, Double.\"). See `agenda_rules`/`agenda_count` for the structured form.
   @BuiltValueField(wireName: r'agendas')
   BuiltList<String> get agendas;
+
+  /// The agenda special rules in effect for this scenario (rulebook p.36). `secret` hides opponents' in-hand agendas; `cycle` auto-draws a replacement when an agenda is scored.
+  @BuiltValueField(wireName: r'agenda_rules')
+  BuiltList<ScenarioAgendaRulesEnum> get agendaRules;
+  // enum agendaRulesEnum {  cycle,  secondary,  double,  secret,  total,  };
+
+  /// How many agendas each player draws for their initial hand.
+  @BuiltValueField(wireName: r'agenda_count')
+  int get agendaCount;
 
   @BuiltValueField(wireName: r'special_rules')
   BuiltList<String> get specialRules;
@@ -123,6 +135,16 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
     yield serializers.serialize(
       object.agendas,
       specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
+    yield r'agenda_rules';
+    yield serializers.serialize(
+      object.agendaRules,
+      specifiedType: const FullType(BuiltList, [FullType(ScenarioAgendaRulesEnum)]),
+    );
+    yield r'agenda_count';
+    yield serializers.serialize(
+      object.agendaCount,
+      specifiedType: const FullType(int),
     );
     yield r'special_rules';
     yield serializers.serialize(
@@ -223,6 +245,20 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
           ) as BuiltList<String>;
           result.agendas.replace(valueDes);
           break;
+        case r'agenda_rules':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(ScenarioAgendaRulesEnum)]),
+          ) as BuiltList<ScenarioAgendaRulesEnum>;
+          result.agendaRules.replace(valueDes);
+          break;
+        case r'agenda_count':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.agendaCount = valueDes;
+          break;
         case r'special_rules':
           final valueDes = serializers.deserialize(
             value,
@@ -286,5 +322,26 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
     );
     return result.build();
   }
+}
+
+class ScenarioAgendaRulesEnum extends EnumClass {
+
+  @BuiltValueEnumConst(wireName: r'cycle')
+  static const ScenarioAgendaRulesEnum cycle = _$scenarioAgendaRulesEnum_cycle;
+  @BuiltValueEnumConst(wireName: r'secondary')
+  static const ScenarioAgendaRulesEnum secondary = _$scenarioAgendaRulesEnum_secondary;
+  @BuiltValueEnumConst(wireName: r'double')
+  static const ScenarioAgendaRulesEnum double_ = _$scenarioAgendaRulesEnum_double_;
+  @BuiltValueEnumConst(wireName: r'secret')
+  static const ScenarioAgendaRulesEnum secret = _$scenarioAgendaRulesEnum_secret;
+  @BuiltValueEnumConst(wireName: r'total')
+  static const ScenarioAgendaRulesEnum total = _$scenarioAgendaRulesEnum_total;
+
+  static Serializer<ScenarioAgendaRulesEnum> get serializer => _$scenarioAgendaRulesEnumSerializer;
+
+  const ScenarioAgendaRulesEnum._(String name): super(name);
+
+  static BuiltSet<ScenarioAgendaRulesEnum> get values => _$scenarioAgendaRulesEnumValues;
+  static ScenarioAgendaRulesEnum valueOf(String name) => _$scenarioAgendaRulesEnumValueOf(name);
 }
 

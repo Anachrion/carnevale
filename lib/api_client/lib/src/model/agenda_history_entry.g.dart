@@ -38,6 +38,8 @@ _$agendaHistoryEntryActionEnumValues =
 
 const AgendaHistoryEntryOriginEnum _$agendaHistoryEntryOriginEnum_initial =
     const AgendaHistoryEntryOriginEnum._('initial');
+const AgendaHistoryEntryOriginEnum _$agendaHistoryEntryOriginEnum_unachievable =
+    const AgendaHistoryEntryOriginEnum._('unachievable');
 const AgendaHistoryEntryOriginEnum _$agendaHistoryEntryOriginEnum_specialRule =
     const AgendaHistoryEntryOriginEnum._('specialRule');
 const AgendaHistoryEntryOriginEnum _$agendaHistoryEntryOriginEnum_commandPoint =
@@ -51,6 +53,8 @@ AgendaHistoryEntryOriginEnum _$agendaHistoryEntryOriginEnumValueOf(
   switch (name) {
     case 'initial':
       return _$agendaHistoryEntryOriginEnum_initial;
+    case 'unachievable':
+      return _$agendaHistoryEntryOriginEnum_unachievable;
     case 'specialRule':
       return _$agendaHistoryEntryOriginEnum_specialRule;
     case 'commandPoint':
@@ -66,6 +70,7 @@ final BuiltSet<AgendaHistoryEntryOriginEnum>
 _$agendaHistoryEntryOriginEnumValues =
     BuiltSet<AgendaHistoryEntryOriginEnum>(const <AgendaHistoryEntryOriginEnum>[
       _$agendaHistoryEntryOriginEnum_initial,
+      _$agendaHistoryEntryOriginEnum_unachievable,
       _$agendaHistoryEntryOriginEnum_specialRule,
       _$agendaHistoryEntryOriginEnum_commandPoint,
       _$agendaHistoryEntryOriginEnum_recycle,
@@ -117,12 +122,14 @@ class _$AgendaHistoryEntryOriginEnumSerializer
     implements PrimitiveSerializer<AgendaHistoryEntryOriginEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'initial': 'initial',
+    'unachievable': 'unachievable',
     'specialRule': 'special_rule',
     'commandPoint': 'command_point',
     'recycle': 'recycle',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'initial': 'initial',
+    'unachievable': 'unachievable',
     'special_rule': 'specialRule',
     'command_point': 'commandPoint',
     'recycle': 'recycle',
