@@ -427,49 +427,77 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       subtitle:
           'Any agenda that is impossible or duplicated can be discarded and redrawn — agree with your opponent that it is unachievable.',
       children: [
-        ...me.agendas.map(
-          (a) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  a.name,
-                  style: GoogleFonts.cinzel(
-                    fontWeight: FontWeight.w700,
-                    color: context.textColor,
-                  ),
-                ),
-                Text(
-                  a.description,
-                  style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-                ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: _busy ? null : () => _mulligan(game.id, a),
-                    icon: const Icon(Icons.autorenew, size: 16),
-                    label: const Text('Unachievable — redraw'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: context.subtleTextColor,
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                ),
-              ],
+        ...me.agendas.map((a) => _agendaDrawCard(context, game, me, a)),
+        const SizedBox(height: 8),
+        // Drawing doesn't auto-advance: the player reads (and optionally mulligans) their hand,
+        // then confirms. Once both players confirm, the game moves on to deployment.
+        if (!me.agendasConfirmed)
+          _ActionButton(
+            label: "I've reviewed my Agendas",
+            onTap: () => _run(() => _service.confirmAgendas(game.id)),
+            busy: _busy,
+          )
+        else ...[
+          Text(
+            'Waiting for the opponent to be ready...',
+            style: TextStyle(color: context.subtleTextColor),
+          ),
+          const SizedBox(height: 16),
+          const CircularProgressIndicator(color: AppPalette.gold),
+        ],
+      ],
+    );
+  }
+
+  // One agenda in the initial-draw list, rendered as a small card: title, description, and (until
+  // the hand is confirmed) the "unachievable — redraw" mulligan affordance.
+  Widget _agendaDrawCard(
+    BuildContext context,
+    api.Game game,
+    api.GamePlayer me,
+    api.Agenda a,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: context.cardBgColor.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.panelBorderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            a.name,
+            style: GoogleFonts.cinzel(
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Waiting for the opponent to draw...',
-          style: TextStyle(color: context.subtleTextColor),
-        ),
-        const SizedBox(height: 16),
-        const CircularProgressIndicator(color: AppPalette.gold),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            a.description,
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+          ),
+          if (!me.agendasConfirmed) ...[
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _busy ? null : () => _mulligan(game.id, a),
+                icon: const Icon(Icons.autorenew, size: 16),
+                label: const Text('Unachievable — redraw'),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.subtleTextColor,
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 

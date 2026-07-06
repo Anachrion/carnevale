@@ -132,6 +132,13 @@ class GameService extends ChangeNotifier {
         return res.data?.agendas.toList() ?? [];
       });
 
+  /// Confirms the player's opening hand, ending their agenda_draw phase. Once both players
+  /// confirm, the server advances the game to deploying.
+  Future<api.Game> confirmAgendas(int gameId) => _guard(() async {
+    final res = await _client.games.confirmAgendas(id: gameId);
+    return res.data!;
+  });
+
   /// Scores an agenda from the player's hand (flat 1 VP). Under a Cycle scenario the server
   /// auto-draws a replacement — nothing to request here.
   Future<api.Game> scoreAgenda(int gameId, int agendaId) => _guard(() async {

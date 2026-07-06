@@ -11,6 +11,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**advanceTurn**](GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the requesting player&#39;s turn cursor
 [**archiveGame**](GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
+[**confirmAgendas**](GamesApi.md#confirmagendas) | **POST** /games/{id}/agendas/confirm | Confirm this player&#39;s opening Agenda hand
 [**createGame**](GamesApi.md#creategame) | **POST** /games | Create a game, hosted by the current user
 [**deleteGame**](GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [**discardAgenda**](GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
@@ -102,6 +103,53 @@ try {
     print(response);
 } on DioException catch (e) {
     print('Exception when calling GamesApi->archiveGame: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**Game**](Game.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **confirmAgendas**
+> Game confirmAgendas(id)
+
+Confirm this player's opening Agenda hand
+
+Marks the player done with the `agenda_draw` phase after they've reviewed and optionally mulliganed their hand. Requires the player to have already drawn. Once both players confirm, the game advances to `deploying`. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+
+try {
+    final response = api.confirmAgendas(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->confirmAgendas: $e\n');
 }
 ```
 
@@ -275,7 +323,7 @@ Name | Type | Description  | Notes
 
 Privately draw this player's Agenda cards
 
-Never broadcast or visible to the opponent. Behavior depends on game status: while `agenda_draw`, draws the scenario's full initial hand (no request body). While `in_progress`, draws a single replacement card and requires `origin` in the body (`special_rule` or `command_point` — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
+Never broadcast or visible to the opponent. Behavior depends on game status: while `agenda_draw`, draws the scenario's full initial hand (no request body). Drawing does not advance the phase — the player then reviews (and optionally mulligans) the hand and posts to `agendas/confirm`. While `in_progress`, draws a single replacement card and requires `origin` in the body (`special_rule` or `command_point` — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
 
 ### Example
 ```dart
