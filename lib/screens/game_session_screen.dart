@@ -6,10 +6,14 @@ import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart';
 import '../services/game_service.dart';
+import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/create_gang_sheet.dart';
+import '../widgets/gang_tile.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/status_views.dart';
+import 'gang_builder_screen.dart';
 import 'gang_viewer_screen.dart';
 import 'score_tab.dart';
 
@@ -39,6 +43,7 @@ class GameSessionScreen extends StatefulWidget {
 
 class _GameSessionScreenState extends State<GameSessionScreen> {
   final _service = GameService();
+  final _gangService = GangService();
   bool _loading = true;
   bool _busy = false;
   bool _discardedExpanded = false;
@@ -375,27 +380,139 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             final gangs = snapshot.data!;
             if (gangs.isEmpty) {
               return Text(
-                'You have no gangs yet — create one from the Gangs tab first.',
+                'You have no gangs yet — build one now.',
                 style: TextStyle(color: context.subtleTextColor),
               );
             }
             return Column(
-              children: gangs
-                  .map(
-                    (g) => _GangOptionTile(
-                      gang: g.gang,
-                      selectable: g.selectable,
-                      busy: _busy,
-                      onTap: () =>
-                          _run(() => _service.selectGang(game.id, g.gang.id)),
-                    ),
-                  )
-                  .toList(),
+              children: [
+                for (final g in gangs) ...[
+                  GangTile(
+                    name: g.gang.name,
+                    faction: g.gang.faction,
+                    totalCost: g.gang.totalCost,
+                    points: g.gang.points,
+                    dimmed: !g.selectable,
+                    onTap: _busy
+                        ? null
+                        : () => _editGangInline(g.gang.id, game),
+                    trailing: g.selectable
+                        ? ElevatedButton(
+                            onPressed: _busy
+                                ? null
+                                : () => _run(
+                                    () => _service.selectGang(
+                                      game.id,
+                                      g.gang.id,
+                                    ),
+                                  ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppPalette.gold,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'Select',
+                              style: GoogleFonts.cinzel(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Over limit',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.red.shade400,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
             );
           },
         ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _busy ? null : () => _createGangInline(game),
+            icon: const Icon(Icons.add, size: 18),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppPalette.gold,
+              side: const BorderSide(color: AppPalette.gold),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            label: Text(
+              'Build a new gang',
+              style: GoogleFonts.cinzel(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
       ],
     );
+  }
+
+  /// Opens the same gang builder used on the Gangs tab, seeded with this game's
+  /// ducat limit, then refreshes the pickable-gang list so the freshly built
+  /// gang appears without leaving the setup flow.
+  Future<void> _createGangInline(api.Game game) async {
+    final gang = await showModalBottomSheet<api.ModelList>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CreateGangSheet(
+        initialPoints: game.ducatLimit,
+        onCreate: (name, faction, points) =>
+            _gangService.create(name, faction, points),
+      ),
+    );
+    if (gang == null || !mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: gang)),
+    );
+    if (!mounted) return;
+    setState(() => _availableGangsFuture = _service.availableGangs(game.id));
+  }
+
+  /// Opens an existing gang in the same builder used on the Gangs tab. The tile
+  /// only carries a [api.GangSummary], so fetch the full list first, then refresh
+  /// the pickable-gang list on return (its cost/limit may have changed).
+  Future<void> _editGangInline(int listId, api.Game game) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    api.ModelList gang;
+    try {
+      gang = await _gangService.loadOne(listId);
+    } catch (_) {
+      if (mounted) showAppToast(context, 'Could not open that gang.');
+      return;
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: gang)),
+    );
+    if (!mounted) return;
+    setState(() => _availableGangsFuture = _service.availableGangs(game.id));
   }
 
   // ── Agenda draw ──────────────────────────────────────────────────────────
@@ -792,83 +909,6 @@ class _ActionButton extends StatelessWidget {
               ),
             )
           : Text(label, style: GoogleFonts.cinzel(fontWeight: FontWeight.w700)),
-    );
-  }
-}
-
-class _GangOptionTile extends StatelessWidget {
-  const _GangOptionTile({
-    required this.gang,
-    required this.selectable,
-    required this.busy,
-    required this.onTap,
-  });
-
-  final api.GangSummary gang;
-  final bool selectable;
-  final bool busy;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: GestureDetector(
-        onTap: selectable && !busy ? onTap : null,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: selectable
-                ? Colors.transparent
-                : context.subtleTextColor.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      gang.name ?? gang.faction,
-                      style: GoogleFonts.cinzel(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: selectable
-                            ? context.textColor
-                            : context.subtleTextColor,
-                      ),
-                    ),
-                    Text(
-                      '${gang.totalCost} / ${gang.points} ducats',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.subtleTextColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (!selectable)
-                Text(
-                  'Over limit',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.red.shade400,
-                    fontWeight: FontWeight.w600,
-                  ),
-                )
-              else
-                const Icon(
-                  Icons.chevron_right,
-                  color: AppPalette.gold,
-                  size: 20,
-                ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

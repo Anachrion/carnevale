@@ -6,24 +6,12 @@ import '../main.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/app_input.dart';
-import '../widgets/bottom_sheet_surface.dart';
-import '../widgets/glass_panel.dart';
+import '../widgets/create_gang_sheet.dart';
+import '../widgets/gang_tile.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/status_views.dart';
 import 'account_screen.dart';
 import 'gang_builder_screen.dart';
-
-// Faction display order for the create-gang picker (distinct from AppPalette.factionColors' order).
-const _kFactions = [
-  'guild',
-  'doctors',
-  'vatican',
-  'patricians',
-  'strigoi',
-  'gifted',
-  'rashaar',
-];
 
 class GangsScreen extends StatefulWidget {
   const GangsScreen({super.key});
@@ -38,6 +26,8 @@ class _GangsScreenState extends State<GangsScreen> {
   List<api.ModelList> _gangs = [];
   bool _loading = true;
   String? _error;
+  // Id of the gang whose roster is expanded inline; only one is open at a time.
+  int? _expandedId;
 
   @override
   void initState() {
@@ -100,7 +90,7 @@ class _GangsScreenState extends State<GangsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CreateGangSheet(
+      builder: (_) => CreateGangSheet(
         onCreate: (name, faction, points) =>
             _service.create(name, faction, points),
       ),
@@ -175,22 +165,126 @@ class _GangsScreenState extends State<GangsScreen> {
       return ErrorRetryView(onRetry: _load);
     }
     if (_gangs.isEmpty) return _buildEmpty();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       itemCount: _gangs.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, i) => _GangTile(
-        gang: _gangs[i],
-        onDelete: () => _deleteGang(_gangs[i].id),
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => GangBuilderScreen(gang: _gangs[i]),
+      itemBuilder: (_, i) {
+        final gang = _gangs[i];
+        final expanded = _expandedId == gang.id;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            GangTile(
+              name: gang.name,
+              faction: gang.faction,
+              totalCost: gang.totalCost,
+              points: gang.points,
+              onLongPress: () => _confirmDelete(gang),
+              onTap: () => setState(
+                () => _expandedId = expanded ? null : gang.id,
+              ),
+              trailing: AnimatedRotation(
+                turns: expanded ? 0.25 : 0,
+                duration: const Duration(milliseconds: 400),
+                child: Icon(
+                  Icons.chevron_right,
+                  color: isDark ? AppPalette.gold : AppPalette.red,
+                  size: 20,
+                ),
+              ),
+              footer: expanded ? _tileActions(gang) : null,
             ),
-          );
-          await _load();
-        },
+            AnimatedSize(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              alignment: Alignment.topCenter,
+              child: expanded
+                  ? _GangRosterPreview(gang: gang)
+                  : const SizedBox(width: double.infinity),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _editGang(api.ModelList gang) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: gang)),
+    );
+    await _load();
+  }
+
+  /// Edit/Delete row revealed inside the tile once it's expanded. Each button
+  /// has its own tap handler, so it acts without also toggling the expansion.
+  Widget _tileActions(api.ModelList gang) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton.icon(
+            onPressed: () => _editGang(gang),
+            icon: const Icon(Icons.edit_outlined, size: 16),
+            style: TextButton.styleFrom(
+              foregroundColor: AppPalette.gold,
+              side: const BorderSide(color: AppPalette.gold),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            label: Text(
+              'Edit',
+              style: GoogleFonts.cinzel(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () => _confirmDelete(gang),
+            icon: const Icon(Icons.delete_outline, size: 16),
+            style: TextButton.styleFrom(
+              foregroundColor: AppPalette.red,
+              side: const BorderSide(color: AppPalette.red),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            label: Text(
+              'Delete',
+              style: GoogleFonts.cinzel(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(api.ModelList gang) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(
+          'Delete Gang',
+          style: GoogleFonts.cinzel(color: context.textColor),
+        ),
+        content: Text('Delete "${gang.name ?? ''}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteGang(gang.id);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
@@ -227,279 +321,66 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 }
 
-class _GangTile extends StatelessWidget {
-  const _GangTile({
-    required this.gang,
-    required this.onDelete,
-    required this.onTap,
-  });
+/// The roster shown when a gang row is expanded on the Gangs tab: each hired
+/// entry with its ducat cost. (Editing is triggered from the tile itself.)
+class _GangRosterPreview extends StatelessWidget {
+  const _GangRosterPreview({required this.gang});
+
   final api.ModelList gang;
-  final VoidCallback onDelete;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final factionColor =
-        AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
-    final iconPath = AppPalette.factionIcons[gang.faction];
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return GlassPanel(
-      padding: EdgeInsets.zero,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          onLongPress: () => _confirmDelete(context),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: factionColor,
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: iconPath != null
-                      ? Image.asset(
-                          iconPath,
-                          fit: BoxFit.contain,
-                          color: Colors.white,
-                          colorBlendMode: BlendMode.srcIn,
-                        )
-                      : const Icon(Icons.flag, color: Colors.white, size: 24),
+    final entries = gang.entries.toList()
+      ..sort((a, b) => a.position.compareTo(b.position));
+    return Container(
+      margin: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      decoration: BoxDecoration(
+        gradient: context.panelGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.panelBorderColor, width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (entries.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Text(
+                'No models hired yet.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.subtleTextColor,
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        gang.name ?? '',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: context.textColor,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _factionLabel(gang.faction),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: factionColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              ),
+            )
+          else
+            for (final entry in entries)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Row(
                   children: [
-                    Text(
-                      '${gang.totalCost}',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppPalette.gold,
+                    Expanded(
+                      child: Text(
+                        entry.name,
+                        style: TextStyle(fontSize: 13, color: context.textColor),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
-                      '/ ${gang.points} duc.',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: context.subtleTextColor,
+                      '${entry.cost}',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: context.accentColor,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.chevron_right,
-                  color: isDark ? AppPalette.gold : AppPalette.red,
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _confirmDelete(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(
-          'Delete Gang',
-          style: GoogleFonts.cinzel(color: context.textColor),
-        ),
-        content: Text('Delete "${gang.name ?? ''}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onDelete();
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
+              ),
         ],
       ),
-    );
-  }
-
-  String _factionLabel(String f) => f[0].toUpperCase() + f.substring(1);
-}
-
-class _CreateGangSheet extends StatefulWidget {
-  const _CreateGangSheet({required this.onCreate});
-  final Future<api.ModelList> Function(String name, String faction, int points)
-  onCreate;
-
-  @override
-  State<_CreateGangSheet> createState() => _CreateGangSheetState();
-}
-
-class _CreateGangSheetState extends State<_CreateGangSheet> {
-  final _nameController = TextEditingController();
-  final _pointsController = TextEditingController(text: '100');
-  String _selectedFaction = _kFactions.first;
-  bool _saving = false;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _pointsController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return;
-    final points = int.tryParse(_pointsController.text.trim()) ?? 100;
-    setState(() => _saving = true);
-    try {
-      final gang = await widget.onCreate(name, _selectedFaction, points);
-      if (mounted) Navigator.of(context).pop(gang);
-    } catch (_) {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomSheetSurface(
-      scrollable: true,
-      title: 'New Gang',
-      children: [
-        TextField(
-          controller: _nameController,
-          autofocus: true,
-          style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
-          decoration: goldInputDecoration(context, label: 'Gang name'),
-          onSubmitted: (_) => _submit(),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _pointsController,
-          keyboardType: TextInputType.number,
-          style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
-          decoration: goldInputDecoration(context, label: 'Point limit'),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Faction',
-          style: TextStyle(
-            fontSize: 12,
-            color: context.subtleTextColor,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 52,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: _kFactions.map((f) {
-              final selected = f == _selectedFaction;
-              final color = AppPalette.factionColors[f] ?? AppPalette.gold;
-              final iconPath = AppPalette.factionIcons[f]!;
-              return GestureDetector(
-                onTap: () => setState(() => _selectedFaction = f),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 10),
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: selected ? color : color.withValues(alpha: 0.35),
-                    border: selected
-                        ? Border.all(color: Colors.white, width: 2.5)
-                        : null,
-                    boxShadow: selected
-                        ? [
-                            BoxShadow(
-                              color: color.withValues(alpha: 0.5),
-                              blurRadius: 8,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  padding: const EdgeInsets.all(9),
-                  child: Image.asset(
-                    iconPath,
-                    fit: BoxFit.contain,
-                    color: Colors.white,
-                    colorBlendMode: BlendMode.srcIn,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-        const SizedBox(height: 28),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _saving ? null : _submit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppPalette.gold,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            child: _saving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : Text(
-                    'Create Gang',
-                    style: GoogleFonts.cinzel(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
-                  ),
-          ),
-        ),
-      ],
     );
   }
 }
