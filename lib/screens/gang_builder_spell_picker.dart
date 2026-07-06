@@ -125,13 +125,13 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
                     ),
                     decoration: BoxDecoration(
                       color: selected
-                          ? accent.withOpacity(0.85)
-                          : Colors.white.withOpacity(0.15),
+                          ? accent.withValues(alpha: 0.85)
+                          : Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: selected
                             ? accent
-                            : context.subtleTextColor.withOpacity(0.3),
+                            : context.subtleTextColor.withValues(alpha: 0.3),
                         width: 0.5,
                       ),
                     ),
@@ -265,7 +265,7 @@ class _SpellRow extends StatelessWidget {
               size: 20,
               color: checked
                   ? accent
-                  : context.subtleTextColor.withOpacity(enabled ? 0.6 : 0.25),
+                  : context.subtleTextColor.withValues(alpha: enabled ? 0.6 : 0.25),
             ),
             const SizedBox(width: 10),
             Expanded(

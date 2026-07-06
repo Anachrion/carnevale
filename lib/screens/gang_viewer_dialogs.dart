@@ -78,7 +78,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
           ),
           const SizedBox(height: 12),
           Divider(
-            color: context.subtleTextColor.withOpacity(0.3),
+            color: context.subtleTextColor.withValues(alpha: 0.3),
             thickness: 0.5,
           ),
           const SizedBox(height: 4),
@@ -263,7 +263,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
           ),
           const SizedBox(height: 12),
           Divider(
-            color: context.subtleTextColor.withOpacity(0.3),
+            color: context.subtleTextColor.withValues(alpha: 0.3),
             thickness: 0.5,
           ),
           const SizedBox(height: 4),
@@ -363,7 +363,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
     final enabled = onTap != null;
     final color = enabled
         ? context.textColor
-        : context.subtleTextColor.withOpacity(0.4);
+        : context.subtleTextColor.withValues(alpha: 0.4);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -372,7 +372,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: enabled ? color.withOpacity(0.5) : color,
+            color: enabled ? color.withValues(alpha: 0.5) : color,
             width: 1.2,
           ),
         ),
@@ -413,8 +413,8 @@ class _CounterIcon extends StatelessWidget {
         height: 34,
         decoration: BoxDecoration(
           color: active
-              ? AppPalette.gold.withOpacity(0.35)
-              : Colors.black.withOpacity(0.2),
+              ? AppPalette.gold.withValues(alpha: 0.35)
+              : Colors.black.withValues(alpha: 0.2),
           shape: BoxShape.circle,
           border: active
               ? Border.all(color: AppPalette.gold, width: 1.4)

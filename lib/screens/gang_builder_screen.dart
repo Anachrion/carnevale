@@ -388,7 +388,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
             Icon(
               Icons.group_outlined,
               size: 48,
-              color: context.subtleTextColor.withOpacity(0.4),
+              color: context.subtleTextColor.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 12),
             Text(
@@ -403,7 +403,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               'Go to Hire to add models',
               style: TextStyle(
                 fontSize: 12,
-                color: context.subtleTextColor.withOpacity(0.7),
+                color: context.subtleTextColor.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -618,7 +618,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         children: [
           Expanded(
             child: Divider(
-              color: context.subtleTextColor.withOpacity(0.3),
+              color: context.subtleTextColor.withValues(alpha: 0.3),
               thickness: 0.5,
             ),
           ),
@@ -628,7 +628,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               label.toUpperCase(),
               style: TextStyle(
                 fontSize: 11,
-                color: context.subtleTextColor.withOpacity(0.7),
+                color: context.subtleTextColor.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1.5,
               ),
@@ -636,7 +636,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
           ),
           Expanded(
             child: Divider(
-              color: context.subtleTextColor.withOpacity(0.3),
+              color: context.subtleTextColor.withValues(alpha: 0.3),
               thickness: 0.5,
             ),
           ),
@@ -658,7 +658,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
               decoration: InputDecoration(
                 hintText: 'Search profiles...',
                 hintStyle: TextStyle(
-                  color: context.subtleTextColor.withOpacity(0.7),
+                  color: context.subtleTextColor.withValues(alpha: 0.7),
                   fontSize: 15,
                 ),
                 prefixIcon: Icon(
@@ -672,7 +672,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     ? IconButton(
                         icon: Icon(
                           Icons.clear,
-                          color: context.subtleTextColor.withOpacity(0.6),
+                          color: context.subtleTextColor.withValues(alpha: 0.6),
                           size: 18,
                         ),
                         onPressed: () => _searchController.clear(),

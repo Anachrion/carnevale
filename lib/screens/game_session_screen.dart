@@ -231,7 +231,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: AppPalette.gold.withOpacity(0.15),
+              color: AppPalette.gold.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppPalette.gold),
             ),
@@ -629,9 +629,9 @@ class _GangOptionTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: selectable
                 ? Colors.transparent
-                : context.subtleTextColor.withOpacity(0.08),
+                : context.subtleTextColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: context.subtleTextColor.withOpacity(0.3)),
+            border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [

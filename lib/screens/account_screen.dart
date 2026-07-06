@@ -486,7 +486,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                 ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: AppPalette.gold.withOpacity(0.5),
+                    color: AppPalette.gold.withValues(alpha: 0.5),
                   ),
                 ),
                 focusedBorder: const UnderlineInputBorder(

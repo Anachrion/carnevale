@@ -128,7 +128,7 @@ class _CardsScreenState extends State<CardsScreen> {
           decoration: InputDecoration(
             hintText: 'Search profiles...',
             hintStyle: TextStyle(
-              color: context.subtleTextColor.withOpacity(0.7),
+              color: context.subtleTextColor.withValues(alpha: 0.7),
               fontSize: 15,
             ),
             prefixIcon: const Icon(
@@ -243,13 +243,13 @@ class _FactionIconChip extends StatelessWidget {
         height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: selected ? color : color.withOpacity(0.5),
+          color: selected ? color : color.withValues(alpha: 0.5),
         ),
         padding: const EdgeInsets.all(4),
         child: Image.asset(
           iconPath,
           fit: BoxFit.contain,
-          color: selected ? Colors.white : Colors.white.withOpacity(0.35),
+          color: selected ? Colors.white : Colors.white.withValues(alpha: 0.35),
           colorBlendMode: BlendMode.srcIn,
         ),
       ),
@@ -315,7 +315,7 @@ class _ProfileTile extends StatelessWidget {
                               : 'hero',
                           style: TextStyle(
                             fontSize: 10,
-                            color: Colors.white.withOpacity(0.65),
+                            color: Colors.white.withValues(alpha: 0.65),
                             fontStyle: FontStyle.italic,
                           ),
                         ),

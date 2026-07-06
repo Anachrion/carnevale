@@ -219,7 +219,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
         labelColor: AppPalette.gold,
         unselectedLabelColor: context.subtleTextColor,
         indicatorColor: AppPalette.gold,
-        dividerColor: context.subtleTextColor.withOpacity(0.2),
+        dividerColor: context.subtleTextColor.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.cinzel(
           fontWeight: FontWeight.w700,
           fontSize: 13,
@@ -290,7 +290,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
             Icon(
               emptyIcon,
               size: 56,
-              color: context.subtleTextColor.withOpacity(0.4),
+              color: context.subtleTextColor.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
             Text(
@@ -305,7 +305,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
               emptySubtitle,
               style: TextStyle(
                 fontSize: 13,
-                color: context.subtleTextColor.withOpacity(0.7),
+                color: context.subtleTextColor.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -432,7 +432,7 @@ class _GameTileState extends State<_GameTile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Divider(color: context.subtleTextColor.withOpacity(0.2), height: 1),
+          Divider(color: context.subtleTextColor.withValues(alpha: 0.2), height: 1),
           const SizedBox(height: 12),
           Text(
             _game.scenario.name,
@@ -773,13 +773,13 @@ class _ScenarioTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: selected
-                ? AppPalette.gold.withOpacity(0.18)
+                ? AppPalette.gold.withValues(alpha: 0.18)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: selected
                   ? AppPalette.gold
-                  : context.subtleTextColor.withOpacity(0.25),
+                  : context.subtleTextColor.withValues(alpha: 0.25),
             ),
           ),
           child: Row(

@@ -29,8 +29,8 @@ class AppDrawer extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = isDark ? AppPalette.mutedGold : AppPalette.red;
     final borderColor = isDark
-        ? AppPalette.mutedGold.withOpacity(0.25)
-        : AppPalette.ink.withOpacity(0.15);
+        ? AppPalette.mutedGold.withValues(alpha: 0.25)
+        : AppPalette.ink.withValues(alpha: 0.15);
 
     return Drawer(
       backgroundColor: isDark ? AppPalette.backgroundDark : AppPalette.background,
@@ -222,7 +222,7 @@ class _Ornament extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = accent.withOpacity(0.5);
+    final line = accent.withValues(alpha: 0.5);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
