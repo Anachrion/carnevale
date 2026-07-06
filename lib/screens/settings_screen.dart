@@ -51,11 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await authService.forgotPassword(email);
       if (mounted) showAppToast(context, 'Password reset email sent!');
     } on AuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
-      }
+      if (mounted) showAppToast(context, e.message);
     } finally {
       if (mounted) setState(() => _sendingReset = false);
     }
