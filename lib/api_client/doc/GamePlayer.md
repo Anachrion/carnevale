@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **list** | [**GangSummary**](GangSummary.md) |  | 
 **role** | **String** |  | 
 **ready** | **bool** |  | 
+**agendasConfirmed** | **bool** | True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming advances the game to deploying. | 
 **wonRoleRoll** | **bool** | True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins. | 
 **wonDeploymentRoll** | **bool** | True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app. | 
 **score** | **int** | Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Always visible for both players. | 

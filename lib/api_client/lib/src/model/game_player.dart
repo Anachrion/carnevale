@@ -22,6 +22,7 @@ part 'game_player.g.dart';
 /// * [list] 
 /// * [role] 
 /// * [ready] 
+/// * [agendasConfirmed] - True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming advances the game to deploying.
 /// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
 /// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
 /// * [score] - Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Always visible for both players.
@@ -52,6 +53,10 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
 
   @BuiltValueField(wireName: r'ready')
   bool get ready;
+
+  /// True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming advances the game to deploying.
+  @BuiltValueField(wireName: r'agendas_confirmed')
+  bool get agendasConfirmed;
 
   /// True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
   @BuiltValueField(wireName: r'won_role_roll')
@@ -137,6 +142,11 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     yield r'ready';
     yield serializers.serialize(
       object.ready,
+      specifiedType: const FullType(bool),
+    );
+    yield r'agendas_confirmed';
+    yield serializers.serialize(
+      object.agendasConfirmed,
       specifiedType: const FullType(bool),
     );
     yield r'won_role_roll';
@@ -247,6 +257,13 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.ready = valueDes;
+          break;
+        case r'agendas_confirmed':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.agendasConfirmed = valueDes;
           break;
         case r'won_role_roll':
           final valueDes = serializers.deserialize(

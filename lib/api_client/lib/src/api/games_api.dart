@@ -205,6 +205,92 @@ class GamesApi {
     );
   }
 
+  /// Confirm this player&#39;s opening Agenda hand
+  /// Marks the player done with the &#x60;agenda_draw&#x60; phase after they&#39;ve reviewed and optionally mulliganed their hand. Requires the player to have already drawn. Once both players confirm, the game advances to &#x60;deploying&#x60;. 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Game] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Game>> confirmAgendas({ 
+    required int id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/agendas/confirm'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Game? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(Game),
+      ) as Game;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Game>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Create a game, hosted by the current user
   /// ducat_limit and name default from the scenario if omitted.
   ///
@@ -480,7 +566,7 @@ class GamesApi {
   }
 
   /// Privately draw this player&#39;s Agenda cards
-  /// Never broadcast or visible to the opponent. Behavior depends on game status: while &#x60;agenda_draw&#x60;, draws the scenario&#39;s full initial hand (no request body). While &#x60;in_progress&#x60;, draws a single replacement card and requires &#x60;origin&#x60; in the body (&#x60;special_rule&#x60; or &#x60;command_point&#x60; — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
+  /// Never broadcast or visible to the opponent. Behavior depends on game status: while &#x60;agenda_draw&#x60;, draws the scenario&#39;s full initial hand (no request body). Drawing does not advance the phase — the player then reviews (and optionally mulligans) the hand and posts to &#x60;agendas/confirm&#x60;. While &#x60;in_progress&#x60;, draws a single replacement card and requires &#x60;origin&#x60; in the body (&#x60;special_rule&#x60; or &#x60;command_point&#x60; — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
   ///
   /// Parameters:
   /// * [id] 
