@@ -6,6 +6,7 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/sort_chip.dart';
 import 'card_viewer_screen.dart';
 
 enum _CardSort { name, cost }
@@ -171,57 +172,16 @@ class _CardsScreenState extends State<CardsScreen> {
   }
 
   Widget _buildSortChips() {
-    final accent = Theme.of(context).brightness == Brightness.dark
-        ? AppPalette.gold
-        : AppPalette.red;
-    Widget chip(String label, _CardSort value) {
-      final selected = _sort == value;
-      return GestureDetector(
-        onTap: () => setState(() {
-          if (_sort == value) {
-            _sortAsc = !_sortAsc;
-          } else {
-            _sort = value;
-            _sortAsc = true;
-          }
-        }),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: selected
-                ? accent.withOpacity(0.85)
-                : Colors.white.withOpacity(0.35),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: selected ? accent : Colors.white.withOpacity(0.4),
-              width: 0.5,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? Colors.white : context.subtleTextColor,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              if (selected) ...[
-                const SizedBox(width: 3),
-                Icon(
-                  _sortAsc ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 10,
-                  color: Colors.white,
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
-    }
+    Widget chip(String label, _CardSort value) => SortChip(
+      label: label,
+      selected: _sort == value,
+      ascending: _sortAsc,
+      onTap: () => setState(() {
+        final (field, asc) = applySortTap(value, _sort, _sortAsc);
+        _sort = field;
+        _sortAsc = asc;
+      }),
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

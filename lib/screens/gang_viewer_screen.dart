@@ -10,6 +10,8 @@ import '../services/game_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/equipment_detail.dart';
+import '../widgets/faction_badge.dart';
+import '../widgets/points_bar.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
@@ -396,7 +398,11 @@ class _ReadOnlyGangBody extends StatelessWidget {
       children: [
         if (showHeader) ...[
           _buildGangHeader(context, factionColor),
-          _buildPointsBar(context, factionColor),
+          PointsBar(
+            used: gang.totalCost,
+            limit: gang.points,
+            factionColor: factionColor,
+          ),
           const SizedBox(height: 12),
         ],
         Expanded(child: _buildEntries(context, factionColor)),
@@ -405,7 +411,6 @@ class _ReadOnlyGangBody extends StatelessWidget {
   }
 
   Widget _buildGangHeader(BuildContext context, Color factionColor) {
-    final iconPath = AppPalette.factionIcons[gang.faction];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: Row(
@@ -423,83 +428,8 @@ class _ReadOnlyGangBody extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: factionColor,
-              shape: BoxShape.circle,
-            ),
-            padding: const EdgeInsets.all(6),
-            child: iconPath != null
-                ? Image.asset(
-                    iconPath,
-                    fit: BoxFit.contain,
-                    color: Colors.white,
-                    colorBlendMode: BlendMode.srcIn,
-                  )
-                : const Icon(Icons.flag, color: Colors.white, size: 16),
-          ),
+          FactionBadge(faction: gang.faction, color: factionColor),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPointsBar(BuildContext context, Color factionColor) {
-    final used = gang.totalCost;
-    final limit = gang.points;
-    final ratio = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: context.panelGradient,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.panelBorderColor, width: 1.0),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      '$used',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: context.textColor,
-                      ),
-                    ),
-                    Text(
-                      ' / $limit ducats',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 13,
-                        color: context.subtleTextColor,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: ratio,
-                    backgroundColor: Colors.black.withOpacity(0.08),
-                    valueColor: AlwaysStoppedAnimation(factionColor),
-                    minHeight: 6,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -612,11 +542,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color, Color.lerp(color, Colors.black, 0.45)!],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
+            gradient: AppPalette.entryTileGradient(color),
           ),
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Column(

@@ -58,4 +58,12 @@ abstract final class AppPalette {
     'strigoi': 'assets/images/icons/strigoi icon.png',
     'vatican': 'assets/images/icons/vatican icon.png',
   };
+
+  /// The left-to-right gradient behind a gang entry tile: the faction [color]
+  /// fading toward black. Shared by the builder and viewer tiles (F-P2-4).
+  static LinearGradient entryTileGradient(Color color) => LinearGradient(
+    colors: [color, Color.lerp(color, Colors.black, 0.45)!],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
 }
