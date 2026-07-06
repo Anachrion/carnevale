@@ -100,7 +100,10 @@ class GangTile extends StatelessWidget {
               ),
               Text(
                 '/ $points',
-                style: TextStyle(fontSize: 10, color: context.subtleTextColor),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: context.textColor.withValues(alpha: 0.85),
+                ),
               ),
             ],
           ),
@@ -120,12 +123,22 @@ class GangTile extends StatelessWidget {
           onLongPress: onLongPress,
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: footer == null
-                ? content
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [content, footer!],
-                  ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                content,
+                // Animate the tile's own height as the footer (e.g. an
+                // Edit/Delete row) reveals, so the card grows smoothly rather
+                // than snapping open.
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOut,
+                  alignment: Alignment.topCenter,
+                  child: footer ?? const SizedBox(width: double.infinity),
+                ),
+              ],
+            ),
           ),
         ),
       ),

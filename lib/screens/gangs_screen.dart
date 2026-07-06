@@ -113,7 +113,7 @@ class _GangsScreenState extends State<GangsScreen> {
       floatingActionButton: authService.isLoggedIn
           ? FloatingActionButton(
               onPressed: _showCreateDialog,
-              backgroundColor: AppPalette.gold,
+              backgroundColor: context.accentColor,
               foregroundColor: Colors.white,
               mini: true,
               child: const Icon(Icons.add),
