@@ -222,7 +222,9 @@ class AuthService extends ChangeNotifier {
         utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
       );
       final exp = payload['exp'];
-      if (exp is! int) return false;
+      // A token we can't read an expiry from is untrustworthy — treat it as expired so we
+      // re-authenticate rather than trusting a possibly-stale credential indefinitely.
+      if (exp is! int) return true;
       return DateTime.fromMillisecondsSinceEpoch(
         exp * 1000,
       ).isBefore(DateTime.now());

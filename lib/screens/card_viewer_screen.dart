@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
@@ -138,8 +140,8 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                             animation: _flipAnimation,
                             builder: (_, __) {
                               final angle =
-                                  _flipAnimation.value * 3.14159 * _flipSign;
-                              final showFront = angle.abs() < 1.5708;
+                                  _flipAnimation.value * math.pi * _flipSign;
+                              final showFront = angle.abs() < math.pi / 2;
                               return Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.identity()
@@ -150,7 +152,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                                     : Transform(
                                         alignment: Alignment.center,
                                         transform: Matrix4.identity()
-                                          ..rotateY(3.14159),
+                                          ..rotateY(math.pi),
                                         child: _CardImage(
                                           path: profile.backImage,
                                         ),

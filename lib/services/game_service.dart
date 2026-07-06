@@ -234,6 +234,7 @@ class GameService extends ChangeNotifier {
     _cable = null;
     _watchedGameId = null;
     currentGame = null;
+    notifyListeners();
   }
 
   void _onChannelMessage(Map<String, dynamic> message) {

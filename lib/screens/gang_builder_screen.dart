@@ -43,7 +43,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   bool _hireSortAsc = true;
   final _searchController = TextEditingController();
 
-  List<api.Profile> get _filteredProfiles {
+  // Cached filtered+sorted hire list. Recomputed only when its inputs (search text, sort field/dir,
+  // or the loaded profiles) change — not on every rebuild, which the old getter did (F-P3-6).
+  List<api.Profile> _visibleProfiles = [];
+
+  void _recomputeVisibleProfiles() {
     final q = _searchController.text.trim().toLowerCase();
     final filtered = q.isEmpty
         ? List<api.Profile>.from(_profiles)
@@ -70,7 +74,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
           return asc ? nameCmp : -nameCmp;
       }
     });
-    return filtered;
+    _visibleProfiles = filtered;
   }
 
   @override
@@ -78,7 +82,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     super.initState();
     _gang = widget.gang;
     _loadData();
-    _searchController.addListener(() => setState(() {}));
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    _recomputeVisibleProfiles();
+    setState(() {});
   }
 
   @override
@@ -99,6 +108,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       _equipment = results[1] as List<api.Equipment>;
       _spells = results[2] as List<api.Spell>;
       _loading = false;
+      _recomputeVisibleProfiles();
     });
   }
 
@@ -147,11 +157,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 
   Future<void> _add(api.Profile p) async {
     if (_busy) return;
+    final refId = p.cardReferenceId;
+    if (refId == null) return; // no printed card → nothing to hire
     setState(() => _busy = true);
     try {
       final updated = await GangService().addEntry(
         _gang.id,
-        p.cardReferenceId,
+        refId,
         'CardReference',
       );
       if (!mounted) return;
@@ -372,10 +384,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
         child: CircularProgressIndicator(color: AppPalette.gold),
       );
     }
-    return IndexedStack(
-      index: _tab == _Tab.list ? 0 : 1,
-      children: [_buildListTab(factionColor), _buildHireTab(factionColor)],
-    );
+    // Build only the active tab rather than eagerly laying out both (F-P3-6). The list/hire tabs
+    // hold no scroll/selection state worth preserving across a switch.
+    return _tab == _Tab.list
+        ? _buildListTab(factionColor)
+        : _buildHireTab(factionColor);
   }
 
   Widget _buildListTab(Color factionColor) {
@@ -496,7 +509,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   }
 
   Widget _buildHireTab(Color factionColor) {
-    final profiles = _filteredProfiles;
+    final profiles = _visibleProfiles;
 
     final factionProfiles = _gang.faction == 'gifted'
         ? profiles
@@ -704,6 +717,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                     );
                     _hireSort = field;
                     _hireSortAsc = asc;
+                    _recomputeVisibleProfiles();
                   }),
                 ),
               ],
