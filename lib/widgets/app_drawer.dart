@@ -27,7 +27,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? AppPalette.mutedGold : AppPalette.red;
+    final accent = context.accentColor;
     final borderColor = isDark
         ? AppPalette.mutedGold.withValues(alpha: 0.25)
         : AppPalette.ink.withValues(alpha: 0.15);

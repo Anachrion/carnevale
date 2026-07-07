@@ -124,11 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         );
                       }
-                      final isDark =
-                          Theme.of(context).brightness == Brightness.dark;
-                      final logoutColor = isDark
-                          ? AppPalette.mutedGold
-                          : AppPalette.red;
+                      final logoutColor = context.accentColor;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -203,7 +199,7 @@ class _ThemePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor = isDark ? AppPalette.mutedGold : AppPalette.red;
+    final accentColor = context.accentColor;
 
     return GestureDetector(
       onTap: () async {
