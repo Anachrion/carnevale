@@ -15,9 +15,6 @@ const GameStatusEnum _$gameStatusEnum_gangSelection = const GameStatusEnum._(
 const GameStatusEnum _$gameStatusEnum_agendaDraw = const GameStatusEnum._(
   'agendaDraw',
 );
-const GameStatusEnum _$gameStatusEnum_deploying = const GameStatusEnum._(
-  'deploying',
-);
 const GameStatusEnum _$gameStatusEnum_inProgress = const GameStatusEnum._(
   'inProgress',
 );
@@ -33,8 +30,6 @@ GameStatusEnum _$gameStatusEnumValueOf(String name) {
       return _$gameStatusEnum_gangSelection;
     case 'agendaDraw':
       return _$gameStatusEnum_agendaDraw;
-    case 'deploying':
-      return _$gameStatusEnum_deploying;
     case 'inProgress':
       return _$gameStatusEnum_inProgress;
     case 'completed':
@@ -49,7 +44,6 @@ final BuiltSet<GameStatusEnum> _$gameStatusEnumValues =
       _$gameStatusEnum_pending,
       _$gameStatusEnum_gangSelection,
       _$gameStatusEnum_agendaDraw,
-      _$gameStatusEnum_deploying,
       _$gameStatusEnum_inProgress,
       _$gameStatusEnum_completed,
     ]);
@@ -92,7 +86,6 @@ class _$GameStatusEnumSerializer
     'pending': 'pending',
     'gangSelection': 'gang_selection',
     'agendaDraw': 'agenda_draw',
-    'deploying': 'deploying',
     'inProgress': 'in_progress',
     'completed': 'completed',
   };
@@ -100,7 +93,6 @@ class _$GameStatusEnumSerializer
     'pending': 'pending',
     'gang_selection': 'gangSelection',
     'agenda_draw': 'agendaDraw',
-    'deploying': 'deploying',
     'in_progress': 'inProgress',
     'completed': 'completed',
   };

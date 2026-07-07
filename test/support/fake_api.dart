@@ -226,7 +226,6 @@ api.GamePlayer fakeGamePlayer({
   int userId = 1,
   String username = 'tester',
   bool host = true,
-  bool ready = false,
   bool agendasConfirmed = false,
   int score = 0,
   int currentTurn = 1,
@@ -239,7 +238,6 @@ api.GamePlayer fakeGamePlayer({
     ..userId = userId
     ..username = username
     ..host = host
-    ..ready = ready
     ..agendasConfirmed = agendasConfirmed
     ..wonRoleRoll = false
     ..wonDeploymentRoll = false

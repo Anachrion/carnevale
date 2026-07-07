@@ -78,8 +78,6 @@ class _$GamePlayer extends GamePlayer {
   @override
   final GamePlayerRoleEnum? role;
   @override
-  final bool ready;
-  @override
   final bool agendasConfirmed;
   @override
   final bool wonRoleRoll;
@@ -106,7 +104,6 @@ class _$GamePlayer extends GamePlayer {
     required this.host,
     this.list,
     this.role,
-    required this.ready,
     required this.agendasConfirmed,
     required this.wonRoleRoll,
     required this.wonDeploymentRoll,
@@ -133,7 +130,6 @@ class _$GamePlayer extends GamePlayer {
         host == other.host &&
         list == other.list &&
         role == other.role &&
-        ready == other.ready &&
         agendasConfirmed == other.agendasConfirmed &&
         wonRoleRoll == other.wonRoleRoll &&
         wonDeploymentRoll == other.wonDeploymentRoll &&
@@ -153,7 +149,6 @@ class _$GamePlayer extends GamePlayer {
     _$hash = $jc(_$hash, host.hashCode);
     _$hash = $jc(_$hash, list.hashCode);
     _$hash = $jc(_$hash, role.hashCode);
-    _$hash = $jc(_$hash, ready.hashCode);
     _$hash = $jc(_$hash, agendasConfirmed.hashCode);
     _$hash = $jc(_$hash, wonRoleRoll.hashCode);
     _$hash = $jc(_$hash, wonDeploymentRoll.hashCode);
@@ -175,7 +170,6 @@ class _$GamePlayer extends GamePlayer {
           ..add('host', host)
           ..add('list', list)
           ..add('role', role)
-          ..add('ready', ready)
           ..add('agendasConfirmed', agendasConfirmed)
           ..add('wonRoleRoll', wonRoleRoll)
           ..add('wonDeploymentRoll', wonDeploymentRoll)
@@ -214,10 +208,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
   GamePlayerRoleEnum? _role;
   GamePlayerRoleEnum? get role => _$this._role;
   set role(GamePlayerRoleEnum? role) => _$this._role = role;
-
-  bool? _ready;
-  bool? get ready => _$this._ready;
-  set ready(bool? ready) => _$this._ready = ready;
 
   bool? _agendasConfirmed;
   bool? get agendasConfirmed => _$this._agendasConfirmed;
@@ -268,7 +258,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
       _host = $v.host;
       _list = $v.list?.toBuilder();
       _role = $v.role;
-      _ready = $v.ready;
       _agendasConfirmed = $v.agendasConfirmed;
       _wonRoleRoll = $v.wonRoleRoll;
       _wonDeploymentRoll = $v.wonDeploymentRoll;
@@ -319,11 +308,6 @@ class GamePlayerBuilder implements Builder<GamePlayer, GamePlayerBuilder> {
             ),
             list: _list?.build(),
             role: role,
-            ready: BuiltValueNullFieldError.checkNotNull(
-              ready,
-              r'GamePlayer',
-              'ready',
-            ),
             agendasConfirmed: BuiltValueNullFieldError.checkNotNull(
               agendasConfirmed,
               r'GamePlayer',

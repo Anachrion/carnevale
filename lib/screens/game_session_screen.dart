@@ -19,13 +19,11 @@ import 'score_tab.dart';
 
 const _kGangsVisibleStatuses = {
   api.GameStatusEnum.agendaDraw,
-  api.GameStatusEnum.deploying,
 };
 const _kScrollablePhaseStatuses = {
   api.GameStatusEnum.pending,
   api.GameStatusEnum.gangSelection,
   api.GameStatusEnum.agendaDraw,
-  api.GameStatusEnum.deploying,
 };
 
 /// One status-driven screen for the whole two-player setup flow, rather than a
@@ -49,6 +47,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   bool _discardedExpanded = false;
   String? _error;
   Future<List<AvailableGang>>? _availableGangsFuture;
+  // Last status we saw, so we can fire the one-off deployment popup exactly on the agenda_draw ->
+  // in_progress transition (both players confirmed) rather than every time an already-live game
+  // loads. Client-local only — a reload won't replay it, which is fine for an at-the-table prompt.
+  api.GameStatusEnum? _lastStatus;
 
   api.Game? get _game => _service.currentGame;
   api.GamePlayer? get _me => _game?.playerFor(authService.currentUser!.id);
@@ -71,7 +73,45 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   }
 
   void _onUpdate() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    final status = _game?.status;
+    if (_lastStatus == api.GameStatusEnum.agendaDraw &&
+        status == api.GameStatusEnum.inProgress) {
+      _showDeploymentDialog();
+    }
+    _lastStatus = status;
+    setState(() {});
+  }
+
+  // Deployment is done around the table, not in the app: the moment both players confirm their
+  // hand and the game goes live, surface a one-off prompt naming the deployment-roll winner.
+  void _showDeploymentDialog() {
+    final winnerName = (_me?.wonDeploymentRoll ?? false)
+        ? 'You'
+        : (_opponent?.wonDeploymentRoll ?? false)
+        ? (_opponent?.username ?? 'Opponent')
+        : null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Deploy your gangs'),
+          content: Text(
+            winnerName != null
+                ? '$winnerName won the deployment roll-off. Agree on deployment zones and '
+                      'place your miniatures at the table.'
+                : 'Agree on deployment zones and place your miniatures at the table.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Got it'),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Future<void> _init() async {
@@ -207,7 +247,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           game,
           me,
         ),
-        _ => _buildDeployingPhase(context, game, me),
+        // in_progress/completed are intercepted above; anything else is a transient state with
+        // nothing to show yet.
+        _ => const SizedBox.shrink(),
       },
     );
   }
@@ -768,50 +810,6 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     if (confirmed == true) {
       await _run(() => _service.discardUnachievable(gameId, agenda.id));
     }
-  }
-
-  // ── Deploying ────────────────────────────────────────────────────────────
-
-  Widget _buildDeployingPhase(
-    BuildContext context,
-    api.Game game,
-    api.GamePlayer me,
-  ) {
-    final opponent = _opponent;
-    final winnerName = me.wonDeploymentRoll
-        ? 'You'
-        : (opponent?.wonDeploymentRoll ?? false)
-        ? (opponent?.username ?? 'Opponent')
-        : null;
-    return _PhaseCard(
-      title: 'Deploy your gangs',
-      subtitle:
-          'Agree on deployment zones at the table, place your miniatures, then confirm below.',
-      children: [
-        if (winnerName != null) ...[
-          Text(
-            '$winnerName won the deployment roll-off.',
-            style: TextStyle(color: context.textColor),
-          ),
-          const SizedBox(height: 16),
-        ],
-        if (!me.ready)
-          _ActionButton(
-            label: "Ready",
-            onTap: () => _run(() => _service.markReady(game.id)),
-            busy: _busy,
-            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
-          )
-        else ...[
-          Text(
-            'Waiting for the opponent to be ready...',
-            style: TextStyle(color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 16),
-          const CircularProgressIndicator(color: AppPalette.gold),
-        ],
-      ],
-    );
   }
 
   // ── In progress ──────────────────────────────────────────────────────────

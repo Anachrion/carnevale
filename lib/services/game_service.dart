@@ -140,7 +140,7 @@ class GameService extends ChangeNotifier {
       });
 
   /// Confirms the player's opening hand, ending their agenda_draw phase. Once both players
-  /// confirm, the server advances the game to deploying.
+  /// confirm, the server takes the game straight to in_progress (deployment is done at the table).
   Future<api.Game> confirmAgendas(int gameId) => _guard(() async {
     final res = await _client.games.confirmAgendas(id: gameId);
     return res.data!;
@@ -209,11 +209,6 @@ class GameService extends ChangeNotifier {
         'command_point' => api.DiscardAgendaInputOriginEnum.commandPoint,
         _ => throw ArgumentError('Unknown discard origin: $origin'),
       };
-
-  Future<api.Game> markReady(int gameId) => _guard(() async {
-    final res = await _client.games.markReady(id: gameId);
-    return res.data!;
-  });
 
   /// Either player's selected gang, in full — available once that player has picked one,
   /// regardless of whose turn it currently is.

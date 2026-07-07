@@ -23,7 +23,6 @@ void main() {
         api.GameStatusEnum.pending: 'pending',
         api.GameStatusEnum.gangSelection: 'gang_selection',
         api.GameStatusEnum.agendaDraw: 'agenda_draw',
-        api.GameStatusEnum.deploying: 'deploying',
         api.GameStatusEnum.inProgress: 'in_progress',
         api.GameStatusEnum.completed: 'completed',
       };
