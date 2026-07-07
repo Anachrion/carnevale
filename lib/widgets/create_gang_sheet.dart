@@ -98,7 +98,7 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
             scrollDirection: Axis.horizontal,
             children: kCreateGangFactions.map((f) {
               final selected = f == _selectedFaction;
-              final color = AppPalette.factionColors[f] ?? AppPalette.gold;
+              final color = AppPalette.factionColors[f] ?? context.accentColor;
               final iconPath = AppPalette.factionIcons[f]!;
               return GestureDetector(
                 onTap: () => setState(() => _selectedFaction = f),

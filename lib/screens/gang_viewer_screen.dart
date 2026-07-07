@@ -162,9 +162,9 @@ class GangsTabView extends StatelessWidget {
       child: TabBar(
         isScrollable: leadingTabs.isNotEmpty,
         tabAlignment: leadingTabs.isNotEmpty ? TabAlignment.center : null,
-        labelColor: AppPalette.gold,
+        labelColor: context.accentColor,
         unselectedLabelColor: context.subtleTextColor,
-        indicatorColor: AppPalette.gold,
+        indicatorColor: context.accentColor,
         labelStyle: GoogleFonts.cinzel(
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -343,8 +343,8 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
     final data = _data;
     if (data == null) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
+      return Center(
+        child: CircularProgressIndicator(color: context.accentColor),
       );
     }
     return _ReadOnlyGangBody(

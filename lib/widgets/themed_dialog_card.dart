@@ -23,7 +23,7 @@ class ThemedDialogCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.cardBgColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppPalette.gold.withValues(alpha: 0.6), width: 1.2),
+            border: Border.all(color: context.accentColor.withValues(alpha: 0.6), width: 1.2),
           ),
           padding: padding,
           child: child,

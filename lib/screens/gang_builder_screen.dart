@@ -234,7 +234,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   @override
   Widget build(BuildContext context) {
     final factionColor =
-        AppPalette.factionColors[_gang.faction] ?? AppPalette.gold;
+        AppPalette.factionColors[_gang.faction] ?? context.accentColor;
     return Scaffold(
       backgroundColor: AppPalette.background,
       body: AppBackground(
@@ -380,8 +380,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
 
   Widget _buildTabContent(Color factionColor) {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
+      return Center(
+        child: CircularProgressIndicator(color: context.accentColor),
       );
     }
     // Build only the active tab rather than eagerly laying out both (F-P3-6). The list/hire tabs
@@ -676,9 +676,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                 ),
                 prefixIcon: Icon(
                   Icons.search,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppPalette.gold
-                      : AppPalette.red,
+                  color: context.accentColor,
                   size: 20,
                 ),
                 suffixIcon: _searchController.text.isNotEmpty

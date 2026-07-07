@@ -26,7 +26,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final factionColor =
-        AppPalette.factionColors[gang.faction] ?? AppPalette.gold;
+        AppPalette.factionColors[gang.faction] ?? context.accentColor;
     return Column(
       children: [
         if (showHeader) ...[

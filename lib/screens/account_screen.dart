@@ -309,7 +309,7 @@ class _AuthFormState extends State<_AuthForm> {
                     'Forgot password?',
                     style: GoogleFonts.notoSans(
                       fontSize: 13,
-                      color: AppPalette.gold,
+                      color: context.accentColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -343,7 +343,7 @@ class _AuthFormState extends State<_AuthForm> {
               const SizedBox(height: 16),
               Text(
                 _error!,
-                style: const TextStyle(color: Colors.red, fontSize: 13),
+                style: TextStyle(color: context.dangerColor, fontSize: 13),
               ),
             ],
             const SizedBox(height: 24),
@@ -391,7 +391,7 @@ class _AuthFormState extends State<_AuthForm> {
                       TextSpan(
                         text: _isSignUp ? 'Log In' : 'Sign Up',
                         style: TextStyle(
-                          color: AppPalette.gold,
+                          color: context.accentColor,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -486,11 +486,11 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                 ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: AppPalette.gold.withValues(alpha: 0.5),
+                    color: context.accentColor.withValues(alpha: 0.5),
                   ),
                 ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: context.accentColor, width: 1.5),
                 ),
               ),
               validator: (v) {
@@ -503,7 +503,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
               const SizedBox(height: 12),
               Text(
                 _error!,
-                style: const TextStyle(color: Colors.red, fontSize: 13),
+                style: TextStyle(color: context.dangerColor, fontSize: 13),
               ),
             ],
           ],
@@ -525,7 +525,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
               : Text(
                   'Send',
                   style: TextStyle(
-                    color: AppPalette.gold,
+                    color: context.accentColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

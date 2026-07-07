@@ -219,9 +219,7 @@ class _MenuItem extends StatelessWidget {
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppPalette.gold
-                      : AppPalette.red,
+                  color: context.accentColor,
                   size: 22,
                 ),
               ],

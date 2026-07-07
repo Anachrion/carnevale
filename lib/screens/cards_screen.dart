@@ -147,9 +147,9 @@ class _CardsScreenState extends State<CardsScreen> {
               color: context.subtleTextColor.withValues(alpha: 0.7),
               fontSize: 15,
             ),
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.search,
-              color: AppPalette.gold,
+              color: context.accentColor,
               size: 20,
             ),
             border: InputBorder.none,
@@ -215,8 +215,8 @@ class _CardsScreenState extends State<CardsScreen> {
 
   Widget _buildList() {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
+      return Center(
+        child: CircularProgressIndicator(color: context.accentColor),
       );
     }
     if (_results.isEmpty) {
@@ -250,7 +250,7 @@ class _FactionIconChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = AppPalette.factionColors[faction] ?? AppPalette.gold;
+    final color = AppPalette.factionColors[faction] ?? context.accentColor;
     final iconPath = AppPalette.factionIcons[faction]!;
     return GestureDetector(
       onTap: onTap,

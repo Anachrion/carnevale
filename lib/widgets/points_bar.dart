@@ -29,8 +29,8 @@ class PointsBar extends StatelessWidget {
     final ratio = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
     final isOver = editable && used > limit;
     final barColor = isOver
-        ? Colors.red.shade400
-        : (editable ? AppPalette.gold : factionColor);
+        ? context.dangerColor
+        : (editable ? context.accentColor : factionColor);
     final remaining = limit - used;
 
     return Padding(
@@ -58,7 +58,7 @@ class PointsBar extends StatelessWidget {
                       style: GoogleFonts.cinzel(
                         fontSize: editable ? 20 : 18,
                         fontWeight: FontWeight.w700,
-                        color: isOver ? Colors.red.shade600 : context.textColor,
+                        color: isOver ? context.dangerColor : context.textColor,
                       ),
                     ),
                     Text(
@@ -75,7 +75,7 @@ class PointsBar extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: isOver
-                              ? Colors.red.shade400
+                              ? context.dangerColor
                               : context.subtleTextColor,
                           fontWeight: FontWeight.w500,
                         ),
