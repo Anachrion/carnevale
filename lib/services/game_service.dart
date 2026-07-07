@@ -126,15 +126,14 @@ class GameService extends ChangeNotifier {
     return res.data!;
   });
 
-  /// Draws agendas: the initial batch when [origin] is null (during `agenda_draw`), or a single
-  /// in-play replacement when [origin] is `special_rule`/`command_point` (during `in_progress`).
-  Future<List<api.Agenda>> drawAgendas(int gameId, {String? origin}) =>
+  /// Draws a single in-play replacement agenda during `in_progress`. [origin] (`special_rule`/
+  /// `command_point`) identifies what granted the draw. The opening hand isn't drawn here — the
+  /// server deals it automatically when the game enters `agenda_draw`.
+  Future<List<api.Agenda>> drawAgendas(int gameId, {required String origin}) =>
       _guard(() async {
         final res = await _client.games.drawAgendas(
           id: gameId,
-          drawAgendaInput: origin == null
-              ? null
-              : api.DrawAgendaInput((b) => b..origin = _drawOrigin(origin)),
+          drawAgendaInput: api.DrawAgendaInput((b) => b..origin = _drawOrigin(origin)),
         );
         return res.data?.agendas.toList() ?? [];
       });

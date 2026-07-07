@@ -594,19 +594,17 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     final secret = game.scenario.agendaRules.contains(
       api.ScenarioAgendaRulesEnum.secret,
     );
+    // The opening hand is dealt server-side the instant the game enters agenda_draw, arriving in
+    // the same state broadcast that flips the status — so agendas are normally already present.
+    // This empty state only shows in the brief window before that broadcast lands.
     if (me.agendas.isEmpty) {
       return _PhaseCard(
-        title: 'Draw your Agendas',
+        title: 'Dealing your Agendas',
         subtitle: secret
             ? 'Kept secret from your opponent until achieved (Secret scenario).'
             : 'Your opponent can see these — this scenario is not Secret.',
-        children: [
-          _ActionButton(
-            label: 'Draw',
-            onTap: () => _run(() => _service.drawAgendas(game.id)),
-            busy: _busy,
-            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
-          ),
+        children: const [
+          Center(child: CircularProgressIndicator(color: AppPalette.gold)),
         ],
       );
     }
@@ -625,8 +623,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         ),
         if (discarded.isNotEmpty) _discardedSection(context, discarded),
         const SizedBox(height: 8),
-        // Drawing doesn't auto-advance: the player reads (and optionally mulligans) their hand,
-        // then confirms. Once both players confirm, the game moves on to deployment.
+        // The hand is dealt automatically; the player reads (and optionally mulligans) it, then
+        // confirms. Once both players confirm, the game goes straight live.
         if (!me.agendasConfirmed)
           Align(
             alignment: Alignment.centerRight,
@@ -909,13 +907,11 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.onTap,
     required this.busy,
-    this.padding = const EdgeInsets.symmetric(vertical: 14),
   });
 
   final String label;
   final VoidCallback onTap;
   final bool busy;
-  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -924,7 +920,7 @@ class _ActionButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: context.accentColor,
         foregroundColor: Colors.white,
-        padding: padding,
+        padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),

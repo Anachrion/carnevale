@@ -16,7 +16,7 @@ Method | HTTP request | Description
 [**deleteGame**](GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [**deselectGang**](GamesApi.md#deselectgang) | **DELETE** /games/{id}/select_gang | Clear the current user&#39;s gang selection for this game (still in gang selection)
 [**discardAgenda**](GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
-[**drawAgendas**](GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
+[**drawAgendas**](GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Draw a single in-play Agenda card
 [**finishGame**](GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side
 [**getAvailableGangs**](GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [**getGame**](GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state
@@ -132,7 +132,7 @@ Name | Type | Description  | Notes
 
 Confirm this player's opening Agenda hand
 
-Marks the player done with the `agenda_draw` phase after they've reviewed and optionally mulliganed their hand. Requires the player to have already drawn. Once both players confirm, the game goes straight to `in_progress` — deployment zones are agreed at the table, so there is no separate in-app deployment step — and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each list. 
+Marks the player done with the `agenda_draw` phase after they've reviewed and optionally mulliganed their auto-dealt opening hand. Once both players confirm, the game goes straight to `in_progress` — deployment zones are agreed at the table, so there is no separate in-app deployment step — and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each list. 
 
 ### Example
 ```dart
@@ -366,9 +366,9 @@ Name | Type | Description  | Notes
 # **drawAgendas**
 > DrawAgendasResponse drawAgendas(id, drawAgendaInput)
 
-Privately draw this player's Agenda cards
+Draw a single in-play Agenda card
 
-Never broadcast or visible to the opponent. Behavior depends on game status: while `agenda_draw`, draws the scenario's full initial hand (no request body). Drawing does not advance the phase — the player then reviews (and optionally mulligans) the hand and posts to `agendas/confirm`. While `in_progress`, draws a single replacement card and requires `origin` in the body (`special_rule` or `command_point` — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
+Only valid while the game is `in_progress`. Draws one replacement card and requires `origin` in the body (`special_rule` or `command_point` — a card is never freely drawn mid-game, only granted by one of those). The opening hand is **not** drawn here: it is dealt automatically the moment the game enters `agenda_draw` (both players' hands at once), so there is no initial-draw call — clients read the pre-dealt hand from the player's `agendas` and go straight to reviewing/mulliganing and `agendas/confirm`. Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
 
 ### Example
 ```dart
