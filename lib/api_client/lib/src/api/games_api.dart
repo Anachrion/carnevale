@@ -206,7 +206,7 @@ class GamesApi {
   }
 
   /// Confirm this player&#39;s opening Agenda hand
-  /// Marks the player done with the &#x60;agenda_draw&#x60; phase after they&#39;ve reviewed and optionally mulliganed their hand. Requires the player to have already drawn. Once both players confirm, the game goes straight to &#x60;in_progress&#x60; — deployment zones are agreed at the table, so there is no separate in-app deployment step — and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each list. 
+  /// Marks the player done with the &#x60;agenda_draw&#x60; phase after they&#39;ve reviewed and optionally mulliganed their auto-dealt opening hand. Once both players confirm, the game goes straight to &#x60;in_progress&#x60; — deployment zones are agreed at the table, so there is no separate in-app deployment step — and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each list. 
   ///
   /// Parameters:
   /// * [id] 
@@ -651,8 +651,8 @@ class GamesApi {
     );
   }
 
-  /// Privately draw this player&#39;s Agenda cards
-  /// Never broadcast or visible to the opponent. Behavior depends on game status: while &#x60;agenda_draw&#x60;, draws the scenario&#39;s full initial hand (no request body). Drawing does not advance the phase — the player then reviews (and optionally mulligans) the hand and posts to &#x60;agendas/confirm&#x60;. While &#x60;in_progress&#x60;, draws a single replacement card and requires &#x60;origin&#x60; in the body (&#x60;special_rule&#x60; or &#x60;command_point&#x60; — a card is never freely drawn mid-game, only granted by one of those). Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
+  /// Draw a single in-play Agenda card
+  /// Only valid while the game is &#x60;in_progress&#x60;. Draws one replacement card and requires &#x60;origin&#x60; in the body (&#x60;special_rule&#x60; or &#x60;command_point&#x60; — a card is never freely drawn mid-game, only granted by one of those). The opening hand is **not** drawn here: it is dealt automatically the moment the game enters &#x60;agenda_draw&#x60; (both players&#39; hands at once), so there is no initial-draw call — clients read the pre-dealt hand from the player&#39;s &#x60;agendas&#x60; and go straight to reviewing/mulliganing and &#x60;agendas/confirm&#x60;. Every agenda a player has ever drawn — whether still in hand, scored, or discarded — can never be drawn again by that same player. 
   ///
   /// Parameters:
   /// * [id] 

@@ -72,7 +72,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**deleteGame**](doc/GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [*GamesApi*](doc/GamesApi.md) | [**deselectGang**](doc/GamesApi.md#deselectgang) | **DELETE** /games/{id}/select_gang | Clear the current user&#39;s gang selection for this game (still in gang selection)
 [*GamesApi*](doc/GamesApi.md) | [**discardAgenda**](doc/GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
-[*GamesApi*](doc/GamesApi.md) | [**drawAgendas**](doc/GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Privately draw this player&#39;s Agenda cards
+[*GamesApi*](doc/GamesApi.md) | [**drawAgendas**](doc/GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Draw a single in-play Agenda card
 [*GamesApi*](doc/GamesApi.md) | [**finishGame**](doc/GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side
 [*GamesApi*](doc/GamesApi.md) | [**getAvailableGangs**](doc/GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
 [*GamesApi*](doc/GamesApi.md) | [**getGame**](doc/GamesApi.md#getgame) | **GET** /games/{id} | Get a game&#39;s full current state

@@ -9,7 +9,7 @@ import 'package:built_value/serializer.dart';
 
 part 'draw_agenda_input.g.dart';
 
-/// Only used (and only required) while the game is `in_progress` — ignored during the initial `agenda_draw` batch draw.
+/// Required — `origin` identifies what granted the in-play draw.
 ///
 /// Properties:
 /// * [origin] 
