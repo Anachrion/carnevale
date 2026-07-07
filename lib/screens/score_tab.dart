@@ -528,13 +528,25 @@ class ScoreTab extends StatelessWidget {
   }
 
   Future<void> _discard(BuildContext context, int agendaId) async {
-    final origin = await _pickOrigin(context, 'Discard this agenda via…');
+    // Unlike a draw, a discard can also be an "unachievable" swap — tossing an impossible agenda
+    // for a fresh one (the server always redraws in that case).
+    final origin = await _pickOrigin(
+      context,
+      'Discard this agenda via…',
+      includeUnachievable: true,
+    );
     if (origin != null) onDiscard(agendaId, origin);
   }
 
-  /// The two in-play origins (special rule / command point) an agenda draw or discard can be
-  /// attributed to — an agenda is never freely drawn or discarded mid-game.
-  Future<String?> _pickOrigin(BuildContext context, String title) {
+  /// Picks the origin a mid-game agenda draw/discard is attributed to — an agenda is never freely
+  /// drawn or discarded. Draws and rule/command-point discards use `special_rule`/`command_point`;
+  /// discards additionally offer `unachievable` (an impossible agenda swapped for a fresh one) when
+  /// [includeUnachievable] is set.
+  Future<String?> _pickOrigin(
+    BuildContext context,
+    String title, {
+    bool includeUnachievable = false,
+  }) {
     return showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -555,6 +567,14 @@ class ScoreTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+                if (includeUnachievable)
+                  ListTile(
+                    title: Text('Unachievable',
+                        style: TextStyle(color: ctx.textColor)),
+                    subtitle: Text('Impossible now — swap for a fresh agenda',
+                        style: TextStyle(color: ctx.subtleTextColor)),
+                    onTap: () => Navigator.pop(ctx, 'unachievable'),
+                  ),
                 ListTile(
                   title: Text('Special Rule',
                       style: TextStyle(color: ctx.textColor)),
