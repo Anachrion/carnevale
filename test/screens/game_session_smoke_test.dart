@@ -121,4 +121,42 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets(
+    'agenda-draw phase shows a dealing placeholder before the hand arrives',
+    (tester) async {
+      AuthService().debugLogin(
+        const AuthUser(id: 1, email: 'a@b.c', username: 'me'),
+      );
+      final adapter = installFakeApi();
+      adapter.stub('POST', '/cable_tickets', {'ticket': 'test-ticket'});
+
+      // In agenda_draw but the auto-dealt hand hasn't landed yet (empty agendas): the screen shows
+      // a loading placeholder rather than a Draw button — there's no draw action to offer anymore.
+      adapter.stub(
+        'GET',
+        '/games/1',
+        gameBody(
+          fakeGame(
+            id: 1,
+            status: api.GameStatusEnum.agendaDraw,
+            players: [fakeGamePlayer(id: 1, userId: 1, agendas: const [])],
+          ),
+        ),
+      );
+      await tester.pumpWidget(
+        const MaterialApp(home: GameSessionScreen(gameId: 1)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.text('Dealing your Agendas'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      // No draw button and nothing to confirm yet.
+      expect(find.text('Draw'), findsNothing);
+      expect(find.text('Ready'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 }
