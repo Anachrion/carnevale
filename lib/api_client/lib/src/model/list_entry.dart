@@ -20,7 +20,7 @@ part 'list_entry.g.dart';
 /// * [entryId] 
 /// * [name] 
 /// * [cost] 
-/// * [state] - Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
+/// * [state] - Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
 /// * [mage] - Whether this model is a Mage and can therefore be given spells. Always false for Equipment.
 /// * [spellSlots] - Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
 /// * [disciplines] - Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
@@ -48,7 +48,7 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   @BuiltValueField(wireName: r'cost')
   int get cost;
 
-  /// Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
+  /// Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
   @BuiltValueField(wireName: r'state')
   EntryState? get state;
 

@@ -23,7 +23,6 @@ Method | HTTP request | Description
 [**getGames**](GamesApi.md#getgames) | **GET** /games | List the current user&#39;s games (to resume/reopen)
 [**getPlayerList**](GamesApi.md#getplayerlist) | **GET** /games/{id}/players/{player_id}/list | Either player&#39;s selected gang, in full (with entries)
 [**joinGame**](GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
-[**markReady**](GamesApi.md#markready) | **POST** /games/{id}/ready | Confirm physical deployment is done
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
 [**rewindTurn**](GamesApi.md#rewindturn) | **POST** /games/{id}/turns/rewind | Rewind the requesting player&#39;s turn cursor
 [**scoreAgenda**](GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
@@ -133,7 +132,7 @@ Name | Type | Description  | Notes
 
 Confirm this player's opening Agenda hand
 
-Marks the player done with the `agenda_draw` phase after they've reviewed and optionally mulliganed their hand. Requires the player to have already drawn. Once both players confirm, the game advances to `deploying`. 
+Marks the player done with the `agenda_draw` phase after they've reviewed and optionally mulliganed their hand. Requires the player to have already drawn. Once both players confirm, the game goes straight to `in_progress` — deployment zones are agreed at the table, so there is no separate in-app deployment step — and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each list. 
 
 ### Example
 ```dart
@@ -318,7 +317,7 @@ Name | Type | Description  | Notes
 
 Discard an Agenda from this player's hand
 
-Discards an agenda currently in the requesting player's hand. The valid `origin` depends on the game status:   * during setup (`agenda_draw`/`deploying`), `unachievable` — the pre-game mulligan for an     impossible or duplicated agenda, which always draws a replacement (origin `recycle`); or   * while `in_progress`, `special_rule` or `command_point` — an in-play discard granted by     one of those, which draws a replacement only when `recycle: true`. A discarded agenda is always visible to the opponent (even under the Secret rule). 
+Discards an agenda currently in the requesting player's hand. The valid `origin` depends on the game status:   * during setup (`agenda_draw`), `unachievable` — the pre-game mulligan for an     impossible or duplicated agenda, which always draws a replacement (origin `recycle`); or   * while `in_progress`, `special_rule` or `command_point` — an in-play discard granted by     one of those, which draws a replacement only when `recycle: true`. A discarded agenda is always visible to the opponent (even under the Secret rule). 
 
 ### Example
 ```dart
@@ -691,53 +690,6 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **markReady**
-> Game markReady(id)
-
-Confirm physical deployment is done
-
-Once both players are ready, the game's status becomes in_progress and an EntryState (current/starting HP, WP, CP, and status counters) is created for every model (Catalog::CardReference entry) in each player's list.
-
-### Example
-```dart
-import 'package:carnevale_api/api.dart';
-// TODO Configure API key authorization: ApiKeyAuth
-//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
-// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
-
-final api = CarnevaleApi().getGamesApi();
-final int id = 56; // int | 
-
-try {
-    final response = api.markReady(id);
-    print(response);
-} on DioException catch (e) {
-    print('Exception when calling GamesApi->markReady: $e\n');
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **id** | **int**|  | 
-
-### Return type
-
-[**Game**](Game.md)
-
-### Authorization
-
-[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

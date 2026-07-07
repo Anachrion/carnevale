@@ -21,8 +21,7 @@ part 'game_player.g.dart';
 /// * [host] 
 /// * [list] 
 /// * [role] 
-/// * [ready] 
-/// * [agendasConfirmed] - True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming advances the game to deploying.
+/// * [agendasConfirmed] - True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming takes the game straight to in_progress.
 /// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
 /// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
 /// * [score] - Total Victory Points scored from Agendas so far (every Agenda scores a flat 1 VP). Always visible for both players.
@@ -51,10 +50,7 @@ abstract class GamePlayer implements Built<GamePlayer, GamePlayerBuilder> {
   GamePlayerRoleEnum? get role;
   // enum roleEnum {  attacker,  defender,  };
 
-  @BuiltValueField(wireName: r'ready')
-  bool get ready;
-
-  /// True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming advances the game to deploying.
+  /// True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming takes the game straight to in_progress.
   @BuiltValueField(wireName: r'agendas_confirmed')
   bool get agendasConfirmed;
 
@@ -138,11 +134,6 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     yield object.role == null ? null : serializers.serialize(
       object.role,
       specifiedType: const FullType.nullable(GamePlayerRoleEnum),
-    );
-    yield r'ready';
-    yield serializers.serialize(
-      object.ready,
-      specifiedType: const FullType(bool),
     );
     yield r'agendas_confirmed';
     yield serializers.serialize(
@@ -250,13 +241,6 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
           ) as GamePlayerRoleEnum?;
           if (valueDes == null) continue;
           result.role = valueDes;
-          break;
-        case r'ready':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.ready = valueDes;
           break;
         case r'agendas_confirmed':
           final valueDes = serializers.deserialize(

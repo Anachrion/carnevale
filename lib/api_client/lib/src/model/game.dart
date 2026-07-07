@@ -37,7 +37,7 @@ abstract class Game implements Built<Game, GameBuilder> {
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueField(wireName: r'status')
   GameStatusEnum get status;
-  // enum statusEnum {  pending,  gang_selection,  agenda_draw,  deploying,  in_progress,  completed,  };
+  // enum statusEnum {  pending,  gang_selection,  agenda_draw,  in_progress,  completed,  };
 
   @BuiltValueField(wireName: r'ducat_limit')
   int get ducatLimit;
@@ -251,9 +251,6 @@ class GameStatusEnum extends EnumClass {
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'agenda_draw')
   static const GameStatusEnum agendaDraw = _$gameStatusEnum_agendaDraw;
-  /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
-  @BuiltValueEnumConst(wireName: r'deploying')
-  static const GameStatusEnum deploying = _$gameStatusEnum_deploying;
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'in_progress')
   static const GameStatusEnum inProgress = _$gameStatusEnum_inProgress;

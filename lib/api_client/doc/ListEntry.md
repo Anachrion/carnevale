@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 **entryId** | **int** |  | 
 **name** | **String** |  | 
 **cost** | **int** |  | 
-**state** | [**EntryState**](EntryState.md) | Present once the game has started (POST /games/{id}/ready flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track. | [optional] 
+**state** | [**EntryState**](EntryState.md) | Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track. | [optional] 
 **mage** | **bool** | Whether this model is a Mage and can therefore be given spells. Always false for Equipment. | 
 **spellSlots** | **int** | Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages. | 
 **disciplines** | **BuiltList&lt;String&gt;** | Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"]. | 
