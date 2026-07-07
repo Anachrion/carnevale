@@ -33,7 +33,7 @@ void showEquipmentDetailDialog(BuildContext context, api.Equipment e) {
                 style: GoogleFonts.cinzel(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppPalette.gold,
+                  color: context.accentColor,
                 ),
               ),
             ],

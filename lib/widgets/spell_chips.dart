@@ -53,7 +53,7 @@ void showSpellDetailDialog(BuildContext context, api.Spell spell) {
                   style: GoogleFonts.cinzel(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: AppPalette.gold,
+                    color: context.accentColor,
                   ),
                 ),
               ],

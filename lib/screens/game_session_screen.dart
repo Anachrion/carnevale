@@ -219,8 +219,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     final game = _game;
     final me = _me;
     if (game == null || me == null)
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
+      return Center(
+        child: CircularProgressIndicator(color: context.accentColor),
       );
 
     // in_progress/completed (and any future status) render full-bleed below the header instead
@@ -280,9 +280,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: AppPalette.gold.withValues(alpha: 0.15),
+              color: context.accentColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppPalette.gold),
+              border: Border.all(color: context.accentColor),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -297,13 +297,13 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Icon(Icons.copy, color: AppPalette.gold, size: 18),
+                Icon(Icons.copy, color: context.accentColor, size: 18),
               ],
             ),
           ),
         ),
         const SizedBox(height: 20),
-        const CircularProgressIndicator(color: AppPalette.gold),
+        CircularProgressIndicator(color: context.accentColor),
       ],
     );
   }
@@ -361,7 +361,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             style: TextStyle(color: context.subtleTextColor),
           ),
           const SizedBox(height: 16),
-          const CircularProgressIndicator(color: AppPalette.gold),
+          CircularProgressIndicator(color: context.accentColor),
         ],
       );
     }
@@ -373,7 +373,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           style: TextStyle(color: context.subtleTextColor),
         ),
         const SizedBox(height: 16),
-        const CircularProgressIndicator(color: AppPalette.gold),
+        CircularProgressIndicator(color: context.accentColor),
       ],
     );
   }
@@ -521,7 +521,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         'Over limit',
         style: TextStyle(
           fontSize: 11,
-          color: Colors.red.shade400,
+          color: context.dangerColor,
           fontWeight: FontWeight.w600,
         ),
       );
@@ -603,8 +603,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         subtitle: secret
             ? 'Kept secret from your opponent until achieved (Secret scenario).'
             : 'Your opponent can see these — this scenario is not Secret.',
-        children: const [
-          Center(child: CircularProgressIndicator(color: AppPalette.gold)),
+        children: [
+          Center(child: CircularProgressIndicator(color: context.accentColor)),
         ],
       );
     }
@@ -640,7 +640,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             style: TextStyle(color: context.subtleTextColor),
           ),
           const SizedBox(height: 16),
-          const CircularProgressIndicator(color: AppPalette.gold),
+          CircularProgressIndicator(color: context.accentColor),
         ],
       ],
     );
@@ -823,8 +823,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   ) {
     final opponent = _opponent;
     if (opponent == null) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppPalette.gold),
+      return Center(
+        child: CircularProgressIndicator(color: context.accentColor),
       );
     }
     return GangsTabView(

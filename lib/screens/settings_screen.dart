@@ -77,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.cinzel(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppPalette.gold,
+                      color: context.accentColor,
                       letterSpacing: 2,
                     ),
                   ),
@@ -95,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.cinzel(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppPalette.gold,
+                      color: context.accentColor,
                       letterSpacing: 2,
                     ),
                   ),
@@ -117,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Text(
                               'Log In',
                               style: GoogleFonts.cinzel(
-                                color: AppPalette.gold,
+                                color: context.accentColor,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -447,12 +447,12 @@ class _UsernameEditorState extends State<_UsernameEditor> {
                 ),
                 const SizedBox(width: 4),
                 _saving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppPalette.gold,
+                          color: context.accentColor,
                         ),
                       )
                     : IconButton(
@@ -460,7 +460,7 @@ class _UsernameEditorState extends State<_UsernameEditor> {
                           Icons.check,
                           size: 20,
                           color: _changed
-                              ? AppPalette.gold
+                              ? context.accentColor
                               : context.subtleTextColor.withValues(alpha: 0.3),
                         ),
                         onPressed: _changed ? _save : null,
@@ -476,7 +476,7 @@ class _UsernameEditorState extends State<_UsernameEditor> {
             padding: const EdgeInsets.only(top: 6, left: 4),
             child: Text(
               _error!,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
+              style: TextStyle(color: context.dangerColor, fontSize: 12),
             ),
           ),
       ],

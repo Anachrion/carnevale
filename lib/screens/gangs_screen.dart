@@ -165,7 +165,6 @@ class _GangsScreenState extends State<GangsScreen> {
       return ErrorRetryView(onRetry: _load);
     }
     if (_gangs.isEmpty) return _buildEmpty();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       itemCount: _gangs.length,
@@ -190,7 +189,7 @@ class _GangsScreenState extends State<GangsScreen> {
                 duration: const Duration(milliseconds: 400),
                 child: Icon(
                   Icons.chevron_right,
-                  color: isDark ? AppPalette.gold : AppPalette.red,
+                  color: context.accentColor,
                   size: 20,
                 ),
               ),
@@ -230,8 +229,8 @@ class _GangsScreenState extends State<GangsScreen> {
             onPressed: () => _editGang(gang),
             icon: const Icon(Icons.edit_outlined, size: 16),
             style: TextButton.styleFrom(
-              foregroundColor: AppPalette.gold,
-              side: const BorderSide(color: AppPalette.gold),
+              foregroundColor: context.accentColor,
+              side: BorderSide(color: context.accentColor),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             label: Text(
@@ -246,8 +245,8 @@ class _GangsScreenState extends State<GangsScreen> {
             onPressed: () => _confirmDelete(gang),
             icon: const Icon(Icons.delete_outline, size: 16),
             style: TextButton.styleFrom(
-              foregroundColor: AppPalette.red,
-              side: const BorderSide(color: AppPalette.red),
+              foregroundColor: context.dangerColor,
+              side: BorderSide(color: context.dangerColor),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             label: Text(
@@ -282,7 +281,7 @@ class _GangsScreenState extends State<GangsScreen> {
               Navigator.pop(context);
               _deleteGang(gang.id);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('Delete', style: TextStyle(color: context.dangerColor)),
           ),
         ],
       ),

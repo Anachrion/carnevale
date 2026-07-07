@@ -24,6 +24,11 @@ extension AppColors on BuildContext {
   /// primary's family without colliding with the destructive `brightRed`.
   Color get secondaryAccentColor => _isDark ? AppPalette.antiqueGold : AppPalette.terracotta;
 
+  /// Destructive / error signal — over-limit points, delete actions, validation errors. Kept
+  /// constant across themes: the stronger `brightRed` reads as "warning" against either accent
+  /// (and, in light theme, stays distinct from the deep-red [accentColor]).
+  Color get dangerColor => AppPalette.brightRed;
+
   Color get cardBgColor => _isDark ? AppPalette.surfaceDark : AppPalette.paper;
 
   /// Scaffold / drawer background.

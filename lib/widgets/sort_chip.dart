@@ -21,9 +21,7 @@ class SortChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = Theme.of(context).brightness == Brightness.dark
-        ? AppPalette.gold
-        : AppPalette.red;
+    final accent = context.accentColor;
     return GestureDetector(
       onTap: onTap,
       child: Container(

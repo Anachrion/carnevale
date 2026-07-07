@@ -114,7 +114,7 @@ class ScoreTab extends StatelessWidget {
                     : null,
                 icon: const Icon(Icons.chevron_left),
                 tooltip: 'Rewind a turn',
-                color: AppPalette.gold,
+                color: context.accentColor,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -133,7 +133,7 @@ class ScoreTab extends StatelessWidget {
                     : null,
                 icon: const Icon(Icons.chevron_right),
                 tooltip: 'Advance a turn',
-                color: AppPalette.gold,
+                color: context.accentColor,
               ),
             ],
           ),
@@ -175,7 +175,7 @@ class ScoreTab extends StatelessWidget {
             onPressed: busy ? null : onUnfinish,
             icon: const Icon(Icons.undo, size: 18),
             label: const Text('Undo — keep scoring'),
-            style: OutlinedButton.styleFrom(foregroundColor: AppPalette.gold),
+            style: OutlinedButton.styleFrom(foregroundColor: context.accentColor),
           ),
         ],
       );
@@ -214,7 +214,7 @@ class ScoreTab extends StatelessWidget {
             style: GoogleFonts.cinzel(
               fontSize: 30,
               fontWeight: FontWeight.w700,
-              color: isMe ? AppPalette.gold : context.textColor,
+              color: isMe ? context.accentColor : context.textColor,
             ),
           ),
           Text(
@@ -259,7 +259,7 @@ class ScoreTab extends StatelessWidget {
                       icon: const Icon(Icons.add, size: 18),
                       label: const Text('Draw'),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppPalette.gold,
+                        foregroundColor: context.accentColor,
                       ),
                     ),
                 ],
@@ -277,7 +277,7 @@ class ScoreTab extends StatelessWidget {
             const SizedBox(height: 12),
             _sectionLabel(context, 'Scored'),
             ...scored.map((n) => _resolvedRow(context, n, Icons.check_circle,
-                AppPalette.gold)),
+                context.accentColor)),
           ],
           if (discarded.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -325,7 +325,7 @@ class ScoreTab extends StatelessWidget {
               children: [
                 _smallButton(
                   label: 'Score',
-                  color: AppPalette.gold,
+                  color: context.accentColor,
                   onTap: busy ? null : () => onScore(a.id),
                 ),
                 const SizedBox(width: 8),
@@ -390,7 +390,7 @@ class ScoreTab extends StatelessWidget {
             const SizedBox(height: 12),
             _sectionLabel(context, 'Scored'),
             ...scored.map((n) => _resolvedRow(context, n, Icons.check_circle,
-                AppPalette.gold)),
+                context.accentColor)),
           ],
           if (discarded.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -655,9 +655,9 @@ class _AgendaRuleChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: AppPalette.gold.withValues(alpha: 0.15),
+          color: context.accentColor.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppPalette.gold.withValues(alpha: 0.6)),
+          border: Border.all(color: context.accentColor.withValues(alpha: 0.6)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -767,11 +767,11 @@ class _AgendaLogSheet extends StatelessWidget {
         children: [
           Text(
             'TURN $turn',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               letterSpacing: 1.2,
               fontWeight: FontWeight.w600,
-              color: AppPalette.gold,
+              color: context.accentColor,
             ),
           ),
           const SizedBox(height: 4),
@@ -785,7 +785,7 @@ class _AgendaLogSheet extends StatelessWidget {
     final (IconData icon, Color color, String verb) = switch (e.action) {
       api.AgendaHistoryEntryActionEnum.scored => (
           Icons.check_circle,
-          AppPalette.gold,
+          context.accentColor,
           'Scored'
         ),
       api.AgendaHistoryEntryActionEnum.discarded => (

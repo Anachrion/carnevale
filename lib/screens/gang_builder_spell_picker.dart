@@ -77,9 +77,7 @@ class _SpellPickerDialogState extends State<_SpellPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final disciplines = widget.entry.disciplines;
-    final accent = Theme.of(context).brightness == Brightness.dark
-        ? AppPalette.gold
-        : AppPalette.red;
+    final accent = context.accentColor;
     return ThemedDialogCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -249,9 +247,7 @@ class _SpellRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = Theme.of(context).brightness == Brightness.dark
-        ? AppPalette.gold
-        : AppPalette.red;
+    final accent = context.accentColor;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),

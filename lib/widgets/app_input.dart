@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 
-/// The app's shared gold-underline [InputDecoration] (F-P2-3): a subtle-gold enabled underline that
-/// brightens to solid gold on focus. Was re-inlined across the auth, gang and game forms (the old
-/// per-screen `_decoration(label)` helpers).
+/// The app's shared accent-underline [InputDecoration] (F-P2-3): a subtle accent enabled underline
+/// that brightens to the solid accent on focus (theme-aware — gold on dark, deep red on light).
+/// Was re-inlined across the auth, gang and game forms (the old per-screen `_decoration(label)`
+/// helpers).
 InputDecoration goldInputDecoration(
   BuildContext context, {
   String? label,
@@ -24,10 +25,10 @@ InputDecoration goldInputDecoration(
             fontSize: 15,
           ),
     enabledBorder: UnderlineInputBorder(
-      borderSide: BorderSide(color: AppPalette.gold.withValues(alpha: 0.5)),
+      borderSide: BorderSide(color: context.accentColor.withValues(alpha: 0.5)),
     ),
-    focusedBorder: const UnderlineInputBorder(
-      borderSide: BorderSide(color: AppPalette.gold, width: 1.5),
+    focusedBorder: UnderlineInputBorder(
+      borderSide: BorderSide(color: context.accentColor, width: 1.5),
     ),
   );
 }

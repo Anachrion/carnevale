@@ -216,9 +216,9 @@ class _GameHomeScreenState extends State<GameHomeScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TabBar(
         controller: _tabController,
-        labelColor: AppPalette.gold,
+        labelColor: context.accentColor,
         unselectedLabelColor: context.subtleTextColor,
-        indicatorColor: AppPalette.gold,
+        indicatorColor: context.accentColor,
         dividerColor: context.subtleTextColor.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.cinzel(
           fontWeight: FontWeight.w700,
@@ -361,7 +361,6 @@ class _GameTileState extends State<_GameTile> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GlassPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +399,7 @@ class _GameTileState extends State<_GameTile> {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       Icons.expand_more,
-                      color: isDark ? AppPalette.gold : AppPalette.red,
+                      color: context.accentColor,
                       size: 22,
                     ),
                   ),
@@ -462,7 +461,7 @@ class _GameTileState extends State<_GameTile> {
               IconButton(
                 onPressed: () => _confirmDelete(context),
                 icon: const Icon(Icons.delete_outline),
-                color: Colors.red.shade400,
+                color: context.dangerColor,
                 tooltip: 'Delete game',
               ),
               const SizedBox(width: 4),
@@ -480,7 +479,7 @@ class _GameTileState extends State<_GameTile> {
               IconButton(
                 onPressed: widget.onPlay,
                 icon: const Icon(Icons.play_circle_fill),
-                color: AppPalette.gold,
+                color: context.accentColor,
                 iconSize: 28,
                 tooltip: 'Open game',
               ),
@@ -512,7 +511,7 @@ class _GameTileState extends State<_GameTile> {
               Navigator.pop(context);
               widget.onDelete();
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('Delete', style: TextStyle(color: context.dangerColor)),
           ),
         ],
       ),
@@ -565,8 +564,8 @@ class _GameActionSheet extends StatelessWidget {
             icon: const Icon(Icons.meeting_room_outlined, size: 18),
             label: const Text('Join Game'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppPalette.gold,
-              side: const BorderSide(color: AppPalette.gold),
+              foregroundColor: context.accentColor,
+              side: BorderSide(color: context.accentColor),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -664,14 +663,14 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
       title: 'New Game',
       children: [
         if (_loading)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(24),
-              child: CircularProgressIndicator(color: AppPalette.gold),
+              padding: const EdgeInsets.all(24),
+              child: CircularProgressIndicator(color: context.accentColor),
             ),
           )
         else if (_error != null)
-          Text(_error!, style: const TextStyle(color: Colors.red))
+          Text(_error!, style: TextStyle(color: context.dangerColor))
         else ...[
           Text(
             'Scenario',
@@ -773,12 +772,12 @@ class _ScenarioTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: selected
-                ? AppPalette.gold.withValues(alpha: 0.18)
+                ? context.accentColor.withValues(alpha: 0.18)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: selected
-                  ? AppPalette.gold
+                  ? context.accentColor
                   : context.subtleTextColor.withValues(alpha: 0.25),
             ),
           ),
@@ -807,9 +806,9 @@ class _ScenarioTile extends StatelessWidget {
                 ),
               ),
               if (selected)
-                const Icon(
+                Icon(
                   Icons.check_circle,
-                  color: AppPalette.gold,
+                  color: context.accentColor,
                   size: 20,
                 ),
             ],
@@ -883,7 +882,7 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
           const SizedBox(height: 12),
           Text(
             _error!,
-            style: const TextStyle(color: Colors.red, fontSize: 13),
+            style: TextStyle(color: context.dangerColor, fontSize: 13),
           ),
         ],
         const SizedBox(height: 24),

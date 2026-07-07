@@ -124,7 +124,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: _state.underwaterCounters > 0
-                    ? AppPalette.gold
+                    ? context.accentColor
                     : context.subtleTextColor,
               ),
             ),
@@ -140,7 +140,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
                 'Done',
                 style: GoogleFonts.cinzel(
                   fontWeight: FontWeight.w700,
-                  color: AppPalette.gold,
+                  color: context.accentColor,
                 ),
               ),
             ),
@@ -188,7 +188,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
                 Icon(
                   active ? Icons.check_circle : Icons.circle_outlined,
                   size: 20,
-                  color: active ? AppPalette.gold : context.subtleTextColor,
+                  color: active ? context.accentColor : context.subtleTextColor,
                 ),
           ],
         ),
@@ -295,7 +295,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
                 'Done',
                 style: GoogleFonts.cinzel(
                   fontWeight: FontWeight.w700,
-                  color: AppPalette.gold,
+                  color: context.accentColor,
                 ),
               ),
             ),
@@ -413,11 +413,11 @@ class _CounterIcon extends StatelessWidget {
         height: 34,
         decoration: BoxDecoration(
           color: active
-              ? AppPalette.gold.withValues(alpha: 0.35)
+              ? context.accentColor.withValues(alpha: 0.35)
               : Colors.black.withValues(alpha: 0.2),
           shape: BoxShape.circle,
           border: active
-              ? Border.all(color: AppPalette.gold, width: 1.4)
+              ? Border.all(color: context.accentColor, width: 1.4)
               : null,
         ),
         child: Stack(
@@ -444,7 +444,7 @@ class _CounterIcon extends StatelessWidget {
                     vertical: 1,
                   ),
                   decoration: BoxDecoration(
-                    color: AppPalette.gold,
+                    color: context.accentColor,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

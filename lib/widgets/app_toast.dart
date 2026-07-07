@@ -66,7 +66,7 @@ class _AppToastState extends State<_AppToast> with SingleTickerProviderStateMixi
                     color: (isDark ? AppPalette.backgroundDark : AppPalette.paper)
                         .withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppPalette.gold.withValues(alpha: 0.6), width: 1.2),
+                    border: Border.all(color: context.accentColor.withValues(alpha: 0.6), width: 1.2),
                     boxShadow: [
                       BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 12, offset: const Offset(0, 4)),
                     ],
@@ -75,7 +75,7 @@ class _AppToastState extends State<_AppToast> with SingleTickerProviderStateMixi
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_circle, color: AppPalette.gold, size: 20),
+                      Icon(Icons.check_circle, color: context.accentColor, size: 20),
                       const SizedBox(width: 10),
                       Flexible(
                         child: Text(
