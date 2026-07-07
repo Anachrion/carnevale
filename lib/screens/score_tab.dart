@@ -571,8 +571,6 @@ class ScoreTab extends StatelessWidget {
                   ListTile(
                     title: Text('Unachievable',
                         style: TextStyle(color: ctx.textColor)),
-                    subtitle: Text('Impossible now — swap for a fresh agenda',
-                        style: TextStyle(color: ctx.subtleTextColor)),
                     onTap: () => Navigator.pop(ctx, 'unachievable'),
                   ),
                 ListTile(
