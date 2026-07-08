@@ -44,7 +44,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           _MenuItem(
                             icon: Icons.flag_outlined,
                             imagePath: 'assets/images/list_icon.png',
@@ -57,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           _MenuItem(
                             icon: Icons.sports_esports_outlined,
                             imagePath: 'assets/images/games_icon.png',
@@ -70,13 +70,13 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           _MenuItem(
                             icon: Icons.menu_book_outlined,
                             imagePath: 'assets/images/book_icon.png',
                             title: 'Rules',
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           _MenuItem(
                             icon: Icons.settings_outlined,
                             imagePath: 'assets/images/gear_icon.png',
@@ -113,13 +113,13 @@ class _Header extends StatelessWidget {
         children: [
           Center(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 64, 0, 32),
+              padding: const EdgeInsets.fromLTRB(0, 32, 0, 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
                     width: double.infinity,
-                    height: 160,
+                    height: 148,
                     child: Image.asset(
                       'assets/images/mask.png',
                       fit: BoxFit.contain,
