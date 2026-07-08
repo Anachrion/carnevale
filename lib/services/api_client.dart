@@ -1,6 +1,5 @@
 import 'package:carnevale_api/carnevale_api.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._();
@@ -63,9 +62,9 @@ class ApiClient {
 
   late final Dio _dio;
 
-  /// The underlying Dio, exposed only so tests can swap in a fake HttpClientAdapter and drive the
-  /// services against canned responses.
-  @visibleForTesting
+  /// The underlying Dio (base URL, client key and auth interceptors already wired). Exposed for
+  /// endpoints that aren't in the generated client — the card image manifest and the static /cards
+  /// files (see CardImageService) — and so tests can swap in a fake HttpClientAdapter.
   Dio get dio => _dio;
 
   /// Fetches a short-lived, single-use cable ticket over authenticated REST and returns the full
