@@ -298,9 +298,9 @@ class _ProfileTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color:
-                AppPalette.factionColors[profile.faction] ??
-                context.cardBgColor,
+            gradient: AppPalette.entryTileGradient(
+              AppPalette.factionColors[profile.faction] ?? context.cardBgColor,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
