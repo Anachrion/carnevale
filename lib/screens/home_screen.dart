@@ -20,70 +20,83 @@ class HomeScreen extends StatelessWidget {
       body: AppBackground(
         blurScrim: false,
         safeArea: false,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _Header(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 80, 24, 32),
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
                 child: Column(
                   children: [
-                    _MenuItem(
-                      icon: Icons.style_outlined,
-                      imagePath: 'assets/images/cards_icon.png',
-                      title: 'Cards',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const CardsScreen()),
+                    _Header(),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                      child: Column(
+                        children: [
+                          _MenuItem(
+                            icon: Icons.style_outlined,
+                            imagePath: 'assets/images/cards_icon.png',
+                            title: 'Cards',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CardsScreen(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _MenuItem(
+                            icon: Icons.flag_outlined,
+                            imagePath: 'assets/images/list_icon.png',
+                            imageScale: 1.2,
+                            title: 'Gangs',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const GangsScreen(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _MenuItem(
+                            icon: Icons.sports_esports_outlined,
+                            imagePath: 'assets/images/games_icon.png',
+                            imageScale: 1.10,
+                            title: 'Games',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const GameHomeScreen(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _MenuItem(
+                            icon: Icons.menu_book_outlined,
+                            imagePath: 'assets/images/book_icon.png',
+                            title: 'Rules',
+                          ),
+                          const SizedBox(height: 12),
+                          _MenuItem(
+                            icon: Icons.settings_outlined,
+                            imagePath: 'assets/images/gear_icon.png',
+                            imageScale: 1.2,
+                            title: 'Settings',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SettingsScreen(),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    _MenuItem(
-                      icon: Icons.flag_outlined,
-                      imagePath: 'assets/images/list_icon.png',
-                      imageScale: 1.2,
-                      title: 'Gangs',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const GangsScreen()),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _MenuItem(
-                      icon: Icons.sports_esports_outlined,
-                      imagePath: 'assets/images/games_icon.png',
-                      imageScale: 1.10,
-                      title: 'Games',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const GameHomeScreen(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _MenuItem(
-                      icon: Icons.menu_book_outlined,
-                      imagePath: 'assets/images/book_icon.png',
-                      title: 'Rules',
-                    ),
-                    const SizedBox(height: 12),
-                    _MenuItem(
-                      icon: Icons.settings_outlined,
-                      imagePath: 'assets/images/gear_icon.png',
-                      imageScale: 1.2,
-                      title: 'Settings',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SettingsScreen(),
-                        ),
-                      ),
-                    ),
+                    const Spacer(),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -217,11 +230,7 @@ class _MenuItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: context.accentColor,
-                  size: 22,
-                ),
+                Icon(Icons.chevron_right, color: context.accentColor, size: 22),
               ],
             ),
           ),
