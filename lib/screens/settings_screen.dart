@@ -441,8 +441,10 @@ class _CardImageSyncState extends State<_CardImageSync> {
   void _start() {
     if (_status.value != null) return; // already syncing
     _sawSync = true;
-    // Fire-and-forget: the service owns the work and publishes progress on syncStatus.
-    CardImageService().sync(force: true);
+    // Fire-and-forget: the service owns the work and publishes progress on syncStatus. `refresh`
+    // re-pulls the manifest first; only missing/outdated faces download, so this resumes rather
+    // than restarting an interrupted sync.
+    CardImageService().sync(refresh: true);
   }
 
   @override
@@ -453,7 +455,7 @@ class _CardImageSyncState extends State<_CardImageSync> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Re-download every card image to this device. Handy if a card looks missing or broken.',
+            'Download any card images that are missing or out of date on this device.',
             style: GoogleFonts.cinzel(
               fontSize: 12,
               color: context.subtleTextColor,
