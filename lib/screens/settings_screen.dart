@@ -420,9 +420,8 @@ class _AccountButton extends StatelessWidget {
   }
 }
 
-/// Settings control that re-downloads all card faces into the on-disk cache, showing live
-/// progress. Mobile only (the parent hides it on web). Forces a full re-fetch so it doubles as a
-/// repair for a partial or corrupt cache.
+/// Settings control that downloads missing/outdated card faces into the on-disk cache, showing
+/// live progress. Mobile only (the parent hides it on web).
 ///
 /// All progress state lives on [CardImageService.syncStatus], not here, so a sync started from this
 /// screen keeps running and keeps reporting even if you navigate away and back — the button simply
@@ -436,11 +435,18 @@ class _CardImageSync extends StatefulWidget {
 
 class _CardImageSyncState extends State<_CardImageSync> {
   ValueNotifier<CardSyncStatus?> get _status => CardImageService().syncStatus;
+
+  /// True while a sync this screen started is still running; used to toast exactly once on finish.
   bool _sawSync = false;
+
+  /// Faces the in-flight sync had to fetch (its final total), captured while progress is live so we
+  /// can tell "already up to date" (0) from "downloaded some" after it goes idle.
+  int _pendingTotal = 0;
 
   void _start() {
     if (_status.value != null) return; // already syncing
     _sawSync = true;
+    _pendingTotal = 0;
     // Fire-and-forget: the service owns the work and publishes progress on syncStatus. `refresh`
     // re-pulls the manifest first; only missing/outdated faces download, so this resumes rather
     // than restarting an interrupted sync.
@@ -465,19 +471,28 @@ class _CardImageSyncState extends State<_CardImageSync> {
           ValueListenableBuilder<CardSyncStatus?>(
             valueListenable: _status,
             builder: (context, status, _) {
-              // Toast once, when a sync this screen kicked off finishes.
-              if (status == null && _sawSync) {
-                _sawSync = false;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) showAppToast(context, 'Card images synced');
-                });
-              }
               if (status != null) {
+                _pendingTotal = status.total;
                 return _SyncProgress(done: status.done, total: status.total);
+              }
+              // Idle. If a sync this screen started just finished, tell the user how it went —
+              // distinguishing "nothing to do" from "downloaded N".
+              if (_sawSync) {
+                _sawSync = false;
+                final total = _pendingTotal;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  showAppToast(
+                    context,
+                    total == 0
+                        ? 'All cards are already up to date'
+                        : 'Synced $total card image${total == 1 ? '' : 's'}',
+                  );
+                });
               }
               return _AccountButton(
                 icon: Icons.cloud_download_outlined,
-                label: 'Sync Card Images',
+                label: 'Sync Cards',
                 color: AppPalette.toggleBlue,
                 onPressed: _start,
               );
