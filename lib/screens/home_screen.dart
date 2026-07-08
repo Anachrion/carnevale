@@ -20,83 +20,109 @@ class HomeScreen extends StatelessWidget {
       body: AppBackground(
         blurScrim: false,
         safeArea: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    _Header(),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                      child: Column(
-                        children: [
-                          _MenuItem(
-                            icon: Icons.style_outlined,
-                            imagePath: 'assets/images/cards_icon.png',
-                            title: 'Cards',
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const CardsScreen(),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // The header + menu are scaled to fit whatever height the screen offers, so the
+              // page never scrolls: full size (centered) on tall screens, gently scaled down on
+              // shorter ones. FittedBox does the responsive scaling for us.
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const _Header(),
+                              const SizedBox(height: 24),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                child: Column(
+                                  children: [
+                                    _MenuItem(
+                                      icon: Icons.style_outlined,
+                                      imagePath: 'assets/images/cards_icon.png',
+                                      title: 'Cards',
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const CardsScreen(),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _MenuItem(
+                                      icon: Icons.flag_outlined,
+                                      imagePath: 'assets/images/list_icon.png',
+                                      imageScale: 1.2,
+                                      title: 'Gangs',
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const GangsScreen(),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _MenuItem(
+                                      icon: Icons.sports_esports_outlined,
+                                      imagePath: 'assets/images/games_icon.png',
+                                      imageScale: 1.10,
+                                      title: 'Games',
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const GameHomeScreen(),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _MenuItem(
+                                      icon: Icons.menu_book_outlined,
+                                      imagePath: 'assets/images/book_icon.png',
+                                      title: 'Rules',
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _MenuItem(
+                                      icon: Icons.settings_outlined,
+                                      imagePath: 'assets/images/gear_icon.png',
+                                      imageScale: 1.2,
+                                      title: 'Settings',
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const SettingsScreen(),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(height: 10),
-                          _MenuItem(
-                            icon: Icons.flag_outlined,
-                            imagePath: 'assets/images/list_icon.png',
-                            imageScale: 1.2,
-                            title: 'Gangs',
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const GangsScreen(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          _MenuItem(
-                            icon: Icons.sports_esports_outlined,
-                            imagePath: 'assets/images/games_icon.png',
-                            imageScale: 1.10,
-                            title: 'Games',
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const GameHomeScreen(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          _MenuItem(
-                            icon: Icons.menu_book_outlined,
-                            imagePath: 'assets/images/book_icon.png',
-                            title: 'Rules',
-                          ),
-                          const SizedBox(height: 10),
-                          _MenuItem(
-                            icon: Icons.settings_outlined,
-                            imagePath: 'assets/images/gear_icon.png',
-                            imageScale: 1.2,
-                            title: 'Settings',
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const SettingsScreen(),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                    const Spacer(),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              // Drawer button stays pinned top-left, independent of the scaled content.
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Builder(
+                  builder: (context) => IconButton(
+                    icon: Icon(Icons.menu, color: context.textColor, size: 28),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -105,69 +131,52 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
+  const _Header();
+
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    return SafeArea(
-      child: Stack(
-        children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 32, 0, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 148,
-                    child: Image.asset(
-                      'assets/images/mask.png',
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                      color: isLight ? AppPalette.red : null,
-                      colorBlendMode: BlendMode.srcIn,
-                    ),
-                  ),
-                  Transform.translate(
-                    offset: const Offset(0, -14),
-                    child: Text(
-                      'CARNEVALE',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w400,
-                        color: context.textColor,
-                        letterSpacing: 10,
-                      ),
-                    ),
-                  ),
-                  Transform.translate(
-                    offset: const Offset(0, -8),
-                    child: SizedBox(
-                      width: 180,
-                      height: 25,
-                      child: Image.asset(
-                        'assets/images/divider.png',
-                        fit: BoxFit.cover,
-                        alignment: Alignment.center,
-                        color: isLight ? AppPalette.red : AppPalette.mutedGold,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 160,
+          child: Image.asset(
+            'assets/images/mask.png',
+            fit: BoxFit.contain,
+            alignment: Alignment.center,
+            color: isLight ? AppPalette.red : null,
+            colorBlendMode: BlendMode.srcIn,
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -14),
+          child: Text(
+            'CARNEVALE',
+            style: GoogleFonts.cinzel(
+              fontSize: 40,
+              fontWeight: FontWeight.w400,
+              color: context.textColor,
+              letterSpacing: 10,
             ),
           ),
-          Positioned(
-            top: 8,
-            left: 8,
-            child: IconButton(
-              icon: Icon(Icons.menu, color: context.textColor, size: 28),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -8),
+          child: SizedBox(
+            width: 180,
+            height: 25,
+            child: Image.asset(
+              'assets/images/divider.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              color: isLight ? AppPalette.red : AppPalette.mutedGold,
+              colorBlendMode: BlendMode.srcIn,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
