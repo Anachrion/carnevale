@@ -830,7 +830,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     return GangsTabView(
       gameId: game.id,
       myPlayerId: me.id,
-      myLabel: 'My Models',
+      myLabel: me.username,
       opponentPlayerId: opponent.id,
       opponentLabel: opponent.username,
       // Mid-game the list is fixed; drop the per-gang name/faction/ducats summary as noise.

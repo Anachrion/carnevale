@@ -437,6 +437,16 @@ class _GameTileState extends State<_GameTile> {
             _game.scenario.name,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
+          if (_game.scenario.agendaRules.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: _game.scenario.agendaRules
+                  .map((r) => _agendaRuleChip(context, r))
+                  .toList(),
+            ),
+          ],
           const SizedBox(height: 6),
           Text(
             '${p1?.username ?? '—'} vs ${p2?.username ?? 'waiting for an opponent'}',
@@ -489,6 +499,37 @@ class _GameTileState extends State<_GameTile> {
       ),
     );
   }
+
+  // A compact pill for one scenario agenda special rule (rulebook p.36), mirroring the labels the
+  // in-game Score tab uses. Shown on the expanded game card so the rules are visible before opening.
+  Widget _agendaRuleChip(BuildContext context, api.ScenarioAgendaRulesEnum rule) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: context.accentColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.4)),
+      ),
+      child: Text(
+        _agendaRuleLabel(rule),
+        style: GoogleFonts.cinzel(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+          color: context.textColor,
+        ),
+      ),
+    );
+  }
+
+  static String _agendaRuleLabel(api.ScenarioAgendaRulesEnum rule) => switch (rule) {
+        api.ScenarioAgendaRulesEnum.cycle => 'Cycle',
+        api.ScenarioAgendaRulesEnum.secondary => 'Secondary',
+        api.ScenarioAgendaRulesEnum.double_ => 'Double',
+        api.ScenarioAgendaRulesEnum.secret => 'Secret',
+        api.ScenarioAgendaRulesEnum.total => 'Total',
+        _ => rule.name,
+      };
 
   void _confirmDelete(BuildContext context) {
     showDialog(
