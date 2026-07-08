@@ -54,19 +54,27 @@ class _CardViewerScreenState extends State<CardViewerScreen>
   }
 
   void _flip() {
-    if (_flipController.isAnimating) return;
-    if (_showingFront) _flipSign = 1;
-    _showingFront ? _flipController.forward() : _flipController.reverse();
-    setState(() => _showingFront = !_showingFront);
+    // A tap keeps spinning/sliding in a consistent direction: the outbound (front→back)
+    // and return (back→front) trips use opposite signs so successive taps read as
+    // continuous motion rather than a rewind.
+    _turnCard(velocityX: _showingFront ? -1 : 1);
   }
 
-  void _flipDirectional(double velocityX) {
+  void _flipDirectional(double velocityX) => _turnCard(velocityX: velocityX);
+
+  /// Toggles the visible face, driven by the swipe direction in [velocityX] (negative =
+  /// leftward). `t` runs 0 (front) → 1 (back) regardless of direction; [_flipSign] is chosen
+  /// so the motion always follows the swipe on both the outbound and return trips — so
+  /// swiping the same way twice cycles front → back → front continuously.
+  void _turnCard({required double velocityX}) {
     if (_flipController.isAnimating) return;
+    final swipeLeft = velocityX < 0;
     if (_showingFront) {
-      _flipSign = velocityX < 0 ? 1 : -1;
+      _flipSign = swipeLeft ? 1 : -1;
       _flipController.forward();
       setState(() => _showingFront = false);
     } else {
+      _flipSign = swipeLeft ? -1 : 1;
       _flipController.reverse();
       setState(() => _showingFront = true);
     }
