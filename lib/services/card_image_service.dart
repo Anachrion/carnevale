@@ -113,19 +113,18 @@ class CardImageService {
 
   /// Downloads every face whose on-disk copy is missing or a version behind (mobile only; no-op on
   /// web). Safe to run in the background and to call repeatedly. Progress is published on
-  /// [syncStatus] for the whole run. With [force] every face is re-downloaded even if an up-to-date
-  /// copy already exists — used by the manual "sync card images" action in settings to repair a
-  /// partial or corrupt cache, and to reload the manifest so newly added cards are picked up.
-  Future<void> sync({bool force = false}) async {
+  /// [syncStatus] for the whole run. Already-downloaded, up-to-date faces are skipped, so an
+  /// interrupted sync resumes rather than starting over. Pass [refresh] (the manual Settings action)
+  /// to re-fetch the manifest first, picking up newly added cards and version bumps.
+  Future<void> sync({bool refresh = false}) async {
     final dir = _cacheDir;
     if (kIsWeb || dir == null) return;
     if (_syncing) return; // a sync is already running; let it finish
     _syncing = true;
     syncStatus.value = const CardSyncStatus(0, 0);
     try {
-      if (force) {
-        // Manual refresh: pull the manifest again so new cards / version bumps are seen. A failure
-        // here is non-fatal as long as we already have a manifest to work from.
+      if (refresh) {
+        // A failure here is non-fatal as long as we already have a manifest to work from.
         try {
           await loadManifest();
         } catch (e) {
@@ -141,7 +140,7 @@ class CardImageService {
 
       final stale = _faces.entries.where((e) {
         final file = File('${dir.path}/${e.key}');
-        return force || !file.existsSync() || (_downloaded[e.key] ?? -1) != e.value.version;
+        return !file.existsSync() || (_downloaded[e.key] ?? -1) != e.value.version;
       }).toList();
 
       var done = 0;
@@ -156,6 +155,9 @@ class CardImageService {
           if (bytes != null) {
             await File('${dir.path}/${entry.key}').writeAsBytes(bytes);
             _downloaded[entry.key] = entry.value.version;
+            // Persist after each face so a sync interrupted by the app being killed resumes from
+            // here next launch instead of re-downloading everything it had already fetched.
+            await _prefs?.setString(_versionsKey, jsonEncode(_downloaded));
           }
         } catch (e) {
           debugPrint('Card image download failed for ${entry.key}: $e');
@@ -163,7 +165,6 @@ class CardImageService {
         done++;
         syncStatus.value = CardSyncStatus(done, stale.length);
       }
-      await _prefs?.setString(_versionsKey, jsonEncode(_downloaded));
     } finally {
       _syncing = false;
       syncStatus.value = null;
