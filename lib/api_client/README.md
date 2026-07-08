@@ -47,13 +47,14 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:carnevale_api/carnevale_api.dart';
 
 
-final api = CarnevaleApi().getEquipmentApi();
+final api = CarnevaleApi().getAbilitiesApi();
+final String category = category_example; // String | 
 
 try {
-    final response = await api.getEquipment();
+    final response = await api.getAbilities(category);
     print(response);
 } on DioException catch (e) {
-    print("Exception when calling EquipmentApi->getEquipment: $e\n");
+    print("Exception when calling AbilitiesApi->getAbilities: $e\n");
 }
 
 ```
@@ -64,6 +65,7 @@ All URIs are relative to *http://localhost:3000/api/v1*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+[*AbilitiesApi*](doc/AbilitiesApi.md) | [**getAbilities**](doc/AbilitiesApi.md#getabilities) | **GET** /abilities | List all glossary abilities (character and weapon special rules)
 [*EquipmentApi*](doc/EquipmentApi.md) | [**getEquipment**](doc/EquipmentApi.md#getequipment) | **GET** /equipment | List all equipment
 [*GamesApi*](doc/GamesApi.md) | [**advanceTurn**](doc/GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the requesting player&#39;s turn cursor
 [*GamesApi*](doc/GamesApi.md) | [**archiveGame**](doc/GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
@@ -111,6 +113,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [Ability](doc/Ability.md)
  - [Agenda](doc/Agenda.md)
  - [AgendaHistoryEntry](doc/AgendaHistoryEntry.md)
  - [AgendaHistoryEntryAgenda](doc/AgendaHistoryEntryAgenda.md)

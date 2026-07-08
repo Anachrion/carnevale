@@ -542,7 +542,7 @@ class GamesApi {
   }
 
   /// Discard an Agenda from this player&#39;s hand
-  /// Discards an agenda currently in the requesting player&#39;s hand. The valid &#x60;origin&#x60; depends on the game status:   * during setup (&#x60;agenda_draw&#x60;), &#x60;unachievable&#x60; — the pre-game mulligan for an     impossible or duplicated agenda, which always draws a replacement (origin &#x60;recycle&#x60;); or   * while &#x60;in_progress&#x60;, &#x60;special_rule&#x60; or &#x60;command_point&#x60; — an in-play discard granted by     one of those, which draws a replacement only when &#x60;recycle: true&#x60;. A discarded agenda is always visible to the opponent (even under the Secret rule). 
+  /// Discards an agenda currently in the requesting player&#39;s hand. Valid &#x60;origin&#x60; values:   * &#x60;unachievable&#x60; — tossing an impossible or duplicated agenda and swapping it for a fresh     one. Always draws a replacement (origin &#x60;recycle&#x60;). Allowed both during setup     (&#x60;agenda_draw&#x60;, the pre-game mulligan) and mid-game (&#x60;in_progress&#x60;); or   * &#x60;special_rule&#x60; / &#x60;command_point&#x60; — an in-play discard (only while &#x60;in_progress&#x60;) granted     by one of those, which draws a replacement only when &#x60;recycle: true&#x60;. A discarded agenda is always visible to the opponent (even under the Secret rule). 
   ///
   /// Parameters:
   /// * [id] 

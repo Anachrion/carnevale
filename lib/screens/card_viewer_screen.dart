@@ -2,8 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../app_colors.dart';
 import '../models/profile.dart';
+import '../services/ability_service.dart';
 
 class CardViewerScreen extends StatefulWidget {
   const CardViewerScreen({
@@ -83,6 +86,16 @@ class _CardViewerScreenState extends State<CardViewerScreen>
       _currentIndex = index;
       _showingFront = true;
     });
+  }
+
+  void _showAbilities() {
+    final profile = widget.profiles[_currentIndex];
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AbilitiesSheet(profile: profile),
+    );
   }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
@@ -165,13 +178,27 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                 );
               },
             ),
-            // Close button
+            // Close + abilities info buttons
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                  onPressed: () => Navigator.of(context).pop(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.info_outline,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                      tooltip: 'Abilities',
+                      onPressed: _showAbilities,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -192,6 +219,158 @@ class _CardViewerScreenState extends State<CardViewerScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet listing the Character and Weapon abilities on a profile, each with its rulebook
+/// description resolved from the glossary (rulebook p44-48).
+class _AbilitiesSheet extends StatelessWidget {
+  const _AbilitiesSheet({required this.profile});
+
+  final api.Profile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.3,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: context.cardBgColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: FutureBuilder<void>(
+            future: AbilityService().load(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return SizedBox(
+                  height: 160,
+                  child: Center(
+                    child: CircularProgressIndicator(color: context.accentColor),
+                  ),
+                );
+              }
+              if (snapshot.hasError) {
+                return Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: Text(
+                      'Could not load abilities.',
+                      style: TextStyle(color: context.subtleTextColor),
+                    ),
+                  ),
+                );
+              }
+
+              final service = AbilityService();
+              final character = service.characterAbilities(profile);
+              final weapon = service.weaponAbilities(profile);
+
+              return ListView(
+                controller: scrollController,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: context.subtleTextColor.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    profile.name,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: context.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (character.isEmpty && weapon.isEmpty)
+                    Text(
+                      'This character has no special abilities.',
+                      style: TextStyle(color: context.subtleTextColor, fontSize: 14),
+                    ),
+                  if (character.isNotEmpty) ...[
+                    const _SectionTitle('Character Abilities'),
+                    ...character.map((a) => _AbilityEntry(ability: a)),
+                  ],
+                  if (weapon.isNotEmpty) ...[
+                    if (character.isNotEmpty) const SizedBox(height: 8),
+                    const _SectionTitle('Weapon Abilities'),
+                    ...weapon.map((a) => _AbilityEntry(ability: a)),
+                  ],
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.5,
+          color: context.accentColor.withValues(alpha: 0.8),
+        ),
+      ),
+    );
+  }
+}
+
+class _AbilityEntry extends StatelessWidget {
+  const _AbilityEntry({required this.ability});
+  final ResolvedAbility ability;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            ability.label,
+            style: GoogleFonts.cinzel(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: context.accentColor,
+            ),
+          ),
+          if (ability.description != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              ability.description!,
+              style: TextStyle(
+                fontSize: 13.5,
+                height: 1.4,
+                color: context.textColor,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -1,6 +1,8 @@
 .gitignore
 README.md
 analysis_options.yaml
+doc/AbilitiesApi.md
+doc/Ability.md
 doc/Agenda.md
 doc/AgendaHistoryEntry.md
 doc/AgendaHistoryEntryAgenda.md
@@ -62,6 +64,7 @@ doc/ValidationErrors.md
 doc/Weapon.md
 lib/carnevale_api.dart
 lib/src/api.dart
+lib/src/api/abilities_api.dart
 lib/src/api/equipment_api.dart
 lib/src/api/games_api.dart
 lib/src/api/list_entries_api.dart
@@ -77,6 +80,7 @@ lib/src/auth/basic_auth.dart
 lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/date_serializer.dart
+lib/src/model/ability.dart
 lib/src/model/agenda.dart
 lib/src/model/agenda_history_entry.dart
 lib/src/model/agenda_history_entry_agenda.dart
@@ -131,3 +135,5 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
+test/abilities_api_test.dart
+test/ability_test.dart

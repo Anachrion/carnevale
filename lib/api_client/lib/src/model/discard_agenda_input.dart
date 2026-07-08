@@ -12,11 +12,11 @@ part 'discard_agenda_input.g.dart';
 /// DiscardAgendaInput
 ///
 /// Properties:
-/// * [origin] - `unachievable` is the pre-game mulligan (valid during `agenda_draw`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+/// * [origin] - `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
 /// * [recycle] - Whether to immediately draw a replacement card (origin `recycle`) linked back to this discard. Only honoured for in-play discards; the `unachievable` mulligan always redraws. 
 @BuiltValue()
 abstract class DiscardAgendaInput implements Built<DiscardAgendaInput, DiscardAgendaInputBuilder> {
-  /// `unachievable` is the pre-game mulligan (valid during `agenda_draw`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
   @BuiltValueField(wireName: r'origin')
   DiscardAgendaInputOriginEnum get origin;
   // enum originEnum {  unachievable,  special_rule,  command_point,  };
@@ -129,13 +129,13 @@ class _$DiscardAgendaInputSerializer implements PrimitiveSerializer<DiscardAgend
 
 class DiscardAgendaInputOriginEnum extends EnumClass {
 
-  /// `unachievable` is the pre-game mulligan (valid during `agenda_draw`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
   @BuiltValueEnumConst(wireName: r'unachievable')
   static const DiscardAgendaInputOriginEnum unachievable = _$discardAgendaInputOriginEnum_unachievable;
-  /// `unachievable` is the pre-game mulligan (valid during `agenda_draw`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
   @BuiltValueEnumConst(wireName: r'special_rule')
   static const DiscardAgendaInputOriginEnum specialRule = _$discardAgendaInputOriginEnum_specialRule;
-  /// `unachievable` is the pre-game mulligan (valid during `agenda_draw`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
   @BuiltValueEnumConst(wireName: r'command_point')
   static const DiscardAgendaInputOriginEnum commandPoint = _$discardAgendaInputOriginEnum_commandPoint;
 
