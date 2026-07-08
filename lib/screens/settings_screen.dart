@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
+import '../services/settings_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
@@ -84,9 +85,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 10),
                   _SettingRow(
                     label: 'Theme',
-                    child: _ThemePicker(
+                    child: _OptionPicker<ThemeMode>(
                       value: settingsService.themeMode,
-                      onChanged: (mode) => settingsService.setThemeMode(mode),
+                      options: const [
+                        ThemeMode.system,
+                        ThemeMode.light,
+                        ThemeMode.dark,
+                      ],
+                      labelBuilder: _themeModeLabel,
+                      onChanged: settingsService.setThemeMode,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _SettingRow(
+                    label: 'Card flip',
+                    child: _OptionPicker<CardFlipStyle>(
+                      value: settingsService.cardFlipStyle,
+                      options: const [CardFlipStyle.flip, CardFlipStyle.swipe],
+                      labelBuilder: _cardFlipStyleLabel,
+                      onChanged: settingsService.setCardFlipStyle,
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -183,18 +200,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-class _ThemePicker extends StatelessWidget {
-  const _ThemePicker({required this.value, required this.onChanged});
-  final ThemeMode value;
-  final ValueChanged<ThemeMode> onChanged;
+String _themeModeLabel(ThemeMode m) => switch (m) {
+  ThemeMode.system => 'Follow System',
+  ThemeMode.light => 'Light',
+  ThemeMode.dark => 'Dark',
+};
 
-  static const _options = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+String _cardFlipStyleLabel(CardFlipStyle s) => switch (s) {
+  CardFlipStyle.flip => 'Flip',
+  CardFlipStyle.swipe => 'Swipe',
+};
 
-  String _label(ThemeMode m) => switch (m) {
-    ThemeMode.system => 'Follow System',
-    ThemeMode.light => 'Light',
-    ThemeMode.dark => 'Dark',
-  };
+/// A tap-to-open dropdown that shows the current [value] and lets the user pick another
+/// [options] entry, styled to match the settings surface.
+class _OptionPicker<T> extends StatelessWidget {
+  const _OptionPicker({
+    required this.value,
+    required this.options,
+    required this.labelBuilder,
+    required this.onChanged,
+  });
+
+  final T value;
+  final List<T> options;
+  final String Function(T) labelBuilder;
+  final ValueChanged<T> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +247,7 @@ class _ThemePicker extends StatelessWidget {
           ),
           Offset.zero & overlay.size,
         );
-        final result = await showMenu<ThemeMode>(
+        final result = await showMenu<T>(
           context: context,
           position: position,
           elevation: 8,
@@ -226,12 +256,12 @@ class _ThemePicker extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             side: BorderSide(color: accentColor.withValues(alpha: 0.45), width: 1.0),
           ),
-          items: _options.map((m) {
-            final selected = m == value;
-            return PopupMenuItem<ThemeMode>(
-              value: m,
+          items: options.map((o) {
+            final selected = o == value;
+            return PopupMenuItem<T>(
+              value: o,
               child: Text(
-                _label(m),
+                labelBuilder(o),
                 style: GoogleFonts.cinzel(
                   fontSize: 14,
                   color: selected ? accentColor : context.textColor,
@@ -247,7 +277,7 @@ class _ThemePicker extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            _label(value),
+            labelBuilder(value),
             style: GoogleFonts.cinzel(fontSize: 14, color: context.textColor),
           ),
           const SizedBox(width: 4),

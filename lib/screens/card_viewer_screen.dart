@@ -7,6 +7,7 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../app_colors.dart';
 import '../models/profile.dart';
 import '../services/ability_service.dart';
+import '../services/settings_service.dart';
 
 class CardViewerScreen extends StatefulWidget {
   const CardViewerScreen({
@@ -121,6 +122,56 @@ class _CardViewerScreenState extends State<CardViewerScreen>
     }
   }
 
+  /// Builds the current card with its reveal animation. The flip controller drives a value
+  /// `t` from 0 (front) to 1 (back); [_flipSign] carries the swipe direction so the motion
+  /// follows the gesture. The animation style is a user preference.
+  Widget _buildAnimatedCard(api.Profile profile) {
+    final style = SettingsService().cardFlipStyle;
+    final front = _CardImage(path: profile.frontImage);
+    final back = _CardImage(path: profile.backImage);
+    return AnimatedBuilder(
+      animation: _flipAnimation,
+      builder: (context, _) {
+        final t = _flipAnimation.value;
+        switch (style) {
+          case CardFlipStyle.flip:
+            final angle = t * math.pi * _flipSign;
+            final showFront = angle.abs() < math.pi / 2;
+            return Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(angle),
+              child: showFront
+                  ? front
+                  : Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.identity()..rotateY(math.pi),
+                      child: back,
+                    ),
+            );
+          case CardFlipStyle.swipe:
+            // Cross-slide: front exits toward one edge while back enters from the other,
+            // travelling a full screen width so each fully clears the viewport.
+            final w = MediaQuery.of(context).size.width;
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                Transform.translate(
+                  offset: Offset(-t * w * _flipSign, 0),
+                  child: front,
+                ),
+                Transform.translate(
+                  offset: Offset((1 - t) * w * _flipSign, 0),
+                  child: back,
+                ),
+              ],
+            );
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,30 +200,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                           }
                         : null,
                     child: isCurrent
-                        ? AnimatedBuilder(
-                            animation: _flipAnimation,
-                            builder: (_, __) {
-                              final angle =
-                                  _flipAnimation.value * math.pi * _flipSign;
-                              final showFront = angle.abs() < math.pi / 2;
-                              return Transform(
-                                alignment: Alignment.center,
-                                transform: Matrix4.identity()
-                                  ..setEntry(3, 2, 0.001)
-                                  ..rotateY(angle),
-                                child: showFront
-                                    ? _CardImage(path: profile.frontImage)
-                                    : Transform(
-                                        alignment: Alignment.center,
-                                        transform: Matrix4.identity()
-                                          ..rotateY(math.pi),
-                                        child: _CardImage(
-                                          path: profile.backImage,
-                                        ),
-                                      ),
-                              );
-                            },
-                          )
+                        ? _buildAnimatedCard(profile)
                         : _CardImage(path: profile.frontImage),
                   ),
                 );
