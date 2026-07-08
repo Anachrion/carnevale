@@ -423,6 +423,10 @@ class _AccountButton extends StatelessWidget {
 /// Settings control that re-downloads all card faces into the on-disk cache, showing live
 /// progress. Mobile only (the parent hides it on web). Forces a full re-fetch so it doubles as a
 /// repair for a partial or corrupt cache.
+///
+/// All progress state lives on [CardImageService.syncStatus], not here, so a sync started from this
+/// screen keeps running and keeps reporting even if you navigate away and back — the button simply
+/// mirrors whatever the service is doing.
 class _CardImageSync extends StatefulWidget {
   const _CardImageSync();
 
@@ -431,42 +435,14 @@ class _CardImageSync extends StatefulWidget {
 }
 
 class _CardImageSyncState extends State<_CardImageSync> {
-  bool _syncing = false;
-  int _done = 0;
-  int _total = 0;
+  ValueNotifier<CardSyncStatus?> get _status => CardImageService().syncStatus;
+  bool _sawSync = false;
 
-  Future<void> _sync() async {
-    setState(() {
-      _syncing = true;
-      _done = 0;
-      _total = 0;
-    });
-    try {
-      final service = CardImageService();
-      // Refresh the manifest first so newly added cards (and version bumps) are picked up.
-      await service.loadManifest();
-      await service.sync(
-        force: true,
-        onProgress: (done, total) {
-          if (mounted) {
-            setState(() {
-              _done = done;
-              _total = total;
-            });
-          }
-        },
-      );
-      if (mounted) {
-        showAppToast(
-          context,
-          _total == 0 ? 'No card images to sync' : 'Synced $_total card images',
-        );
-      }
-    } catch (_) {
-      if (mounted) showAppToast(context, 'Card image sync failed — check your connection');
-    } finally {
-      if (mounted) setState(() => _syncing = false);
-    }
+  void _start() {
+    if (_status.value != null) return; // already syncing
+    _sawSync = true;
+    // Fire-and-forget: the service owns the work and publishes progress on syncStatus.
+    CardImageService().sync(force: true);
   }
 
   @override
@@ -484,15 +460,27 @@ class _CardImageSyncState extends State<_CardImageSync> {
             ),
           ),
           const SizedBox(height: 12),
-          if (_syncing)
-            _SyncProgress(done: _done, total: _total)
-          else
-            _AccountButton(
-              icon: Icons.cloud_download_outlined,
-              label: 'Sync Card Images',
-              color: AppPalette.toggleBlue,
-              onPressed: _sync,
-            ),
+          ValueListenableBuilder<CardSyncStatus?>(
+            valueListenable: _status,
+            builder: (context, status, _) {
+              // Toast once, when a sync this screen kicked off finishes.
+              if (status == null && _sawSync) {
+                _sawSync = false;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) showAppToast(context, 'Card images synced');
+                });
+              }
+              if (status != null) {
+                return _SyncProgress(done: status.done, total: status.total);
+              }
+              return _AccountButton(
+                icon: Icons.cloud_download_outlined,
+                label: 'Sync Card Images',
+                color: AppPalette.toggleBlue,
+                onPressed: _start,
+              );
+            },
+          ),
         ],
       ),
     );
