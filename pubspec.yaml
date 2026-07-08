@@ -33,6 +33,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.3.0
+  path_provider: ^2.1.0
   google_fonts: ^6.2.1
   carnevale_api:
     path: lib/api_client
@@ -67,7 +68,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/icons/
-    - assets/images/cards/
+    # Card faces are no longer bundled — they are fetched from the backend and cached at runtime
+    # (see lib/services/card_image_service.dart), which keeps the app download ~600 MB smaller.
     - assets/images/counters/
 
   # An image asset can refer to one or more resolution-specific "variants", see

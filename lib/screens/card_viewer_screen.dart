@@ -7,6 +7,7 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../app_colors.dart';
 import '../models/profile.dart';
 import '../services/ability_service.dart';
+import '../services/card_image_service.dart';
 import '../services/settings_service.dart';
 
 class CardViewerScreen extends StatefulWidget {
@@ -419,16 +420,19 @@ class _CardImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filename = path.split('/').last;
-    if (filename.isEmpty) {
+    // Faces are fetched from the backend and cached locally (mobile) or by the browser (web),
+    // rather than bundled with the app — see CardImageService.
+    final provider = filename.isEmpty ? null : CardImageService().provider(filename);
+    if (provider == null) {
       return const Center(
         child: Icon(Icons.broken_image, color: Colors.white38, size: 64),
       );
     }
-    return Image.asset(
-      'assets/images/cards/$filename',
+    return Image(
+      image: provider,
       fit: BoxFit.contain,
       height: MediaQuery.of(context).size.height * 0.8,
-      errorBuilder: (_, __, ___) => const Center(
+      errorBuilder: (_, _, _) => const Center(
         child: Icon(Icons.broken_image, color: Colors.white38, size: 64),
       ),
     );

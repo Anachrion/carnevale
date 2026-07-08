@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
@@ -6,6 +8,7 @@ import 'screens/game_home_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'services/auth_service.dart';
+import 'services/card_image_service.dart';
 import 'services/settings_service.dart';
 
 final settingsService = SettingsService();
@@ -16,6 +19,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await settingsService.load();
   await authService.load();
+  // Load the card image manifest (and cache dir on mobile) before the UI needs a face. Then kick
+  // off a background download of any stale/missing faces — unawaited so startup isn't blocked;
+  // faces stream from the network until their local copy lands. No-op on web.
+  await CardImageService().init();
+  unawaited(CardImageService().sync());
   runApp(const CarnevaleApp());
 }
 
