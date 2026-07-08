@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               _Header(),
               Padding(
-                padding: const EdgeInsets.fromLTRB(72, 80, 72, 32),
+                padding: const EdgeInsets.fromLTRB(24, 80, 24, 32),
                 child: Column(
                   children: [
                     _MenuItem(
