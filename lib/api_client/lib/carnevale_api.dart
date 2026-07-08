@@ -10,6 +10,7 @@ export 'package:carnevale_api/src/auth/oauth.dart';
 export 'package:carnevale_api/src/serializers.dart';
 export 'package:carnevale_api/src/model/date.dart';
 
+export 'package:carnevale_api/src/api/abilities_api.dart';
 export 'package:carnevale_api/src/api/equipment_api.dart';
 export 'package:carnevale_api/src/api/games_api.dart';
 export 'package:carnevale_api/src/api/list_entries_api.dart';
@@ -19,6 +20,7 @@ export 'package:carnevale_api/src/api/scenarios_api.dart';
 export 'package:carnevale_api/src/api/session_api.dart';
 export 'package:carnevale_api/src/api/spells_api.dart';
 
+export 'package:carnevale_api/src/model/ability.dart';
 export 'package:carnevale_api/src/model/agenda.dart';
 export 'package:carnevale_api/src/model/agenda_history_entry.dart';
 export 'package:carnevale_api/src/model/agenda_history_entry_agenda.dart';

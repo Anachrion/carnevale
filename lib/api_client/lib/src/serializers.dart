@@ -14,6 +14,7 @@ import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:carnevale_api/src/date_serializer.dart';
 import 'package:carnevale_api/src/model/date.dart';
 
+import 'package:carnevale_api/src/model/ability.dart';
 import 'package:carnevale_api/src/model/agenda.dart';
 import 'package:carnevale_api/src/model/agenda_history_entry.dart';
 import 'package:carnevale_api/src/model/agenda_history_entry_agenda.dart';
@@ -69,6 +70,7 @@ import 'package:carnevale_api/src/model/weapon.dart';
 part 'serializers.g.dart';
 
 @SerializersFor([
+  Ability,
   Agenda,
   AgendaHistoryEntry,
   AgendaHistoryEntryAgenda,
@@ -129,6 +131,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Spell)]),
         () => ListBuilder<Spell>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Ability)]),
+        () => ListBuilder<Ability>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Game)]),

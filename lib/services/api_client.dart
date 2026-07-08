@@ -54,6 +54,7 @@ class ApiClient {
     lists = ListsApi(_dio, standardSerializers);
     listEntries = ListEntriesApi(_dio, standardSerializers);
     profiles = ProfilesApi(_dio, standardSerializers);
+    abilities = AbilitiesApi(_dio, standardSerializers);
     equipment = EquipmentApi(_dio, standardSerializers);
     games = GamesApi(_dio, standardSerializers);
     scenarios = ScenariosApi(_dio, standardSerializers);
@@ -90,6 +91,7 @@ class ApiClient {
   late final ListsApi lists;
   late final ListEntriesApi listEntries;
   late final ProfilesApi profiles;
+  late final AbilitiesApi abilities;
   late final EquipmentApi equipment;
   late final GamesApi games;
   late final ScenariosApi scenarios;

@@ -317,7 +317,7 @@ Name | Type | Description  | Notes
 
 Discard an Agenda from this player's hand
 
-Discards an agenda currently in the requesting player's hand. The valid `origin` depends on the game status:   * during setup (`agenda_draw`), `unachievable` — the pre-game mulligan for an     impossible or duplicated agenda, which always draws a replacement (origin `recycle`); or   * while `in_progress`, `special_rule` or `command_point` — an in-play discard granted by     one of those, which draws a replacement only when `recycle: true`. A discarded agenda is always visible to the opponent (even under the Secret rule). 
+Discards an agenda currently in the requesting player's hand. Valid `origin` values:   * `unachievable` — tossing an impossible or duplicated agenda and swapping it for a fresh     one. Always draws a replacement (origin `recycle`). Allowed both during setup     (`agenda_draw`, the pre-game mulligan) and mid-game (`in_progress`); or   * `special_rule` / `command_point` — an in-play discard (only while `in_progress`) granted     by one of those, which draws a replacement only when `recycle: true`. A discarded agenda is always visible to the opponent (even under the Secret rule). 
 
 ### Example
 ```dart

@@ -8,6 +8,8 @@ part of 'serializers.dart';
 
 Serializers _$serializers =
     (Serializers().toBuilder()
+          ..add(Ability.serializer)
+          ..add(AbilityCategoryEnum.serializer)
           ..add(Agenda.serializer)
           ..add(AgendaHistoryEntry.serializer)
           ..add(AgendaHistoryEntryActionEnum.serializer)
