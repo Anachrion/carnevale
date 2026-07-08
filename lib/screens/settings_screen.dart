@@ -1,9 +1,11 @@
 import 'dart:ui';
 import '../app_colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
+import '../services/card_image_service.dart';
 import '../services/settings_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
@@ -106,6 +108,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: settingsService.setCardFlipStyle,
                     ),
                   ),
+                  // Web streams faces straight from the backend (browser cache), so there is no
+                  // local cache to sync — this section is mobile only.
+                  if (!kIsWeb) ...[
+                    const SizedBox(height: 28),
+                    Text(
+                      'CARD IMAGES',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: context.accentColor,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const _CardImageSync(),
+                  ],
                   const SizedBox(height: 28),
                   Text(
                     'ACCOUNT',
@@ -398,6 +416,116 @@ class _AccountButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Settings control that re-downloads all card faces into the on-disk cache, showing live
+/// progress. Mobile only (the parent hides it on web). Forces a full re-fetch so it doubles as a
+/// repair for a partial or corrupt cache.
+class _CardImageSync extends StatefulWidget {
+  const _CardImageSync();
+
+  @override
+  State<_CardImageSync> createState() => _CardImageSyncState();
+}
+
+class _CardImageSyncState extends State<_CardImageSync> {
+  bool _syncing = false;
+  int _done = 0;
+  int _total = 0;
+
+  Future<void> _sync() async {
+    setState(() {
+      _syncing = true;
+      _done = 0;
+      _total = 0;
+    });
+    try {
+      final service = CardImageService();
+      // Refresh the manifest first so newly added cards (and version bumps) are picked up.
+      await service.loadManifest();
+      await service.sync(
+        force: true,
+        onProgress: (done, total) {
+          if (mounted) {
+            setState(() {
+              _done = done;
+              _total = total;
+            });
+          }
+        },
+      );
+      if (mounted) {
+        showAppToast(
+          context,
+          _total == 0 ? 'No card images to sync' : 'Synced $_total card images',
+        );
+      }
+    } catch (_) {
+      if (mounted) showAppToast(context, 'Card image sync failed — check your connection');
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassPanel(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Re-download every card image to this device. Handy if a card looks missing or broken.',
+            style: GoogleFonts.cinzel(
+              fontSize: 12,
+              color: context.subtleTextColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (_syncing)
+            _SyncProgress(done: _done, total: _total)
+          else
+            _AccountButton(
+              icon: Icons.cloud_download_outlined,
+              label: 'Sync Card Images',
+              color: AppPalette.toggleBlue,
+              onPressed: _sync,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SyncProgress extends StatelessWidget {
+  const _SyncProgress({required this.done, required this.total});
+
+  final int done;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = context.accentColor;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: total > 0 ? done / total : null,
+            minHeight: 6,
+            backgroundColor: accent.withValues(alpha: 0.15),
+            valueColor: AlwaysStoppedAnimation(accent),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          total > 0 ? 'Downloading $done / $total' : 'Checking for updates…',
+          style: GoogleFonts.cinzel(fontSize: 12, color: context.subtleTextColor),
+        ),
+      ],
     );
   }
 }

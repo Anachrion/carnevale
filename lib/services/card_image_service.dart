@@ -104,7 +104,9 @@ class CardImageService {
 
   /// Downloads every face whose on-disk copy is missing or a version behind (mobile only; no-op on
   /// web). Safe to run in the background and to call repeatedly. [onProgress] reports (done, total).
-  Future<void> sync({void Function(int done, int total)? onProgress}) async {
+  /// With [force] every face is re-downloaded even if an up-to-date copy already exists — used by
+  /// the manual "sync card images" action in settings to repair a partial or corrupt cache.
+  Future<void> sync({bool force = false, void Function(int done, int total)? onProgress}) async {
     final dir = _cacheDir;
     if (kIsWeb || dir == null) return;
     if (!_manifestLoaded) {
@@ -117,7 +119,7 @@ class CardImageService {
 
     final stale = _faces.entries.where((e) {
       final file = File('${dir.path}/${e.key}');
-      return !file.existsSync() || (_downloaded[e.key] ?? -1) != e.value.version;
+      return force || !file.existsSync() || (_downloaded[e.key] ?? -1) != e.value.version;
     }).toList();
 
     var done = 0;
