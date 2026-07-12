@@ -215,41 +215,55 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                 );
               },
             ),
-            // Close + abilities info buttons
+            // Close button
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.info_outline,
-                        color: Colors.white,
-                        size: 26,
-                      ),
-                      tooltip: 'Abilities',
-                      onPressed: _showAbilities,
-                    ),
-                  ],
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ),
               ),
             ),
-            // Navigation hint
+            // Bottom bar: the navigation hint on the left, the abilities button on the right. The
+            // Row gives the button its natural height, so nothing is clipped.
             Positioned(
-              bottom: 32,
+              bottom: 0,
               left: 0,
               right: 0,
-              child: Center(
-                child: Text(
-                  '${_currentIndex + 1} / ${widget.profiles.length}  •  tap/←→ flip  •  swipe ↑↓ navigate',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.35),
-                    fontSize: 12,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 8, 16),
+                  child: Row(
+                    key: const Key('card-viewer-bottom-bar'),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${_currentIndex + 1} / ${widget.profiles.length}  •  tap/←→ flip  •  swipe ↑↓ navigate',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: _showAbilities,
+                        icon: const Icon(Icons.info_outline, size: 20),
+                        label: const Text('Abilities'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
