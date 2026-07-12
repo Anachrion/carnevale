@@ -1,13 +1,11 @@
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import '../models/profile_query.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/glass_panel.dart';
+import '../widgets/profile_search.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/sort_chip.dart';
 import 'card_viewer_screen.dart';
@@ -21,26 +19,27 @@ class CardsScreen extends StatefulWidget {
   State<CardsScreen> createState() => _CardsScreenState();
 }
 
-class _CardsScreenState extends State<CardsScreen> {
+class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _searchController = TextEditingController();
   final _service = ProfileService();
 
   List<api.Profile> _results = [];
   // Cached sorted view of _results; recomputed only when the results or sort change (F-P3-6).
   List<api.Profile> _sorted = [];
   final Set<String> _selectedFactions = {};
-  // Exact filters picked from the autocomplete, ANDed together: Leader + Brave finds brave leaders.
-  final Set<Facet> _facets = {};
-  List<FacetSuggestion> _suggestions = const [];
-  /// Index into [_suggestions] of the arrow-key selection, or -1 when nothing is selected yet
-  /// (in which case Enter takes the top hit).
-  int _highlighted = -1;
-  /// Per-row keys, so the arrow keys can scroll a selection that has moved out of view back in.
-  final Map<int, GlobalKey> _suggestionKeys = {};
   bool _loading = true;
   _CardSort _sort = _CardSort.name;
   bool _sortAsc = true;
+
+  /// The Cards screen searches the whole catalog, narrowed to whichever factions are picked.
+  @override
+  Set<String> get searchFactions => _selectedFactions;
+
+  @override
+  void onSearchChanged() {
+    _results = _service.matching(searchQuery);
+    _recomputeSorted();
+  }
 
   void _recomputeSorted() {
     final list = List<api.Profile>.from(_results);
@@ -65,7 +64,7 @@ class _CardsScreenState extends State<CardsScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
+    disposeSearch();
     super.dispose();
   }
 
@@ -73,93 +72,12 @@ class _CardsScreenState extends State<CardsScreen> {
     await _service.loadAll();
     if (!mounted) return;
     setState(() => _loading = false);
-    _applyQuery();
-  }
-
-  /// The single funnel for every filter change. The catalog is already on the device, so this runs
-  /// synchronously on each keystroke — no debounce, no round-trip.
-  void _applyQuery() {
-    final text = _searchController.text;
-    setState(() {
-      _results = _service.matching(
-        ProfileQuery(
-          text: text,
-          factions: _selectedFactions,
-          facets: _facets,
-        ),
-      );
-      _suggestions = _service.suggest(text, exclude: _facets);
-      // The list just changed under it, so any previous selection is meaningless.
-      _highlighted = -1;
-      _recomputeSorted();
-    });
-  }
-
-  /// Arrow keys walk the suggestions, Enter picks one, Escape dismisses them. Handled here, above
-  /// the field, so the keys don't also move the text caret; anything else falls through to it.
-  KeyEventResult _onSearchKey(FocusNode node, KeyEvent event) {
-    if (event is KeyUpEvent || _suggestions.isEmpty) return KeyEventResult.ignored;
-
-    switch (event.logicalKey) {
-      case LogicalKeyboardKey.arrowDown:
-        _moveHighlight(1);
-        return KeyEventResult.handled;
-      case LogicalKeyboardKey.arrowUp:
-        _moveHighlight(-1);
-        return KeyEventResult.handled;
-      case LogicalKeyboardKey.enter:
-      case LogicalKeyboardKey.numpadEnter:
-        // Enter with nothing selected takes the top hit, so you can type and confirm without
-        // reaching for the arrows at all.
-        _addFacet(_suggestions[_highlighted < 0 ? 0 : _highlighted].facet);
-        return KeyEventResult.handled;
-      case LogicalKeyboardKey.escape:
-        setState(() {
-          _suggestions = const [];
-          _highlighted = -1;
-        });
-        return KeyEventResult.handled;
-      default:
-        return KeyEventResult.ignored;
-    }
-  }
-
-  void _moveHighlight(int delta) {
-    setState(() {
-      // From "nothing selected", Down lands on the first hit and Up wraps to the last.
-      final from = _highlighted >= 0
-          ? _highlighted
-          : (delta > 0 ? -1 : 0);
-      _highlighted = (from + delta + _suggestions.length) % _suggestions.length;
-    });
-    // A long suggestion list scrolls inside its panel, so keep the selection on screen.
-    final key = _suggestionKeys[_highlighted];
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = key?.currentContext;
-      if (context == null) return;
-      Scrollable.ensureVisible(
-        context,
-        alignment: 0.5,
-        duration: const Duration(milliseconds: 120),
-      );
-    });
-  }
-
-  void _addFacet(Facet facet) {
-    _facets.add(facet);
-    // The text has been promoted into a chip, so clear it (this doesn't fire `onChanged`).
-    _searchController.clear();
-    _applyQuery();
-  }
-
-  void _removeFacet(Facet facet) {
-    _facets.remove(facet);
-    _applyQuery();
+    applySearch();
   }
 
   void _toggleFaction(String faction) {
     if (!_selectedFactions.remove(faction)) _selectedFactions.add(faction);
-    _applyQuery();
+    applySearch();
   }
 
   @override
@@ -172,8 +90,14 @@ class _CardsScreenState extends State<CardsScreen> {
         child: Column(
           children: [
             _buildHeader(context),
-            _buildSearchBar(),
-            if (_facets.isNotEmpty) _buildFacetChips(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: buildSearchField(),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: buildFacetChips(),
+            ),
             // The suggestions float over the filters and the card list rather than sitting in the
             // column, so opening them doesn't shove the page down. Stacking them inside the area
             // below the search box (not over the whole screen) keeps them hit-testable, and lets
@@ -189,12 +113,15 @@ class _CardsScreenState extends State<CardsScreen> {
                       Expanded(child: _buildList()),
                     ],
                   ),
-                  if (_suggestions.isNotEmpty)
+                  if (hasSuggestions)
                     Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
-                      child: _buildSuggestions(),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: buildSuggestions(),
+                      ),
                     ),
                 ],
               ),
@@ -212,109 +139,6 @@ class _CardsScreenState extends State<CardsScreen> {
       trailing: Text(
         '${_results.length} profiles',
         style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: GlassPanel(
-        padding: EdgeInsets.zero,
-        // canRequestFocus: false — this node only listens for keys on their way up from the field,
-        // it must never take focus away from it.
-        child: Focus(
-          canRequestFocus: false,
-          onKeyEvent: _onSearchKey,
-          child: TextField(
-            controller: _searchController,
-            onChanged: (_) => _applyQuery(),
-            style: TextStyle(color: context.textColor, fontSize: 15),
-            decoration: InputDecoration(
-              hintText: 'Search names, abilities, rules...',
-              hintStyle: TextStyle(
-                color: context.subtleTextColor.withValues(alpha: 0.7),
-                fontSize: 15,
-              ),
-              prefixIcon: Icon(
-                Icons.search,
-                color: context.accentColor,
-                size: 20,
-              ),
-              suffixIcon: _searchController.text.isEmpty
-                  ? null
-                  : IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        color: context.subtleTextColor,
-                        size: 18,
-                      ),
-                      onPressed: () {
-                        _searchController.clear();
-                        _applyQuery();
-                      },
-                    ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// The autocomplete: abilities, keywords and weapon abilities whose name matches what's typed.
-  /// Tapping one promotes it from free text to an exact filter (a chip), which is how you ask for
-  /// "Leader AND Brave" — a question plain text can't express.
-  Widget _buildSuggestions() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: DecoratedBox(
-        // Lifts the panel off the cards it now floats over.
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.28),
-              blurRadius: 28,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: GlassPanel(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 232),
-            child: ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: _suggestions.length,
-              itemBuilder: (_, i) {
-                final suggestion = _suggestions[i];
-                return _SuggestionRow(
-                  key: _suggestionKeys.putIfAbsent(i, GlobalKey.new),
-                  suggestion: suggestion,
-                  selected: i == _highlighted,
-                  onTap: () => _addFacet(suggestion.facet),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFacetChips() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 6,
-        children: [
-          for (final facet in _facets)
-            _FacetChip(facet: facet, onRemove: () => _removeFacet(facet)),
-        ],
       ),
     );
   }
@@ -344,8 +168,13 @@ class _CardsScreenState extends State<CardsScreen> {
     );
   }
 
+  /// The seven faction toggles, sized to fit the screen rather than scrolling. They used to be
+  /// fixed-width chips in a horizontal ListView, which overflowed on a narrow phone and pushed
+  /// Rashaar — the last one — off the edge, behind a sideways scroll nobody thinks to try on a
+  /// filter row. A filter you can't see is a filter you don't know you have, so they shrink
+  /// together instead, down to the point where all seven still fit.
   Widget _buildFactionFilter() {
-    final factions = [
+    const factions = [
       'guild',
       'doctors',
       'vatican',
@@ -354,21 +183,40 @@ class _CardsScreenState extends State<CardsScreen> {
       'gifted',
       'rashaar',
     ];
-    return SizedBox(
-      height: 60,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          ...factions.map(
-            (f) => _FactionIconChip(
-              faction: f,
-              selected: _selectedFactions.contains(f),
-              onTap: () => _toggleFaction(f),
+    const gap = 8.0;
+    const padding = 16.0;
+    const maxDiameter = 48.0;
+    // Floor, so they stay a usable tap target. Seven of these plus the gaps need ~276px, which
+    // clears even the narrowest phones in circulation — so the row never overflows in practice.
+    const minDiameter = 28.0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final available = constraints.maxWidth - padding * 2;
+        final diameter =
+            ((available - gap * (factions.length - 1)) / factions.length).clamp(
+              minDiameter,
+              maxDiameter,
+            );
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: padding),
+          child: SizedBox(
+            height: diameter + 12,
+            child: Row(
+              spacing: gap,
+              children: [
+                for (final faction in factions)
+                  _FactionIconChip(
+                    faction: faction,
+                    diameter: diameter,
+                    selected: _selectedFactions.contains(faction),
+                    onTap: () => _toggleFaction(faction),
+                  ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -397,123 +245,18 @@ class _CardsScreenState extends State<CardsScreen> {
   }
 }
 
-IconData _facetIcon(FacetKind kind) => switch (kind) {
-  FacetKind.keyword => Icons.local_offer_outlined,
-  FacetKind.ability => Icons.auto_awesome_outlined,
-  FacetKind.weaponAbility => Icons.gavel_outlined,
-};
-
-/// One autocomplete hit: the facet's name, what kind it is and how many models have it, over the
-/// rulebook text when the glossary knows the ability.
-class _SuggestionRow extends StatelessWidget {
-  const _SuggestionRow({
-    super.key,
-    required this.suggestion,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final FacetSuggestion suggestion;
-
-  /// True when the arrow keys have landed on this row; Enter would pick it.
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: selected
-            ? context.accentColor.withValues(alpha: 0.16)
-            : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Row(
-          children: [
-            Icon(
-              _facetIcon(suggestion.facet.kind),
-              size: 16,
-              color: context.accentColor,
-            ),
-            const SizedBox(width: 10),
-            Flexible(
-              child: Text(
-                suggestion.facet.name,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w600,
-                  color: context.textColor,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '${suggestion.facet.kind.label} · ${suggestion.count}',
-              style: TextStyle(
-                fontSize: 10.5,
-                color: context.subtleTextColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// A picked filter, shown under the search box until it's dismissed.
-class _FacetChip extends StatelessWidget {
-  const _FacetChip({required this.facet, required this.onRemove});
-
-  final Facet facet;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = context.accentColor;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(9, 5, 5, 5),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: accent.withValues(alpha: 0.45), width: 0.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(_facetIcon(facet.kind), size: 12, color: accent),
-          const SizedBox(width: 5),
-          Text(
-            facet.name,
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-              color: context.textColor,
-            ),
-          ),
-          const SizedBox(width: 2),
-          GestureDetector(
-            onTap: onRemove,
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.all(3),
-              child: Icon(Icons.close, size: 12, color: context.subtleTextColor),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _FactionIconChip extends StatelessWidget {
   const _FactionIconChip({
     required this.faction,
+    required this.diameter,
     required this.selected,
     required this.onTap,
   });
   final String faction;
+
+  /// Set by the filter row, which divides the screen width across the seven factions so they all
+  /// stay visible. Spacing is the row's job, so the chip carries no margin of its own.
+  final double diameter;
   final bool selected;
   final VoidCallback onTap;
 
@@ -524,14 +267,17 @@ class _FactionIconChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        width: 48,
-        height: 48,
+        width: diameter,
+        height: diameter,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: selected ? color : color.withValues(alpha: 0.5),
+          gradient: AppPalette.factionIconGradient(
+            color,
+            opacity: selected ? 1 : 0.5,
+          ),
         ),
-        padding: const EdgeInsets.all(4),
+        // Scales with the chip, so the glyph keeps its proportions as the row tightens.
+        padding: EdgeInsets.all(diameter / 12),
         child: Image.asset(
           iconPath,
           fit: BoxFit.contain,

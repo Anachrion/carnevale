@@ -330,6 +330,31 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  // Activation is a turn-sequencing marker rather than a status counter, so it toggles straight
+  // from the tile instead of through the counter popup — mid-turn you flip it once per model and
+  // want it in one tap. No reset logic here: the server records which turn the model activated on,
+  // so advancing the turn clears the whole gang on its own.
+  Future<void> _toggleActivated(api.ListEntry entry) async {
+    final state = entry.state;
+    if (state == null) return;
+    try {
+      final newState = await GameService().updateCounters(
+        widget.gameId,
+        entry.id,
+        activated: !state.activated,
+      );
+      if (!mounted) return;
+      _applyEntryState(entry.id, newState);
+    } catch (_) {
+      if (mounted) {
+        showAppToast(
+          context,
+          'Could not update the activation. Please try again.',
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -354,6 +379,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       showHeader: widget.showListHeader,
       onEditCounters: widget.editable ? _editCounters : null,
       onEditStats: widget.editable ? _editStats : null,
+      onToggleActivated: widget.editable ? _toggleActivated : null,
     );
   }
 }

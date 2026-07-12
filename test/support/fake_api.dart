@@ -67,6 +67,22 @@ Object gameBody(api.Game game) => _serialize(game, const FullType(api.Game));
 Object modelListBody(api.ModelList list) =>
     _serialize(list, const FullType(api.ModelList));
 
+Object entryStateBody(api.EntryState state) =>
+    _serialize(state, const FullType(api.EntryState));
+
+api.Equipment fakeEquipment({
+  int id = 1,
+  String name = 'Gondola',
+  String description = 'A boat.',
+  int cost = 10,
+}) => api.Equipment(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..description = description
+    ..cost = cost,
+);
+
 api.ListEntry fakeListEntry({
   int id = 1,
   int position = 1,
@@ -75,6 +91,7 @@ api.ListEntry fakeListEntry({
   int entryId = 10,
   String name = 'Capodecina',
   int cost = 20,
+  api.EntryState? state,
 }) => api.ListEntry(
   (b) => b
     ..id = id
@@ -86,7 +103,38 @@ api.ListEntry fakeListEntry({
     ..mage = false
     ..spellSlots = 0
     ..disciplines = ListBuilder<String>()
-    ..spells = ListBuilder<api.Spell>(),
+    ..spells = ListBuilder<api.Spell>()
+    // Only models in a live game have a state; a gang-builder entry leaves it null.
+    ..state = state?.toBuilder(),
+);
+
+api.EntryStatValue _fakeStat(int current, int starting) => api.EntryStatValue(
+  (b) => b
+    ..current = current
+    ..starting = starting,
+);
+
+api.EntryState fakeEntryState({
+  int lifePoints = 10,
+  int willPoints = 3,
+  int commandPoints = 1,
+  bool stunned = false,
+  bool hidden = false,
+  bool guarding = false,
+  bool carryingObjective = false,
+  int underwaterCounters = 0,
+  bool activated = false,
+}) => api.EntryState(
+  (b) => b
+    ..lifePoints = _fakeStat(lifePoints, 10).toBuilder()
+    ..willPoints = _fakeStat(willPoints, 3).toBuilder()
+    ..commandPoints = _fakeStat(commandPoints, 1).toBuilder()
+    ..stunned = stunned
+    ..hidden = hidden
+    ..guarding = guarding
+    ..carryingObjective = carryingObjective
+    ..underwaterCounters = underwaterCounters
+    ..activated = activated,
 );
 
 api.Spell fakeSpell({

@@ -108,7 +108,10 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
                   height: 48,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: selected ? color : color.withValues(alpha: 0.35),
+                    gradient: AppPalette.factionIconGradient(
+                      color,
+                      opacity: selected ? 1 : 0.35,
+                    ),
                     border: selected
                         ? Border.all(color: Colors.white, width: 2.5)
                         : null,

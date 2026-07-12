@@ -28,16 +28,22 @@ class ScreenHeader extends StatelessWidget {
             onPressed: onMenu,
           ),
           const SizedBox(width: 4),
-          Text(
-            title,
-            style: GoogleFonts.cinzel(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              letterSpacing: 3,
+          // Expanded rather than a fixed Text + Spacer: the title takes whatever room is left and
+          // ellipsizes instead of overflowing, so a long title (or a narrow phone) can't push the
+          // trailing count off the edge. Reads identically whenever there is room to spare.
+          Expanded(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.cinzel(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+                letterSpacing: 3,
+              ),
             ),
           ),
-          if (trailing != null) ...[const Spacer(), trailing!],
+          if (trailing != null) trailing!,
         ],
       ),
     );

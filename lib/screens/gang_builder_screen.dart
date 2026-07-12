@@ -11,6 +11,7 @@ import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/points_bar.dart';
+import '../widgets/profile_search.dart';
 import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
@@ -31,7 +32,8 @@ class GangBuilderScreen extends StatefulWidget {
   State<GangBuilderScreen> createState() => _GangBuilderScreenState();
 }
 
-class _GangBuilderScreenState extends State<GangBuilderScreen> {
+class _GangBuilderScreenState extends State<GangBuilderScreen>
+    with ProfileSearchMixin {
   late api.ModelList _gang;
   List<api.Profile> _profiles = [];
   List<api.Equipment> _equipment = [];
@@ -41,22 +43,58 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   _Tab _tab = _Tab.list;
   _HireSort _hireSort = _HireSort.role;
   bool _hireSortAsc = true;
-  final _searchController = TextEditingController();
   final _hireScroll = ScrollController();
 
   // One key per hire tile, so a tile can be located and centred after the card viewer closes.
   // Keyed by profile id: the list is rebuilt on search/sort, but a profile keeps its key.
   final Map<int, GlobalKey> _hireTileKeys = {};
 
-  // Cached filtered+sorted hire list. Recomputed only when its inputs (search text, sort field/dir,
-  // or the loaded profiles) change — not on every rebuild, which the old getter did (F-P3-6).
+  // Cached filtered+sorted hire list. Recomputed only when its inputs (search text, facets, sort
+  // field/dir, or the loaded profiles) change — not on every rebuild, which the old getter did
+  // (F-P3-6).
   List<api.Profile> _visibleProfiles = [];
 
+  // The Equipment section of the hire tab is searched too — it's hireable from the same list, so a
+  // search that ignored it would just make gear look missing.
+  List<api.Equipment> _visibleEquipment = [];
+
+  /// You can only ever hire from your own faction plus Gifted (the mercenaries), so unlike the Cards
+  /// screen the hire search has no faction picker — it's pinned to exactly what this gang may hire.
+  /// This mirrors the `factions:` the profiles were loaded with in [_loadData].
+  @override
+  Set<String> get searchFactions => {_gang.faction, 'gifted'};
+
+  @override
+  void onSearchChanged() {
+    _recomputeVisibleProfiles();
+    _recomputeVisibleEquipment();
+  }
+
+  /// Equipment carries only a name, a description and a cost — no keywords, abilities or weapons —
+  /// so free text sweeps its name and description, and a *facet* chip excludes it outright: asking
+  /// for "Brave" is a question about models, and no piece of gear can answer it.
+  void _recomputeVisibleEquipment() {
+    if (pickedFacets.isNotEmpty) {
+      _visibleEquipment = const [];
+      return;
+    }
+    final terms = searchController.text
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((term) => term.isNotEmpty);
+    _visibleEquipment = _equipment.where((e) {
+      final haystack = '${e.name}\n${e.description}'.toLowerCase();
+      // Each word must land somewhere, matching how ProfileService sweeps free text.
+      return terms.every(haystack.contains);
+    }).toList();
+  }
+
   void _recomputeVisibleProfiles() {
-    final q = _searchController.text.trim().toLowerCase();
-    final filtered = q.isEmpty
-        ? List<api.Profile>.from(_profiles)
-        : _profiles.where((p) => p.name.toLowerCase().contains(q)).toList();
+    // Runs through the same catalog index the Cards screen searches, so the Hire tab gets free text
+    // over abilities/weapons/special rules and ANDed facet chips — not just a name substring. The
+    // faction constraint in `searchQuery` reproduces the loaded set, so this never widens the pool
+    // beyond what the gang can actually hire.
+    final filtered = ProfileService().matching(searchQuery);
     int roleRank(api.Profile p) {
       if (p.keywords.contains('Leader')) return 0;
       if (p.keywords.contains('Hero')) return 1;
@@ -95,17 +133,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     super.initState();
     _gang = widget.gang;
     _loadData();
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  void _onSearchChanged() {
-    _recomputeVisibleProfiles();
-    setState(() {});
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
+    disposeSearch();
     _hireScroll.dispose();
     super.dispose();
   }
@@ -202,6 +234,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       _spells = results[2] as List<api.Spell>;
       _loading = false;
       _recomputeVisibleProfiles();
+      _recomputeVisibleEquipment();
     });
   }
 
@@ -638,84 +671,109 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
     return Column(
       children: [
         _buildHireControls(),
+        // The suggestions float over the hire list rather than sitting in the column, so opening
+        // them doesn't shove the list down. Same arrangement as the Cards screen.
         Expanded(
-          child: _profiles.isEmpty
-              ? Center(
-                  child: Text(
-                    'No profiles for this faction.',
-                    style: TextStyle(color: context.subtleTextColor),
+          child: Stack(
+            children: [
+              _buildHireList(factionProfiles, giftedProfiles, buildTile),
+              if (hasSuggestions)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: buildSuggestions(),
                   ),
-                )
-              : profiles.isEmpty
-              ? Center(
-                  child: Text(
-                    'No profiles match your search.',
-                    style: TextStyle(color: context.subtleTextColor),
-                  ),
-                )
-              : CustomScrollView(
-                  controller: _hireScroll,
-                  slivers: [
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                      sliver: SliverList.separated(
-                        itemCount: factionProfiles.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (_, i) => buildTile(factionProfiles[i]),
-                      ),
-                    ),
-                    if (giftedProfiles.isNotEmpty) ...[
-                      _buildHireDivider('Mercenaries'),
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                        sliver: SliverList.separated(
-                          itemCount: giftedProfiles.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 8),
-                          itemBuilder: (_, i) => buildTile(giftedProfiles[i]),
-                        ),
-                      ),
-                    ],
-                    if (_equipment.isNotEmpty) ...[
-                      _buildHireDivider('Equipment'),
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                        sliver: SliverList.separated(
-                          itemCount: _equipment.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 8),
-                          itemBuilder: (_, i) {
-                            final e = _equipment[i];
-                            final count = _gang.entries
-                                .where(
-                                  (en) =>
-                                      en.entryType ==
-                                          api
-                                              .ListEntryEntryTypeEnum
-                                              .catalogColonColonEquipment &&
-                                      en.entryId == e.id,
-                                )
-                                .length;
-                            final canAdd = count == 0;
-                            return _HireEquipmentTile(
-                              equipment: e,
-                              count: count,
-                              canAdd: canAdd,
-                              busy: _busy,
-                              onAdd: () => _addEquipment(e),
-                              onTap: () =>
-                                  showEquipmentDetailDialog(context, e),
-                            );
-                          },
-                        ),
-                      ),
-                    ] else
-                      const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
-                  ],
                 ),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+  Widget _buildHireList(
+    List<api.Profile> factionProfiles,
+    List<api.Profile> giftedProfiles,
+    Widget Function(api.Profile) buildTile,
+  ) {
+    // Gated on *both* sections being empty, not just the profiles: a search like "gondola" matches
+    // no model but does match a piece of gear, and keying the empty state off the profiles alone
+    // used to replace the whole list — equipment included — with "nothing found".
+    final noResults = _visibleProfiles.isEmpty && _visibleEquipment.isEmpty;
+    return _profiles.isEmpty
+        ? Center(
+            child: Text(
+              'No profiles for this faction.',
+              style: TextStyle(color: context.subtleTextColor),
+            ),
+          )
+        : noResults
+        ? Center(
+            child: Text(
+              'Nothing matches your search.',
+              style: TextStyle(color: context.subtleTextColor),
+            ),
+          )
+        : CustomScrollView(
+            controller: _hireScroll,
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                sliver: SliverList.separated(
+                  itemCount: factionProfiles.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) => buildTile(factionProfiles[i]),
+                ),
+              ),
+              if (giftedProfiles.isNotEmpty) ...[
+                _buildHireDivider('Mercenaries'),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  sliver: SliverList.separated(
+                    itemCount: giftedProfiles.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (_, i) => buildTile(giftedProfiles[i]),
+                  ),
+                ),
+              ],
+              if (_visibleEquipment.isNotEmpty) ...[
+                _buildHireDivider('Equipment'),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  sliver: SliverList.separated(
+                    itemCount: _visibleEquipment.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (_, i) {
+                      final e = _visibleEquipment[i];
+                      final count = _gang.entries
+                          .where(
+                            (en) =>
+                                en.entryType ==
+                                    api
+                                        .ListEntryEntryTypeEnum
+                                        .catalogColonColonEquipment &&
+                                en.entryId == e.id,
+                          )
+                          .length;
+                      final canAdd = count == 0;
+                      return _HireEquipmentTile(
+                        equipment: e,
+                        count: count,
+                        canAdd: canAdd,
+                        busy: _busy,
+                        onAdd: () => _addEquipment(e),
+                        onTap: () => showEquipmentDetailDialog(context, e),
+                      );
+                    },
+                  ),
+                ),
+              ] else
+                const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+            ],
+          );
   }
 
   SliverToBoxAdapter _buildHireDivider(String label) => SliverToBoxAdapter(
@@ -757,37 +815,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Column(
         children: [
-          GlassPanel(
-            padding: EdgeInsets.zero,
-            child: TextField(
-              controller: _searchController,
-              style: TextStyle(color: context.textColor, fontSize: 15),
-              decoration: InputDecoration(
-                hintText: 'Search profiles...',
-                hintStyle: TextStyle(
-                  color: context.subtleTextColor.withValues(alpha: 0.7),
-                  fontSize: 15,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: context.accentColor,
-                  size: 20,
-                ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.clear,
-                          color: context.subtleTextColor.withValues(alpha: 0.6),
-                          size: 18,
-                        ),
-                        onPressed: () => _searchController.clear(),
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
+          buildSearchField(hintText: 'Search models, equipment, abilities...'),
+          if (pickedFacets.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Align(alignment: Alignment.centerLeft, child: buildFacetChips()),
+          ],
           const SizedBox(height: 6),
           Row(
             children: [

@@ -39,7 +39,8 @@ class GangTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final factionColor = AppPalette.factionColors[faction] ?? context.accentColor;
+    final factionColor =
+        AppPalette.factionColors[faction] ?? context.accentColor;
     final iconPath = AppPalette.factionIcons[faction];
     final content = Opacity(
       opacity: dimmed ? 0.5 : 1,
@@ -49,7 +50,7 @@ class GangTile extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: factionColor,
+              gradient: AppPalette.factionIconGradient(factionColor),
               shape: BoxShape.circle,
             ),
             padding: const EdgeInsets.all(10),

@@ -133,7 +133,9 @@ class GameService extends ChangeNotifier {
       _guard(() async {
         final res = await _client.games.drawAgendas(
           id: gameId,
-          drawAgendaInput: api.DrawAgendaInput((b) => b..origin = _drawOrigin(origin)),
+          drawAgendaInput: api.DrawAgendaInput(
+            (b) => b..origin = _drawOrigin(origin),
+          ),
         );
         return res.data?.agendas.toList() ?? [];
       });
@@ -223,6 +225,10 @@ class GameService extends ChangeNotifier {
   /// Updates status counters on one of the current player's own models — only the values
   /// passed change, the rest keep their current state. Returns the model's full updated
   /// state; the server also broadcasts a game_state event to both players.
+  ///
+  /// [activated] marks the model as having activated this turn. The server records *which* turn
+  /// it activated on, so the flag clears itself when this player advances the turn — nothing here
+  /// needs to reset it.
   Future<api.EntryState> updateCounters(
     int gameId,
     int listEntryId, {
@@ -231,6 +237,7 @@ class GameService extends ChangeNotifier {
     bool? guarding,
     bool? carryingObjective,
     int? underwaterCounters,
+    bool? activated,
   }) => _guard(() async {
     final res = await _client.games.updateCounters(
       id: gameId,
@@ -241,7 +248,8 @@ class GameService extends ChangeNotifier {
           ..counters.hidden = hidden
           ..counters.guarding = guarding
           ..counters.carryingObjective = carryingObjective
-          ..counters.underwaterCounters = underwaterCounters,
+          ..counters.underwaterCounters = underwaterCounters
+          ..counters.activated = activated,
       ),
     );
     return res.data!;
