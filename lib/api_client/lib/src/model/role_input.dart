@@ -12,7 +12,7 @@ part 'role_input.g.dart';
 /// RoleInput
 ///
 /// Properties:
-/// * [role] 
+/// * [role]
 @BuiltValue()
 abstract class RoleInput implements Built<RoleInput, RoleInputBuilder> {
   @BuiltValueField(wireName: r'role')
@@ -55,7 +55,11 @@ class _$RoleInputSerializer implements PrimitiveSerializer<RoleInput> {
     RoleInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -71,10 +75,12 @@ class _$RoleInputSerializer implements PrimitiveSerializer<RoleInput> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'role':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(RoleInputRoleEnum),
-          ) as RoleInputRoleEnum;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(RoleInputRoleEnum),
+                  )
+                  as RoleInputRoleEnum;
           result.role = valueDes;
           break;
         default:
@@ -107,17 +113,17 @@ class _$RoleInputSerializer implements PrimitiveSerializer<RoleInput> {
 }
 
 class RoleInputRoleEnum extends EnumClass {
-
   @BuiltValueEnumConst(wireName: r'attacker')
   static const RoleInputRoleEnum attacker = _$roleInputRoleEnum_attacker;
   @BuiltValueEnumConst(wireName: r'defender')
   static const RoleInputRoleEnum defender = _$roleInputRoleEnum_defender;
 
-  static Serializer<RoleInputRoleEnum> get serializer => _$roleInputRoleEnumSerializer;
+  static Serializer<RoleInputRoleEnum> get serializer =>
+      _$roleInputRoleEnumSerializer;
 
-  const RoleInputRoleEnum._(String name): super(name);
+  const RoleInputRoleEnum._(String name) : super(name);
 
   static BuiltSet<RoleInputRoleEnum> get values => _$roleInputRoleEnumValues;
-  static RoleInputRoleEnum valueOf(String name) => _$roleInputRoleEnumValueOf(name);
+  static RoleInputRoleEnum valueOf(String name) =>
+      _$roleInputRoleEnumValueOf(name);
 }
-

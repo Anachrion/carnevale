@@ -15,12 +15,12 @@ part 'game_player.g.dart';
 /// GamePlayer
 ///
 /// Properties:
-/// * [id] 
-/// * [userId] 
-/// * [username] 
-/// * [host] 
-/// * [list] 
-/// * [role] 
+/// * [id]
+/// * [userId]
+/// * [username]
+/// * [host]
+/// * [list]
+/// * [role]
 /// * [agendasConfirmed] - True once the player has confirmed their opening Agenda hand (agenda_draw phase). Both players confirming takes the game straight to in_progress.
 /// * [wonRoleRoll] - True for the role roll-off winner (asymmetric scenarios only). Picked at random as soon as the second player joins.
 /// * [wonDeploymentRoll] - True for the deployment roll-off winner. Picked at random as soon as the second player joins. Informational only — the deployment zone itself is chosen at the table, not in-app.
@@ -106,10 +106,7 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     yield r'user_id';
     yield serializers.serialize(
       object.userId,
@@ -126,15 +123,19 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
       specifiedType: const FullType(bool),
     );
     yield r'list';
-    yield object.list == null ? null : serializers.serialize(
-      object.list,
-      specifiedType: const FullType.nullable(GangSummary),
-    );
+    yield object.list == null
+        ? null
+        : serializers.serialize(
+            object.list,
+            specifiedType: const FullType.nullable(GangSummary),
+          );
     yield r'role';
-    yield object.role == null ? null : serializers.serialize(
-      object.role,
-      specifiedType: const FullType.nullable(GamePlayerRoleEnum),
-    );
+    yield object.role == null
+        ? null
+        : serializers.serialize(
+            object.role,
+            specifiedType: const FullType.nullable(GamePlayerRoleEnum),
+          );
     yield r'agendas_confirmed';
     yield serializers.serialize(
       object.agendasConfirmed,
@@ -183,7 +184,11 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
     GamePlayer object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -199,103 +204,123 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'user_id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.userId = valueDes;
           break;
         case r'username':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.username = valueDes;
           break;
         case r'host':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.host = valueDes;
           break;
         case r'list':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(GangSummary),
-          ) as GangSummary?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(GangSummary),
+                  )
+                  as GangSummary?;
           if (valueDes == null) continue;
           result.list.replace(valueDes);
           break;
         case r'role':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(GamePlayerRoleEnum),
-          ) as GamePlayerRoleEnum?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(GamePlayerRoleEnum),
+                  )
+                  as GamePlayerRoleEnum?;
           if (valueDes == null) continue;
           result.role = valueDes;
           break;
         case r'agendas_confirmed':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.agendasConfirmed = valueDes;
           break;
         case r'won_role_roll':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.wonRoleRoll = valueDes;
           break;
         case r'won_deployment_roll':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.wonDeploymentRoll = valueDes;
           break;
         case r'score':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.score = valueDes;
           break;
         case r'current_turn':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.currentTurn = valueDes;
           break;
         case r'finished':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.finished = valueDes;
           break;
         case r'agendas':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(Agenda)]),
-          ) as BuiltList<Agenda>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(Agenda),
+                    ]),
+                  )
+                  as BuiltList<Agenda>;
           result.agendas.replace(valueDes);
           break;
         case r'agenda_history':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(AgendaHistoryEntry)]),
-          ) as BuiltList<AgendaHistoryEntry>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(AgendaHistoryEntry),
+                    ]),
+                  )
+                  as BuiltList<AgendaHistoryEntry>;
           result.agendaHistory.replace(valueDes);
           break;
         default:
@@ -328,17 +353,17 @@ class _$GamePlayerSerializer implements PrimitiveSerializer<GamePlayer> {
 }
 
 class GamePlayerRoleEnum extends EnumClass {
-
   @BuiltValueEnumConst(wireName: r'attacker')
   static const GamePlayerRoleEnum attacker = _$gamePlayerRoleEnum_attacker;
   @BuiltValueEnumConst(wireName: r'defender')
   static const GamePlayerRoleEnum defender = _$gamePlayerRoleEnum_defender;
 
-  static Serializer<GamePlayerRoleEnum> get serializer => _$gamePlayerRoleEnumSerializer;
+  static Serializer<GamePlayerRoleEnum> get serializer =>
+      _$gamePlayerRoleEnumSerializer;
 
-  const GamePlayerRoleEnum._(String name): super(name);
+  const GamePlayerRoleEnum._(String name) : super(name);
 
   static BuiltSet<GamePlayerRoleEnum> get values => _$gamePlayerRoleEnumValues;
-  static GamePlayerRoleEnum valueOf(String name) => _$gamePlayerRoleEnumValueOf(name);
+  static GamePlayerRoleEnum valueOf(String name) =>
+      _$gamePlayerRoleEnumValueOf(name);
 }
-

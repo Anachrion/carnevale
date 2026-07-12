@@ -23,6 +23,8 @@ class _$EntryState extends EntryState {
   final bool carryingObjective;
   @override
   final int underwaterCounters;
+  @override
+  final bool activated;
 
   factory _$EntryState([void Function(EntryStateBuilder)? updates]) =>
       (EntryStateBuilder()..update(updates))._build();
@@ -36,6 +38,7 @@ class _$EntryState extends EntryState {
     required this.guarding,
     required this.carryingObjective,
     required this.underwaterCounters,
+    required this.activated,
   }) : super._();
   @override
   EntryState rebuild(void Function(EntryStateBuilder) updates) =>
@@ -55,7 +58,8 @@ class _$EntryState extends EntryState {
         hidden == other.hidden &&
         guarding == other.guarding &&
         carryingObjective == other.carryingObjective &&
-        underwaterCounters == other.underwaterCounters;
+        underwaterCounters == other.underwaterCounters &&
+        activated == other.activated;
   }
 
   @override
@@ -69,6 +73,7 @@ class _$EntryState extends EntryState {
     _$hash = $jc(_$hash, guarding.hashCode);
     _$hash = $jc(_$hash, carryingObjective.hashCode);
     _$hash = $jc(_$hash, underwaterCounters.hashCode);
+    _$hash = $jc(_$hash, activated.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -83,7 +88,8 @@ class _$EntryState extends EntryState {
           ..add('hidden', hidden)
           ..add('guarding', guarding)
           ..add('carryingObjective', carryingObjective)
-          ..add('underwaterCounters', underwaterCounters))
+          ..add('underwaterCounters', underwaterCounters)
+          ..add('activated', activated))
         .toString();
   }
 }
@@ -131,6 +137,10 @@ class EntryStateBuilder implements Builder<EntryState, EntryStateBuilder> {
   set underwaterCounters(int? underwaterCounters) =>
       _$this._underwaterCounters = underwaterCounters;
 
+  bool? _activated;
+  bool? get activated => _$this._activated;
+  set activated(bool? activated) => _$this._activated = activated;
+
   EntryStateBuilder() {
     EntryState._defaults(this);
   }
@@ -146,6 +156,7 @@ class EntryStateBuilder implements Builder<EntryState, EntryStateBuilder> {
       _guarding = $v.guarding;
       _carryingObjective = $v.carryingObjective;
       _underwaterCounters = $v.underwaterCounters;
+      _activated = $v.activated;
       _$v = null;
     }
     return this;
@@ -197,6 +208,11 @@ class EntryStateBuilder implements Builder<EntryState, EntryStateBuilder> {
               underwaterCounters,
               r'EntryState',
               'underwaterCounters',
+            ),
+            activated: BuiltValueNullFieldError.checkNotNull(
+              activated,
+              r'EntryState',
+              'activated',
             ),
           );
     } catch (_) {

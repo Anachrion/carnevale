@@ -11,10 +11,10 @@ part 'equipment.g.dart';
 /// Equipment
 ///
 /// Properties:
-/// * [id] 
-/// * [name] 
-/// * [description] 
-/// * [cost] 
+/// * [id]
+/// * [name]
+/// * [description]
+/// * [cost]
 @BuiltValue()
 abstract class Equipment implements Built<Equipment, EquipmentBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -53,10 +53,7 @@ class _$EquipmentSerializer implements PrimitiveSerializer<Equipment> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -80,7 +77,11 @@ class _$EquipmentSerializer implements PrimitiveSerializer<Equipment> {
     Equipment object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -96,31 +97,33 @@ class _$EquipmentSerializer implements PrimitiveSerializer<Equipment> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.name = valueDes;
           break;
         case r'description':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.description = valueDes;
           break;
         case r'cost':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.cost = valueDes;
           break;
         default:
@@ -151,4 +154,3 @@ class _$EquipmentSerializer implements PrimitiveSerializer<Equipment> {
     return result.build();
   }
 }
-

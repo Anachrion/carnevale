@@ -11,12 +11,12 @@ part 'gang_summary.g.dart';
 /// GangSummary
 ///
 /// Properties:
-/// * [id] 
+/// * [id]
 /// * [sourceListId] - The source list this gang was snapshotted from when selected for a game; null for a source list itself (e.g. entries in the available-lists picker). Lets a client match a player's in-game gang to the picker.
-/// * [name] 
-/// * [faction] 
-/// * [points] 
-/// * [totalCost] 
+/// * [name]
+/// * [faction]
+/// * [points]
+/// * [totalCost]
 @BuiltValue()
 abstract class GangSummary implements Built<GangSummary, GangSummaryBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -62,10 +62,7 @@ class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     if (object.sourceListId != null) {
       yield r'source_list_id';
       yield serializers.serialize(
@@ -74,10 +71,12 @@ class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
       );
     }
     yield r'name';
-    yield object.name == null ? null : serializers.serialize(
-      object.name,
-      specifiedType: const FullType.nullable(String),
-    );
+    yield object.name == null
+        ? null
+        : serializers.serialize(
+            object.name,
+            specifiedType: const FullType.nullable(String),
+          );
     yield r'faction';
     yield serializers.serialize(
       object.faction,
@@ -101,7 +100,11 @@ class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
     GangSummary object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -117,47 +120,50 @@ class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'source_list_id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(int),
+                  )
+                  as int?;
           if (valueDes == null) continue;
           result.sourceListId = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(String),
+                  )
+                  as String?;
           if (valueDes == null) continue;
           result.name = valueDes;
           break;
         case r'faction':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.faction = valueDes;
           break;
         case r'points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.points = valueDes;
           break;
         case r'total_cost':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.totalCost = valueDes;
           break;
         default:
@@ -188,4 +194,3 @@ class _$GangSummarySerializer implements PrimitiveSerializer<GangSummary> {
     return result.build();
   }
 }
-

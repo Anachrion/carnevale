@@ -11,13 +11,13 @@ part 'special_rule.g.dart';
 /// SpecialRule
 ///
 /// Properties:
-/// * [id] 
-/// * [name] 
-/// * [description] 
-/// * [spellName] 
-/// * [spellCost] 
-/// * [spellDifficulty] 
-/// * [spellDescription] 
+/// * [id]
+/// * [name]
+/// * [description]
+/// * [spellName]
+/// * [spellCost]
+/// * [spellDifficulty]
+/// * [spellDescription]
 @BuiltValue()
 abstract class SpecialRule implements Built<SpecialRule, SpecialRuleBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -65,10 +65,7 @@ class _$SpecialRuleSerializer implements PrimitiveSerializer<SpecialRule> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -115,7 +112,11 @@ class _$SpecialRuleSerializer implements PrimitiveSerializer<SpecialRule> {
     SpecialRule object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -131,55 +132,66 @@ class _$SpecialRuleSerializer implements PrimitiveSerializer<SpecialRule> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.name = valueDes;
           break;
         case r'description':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.description = valueDes;
           break;
         case r'spell_name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(String),
+                  )
+                  as String?;
           if (valueDes == null) continue;
           result.spellName = valueDes;
           break;
         case r'spell_cost':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(int),
+                  )
+                  as int?;
           if (valueDes == null) continue;
           result.spellCost = valueDes;
           break;
         case r'spell_difficulty':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(int),
+                  )
+                  as int?;
           if (valueDes == null) continue;
           result.spellDifficulty = valueDes;
           break;
         case r'spell_description':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(String),
+                  )
+                  as String?;
           if (valueDes == null) continue;
           result.spellDescription = valueDes;
           break;
@@ -211,4 +223,3 @@ class _$SpecialRuleSerializer implements PrimitiveSerializer<SpecialRule> {
     return result.build();
   }
 }
-

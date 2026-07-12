@@ -12,26 +12,33 @@ part 'update_counters_input.g.dart';
 /// UpdateCountersInput
 ///
 /// Properties:
-/// * [counters] 
+/// * [counters]
 @BuiltValue()
-abstract class UpdateCountersInput implements Built<UpdateCountersInput, UpdateCountersInputBuilder> {
+abstract class UpdateCountersInput
+    implements Built<UpdateCountersInput, UpdateCountersInputBuilder> {
   @BuiltValueField(wireName: r'counters')
   UpdateCountersInputCounters get counters;
 
   UpdateCountersInput._();
 
-  factory UpdateCountersInput([void updates(UpdateCountersInputBuilder b)]) = _$UpdateCountersInput;
+  factory UpdateCountersInput([void updates(UpdateCountersInputBuilder b)]) =
+      _$UpdateCountersInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(UpdateCountersInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<UpdateCountersInput> get serializer => _$UpdateCountersInputSerializer();
+  static Serializer<UpdateCountersInput> get serializer =>
+      _$UpdateCountersInputSerializer();
 }
 
-class _$UpdateCountersInputSerializer implements PrimitiveSerializer<UpdateCountersInput> {
+class _$UpdateCountersInputSerializer
+    implements PrimitiveSerializer<UpdateCountersInput> {
   @override
-  final Iterable<Type> types = const [UpdateCountersInput, _$UpdateCountersInput];
+  final Iterable<Type> types = const [
+    UpdateCountersInput,
+    _$UpdateCountersInput,
+  ];
 
   @override
   final String wireName = r'UpdateCountersInput';
@@ -54,7 +61,11 @@ class _$UpdateCountersInputSerializer implements PrimitiveSerializer<UpdateCount
     UpdateCountersInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -70,10 +81,12 @@ class _$UpdateCountersInputSerializer implements PrimitiveSerializer<UpdateCount
       final value = serializedList[i + 1];
       switch (key) {
         case r'counters':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(UpdateCountersInputCounters),
-          ) as UpdateCountersInputCounters;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(UpdateCountersInputCounters),
+                  )
+                  as UpdateCountersInputCounters;
           result.counters.replace(valueDes);
           break;
         default:
@@ -104,4 +117,3 @@ class _$UpdateCountersInputSerializer implements PrimitiveSerializer<UpdateCount
     return result.build();
   }
 }
-

@@ -1,7 +1,6 @@
 import 'package:test/test.dart';
 import 'package:carnevale_api/carnevale_api.dart';
 
-
 /// tests for AbilitiesApi
 void main() {
   final instance = CarnevaleApi().getAbilitiesApi();
@@ -13,6 +12,5 @@ void main() {
     test('test getAbilities', () async {
       // TODO
     });
-
   });
 }

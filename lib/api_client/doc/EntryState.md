@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **guarding** | **bool** |  | 
 **carryingObjective** | **bool** |  | 
 **underwaterCounters** | **int** |  | 
+**activated** | **bool** | Whether this model has already been activated on its *owner's* current turn (each player has an independent turn cursor). Derived server-side, so it flips back to false on its own when the owning player advances the turn.  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

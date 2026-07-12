@@ -11,12 +11,13 @@ part 'create_game_input.g.dart';
 /// CreateGameInput
 ///
 /// Properties:
-/// * [scenarioId] 
+/// * [scenarioId]
 /// * [name] - Defaults to the scenario's name if omitted.
 /// * [ducatLimit] - Defaults to the scenario's ducats if omitted.
-/// * [boardSize] 
+/// * [boardSize]
 @BuiltValue()
-abstract class CreateGameInput implements Built<CreateGameInput, CreateGameInputBuilder> {
+abstract class CreateGameInput
+    implements Built<CreateGameInput, CreateGameInputBuilder> {
   @BuiltValueField(wireName: r'scenario_id')
   int get scenarioId;
 
@@ -33,16 +34,19 @@ abstract class CreateGameInput implements Built<CreateGameInput, CreateGameInput
 
   CreateGameInput._();
 
-  factory CreateGameInput([void updates(CreateGameInputBuilder b)]) = _$CreateGameInput;
+  factory CreateGameInput([void updates(CreateGameInputBuilder b)]) =
+      _$CreateGameInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(CreateGameInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<CreateGameInput> get serializer => _$CreateGameInputSerializer();
+  static Serializer<CreateGameInput> get serializer =>
+      _$CreateGameInputSerializer();
 }
 
-class _$CreateGameInputSerializer implements PrimitiveSerializer<CreateGameInput> {
+class _$CreateGameInputSerializer
+    implements PrimitiveSerializer<CreateGameInput> {
   @override
   final Iterable<Type> types = const [CreateGameInput, _$CreateGameInput];
 
@@ -88,7 +92,11 @@ class _$CreateGameInputSerializer implements PrimitiveSerializer<CreateGameInput
     CreateGameInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -104,33 +112,38 @@ class _$CreateGameInputSerializer implements PrimitiveSerializer<CreateGameInput
       final value = serializedList[i + 1];
       switch (key) {
         case r'scenario_id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.scenarioId = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(String),
+                  )
+                  as String?;
           if (valueDes == null) continue;
           result.name = valueDes;
           break;
         case r'ducat_limit':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(int),
-          ) as int?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(int),
+                  )
+                  as int?;
           if (valueDes == null) continue;
           result.ducatLimit = valueDes;
           break;
         case r'board_size':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(String),
+                  )
+                  as String?;
           if (valueDes == null) continue;
           result.boardSize = valueDes;
           break;
@@ -162,4 +175,3 @@ class _$CreateGameInputSerializer implements PrimitiveSerializer<CreateGameInput
     return result.build();
   }
 }
-

@@ -18,7 +18,6 @@ import 'package:carnevale_api/src/model/update_account_input.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
 class SessionApi {
-
   final Dio _dio;
 
   final Serializers _serializers;
@@ -26,7 +25,7 @@ class SessionApi {
   const SessionApi(this._dio, this._serializers);
 
   /// Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
-  /// Returns a one-time ticket to pass as the &#x60;ticket&#x60; query parameter when connecting to &#x60;/cable&#x60;, so the reusable JWT never travels in the (loggable) WebSocket URL. The ticket expires within seconds and is consumed the first time it is redeemed. 
+  /// Returns a one-time ticket to pass as the &#x60;ticket&#x60; query parameter when connecting to &#x60;/cable&#x60;, so the reusable JWT never travels in the (loggable) WebSocket URL. The ticket expires within seconds and is consumed the first time it is redeemed.
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -38,7 +37,7 @@ class SessionApi {
   ///
   /// Returns a [Future] containing a [Response] with a [CreateCableTicket201Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<CreateCableTicket201Response>> createCableTicket({ 
+  Future<Response<CreateCableTicket201Response>> createCableTicket({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -49,9 +48,7 @@ class SessionApi {
     final _path = r'/cable_tickets';
     final _options = Options(
       method: r'POST',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -59,11 +56,8 @@ class SessionApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
+          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -82,11 +76,13 @@ class SessionApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(CreateCableTicket201Response),
-      ) as CreateCableTicket201Response;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(CreateCableTicket201Response),
+                )
+                as CreateCableTicket201Response;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -110,10 +106,10 @@ class SessionApi {
   }
 
   /// Request a password reset email
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [forgotPasswordInput] 
+  /// * [forgotPasswordInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -123,7 +119,7 @@ class SessionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> forgotPassword({ 
+  Future<Response<void>> forgotPassword({
     required ForgotPasswordInput forgotPasswordInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -135,9 +131,7 @@ class SessionApi {
     final _path = r'/password';
     final _options = Options(
       method: r'POST',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -157,14 +151,13 @@ class SessionApi {
 
     try {
       const _type = FullType(ForgotPasswordInput);
-      _bodyData = _serializers.serialize(forgotPasswordInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+      _bodyData = _serializers.serialize(
+        forgotPasswordInput,
+        specifiedType: _type,
+      );
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -187,7 +180,7 @@ class SessionApi {
   /// On success, the JWT is returned in the &#x60;Authorization&#x60; response header as &#x60;Bearer &lt;token&gt;&#x60;. Send it back on subsequent requests to authenticate.
   ///
   /// Parameters:
-  /// * [loginInput] 
+  /// * [loginInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -197,7 +190,7 @@ class SessionApi {
   ///
   /// Returns a [Future] containing a [Response] with a [Session] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<Session>> login({ 
+  Future<Response<Session>> login({
     required LoginInput loginInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -209,9 +202,7 @@ class SessionApi {
     final _path = r'/login';
     final _options = Options(
       method: r'POST',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -232,13 +223,9 @@ class SessionApi {
     try {
       const _type = FullType(LoginInput);
       _bodyData = _serializers.serialize(loginInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -258,11 +245,13 @@ class SessionApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(Session),
-      ) as Session;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(Session),
+                )
+                as Session;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -286,7 +275,7 @@ class SessionApi {
   }
 
   /// Revoke the current JWT
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -298,7 +287,7 @@ class SessionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> logout({ 
+  Future<Response<void>> logout({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -309,9 +298,7 @@ class SessionApi {
     final _path = r'/logout';
     final _options = Options(
       method: r'DELETE',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -319,11 +306,8 @@ class SessionApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
+          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -342,10 +326,10 @@ class SessionApi {
   }
 
   /// Set a new password using a reset token
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [resetPasswordInput] 
+  /// * [resetPasswordInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -355,7 +339,7 @@ class SessionApi {
   ///
   /// Returns a [Future] containing a [Response] with a [Session] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<Session>> resetPassword({ 
+  Future<Response<Session>> resetPassword({
     required ResetPasswordInput resetPasswordInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -367,9 +351,7 @@ class SessionApi {
     final _path = r'/password';
     final _options = Options(
       method: r'PATCH',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -389,14 +371,13 @@ class SessionApi {
 
     try {
       const _type = FullType(ResetPasswordInput);
-      _bodyData = _serializers.serialize(resetPasswordInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+      _bodyData = _serializers.serialize(
+        resetPasswordInput,
+        specifiedType: _type,
+      );
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -416,11 +397,13 @@ class SessionApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(Session),
-      ) as Session;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(Session),
+                )
+                as Session;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -444,10 +427,10 @@ class SessionApi {
   }
 
   /// Register a new user
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [registrationInput] 
+  /// * [registrationInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -457,7 +440,7 @@ class SessionApi {
   ///
   /// Returns a [Future] containing a [Response] with a [Session] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<Session>> signup({ 
+  Future<Response<Session>> signup({
     required RegistrationInput registrationInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -469,9 +452,7 @@ class SessionApi {
     final _path = r'/signup';
     final _options = Options(
       method: r'POST',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -491,14 +472,13 @@ class SessionApi {
 
     try {
       const _type = FullType(RegistrationInput);
-      _bodyData = _serializers.serialize(registrationInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+      _bodyData = _serializers.serialize(
+        registrationInput,
+        specifiedType: _type,
+      );
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -518,11 +498,13 @@ class SessionApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(Session),
-      ) as Session;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(Session),
+                )
+                as Session;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -546,10 +528,10 @@ class SessionApi {
   }
 
   /// Update the current user&#39;s username
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [updateAccountInput] 
+  /// * [updateAccountInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -559,7 +541,7 @@ class SessionApi {
   ///
   /// Returns a [Future] containing a [Response] with a [Session] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<Session>> updateAccount({ 
+  Future<Response<Session>> updateAccount({
     required UpdateAccountInput updateAccountInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -571,9 +553,7 @@ class SessionApi {
     final _path = r'/account';
     final _options = Options(
       method: r'PATCH',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -581,11 +561,8 @@ class SessionApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
+          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -597,14 +574,13 @@ class SessionApi {
 
     try {
       const _type = FullType(UpdateAccountInput);
-      _bodyData = _serializers.serialize(updateAccountInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+      _bodyData = _serializers.serialize(
+        updateAccountInput,
+        specifiedType: _type,
+      );
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -624,11 +600,13 @@ class SessionApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(Session),
-      ) as Session;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(Session),
+                )
+                as Session;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -650,5 +628,4 @@ class SessionApi {
       extra: _response.extra,
     );
   }
-
 }

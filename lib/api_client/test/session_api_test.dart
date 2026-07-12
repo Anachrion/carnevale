@@ -1,7 +1,6 @@
 import 'package:test/test.dart';
 import 'package:carnevale_api/carnevale_api.dart';
 
-
 /// tests for SessionApi
 void main() {
   final instance = CarnevaleApi().getSessionApi();
@@ -31,6 +30,5 @@ void main() {
     test('test signup', () async {
       // TODO
     });
-
   });
 }

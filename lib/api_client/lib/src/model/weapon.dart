@@ -12,13 +12,13 @@ part 'weapon.g.dart';
 /// Weapon
 ///
 /// Properties:
-/// * [id] 
-/// * [name] 
-/// * [damage] 
-/// * [range] 
-/// * [penetration] 
-/// * [evasion] 
-/// * [abilities] 
+/// * [id]
+/// * [name]
+/// * [damage]
+/// * [range]
+/// * [penetration]
+/// * [evasion]
+/// * [abilities]
 @BuiltValue()
 abstract class Weapon implements Built<Weapon, WeaponBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -66,10 +66,7 @@ class _$WeaponSerializer implements PrimitiveSerializer<Weapon> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -108,7 +105,11 @@ class _$WeaponSerializer implements PrimitiveSerializer<Weapon> {
     Weapon object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -124,52 +125,53 @@ class _$WeaponSerializer implements PrimitiveSerializer<Weapon> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.name = valueDes;
           break;
         case r'damage':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.damage = valueDes;
           break;
         case r'range':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.range = valueDes;
           break;
         case r'penetration':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.penetration = valueDes;
           break;
         case r'evasion':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.evasion = valueDes;
           break;
         case r'abilities':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(String),
+                    ]),
+                  )
+                  as BuiltList<String>;
           result.abilities.replace(valueDes);
           break;
         default:
@@ -200,4 +202,3 @@ class _$WeaponSerializer implements PrimitiveSerializer<Weapon> {
     return result.build();
   }
 }
-

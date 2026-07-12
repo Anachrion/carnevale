@@ -16,6 +16,7 @@ Serializers _$serializers =
           ..add(AgendaHistoryEntryAgenda.serializer)
           ..add(AgendaHistoryEntryOriginEnum.serializer)
           ..add(AvailableGang.serializer)
+          ..add(CardManifestEntry.serializer)
           ..add(CardReference.serializer)
           ..add(CreateCableTicket201Response.serializer)
           ..add(CreateGameInput.serializer)
@@ -40,6 +41,7 @@ Serializers _$serializers =
           ..add(GameStatusEnum.serializer)
           ..add(GameViewerVisibilityEnum.serializer)
           ..add(GangSummary.serializer)
+          ..add(GetCardsManifest200Response.serializer)
           ..add(JoinGameInput.serializer)
           ..add(ListEntry.serializer)
           ..add(ListEntryEntryTypeEnum.serializer)
@@ -87,6 +89,12 @@ Serializers _$serializers =
               const FullType(AgendaHistoryEntry),
             ]),
             () => ListBuilder<AgendaHistoryEntry>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(CardManifestEntry),
+            ]),
+            () => ListBuilder<CardManifestEntry>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(GamePlayer)]),

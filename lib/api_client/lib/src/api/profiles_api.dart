@@ -13,7 +13,6 @@ import 'package:carnevale_api/src/api_util.dart';
 import 'package:carnevale_api/src/model/profile.dart';
 
 class ProfilesApi {
-
   final Dio _dio;
 
   final Serializers _serializers;
@@ -21,10 +20,10 @@ class ProfilesApi {
   const ProfilesApi(this._dio, this._serializers);
 
   /// Get a profile
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -34,7 +33,7 @@ class ProfilesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [Profile] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<Profile>> getProfile({ 
+  Future<Response<Profile>> getProfile({
     required int id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -43,12 +42,15 @@ class ProfilesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/profiles/{id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _path = r'/profiles/{id}'.replaceAll(
+      '{'
+      r'id'
+      '}',
+      encodeQueryParameter(_serializers, id, const FullType(int)).toString(),
+    );
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -75,11 +77,13 @@ class ProfilesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(Profile),
-      ) as Profile;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(Profile),
+                )
+                as Profile;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -103,10 +107,10 @@ class ProfilesApi {
   }
 
   /// List all profiles
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [faction] 
+  /// * [faction]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -116,7 +120,7 @@ class ProfilesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList<Profile>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<BuiltList<Profile>>> getProfiles({ 
+  Future<Response<BuiltList<Profile>>> getProfiles({
     String? faction,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -128,9 +132,7 @@ class ProfilesApi {
     final _path = r'/profiles';
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -146,7 +148,12 @@ class ProfilesApi {
     );
 
     final _queryParameters = <String, dynamic>{
-      if (faction != null) r'faction': encodeQueryParameter(_serializers, faction, const FullType(String)),
+      if (faction != null)
+        r'faction': encodeQueryParameter(
+          _serializers,
+          faction,
+          const FullType(String),
+        ),
     };
 
     final _response = await _dio.request<Object>(
@@ -162,11 +169,13 @@ class ProfilesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(BuiltList, [FullType(Profile)]),
-      ) as BuiltList<Profile>;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(BuiltList, [FullType(Profile)]),
+                )
+                as BuiltList<Profile>;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -188,5 +197,4 @@ class ProfilesApi {
       extra: _response.extra,
     );
   }
-
 }

@@ -12,7 +12,6 @@ import 'package:built_collection/built_collection.dart';
 import 'package:carnevale_api/src/model/equipment.dart';
 
 class EquipmentApi {
-
   final Dio _dio;
 
   final Serializers _serializers;
@@ -20,7 +19,7 @@ class EquipmentApi {
   const EquipmentApi(this._dio, this._serializers);
 
   /// List all equipment
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -32,7 +31,7 @@ class EquipmentApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList<Equipment>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<BuiltList<Equipment>>> getEquipment({ 
+  Future<Response<BuiltList<Equipment>>> getEquipment({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -43,9 +42,7 @@ class EquipmentApi {
     final _path = r'/equipment';
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -72,11 +69,15 @@ class EquipmentApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(BuiltList, [FullType(Equipment)]),
-      ) as BuiltList<Equipment>;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(BuiltList, [
+                    FullType(Equipment),
+                  ]),
+                )
+                as BuiltList<Equipment>;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -98,5 +99,4 @@ class EquipmentApi {
       extra: _response.extra,
     );
   }
-
 }

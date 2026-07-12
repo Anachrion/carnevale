@@ -15,7 +15,9 @@ part 'set_entry_spells_input_entry.g.dart';
 /// * [discipline] - The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
 /// * [spellIds] - The exact set of known spell ids. Replaces any previous selection.
 @BuiltValue()
-abstract class SetEntrySpellsInputEntry implements Built<SetEntrySpellsInputEntry, SetEntrySpellsInputEntryBuilder> {
+abstract class SetEntrySpellsInputEntry
+    implements
+        Built<SetEntrySpellsInputEntry, SetEntrySpellsInputEntryBuilder> {
   /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
   @BuiltValueField(wireName: r'discipline')
   SetEntrySpellsInputEntryDisciplineEnum? get discipline;
@@ -27,18 +29,25 @@ abstract class SetEntrySpellsInputEntry implements Built<SetEntrySpellsInputEntr
 
   SetEntrySpellsInputEntry._();
 
-  factory SetEntrySpellsInputEntry([void updates(SetEntrySpellsInputEntryBuilder b)]) = _$SetEntrySpellsInputEntry;
+  factory SetEntrySpellsInputEntry([
+    void updates(SetEntrySpellsInputEntryBuilder b),
+  ]) = _$SetEntrySpellsInputEntry;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(SetEntrySpellsInputEntryBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<SetEntrySpellsInputEntry> get serializer => _$SetEntrySpellsInputEntrySerializer();
+  static Serializer<SetEntrySpellsInputEntry> get serializer =>
+      _$SetEntrySpellsInputEntrySerializer();
 }
 
-class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEntrySpellsInputEntry> {
+class _$SetEntrySpellsInputEntrySerializer
+    implements PrimitiveSerializer<SetEntrySpellsInputEntry> {
   @override
-  final Iterable<Type> types = const [SetEntrySpellsInputEntry, _$SetEntrySpellsInputEntry];
+  final Iterable<Type> types = const [
+    SetEntrySpellsInputEntry,
+    _$SetEntrySpellsInputEntry,
+  ];
 
   @override
   final String wireName = r'SetEntrySpellsInputEntry';
@@ -52,7 +61,9 @@ class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEnt
       yield r'discipline';
       yield serializers.serialize(
         object.discipline,
-        specifiedType: const FullType.nullable(SetEntrySpellsInputEntryDisciplineEnum),
+        specifiedType: const FullType.nullable(
+          SetEntrySpellsInputEntryDisciplineEnum,
+        ),
       );
     }
     if (object.spellIds != null) {
@@ -70,7 +81,11 @@ class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEnt
     SetEntrySpellsInputEntry object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -86,18 +101,24 @@ class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEnt
       final value = serializedList[i + 1];
       switch (key) {
         case r'discipline':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(SetEntrySpellsInputEntryDisciplineEnum),
-          ) as SetEntrySpellsInputEntryDisciplineEnum?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(
+                      SetEntrySpellsInputEntryDisciplineEnum,
+                    ),
+                  )
+                  as SetEntrySpellsInputEntryDisciplineEnum?;
           if (valueDes == null) continue;
           result.discipline = valueDes;
           break;
         case r'spell_ids':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(int)]),
-          ) as BuiltList<int>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [FullType(int)]),
+                  )
+                  as BuiltList<int>;
           result.spellIds.replace(valueDes);
           break;
         default:
@@ -130,28 +151,38 @@ class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEnt
 }
 
 class SetEntrySpellsInputEntryDisciplineEnum extends EnumClass {
-
   /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
   @BuiltValueEnumConst(wireName: r'blood_rites')
-  static const SetEntrySpellsInputEntryDisciplineEnum bloodRites = _$setEntrySpellsInputEntryDisciplineEnum_bloodRites;
+  static const SetEntrySpellsInputEntryDisciplineEnum bloodRites =
+      _$setEntrySpellsInputEntryDisciplineEnum_bloodRites;
+
   /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
   @BuiltValueEnumConst(wireName: r'divinity')
-  static const SetEntrySpellsInputEntryDisciplineEnum divinity = _$setEntrySpellsInputEntryDisciplineEnum_divinity;
+  static const SetEntrySpellsInputEntryDisciplineEnum divinity =
+      _$setEntrySpellsInputEntryDisciplineEnum_divinity;
+
   /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
   @BuiltValueEnumConst(wireName: r'fateweaving')
-  static const SetEntrySpellsInputEntryDisciplineEnum fateweaving = _$setEntrySpellsInputEntryDisciplineEnum_fateweaving;
+  static const SetEntrySpellsInputEntryDisciplineEnum fateweaving =
+      _$setEntrySpellsInputEntryDisciplineEnum_fateweaving;
+
   /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
   @BuiltValueEnumConst(wireName: r'runes_of_sovereignty')
-  static const SetEntrySpellsInputEntryDisciplineEnum runesOfSovereignty = _$setEntrySpellsInputEntryDisciplineEnum_runesOfSovereignty;
+  static const SetEntrySpellsInputEntryDisciplineEnum runesOfSovereignty =
+      _$setEntrySpellsInputEntryDisciplineEnum_runesOfSovereignty;
+
   /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
   @BuiltValueEnumConst(wireName: r'wild_magic')
-  static const SetEntrySpellsInputEntryDisciplineEnum wildMagic = _$setEntrySpellsInputEntryDisciplineEnum_wildMagic;
+  static const SetEntrySpellsInputEntryDisciplineEnum wildMagic =
+      _$setEntrySpellsInputEntryDisciplineEnum_wildMagic;
 
-  static Serializer<SetEntrySpellsInputEntryDisciplineEnum> get serializer => _$setEntrySpellsInputEntryDisciplineEnumSerializer;
+  static Serializer<SetEntrySpellsInputEntryDisciplineEnum> get serializer =>
+      _$setEntrySpellsInputEntryDisciplineEnumSerializer;
 
-  const SetEntrySpellsInputEntryDisciplineEnum._(String name): super(name);
+  const SetEntrySpellsInputEntryDisciplineEnum._(String name) : super(name);
 
-  static BuiltSet<SetEntrySpellsInputEntryDisciplineEnum> get values => _$setEntrySpellsInputEntryDisciplineEnumValues;
-  static SetEntrySpellsInputEntryDisciplineEnum valueOf(String name) => _$setEntrySpellsInputEntryDisciplineEnumValueOf(name);
+  static BuiltSet<SetEntrySpellsInputEntryDisciplineEnum> get values =>
+      _$setEntrySpellsInputEntryDisciplineEnumValues;
+  static SetEntrySpellsInputEntryDisciplineEnum valueOf(String name) =>
+      _$setEntrySpellsInputEntryDisciplineEnumValueOf(name);
 }
-

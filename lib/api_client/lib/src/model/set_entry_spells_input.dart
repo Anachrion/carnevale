@@ -12,26 +12,33 @@ part 'set_entry_spells_input.g.dart';
 /// SetEntrySpellsInput
 ///
 /// Properties:
-/// * [entry] 
+/// * [entry]
 @BuiltValue()
-abstract class SetEntrySpellsInput implements Built<SetEntrySpellsInput, SetEntrySpellsInputBuilder> {
+abstract class SetEntrySpellsInput
+    implements Built<SetEntrySpellsInput, SetEntrySpellsInputBuilder> {
   @BuiltValueField(wireName: r'entry')
   SetEntrySpellsInputEntry get entry;
 
   SetEntrySpellsInput._();
 
-  factory SetEntrySpellsInput([void updates(SetEntrySpellsInputBuilder b)]) = _$SetEntrySpellsInput;
+  factory SetEntrySpellsInput([void updates(SetEntrySpellsInputBuilder b)]) =
+      _$SetEntrySpellsInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(SetEntrySpellsInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<SetEntrySpellsInput> get serializer => _$SetEntrySpellsInputSerializer();
+  static Serializer<SetEntrySpellsInput> get serializer =>
+      _$SetEntrySpellsInputSerializer();
 }
 
-class _$SetEntrySpellsInputSerializer implements PrimitiveSerializer<SetEntrySpellsInput> {
+class _$SetEntrySpellsInputSerializer
+    implements PrimitiveSerializer<SetEntrySpellsInput> {
   @override
-  final Iterable<Type> types = const [SetEntrySpellsInput, _$SetEntrySpellsInput];
+  final Iterable<Type> types = const [
+    SetEntrySpellsInput,
+    _$SetEntrySpellsInput,
+  ];
 
   @override
   final String wireName = r'SetEntrySpellsInput';
@@ -54,7 +61,11 @@ class _$SetEntrySpellsInputSerializer implements PrimitiveSerializer<SetEntrySpe
     SetEntrySpellsInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -70,10 +81,12 @@ class _$SetEntrySpellsInputSerializer implements PrimitiveSerializer<SetEntrySpe
       final value = serializedList[i + 1];
       switch (key) {
         case r'entry':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(SetEntrySpellsInputEntry),
-          ) as SetEntrySpellsInputEntry;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(SetEntrySpellsInputEntry),
+                  )
+                  as SetEntrySpellsInputEntry;
           result.entry.replace(valueDes);
           break;
         default:
@@ -104,4 +117,3 @@ class _$SetEntrySpellsInputSerializer implements PrimitiveSerializer<SetEntrySpe
     return result.build();
   }
 }
-

@@ -17,7 +17,6 @@ import 'package:carnevale_api/src/model/set_entry_spells_input.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
 class ListEntriesApi {
-
   final Dio _dio;
 
   final Serializers _serializers;
@@ -28,7 +27,7 @@ class ListEntriesApi {
   /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
-  /// * [entryInput] 
+  /// * [entryInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -38,7 +37,7 @@ class ListEntriesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> createListEntry({ 
+  Future<Response<ModelList>> createListEntry({
     required EntryInput entryInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -50,9 +49,7 @@ class ListEntriesApi {
     final _path = r'/list_entries';
     final _options = Options(
       method: r'POST',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -60,11 +57,8 @@ class ListEntriesApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
+          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -77,13 +71,9 @@ class ListEntriesApi {
     try {
       const _type = FullType(EntryInput);
       _bodyData = _serializers.serialize(entryInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -103,11 +93,13 @@ class ListEntriesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(ModelList),
-      ) as ModelList;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(ModelList),
+                )
+                as ModelList;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -134,7 +126,7 @@ class ListEntriesApi {
   /// Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -144,7 +136,7 @@ class ListEntriesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> deleteListEntry({ 
+  Future<Response<ModelList>> deleteListEntry({
     required int id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -153,12 +145,15 @@ class ListEntriesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/list_entries/{id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _path = r'/list_entries/{id}'.replaceAll(
+      '{'
+      r'id'
+      '}',
+      encodeQueryParameter(_serializers, id, const FullType(int)).toString(),
+    );
     final _options = Options(
       method: r'DELETE',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -166,11 +161,8 @@ class ListEntriesApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
+          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -189,11 +181,13 @@ class ListEntriesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(ModelList),
-      ) as ModelList;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(ModelList),
+                )
+                as ModelList;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -217,11 +211,11 @@ class ListEntriesApi {
   }
 
   /// Set the spells (and Discipline) a Mage model knows
-  /// Replaces the model&#39;s committed Discipline and full set of known spells (rulebook p24). Only Mage models may know spells; the selection still saves if it breaks the rules, but the returned list will report selection_valid: false with the reason. Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user. 
+  /// Replaces the model&#39;s committed Discipline and full set of known spells (rulebook p24). Only Mage models may know spells; the selection still saves if it breaks the rules, but the returned list will report selection_valid: false with the reason. Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
-  /// * [id] 
-  /// * [setEntrySpellsInput] 
+  /// * [id]
+  /// * [setEntrySpellsInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -231,7 +225,7 @@ class ListEntriesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> setListEntrySpells({ 
+  Future<Response<ModelList>> setListEntrySpells({
     required int id,
     required SetEntrySpellsInput setEntrySpellsInput,
     CancelToken? cancelToken,
@@ -241,12 +235,15 @@ class ListEntriesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/list_entries/{id}/spells'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _path = r'/list_entries/{id}/spells'.replaceAll(
+      '{'
+      r'id'
+      '}',
+      encodeQueryParameter(_serializers, id, const FullType(int)).toString(),
+    );
     final _options = Options(
       method: r'PATCH',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -254,11 +251,8 @@ class ListEntriesApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
+          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -270,14 +264,13 @@ class ListEntriesApi {
 
     try {
       const _type = FullType(SetEntrySpellsInput);
-      _bodyData = _serializers.serialize(setEntrySpellsInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+      _bodyData = _serializers.serialize(
+        setEntrySpellsInput,
+        specifiedType: _type,
+      );
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -297,11 +290,13 @@ class ListEntriesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(ModelList),
-      ) as ModelList;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(ModelList),
+                )
+                as ModelList;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -328,8 +323,8 @@ class ListEntriesApi {
   /// Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
-  /// * [id] 
-  /// * [entryPositionInput] 
+  /// * [id]
+  /// * [entryPositionInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -339,7 +334,7 @@ class ListEntriesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> updateListEntryPosition({ 
+  Future<Response<ModelList>> updateListEntryPosition({
     required int id,
     required EntryPositionInput entryPositionInput,
     CancelToken? cancelToken,
@@ -349,12 +344,15 @@ class ListEntriesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/list_entries/{id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _path = r'/list_entries/{id}'.replaceAll(
+      '{'
+      r'id'
+      '}',
+      encodeQueryParameter(_serializers, id, const FullType(int)).toString(),
+    );
     final _options = Options(
       method: r'PATCH',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -362,11 +360,8 @@ class ListEntriesApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
+          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -378,14 +373,13 @@ class ListEntriesApi {
 
     try {
       const _type = FullType(EntryPositionInput);
-      _bodyData = _serializers.serialize(entryPositionInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+      _bodyData = _serializers.serialize(
+        entryPositionInput,
+        specifiedType: _type,
+      );
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -405,11 +399,13 @@ class ListEntriesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(ModelList),
-      ) as ModelList;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(ModelList),
+                )
+                as ModelList;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -431,5 +427,4 @@ class ListEntriesApi {
       extra: _response.extra,
     );
   }
-
 }

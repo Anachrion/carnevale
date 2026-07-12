@@ -12,7 +12,7 @@ part 'list_input.g.dart';
 /// ListInput
 ///
 /// Properties:
-/// * [list] 
+/// * [list]
 @BuiltValue()
 abstract class ListInput implements Built<ListInput, ListInputBuilder> {
   @BuiltValueField(wireName: r'list')
@@ -54,7 +54,11 @@ class _$ListInputSerializer implements PrimitiveSerializer<ListInput> {
     ListInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -70,10 +74,12 @@ class _$ListInputSerializer implements PrimitiveSerializer<ListInput> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'list':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(ListInputList),
-          ) as ListInputList;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(ListInputList),
+                  )
+                  as ListInputList;
           result.list.replace(valueDes);
           break;
         default:
@@ -104,4 +110,3 @@ class _$ListInputSerializer implements PrimitiveSerializer<ListInput> {
     return result.build();
   }
 }
-

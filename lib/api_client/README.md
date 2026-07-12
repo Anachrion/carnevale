@@ -66,6 +66,7 @@ All URIs are relative to *http://localhost:3000/api/v1*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*AbilitiesApi*](doc/AbilitiesApi.md) | [**getAbilities**](doc/AbilitiesApi.md#getabilities) | **GET** /abilities | List all glossary abilities (character and weapon special rules)
+[*CardsApi*](doc/CardsApi.md) | [**getCardsManifest**](doc/CardsApi.md#getcardsmanifest) | **GET** /cards/manifest | Card image sync manifest (identifier, internal_version, download URLs)
 [*EquipmentApi*](doc/EquipmentApi.md) | [**getEquipment**](doc/EquipmentApi.md#getequipment) | **GET** /equipment | List all equipment
 [*GamesApi*](doc/GamesApi.md) | [**advanceTurn**](doc/GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the requesting player&#39;s turn cursor
 [*GamesApi*](doc/GamesApi.md) | [**archiveGame**](doc/GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
@@ -118,6 +119,7 @@ Class | Method | HTTP request | Description
  - [AgendaHistoryEntry](doc/AgendaHistoryEntry.md)
  - [AgendaHistoryEntryAgenda](doc/AgendaHistoryEntryAgenda.md)
  - [AvailableGang](doc/AvailableGang.md)
+ - [CardManifestEntry](doc/CardManifestEntry.md)
  - [CardReference](doc/CardReference.md)
  - [CreateCableTicket201Response](doc/CreateCableTicket201Response.md)
  - [CreateGameInput](doc/CreateGameInput.md)
@@ -136,6 +138,7 @@ Class | Method | HTTP request | Description
  - [Game](doc/Game.md)
  - [GamePlayer](doc/GamePlayer.md)
  - [GangSummary](doc/GangSummary.md)
+ - [GetCardsManifest200Response](doc/GetCardsManifest200Response.md)
  - [JoinGameInput](doc/JoinGameInput.md)
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)
