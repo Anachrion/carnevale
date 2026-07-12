@@ -1,7 +1,6 @@
 import 'package:test/test.dart';
 import 'package:carnevale_api/carnevale_api.dart';
 
-
 /// tests for GamesApi
 void main() {
   final instance = CarnevaleApi().getGamesApi();
@@ -108,6 +107,5 @@ void main() {
     test('test selectGang', () async {
       // TODO
     });
-
   });
 }

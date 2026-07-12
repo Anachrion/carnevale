@@ -53,6 +53,5 @@ void main() {
     test('to test the property `players`', () async {
       // TODO
     });
-
   });
 }

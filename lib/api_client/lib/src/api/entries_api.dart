@@ -16,7 +16,6 @@ import 'package:carnevale_api/src/model/model_list.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
 class EntriesApi {
-
   final Dio _dio;
 
   final Serializers _serializers;
@@ -24,11 +23,11 @@ class EntriesApi {
   const EntriesApi(this._dio, this._serializers);
 
   /// Add a card to a list
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [listId] 
-  /// * [entryInput] 
+  /// * [listId]
+  /// * [entryInput]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -38,7 +37,7 @@ class EntriesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> createEntry({ 
+  Future<Response<ModelList>> createEntry({
     required int listId,
     required EntryInput entryInput,
     CancelToken? cancelToken,
@@ -48,16 +47,20 @@ class EntriesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/lists/{list_id}/entries'.replaceAll('{' r'list_id' '}', encodeQueryParameter(_serializers, listId, const FullType(int)).toString());
+    final _path = r'/lists/{list_id}/entries'.replaceAll(
+      '{'
+      r'list_id'
+      '}',
+      encodeQueryParameter(
+        _serializers,
+        listId,
+        const FullType(int),
+      ).toString(),
+    );
     final _options = Options(
       method: r'POST',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
-      extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
-        ...?extra,
-      },
+      headers: <String, dynamic>{...?headers},
+      extra: <String, dynamic>{'secure': <Map<String, String>>[], ...?extra},
       contentType: 'application/json',
       validateStatus: validateStatus,
     );
@@ -67,13 +70,9 @@ class EntriesApi {
     try {
       const _type = FullType(EntryInput);
       _bodyData = _serializers.serialize(entryInput, specifiedType: _type);
-
-    } catch(error, stackTrace) {
+    } catch (error, stackTrace) {
       throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
+        requestOptions: _options.compose(_dio.options, _path),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -93,11 +92,13 @@ class EntriesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(ModelList),
-      ) as ModelList;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(ModelList),
+                )
+                as ModelList;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -121,11 +122,11 @@ class EntriesApi {
   }
 
   /// Remove a card from a list
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [listId] 
-  /// * [id] 
+  /// * [listId]
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -135,7 +136,7 @@ class EntriesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> deleteEntry({ 
+  Future<Response<ModelList>> deleteEntry({
     required int listId,
     required int id,
     CancelToken? cancelToken,
@@ -145,16 +146,31 @@ class EntriesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/lists/{list_id}/entries/{id}'.replaceAll('{' r'list_id' '}', encodeQueryParameter(_serializers, listId, const FullType(int)).toString()).replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _path = r'/lists/{list_id}/entries/{id}'
+        .replaceAll(
+          '{'
+          r'list_id'
+          '}',
+          encodeQueryParameter(
+            _serializers,
+            listId,
+            const FullType(int),
+          ).toString(),
+        )
+        .replaceAll(
+          '{'
+          r'id'
+          '}',
+          encodeQueryParameter(
+            _serializers,
+            id,
+            const FullType(int),
+          ).toString(),
+        );
     final _options = Options(
       method: r'DELETE',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
-      extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
-        ...?extra,
-      },
+      headers: <String, dynamic>{...?headers},
+      extra: <String, dynamic>{'secure': <Map<String, String>>[], ...?extra},
       validateStatus: validateStatus,
     );
 
@@ -170,11 +186,13 @@ class EntriesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(ModelList),
-      ) as ModelList;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(ModelList),
+                )
+                as ModelList;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -196,5 +214,4 @@ class EntriesApi {
       extra: _response.extra,
     );
   }
-
 }

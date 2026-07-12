@@ -14,15 +14,15 @@ part 'game.g.dart';
 /// Game
 ///
 /// Properties:
-/// * [id] 
-/// * [name] 
-/// * [joinCode] 
+/// * [id]
+/// * [name]
+/// * [joinCode]
 /// * [status] - `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
-/// * [ducatLimit] 
-/// * [boardSize] 
-/// * [scenario] 
+/// * [ducatLimit]
+/// * [boardSize]
+/// * [scenario]
 /// * [viewerVisibility] - The requesting user's own archive/delete state for this game — never reflects the opponent's.
-/// * [players] 
+/// * [players]
 @BuiltValue()
 abstract class Game implements Built<Game, GameBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -80,10 +80,7 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -105,10 +102,12 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
       specifiedType: const FullType(int),
     );
     yield r'board_size';
-    yield object.boardSize == null ? null : serializers.serialize(
-      object.boardSize,
-      specifiedType: const FullType.nullable(String),
-    );
+    yield object.boardSize == null
+        ? null
+        : serializers.serialize(
+            object.boardSize,
+            specifiedType: const FullType.nullable(String),
+          );
     yield r'scenario';
     yield serializers.serialize(
       object.scenario,
@@ -132,7 +131,11 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     Game object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -148,67 +151,81 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.name = valueDes;
           break;
         case r'join_code':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.joinCode = valueDes;
           break;
         case r'status':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(GameStatusEnum),
-          ) as GameStatusEnum;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(GameStatusEnum),
+                  )
+                  as GameStatusEnum;
           result.status = valueDes;
           break;
         case r'ducat_limit':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.ducatLimit = valueDes;
           break;
         case r'board_size':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(String),
+                  )
+                  as String?;
           if (valueDes == null) continue;
           result.boardSize = valueDes;
           break;
         case r'scenario':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(Scenario),
-          ) as Scenario;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(Scenario),
+                  )
+                  as Scenario;
           result.scenario.replace(valueDes);
           break;
         case r'viewer_visibility':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(GameViewerVisibilityEnum),
-          ) as GameViewerVisibilityEnum;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(GameViewerVisibilityEnum),
+                  )
+                  as GameViewerVisibilityEnum;
           result.viewerVisibility = valueDes;
           break;
         case r'players':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(GamePlayer)]),
-          ) as BuiltList<GamePlayer>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(GamePlayer),
+                    ]),
+                  )
+                  as BuiltList<GamePlayer>;
           result.players.replace(valueDes);
           break;
         default:
@@ -241,48 +258,58 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
 }
 
 class GameStatusEnum extends EnumClass {
-
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'pending')
   static const GameStatusEnum pending = _$gameStatusEnum_pending;
+
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'gang_selection')
   static const GameStatusEnum gangSelection = _$gameStatusEnum_gangSelection;
+
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'agenda_draw')
   static const GameStatusEnum agendaDraw = _$gameStatusEnum_agendaDraw;
+
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'in_progress')
   static const GameStatusEnum inProgress = _$gameStatusEnum_inProgress;
+
   /// `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
   @BuiltValueEnumConst(wireName: r'completed')
   static const GameStatusEnum completed = _$gameStatusEnum_completed;
 
-  static Serializer<GameStatusEnum> get serializer => _$gameStatusEnumSerializer;
+  static Serializer<GameStatusEnum> get serializer =>
+      _$gameStatusEnumSerializer;
 
-  const GameStatusEnum._(String name): super(name);
+  const GameStatusEnum._(String name) : super(name);
 
   static BuiltSet<GameStatusEnum> get values => _$gameStatusEnumValues;
   static GameStatusEnum valueOf(String name) => _$gameStatusEnumValueOf(name);
 }
 
 class GameViewerVisibilityEnum extends EnumClass {
-
   /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
   @BuiltValueEnumConst(wireName: r'active')
-  static const GameViewerVisibilityEnum active = _$gameViewerVisibilityEnum_active;
+  static const GameViewerVisibilityEnum active =
+      _$gameViewerVisibilityEnum_active;
+
   /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
   @BuiltValueEnumConst(wireName: r'archived')
-  static const GameViewerVisibilityEnum archived = _$gameViewerVisibilityEnum_archived;
+  static const GameViewerVisibilityEnum archived =
+      _$gameViewerVisibilityEnum_archived;
+
   /// The requesting user's own archive/delete state for this game — never reflects the opponent's.
   @BuiltValueEnumConst(wireName: r'deleted')
-  static const GameViewerVisibilityEnum deleted = _$gameViewerVisibilityEnum_deleted;
+  static const GameViewerVisibilityEnum deleted =
+      _$gameViewerVisibilityEnum_deleted;
 
-  static Serializer<GameViewerVisibilityEnum> get serializer => _$gameViewerVisibilityEnumSerializer;
+  static Serializer<GameViewerVisibilityEnum> get serializer =>
+      _$gameViewerVisibilityEnumSerializer;
 
-  const GameViewerVisibilityEnum._(String name): super(name);
+  const GameViewerVisibilityEnum._(String name) : super(name);
 
-  static BuiltSet<GameViewerVisibilityEnum> get values => _$gameViewerVisibilityEnumValues;
-  static GameViewerVisibilityEnum valueOf(String name) => _$gameViewerVisibilityEnumValueOf(name);
+  static BuiltSet<GameViewerVisibilityEnum> get values =>
+      _$gameViewerVisibilityEnumValues;
+  static GameViewerVisibilityEnum valueOf(String name) =>
+      _$gameViewerVisibilityEnumValueOf(name);
 }
-

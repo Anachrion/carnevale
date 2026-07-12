@@ -1,7 +1,6 @@
 import 'package:test/test.dart';
 import 'package:carnevale_api/carnevale_api.dart';
 
-
 /// tests for ListEntriesApi
 void main() {
   final instance = CarnevaleApi().getListEntriesApi();
@@ -20,6 +19,5 @@ void main() {
     test('test deleteListEntry', () async {
       // TODO
     });
-
   });
 }

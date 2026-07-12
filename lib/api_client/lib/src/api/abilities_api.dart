@@ -13,7 +13,6 @@ import 'package:carnevale_api/src/api_util.dart';
 import 'package:carnevale_api/src/model/ability.dart';
 
 class AbilitiesApi {
-
   final Dio _dio;
 
   final Serializers _serializers;
@@ -21,10 +20,10 @@ class AbilitiesApi {
   const AbilitiesApi(this._dio, this._serializers);
 
   /// List all glossary abilities (character and weapon special rules)
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [category] 
+  /// * [category]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -34,7 +33,7 @@ class AbilitiesApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList<Ability>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<BuiltList<Ability>>> getAbilities({ 
+  Future<Response<BuiltList<Ability>>> getAbilities({
     String? category,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -46,9 +45,7 @@ class AbilitiesApi {
     final _path = r'/abilities';
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -64,7 +61,12 @@ class AbilitiesApi {
     );
 
     final _queryParameters = <String, dynamic>{
-      if (category != null) r'category': encodeQueryParameter(_serializers, category, const FullType(String)),
+      if (category != null)
+        r'category': encodeQueryParameter(
+          _serializers,
+          category,
+          const FullType(String),
+        ),
     };
 
     final _response = await _dio.request<Object>(
@@ -80,11 +82,13 @@ class AbilitiesApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(BuiltList, [FullType(Ability)]),
-      ) as BuiltList<Ability>;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(BuiltList, [FullType(Ability)]),
+                )
+                as BuiltList<Ability>;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -106,5 +110,4 @@ class AbilitiesApi {
       extra: _response.extra,
     );
   }
-
 }

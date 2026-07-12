@@ -12,7 +12,6 @@ import 'package:built_collection/built_collection.dart';
 import 'package:carnevale_api/src/model/scenario.dart';
 
 class ScenariosApi {
-
   final Dio _dio;
 
   final Serializers _serializers;
@@ -20,7 +19,7 @@ class ScenariosApi {
   const ScenariosApi(this._dio, this._serializers);
 
   /// List all scenarios
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -32,7 +31,7 @@ class ScenariosApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList<Scenario>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<BuiltList<Scenario>>> getScenarios({ 
+  Future<Response<BuiltList<Scenario>>> getScenarios({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -43,9 +42,7 @@ class ScenariosApi {
     final _path = r'/scenarios';
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
+      headers: <String, dynamic>{...?headers},
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -72,11 +69,15 @@ class ScenariosApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null ? null : _serializers.deserialize(
-        rawResponse,
-        specifiedType: const FullType(BuiltList, [FullType(Scenario)]),
-      ) as BuiltList<Scenario>;
-
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+                  rawResponse,
+                  specifiedType: const FullType(BuiltList, [
+                    FullType(Scenario),
+                  ]),
+                )
+                as BuiltList<Scenario>;
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -98,5 +99,4 @@ class ScenariosApi {
       extra: _response.extra,
     );
   }
-
 }

@@ -17,6 +17,8 @@ class _$UpdateCountersInputCounters extends UpdateCountersInputCounters {
   final bool? carryingObjective;
   @override
   final int? underwaterCounters;
+  @override
+  final bool? activated;
 
   factory _$UpdateCountersInputCounters([
     void Function(UpdateCountersInputCountersBuilder)? updates,
@@ -28,6 +30,7 @@ class _$UpdateCountersInputCounters extends UpdateCountersInputCounters {
     this.guarding,
     this.carryingObjective,
     this.underwaterCounters,
+    this.activated,
   }) : super._();
   @override
   UpdateCountersInputCounters rebuild(
@@ -46,7 +49,8 @@ class _$UpdateCountersInputCounters extends UpdateCountersInputCounters {
         hidden == other.hidden &&
         guarding == other.guarding &&
         carryingObjective == other.carryingObjective &&
-        underwaterCounters == other.underwaterCounters;
+        underwaterCounters == other.underwaterCounters &&
+        activated == other.activated;
   }
 
   @override
@@ -57,6 +61,7 @@ class _$UpdateCountersInputCounters extends UpdateCountersInputCounters {
     _$hash = $jc(_$hash, guarding.hashCode);
     _$hash = $jc(_$hash, carryingObjective.hashCode);
     _$hash = $jc(_$hash, underwaterCounters.hashCode);
+    _$hash = $jc(_$hash, activated.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -68,7 +73,8 @@ class _$UpdateCountersInputCounters extends UpdateCountersInputCounters {
           ..add('hidden', hidden)
           ..add('guarding', guarding)
           ..add('carryingObjective', carryingObjective)
-          ..add('underwaterCounters', underwaterCounters))
+          ..add('underwaterCounters', underwaterCounters)
+          ..add('activated', activated))
         .toString();
   }
 }
@@ -103,6 +109,10 @@ class UpdateCountersInputCountersBuilder
   set underwaterCounters(int? underwaterCounters) =>
       _$this._underwaterCounters = underwaterCounters;
 
+  bool? _activated;
+  bool? get activated => _$this._activated;
+  set activated(bool? activated) => _$this._activated = activated;
+
   UpdateCountersInputCountersBuilder() {
     UpdateCountersInputCounters._defaults(this);
   }
@@ -115,6 +125,7 @@ class UpdateCountersInputCountersBuilder
       _guarding = $v.guarding;
       _carryingObjective = $v.carryingObjective;
       _underwaterCounters = $v.underwaterCounters;
+      _activated = $v.activated;
       _$v = null;
     }
     return this;
@@ -142,6 +153,7 @@ class UpdateCountersInputCountersBuilder
           guarding: guarding,
           carryingObjective: carryingObjective,
           underwaterCounters: underwaterCounters,
+          activated: activated,
         );
     replace(_$result);
     return _$result;

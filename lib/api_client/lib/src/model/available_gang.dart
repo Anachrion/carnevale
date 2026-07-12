@@ -12,10 +12,11 @@ part 'available_gang.g.dart';
 /// AvailableGang
 ///
 /// Properties:
-/// * [list] 
+/// * [list]
 /// * [selectable] - False when list.points exceeds the game's ducat_limit.
 @BuiltValue()
-abstract class AvailableGang implements Built<AvailableGang, AvailableGangBuilder> {
+abstract class AvailableGang
+    implements Built<AvailableGang, AvailableGangBuilder> {
   @BuiltValueField(wireName: r'list')
   GangSummary get list;
 
@@ -25,13 +26,15 @@ abstract class AvailableGang implements Built<AvailableGang, AvailableGangBuilde
 
   AvailableGang._();
 
-  factory AvailableGang([void updates(AvailableGangBuilder b)]) = _$AvailableGang;
+  factory AvailableGang([void updates(AvailableGangBuilder b)]) =
+      _$AvailableGang;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(AvailableGangBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<AvailableGang> get serializer => _$AvailableGangSerializer();
+  static Serializer<AvailableGang> get serializer =>
+      _$AvailableGangSerializer();
 }
 
 class _$AvailableGangSerializer implements PrimitiveSerializer<AvailableGang> {
@@ -64,7 +67,11 @@ class _$AvailableGangSerializer implements PrimitiveSerializer<AvailableGang> {
     AvailableGang object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -80,17 +87,21 @@ class _$AvailableGangSerializer implements PrimitiveSerializer<AvailableGang> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'list':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(GangSummary),
-          ) as GangSummary;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(GangSummary),
+                  )
+                  as GangSummary;
           result.list.replace(valueDes);
           break;
         case r'selectable':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.selectable = valueDes;
           break;
         default:
@@ -121,4 +132,3 @@ class _$AvailableGangSerializer implements PrimitiveSerializer<AvailableGang> {
     return result.build();
   }
 }
-

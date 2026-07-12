@@ -1,7 +1,6 @@
 import 'package:test/test.dart';
 import 'package:carnevale_api/carnevale_api.dart';
 
-
 /// tests for ListsApi
 void main() {
   final instance = CarnevaleApi().getListsApi();
@@ -41,6 +40,5 @@ void main() {
     test('test updateList', () async {
       // TODO
     });
-
   });
 }

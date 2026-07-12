@@ -11,11 +11,12 @@ part 'list_input_list.g.dart';
 /// ListInputList
 ///
 /// Properties:
-/// * [name] 
-/// * [faction] 
-/// * [points] 
+/// * [name]
+/// * [faction]
+/// * [points]
 @BuiltValue()
-abstract class ListInputList implements Built<ListInputList, ListInputListBuilder> {
+abstract class ListInputList
+    implements Built<ListInputList, ListInputListBuilder> {
   @BuiltValueField(wireName: r'name')
   String? get name;
 
@@ -27,14 +28,15 @@ abstract class ListInputList implements Built<ListInputList, ListInputListBuilde
 
   ListInputList._();
 
-  factory ListInputList([void updates(ListInputListBuilder b)]) = _$ListInputList;
+  factory ListInputList([void updates(ListInputListBuilder b)]) =
+      _$ListInputList;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(ListInputListBuilder b) => b
-      ..points = 100;
+  static void _defaults(ListInputListBuilder b) => b..points = 100;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<ListInputList> get serializer => _$ListInputListSerializer();
+  static Serializer<ListInputList> get serializer =>
+      _$ListInputListSerializer();
 }
 
 class _$ListInputListSerializer implements PrimitiveSerializer<ListInputList> {
@@ -76,7 +78,11 @@ class _$ListInputListSerializer implements PrimitiveSerializer<ListInputList> {
     ListInputList object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -92,25 +98,28 @@ class _$ListInputListSerializer implements PrimitiveSerializer<ListInputList> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType.nullable(String),
+                  )
+                  as String?;
           if (valueDes == null) continue;
           result.name = valueDes;
           break;
         case r'faction':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.faction = valueDes;
           break;
         case r'points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.points = valueDes;
           break;
         default:
@@ -141,4 +150,3 @@ class _$ListInputListSerializer implements PrimitiveSerializer<ListInputList> {
     return result.build();
   }
 }
-

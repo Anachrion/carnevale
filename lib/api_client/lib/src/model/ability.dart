@@ -13,8 +13,8 @@ part 'ability.g.dart';
 ///
 /// Properties:
 /// * [name] - Base name without the \"(X)\" rating, e.g. \"Acrobatic\", \"Reload\".
-/// * [category] 
-/// * [description] 
+/// * [category]
+/// * [description]
 @BuiltValue()
 abstract class Ability implements Built<Ability, AbilityBuilder> {
   /// Base name without the \"(X)\" rating, e.g. \"Acrobatic\", \"Reload\".
@@ -74,7 +74,11 @@ class _$AbilitySerializer implements PrimitiveSerializer<Ability> {
     Ability object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -90,24 +94,30 @@ class _$AbilitySerializer implements PrimitiveSerializer<Ability> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.name = valueDes;
           break;
         case r'category':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(AbilityCategoryEnum),
-          ) as AbilityCategoryEnum;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(AbilityCategoryEnum),
+                  )
+                  as AbilityCategoryEnum;
           result.category = valueDes;
           break;
         case r'description':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.description = valueDes;
           break;
         default:
@@ -140,17 +150,18 @@ class _$AbilitySerializer implements PrimitiveSerializer<Ability> {
 }
 
 class AbilityCategoryEnum extends EnumClass {
-
   @BuiltValueEnumConst(wireName: r'character')
   static const AbilityCategoryEnum character = _$abilityCategoryEnum_character;
   @BuiltValueEnumConst(wireName: r'weapon')
   static const AbilityCategoryEnum weapon = _$abilityCategoryEnum_weapon;
 
-  static Serializer<AbilityCategoryEnum> get serializer => _$abilityCategoryEnumSerializer;
+  static Serializer<AbilityCategoryEnum> get serializer =>
+      _$abilityCategoryEnumSerializer;
 
-  const AbilityCategoryEnum._(String name): super(name);
+  const AbilityCategoryEnum._(String name) : super(name);
 
-  static BuiltSet<AbilityCategoryEnum> get values => _$abilityCategoryEnumValues;
-  static AbilityCategoryEnum valueOf(String name) => _$abilityCategoryEnumValueOf(name);
+  static BuiltSet<AbilityCategoryEnum> get values =>
+      _$abilityCategoryEnumValues;
+  static AbilityCategoryEnum valueOf(String name) =>
+      _$abilityCategoryEnumValueOf(name);
 }
-

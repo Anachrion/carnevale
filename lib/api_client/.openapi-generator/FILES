@@ -7,7 +7,9 @@ doc/Agenda.md
 doc/AgendaHistoryEntry.md
 doc/AgendaHistoryEntryAgenda.md
 doc/AvailableGang.md
+doc/CardManifestEntry.md
 doc/CardReference.md
+doc/CardsApi.md
 doc/CreateCableTicket201Response.md
 doc/CreateGameInput.md
 doc/DiscardAgendaInput.md
@@ -27,6 +29,7 @@ doc/Game.md
 doc/GamePlayer.md
 doc/GamesApi.md
 doc/GangSummary.md
+doc/GetCardsManifest200Response.md
 doc/JoinGameInput.md
 doc/ListEntriesApi.md
 doc/ListEntry.md
@@ -65,6 +68,7 @@ doc/Weapon.md
 lib/carnevale_api.dart
 lib/src/api.dart
 lib/src/api/abilities_api.dart
+lib/src/api/cards_api.dart
 lib/src/api/equipment_api.dart
 lib/src/api/games_api.dart
 lib/src/api/list_entries_api.dart
@@ -85,6 +89,7 @@ lib/src/model/agenda.dart
 lib/src/model/agenda_history_entry.dart
 lib/src/model/agenda_history_entry_agenda.dart
 lib/src/model/available_gang.dart
+lib/src/model/card_manifest_entry.dart
 lib/src/model/card_reference.dart
 lib/src/model/create_cable_ticket201_response.dart
 lib/src/model/create_game_input.dart
@@ -104,6 +109,7 @@ lib/src/model/forgot_password_input_user.dart
 lib/src/model/game.dart
 lib/src/model/game_player.dart
 lib/src/model/gang_summary.dart
+lib/src/model/get_cards_manifest200_response.dart
 lib/src/model/join_game_input.dart
 lib/src/model/list_entry.dart
 lib/src/model/list_input.dart
@@ -135,5 +141,6 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/abilities_api_test.dart
-test/ability_test.dart
+test/card_manifest_entry_test.dart
+test/cards_api_test.dart
+test/get_cards_manifest200_response_test.dart

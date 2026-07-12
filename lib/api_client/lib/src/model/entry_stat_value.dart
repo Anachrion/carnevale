@@ -11,10 +11,11 @@ part 'entry_stat_value.g.dart';
 /// EntryStatValue
 ///
 /// Properties:
-/// * [current] 
-/// * [starting] 
+/// * [current]
+/// * [starting]
 @BuiltValue()
-abstract class EntryStatValue implements Built<EntryStatValue, EntryStatValueBuilder> {
+abstract class EntryStatValue
+    implements Built<EntryStatValue, EntryStatValueBuilder> {
   @BuiltValueField(wireName: r'current')
   int get current;
 
@@ -23,16 +24,19 @@ abstract class EntryStatValue implements Built<EntryStatValue, EntryStatValueBui
 
   EntryStatValue._();
 
-  factory EntryStatValue([void updates(EntryStatValueBuilder b)]) = _$EntryStatValue;
+  factory EntryStatValue([void updates(EntryStatValueBuilder b)]) =
+      _$EntryStatValue;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(EntryStatValueBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<EntryStatValue> get serializer => _$EntryStatValueSerializer();
+  static Serializer<EntryStatValue> get serializer =>
+      _$EntryStatValueSerializer();
 }
 
-class _$EntryStatValueSerializer implements PrimitiveSerializer<EntryStatValue> {
+class _$EntryStatValueSerializer
+    implements PrimitiveSerializer<EntryStatValue> {
   @override
   final Iterable<Type> types = const [EntryStatValue, _$EntryStatValue];
 
@@ -62,7 +66,11 @@ class _$EntryStatValueSerializer implements PrimitiveSerializer<EntryStatValue> 
     EntryStatValue object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -78,17 +86,15 @@ class _$EntryStatValueSerializer implements PrimitiveSerializer<EntryStatValue> 
       final value = serializedList[i + 1];
       switch (key) {
         case r'current':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.current = valueDes;
           break;
         case r'starting':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.starting = valueDes;
           break;
         default:
@@ -119,4 +125,3 @@ class _$EntryStatValueSerializer implements PrimitiveSerializer<EntryStatValue> 
     return result.build();
   }
 }
-

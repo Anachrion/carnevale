@@ -15,29 +15,29 @@ part 'profile.g.dart';
 /// Profile
 ///
 /// Properties:
-/// * [id] 
-/// * [name] 
-/// * [faction] 
-/// * [ducats] 
-/// * [movement] 
-/// * [attack] 
-/// * [dexterity] 
-/// * [lifePoints] 
-/// * [mind] 
-/// * [willPoints] 
-/// * [protection] 
-/// * [actionPoints] 
-/// * [commandPoints] 
-/// * [size] 
-/// * [abilities] 
-/// * [keywords] 
-/// * [version] 
+/// * [id]
+/// * [name]
+/// * [faction]
+/// * [ducats]
+/// * [movement]
+/// * [attack]
+/// * [dexterity]
+/// * [lifePoints]
+/// * [mind]
+/// * [willPoints]
+/// * [protection]
+/// * [actionPoints]
+/// * [commandPoints]
+/// * [size]
+/// * [abilities]
+/// * [keywords]
+/// * [version]
 /// * [mage] - Whether the profile has the Mage ability and can be given spells (rulebook p24).
 /// * [spellSlots] - Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
 /// * [disciplines] - Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
-/// * [weapons] 
-/// * [specialRules] 
-/// * [cardReferences] 
+/// * [weapons]
+/// * [specialRules]
+/// * [cardReferences]
 @BuiltValue()
 abstract class Profile implements Built<Profile, ProfileBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -136,10 +136,7 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -258,7 +255,11 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
     Profile object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -274,164 +275,183 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.name = valueDes;
           break;
         case r'faction':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.faction = valueDes;
           break;
         case r'ducats':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.ducats = valueDes;
           break;
         case r'movement':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.movement = valueDes;
           break;
         case r'attack':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.attack = valueDes;
           break;
         case r'dexterity':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.dexterity = valueDes;
           break;
         case r'life_points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.lifePoints = valueDes;
           break;
         case r'mind':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.mind = valueDes;
           break;
         case r'will_points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.willPoints = valueDes;
           break;
         case r'protection':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.protection = valueDes;
           break;
         case r'action_points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.actionPoints = valueDes;
           break;
         case r'command_points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.commandPoints = valueDes;
           break;
         case r'size':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.size = valueDes;
           break;
         case r'abilities':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(String),
+                    ]),
+                  )
+                  as BuiltList<String>;
           result.abilities.replace(valueDes);
           break;
         case r'keywords':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(String),
+                    ]),
+                  )
+                  as BuiltList<String>;
           result.keywords.replace(valueDes);
           break;
         case r'version':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.version = valueDes;
           break;
         case r'mage':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.mage = valueDes;
           break;
         case r'spell_slots':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.spellSlots = valueDes;
           break;
         case r'disciplines':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(String),
+                    ]),
+                  )
+                  as BuiltList<String>;
           result.disciplines.replace(valueDes);
           break;
         case r'weapons':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(Weapon)]),
-          ) as BuiltList<Weapon>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(Weapon),
+                    ]),
+                  )
+                  as BuiltList<Weapon>;
           result.weapons.replace(valueDes);
           break;
         case r'special_rules':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(SpecialRule)]),
-          ) as BuiltList<SpecialRule>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(SpecialRule),
+                    ]),
+                  )
+                  as BuiltList<SpecialRule>;
           result.specialRules.replace(valueDes);
           break;
         case r'card_references':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(CardReference)]),
-          ) as BuiltList<CardReference>;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(BuiltList, [
+                      FullType(CardReference),
+                    ]),
+                  )
+                  as BuiltList<CardReference>;
           result.cardReferences.replace(valueDes);
           break;
         default:
@@ -462,4 +482,3 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
     return result.build();
   }
 }
-

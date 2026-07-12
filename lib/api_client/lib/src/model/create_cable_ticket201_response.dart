@@ -11,26 +11,38 @@ part 'create_cable_ticket201_response.g.dart';
 /// CreateCableTicket201Response
 ///
 /// Properties:
-/// * [ticket] 
+/// * [ticket]
 @BuiltValue()
-abstract class CreateCableTicket201Response implements Built<CreateCableTicket201Response, CreateCableTicket201ResponseBuilder> {
+abstract class CreateCableTicket201Response
+    implements
+        Built<
+          CreateCableTicket201Response,
+          CreateCableTicket201ResponseBuilder
+        > {
   @BuiltValueField(wireName: r'ticket')
   String get ticket;
 
   CreateCableTicket201Response._();
 
-  factory CreateCableTicket201Response([void updates(CreateCableTicket201ResponseBuilder b)]) = _$CreateCableTicket201Response;
+  factory CreateCableTicket201Response([
+    void updates(CreateCableTicket201ResponseBuilder b),
+  ]) = _$CreateCableTicket201Response;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(CreateCableTicket201ResponseBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<CreateCableTicket201Response> get serializer => _$CreateCableTicket201ResponseSerializer();
+  static Serializer<CreateCableTicket201Response> get serializer =>
+      _$CreateCableTicket201ResponseSerializer();
 }
 
-class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<CreateCableTicket201Response> {
+class _$CreateCableTicket201ResponseSerializer
+    implements PrimitiveSerializer<CreateCableTicket201Response> {
   @override
-  final Iterable<Type> types = const [CreateCableTicket201Response, _$CreateCableTicket201Response];
+  final Iterable<Type> types = const [
+    CreateCableTicket201Response,
+    _$CreateCableTicket201Response,
+  ];
 
   @override
   final String wireName = r'CreateCableTicket201Response';
@@ -53,7 +65,11 @@ class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<Cr
     CreateCableTicket201Response object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -69,10 +85,12 @@ class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<Cr
       final value = serializedList[i + 1];
       switch (key) {
         case r'ticket':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.ticket = valueDes;
           break;
         default:
@@ -103,4 +121,3 @@ class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<Cr
     return result.build();
   }
 }
-

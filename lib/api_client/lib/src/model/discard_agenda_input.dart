@@ -12,32 +12,35 @@ part 'discard_agenda_input.g.dart';
 /// DiscardAgendaInput
 ///
 /// Properties:
-/// * [origin] - `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
-/// * [recycle] - Whether to immediately draw a replacement card (origin `recycle`) linked back to this discard. Only honoured for in-play discards; the `unachievable` mulligan always redraws. 
+/// * [origin] - `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`).
+/// * [recycle] - Whether to immediately draw a replacement card (origin `recycle`) linked back to this discard. Only honoured for in-play discards; the `unachievable` mulligan always redraws.
 @BuiltValue()
-abstract class DiscardAgendaInput implements Built<DiscardAgendaInput, DiscardAgendaInputBuilder> {
-  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+abstract class DiscardAgendaInput
+    implements Built<DiscardAgendaInput, DiscardAgendaInputBuilder> {
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`).
   @BuiltValueField(wireName: r'origin')
   DiscardAgendaInputOriginEnum get origin;
   // enum originEnum {  unachievable,  special_rule,  command_point,  };
 
-  /// Whether to immediately draw a replacement card (origin `recycle`) linked back to this discard. Only honoured for in-play discards; the `unachievable` mulligan always redraws. 
+  /// Whether to immediately draw a replacement card (origin `recycle`) linked back to this discard. Only honoured for in-play discards; the `unachievable` mulligan always redraws.
   @BuiltValueField(wireName: r'recycle')
   bool? get recycle;
 
   DiscardAgendaInput._();
 
-  factory DiscardAgendaInput([void updates(DiscardAgendaInputBuilder b)]) = _$DiscardAgendaInput;
+  factory DiscardAgendaInput([void updates(DiscardAgendaInputBuilder b)]) =
+      _$DiscardAgendaInput;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(DiscardAgendaInputBuilder b) => b
-      ..recycle = false;
+  static void _defaults(DiscardAgendaInputBuilder b) => b..recycle = false;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<DiscardAgendaInput> get serializer => _$DiscardAgendaInputSerializer();
+  static Serializer<DiscardAgendaInput> get serializer =>
+      _$DiscardAgendaInputSerializer();
 }
 
-class _$DiscardAgendaInputSerializer implements PrimitiveSerializer<DiscardAgendaInput> {
+class _$DiscardAgendaInputSerializer
+    implements PrimitiveSerializer<DiscardAgendaInput> {
   @override
   final Iterable<Type> types = const [DiscardAgendaInput, _$DiscardAgendaInput];
 
@@ -69,7 +72,11 @@ class _$DiscardAgendaInputSerializer implements PrimitiveSerializer<DiscardAgend
     DiscardAgendaInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -85,17 +92,21 @@ class _$DiscardAgendaInputSerializer implements PrimitiveSerializer<DiscardAgend
       final value = serializedList[i + 1];
       switch (key) {
         case r'origin':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(DiscardAgendaInputOriginEnum),
-          ) as DiscardAgendaInputOriginEnum;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(DiscardAgendaInputOriginEnum),
+                  )
+                  as DiscardAgendaInputOriginEnum;
           result.origin = valueDes;
           break;
         case r'recycle':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.recycle = valueDes;
           break;
         default:
@@ -128,22 +139,28 @@ class _$DiscardAgendaInputSerializer implements PrimitiveSerializer<DiscardAgend
 }
 
 class DiscardAgendaInputOriginEnum extends EnumClass {
-
-  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`).
   @BuiltValueEnumConst(wireName: r'unachievable')
-  static const DiscardAgendaInputOriginEnum unachievable = _$discardAgendaInputOriginEnum_unachievable;
-  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+  static const DiscardAgendaInputOriginEnum unachievable =
+      _$discardAgendaInputOriginEnum_unachievable;
+
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`).
   @BuiltValueEnumConst(wireName: r'special_rule')
-  static const DiscardAgendaInputOriginEnum specialRule = _$discardAgendaInputOriginEnum_specialRule;
-  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`). 
+  static const DiscardAgendaInputOriginEnum specialRule =
+      _$discardAgendaInputOriginEnum_specialRule;
+
+  /// `unachievable` swaps an impossible/duplicated agenda for a fresh one and always redraws (valid both during `agenda_draw` and `in_progress`); `special_rule`/`command_point` are in-play discards (valid while `in_progress`).
   @BuiltValueEnumConst(wireName: r'command_point')
-  static const DiscardAgendaInputOriginEnum commandPoint = _$discardAgendaInputOriginEnum_commandPoint;
+  static const DiscardAgendaInputOriginEnum commandPoint =
+      _$discardAgendaInputOriginEnum_commandPoint;
 
-  static Serializer<DiscardAgendaInputOriginEnum> get serializer => _$discardAgendaInputOriginEnumSerializer;
+  static Serializer<DiscardAgendaInputOriginEnum> get serializer =>
+      _$discardAgendaInputOriginEnumSerializer;
 
-  const DiscardAgendaInputOriginEnum._(String name): super(name);
+  const DiscardAgendaInputOriginEnum._(String name) : super(name);
 
-  static BuiltSet<DiscardAgendaInputOriginEnum> get values => _$discardAgendaInputOriginEnumValues;
-  static DiscardAgendaInputOriginEnum valueOf(String name) => _$discardAgendaInputOriginEnumValueOf(name);
+  static BuiltSet<DiscardAgendaInputOriginEnum> get values =>
+      _$discardAgendaInputOriginEnumValues;
+  static DiscardAgendaInputOriginEnum valueOf(String name) =>
+      _$discardAgendaInputOriginEnumValueOf(name);
 }
-

@@ -11,10 +11,12 @@ part 'agenda_history_entry_agenda.g.dart';
 /// AgendaHistoryEntryAgenda
 ///
 /// Properties:
-/// * [id] 
-/// * [name] 
+/// * [id]
+/// * [name]
 @BuiltValue()
-abstract class AgendaHistoryEntryAgenda implements Built<AgendaHistoryEntryAgenda, AgendaHistoryEntryAgendaBuilder> {
+abstract class AgendaHistoryEntryAgenda
+    implements
+        Built<AgendaHistoryEntryAgenda, AgendaHistoryEntryAgendaBuilder> {
   @BuiltValueField(wireName: r'id')
   int get id;
 
@@ -23,18 +25,25 @@ abstract class AgendaHistoryEntryAgenda implements Built<AgendaHistoryEntryAgend
 
   AgendaHistoryEntryAgenda._();
 
-  factory AgendaHistoryEntryAgenda([void updates(AgendaHistoryEntryAgendaBuilder b)]) = _$AgendaHistoryEntryAgenda;
+  factory AgendaHistoryEntryAgenda([
+    void updates(AgendaHistoryEntryAgendaBuilder b),
+  ]) = _$AgendaHistoryEntryAgenda;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(AgendaHistoryEntryAgendaBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<AgendaHistoryEntryAgenda> get serializer => _$AgendaHistoryEntryAgendaSerializer();
+  static Serializer<AgendaHistoryEntryAgenda> get serializer =>
+      _$AgendaHistoryEntryAgendaSerializer();
 }
 
-class _$AgendaHistoryEntryAgendaSerializer implements PrimitiveSerializer<AgendaHistoryEntryAgenda> {
+class _$AgendaHistoryEntryAgendaSerializer
+    implements PrimitiveSerializer<AgendaHistoryEntryAgenda> {
   @override
-  final Iterable<Type> types = const [AgendaHistoryEntryAgenda, _$AgendaHistoryEntryAgenda];
+  final Iterable<Type> types = const [
+    AgendaHistoryEntryAgenda,
+    _$AgendaHistoryEntryAgenda,
+  ];
 
   @override
   final String wireName = r'AgendaHistoryEntryAgenda';
@@ -45,10 +54,7 @@ class _$AgendaHistoryEntryAgendaSerializer implements PrimitiveSerializer<Agenda
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(
-      object.id,
-      specifiedType: const FullType(int),
-    );
+    yield serializers.serialize(object.id, specifiedType: const FullType(int));
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -62,7 +68,11 @@ class _$AgendaHistoryEntryAgendaSerializer implements PrimitiveSerializer<Agenda
     AgendaHistoryEntryAgenda object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -78,17 +88,18 @@ class _$AgendaHistoryEntryAgendaSerializer implements PrimitiveSerializer<Agenda
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String;
           result.name = valueDes;
           break;
         default:
@@ -119,4 +130,3 @@ class _$AgendaHistoryEntryAgendaSerializer implements PrimitiveSerializer<Agenda
     return result.build();
   }
 }
-

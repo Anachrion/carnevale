@@ -11,6 +11,7 @@ export 'package:carnevale_api/src/serializers.dart';
 export 'package:carnevale_api/src/model/date.dart';
 
 export 'package:carnevale_api/src/api/abilities_api.dart';
+export 'package:carnevale_api/src/api/cards_api.dart';
 export 'package:carnevale_api/src/api/equipment_api.dart';
 export 'package:carnevale_api/src/api/games_api.dart';
 export 'package:carnevale_api/src/api/list_entries_api.dart';
@@ -25,6 +26,7 @@ export 'package:carnevale_api/src/model/agenda.dart';
 export 'package:carnevale_api/src/model/agenda_history_entry.dart';
 export 'package:carnevale_api/src/model/agenda_history_entry_agenda.dart';
 export 'package:carnevale_api/src/model/available_gang.dart';
+export 'package:carnevale_api/src/model/card_manifest_entry.dart';
 export 'package:carnevale_api/src/model/card_reference.dart';
 export 'package:carnevale_api/src/model/create_cable_ticket201_response.dart';
 export 'package:carnevale_api/src/model/create_game_input.dart';
@@ -43,6 +45,7 @@ export 'package:carnevale_api/src/model/forgot_password_input_user.dart';
 export 'package:carnevale_api/src/model/game.dart';
 export 'package:carnevale_api/src/model/game_player.dart';
 export 'package:carnevale_api/src/model/gang_summary.dart';
+export 'package:carnevale_api/src/model/get_cards_manifest200_response.dart';
 export 'package:carnevale_api/src/model/join_game_input.dart';
 export 'package:carnevale_api/src/model/list_entry.dart';
 export 'package:carnevale_api/src/model/list_input.dart';
@@ -72,4 +75,3 @@ export 'package:carnevale_api/src/model/update_stats_input.dart';
 export 'package:carnevale_api/src/model/update_stats_input_stats.dart';
 export 'package:carnevale_api/src/model/validation_errors.dart';
 export 'package:carnevale_api/src/model/weapon.dart';
-

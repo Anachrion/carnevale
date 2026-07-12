@@ -12,14 +12,15 @@ part 'entry_state.g.dart';
 /// EntryState
 ///
 /// Properties:
-/// * [lifePoints] 
-/// * [willPoints] 
-/// * [commandPoints] 
-/// * [stunned] 
-/// * [hidden] 
-/// * [guarding] 
-/// * [carryingObjective] 
-/// * [underwaterCounters] 
+/// * [lifePoints]
+/// * [willPoints]
+/// * [commandPoints]
+/// * [stunned]
+/// * [hidden]
+/// * [guarding]
+/// * [carryingObjective]
+/// * [underwaterCounters]
+/// * [activated] - Whether this model has already been activated on its *owner's* current turn (each player has an independent turn cursor). Derived server-side, so it flips back to false on its own when the owning player advances the turn.
 @BuiltValue()
 abstract class EntryState implements Built<EntryState, EntryStateBuilder> {
   @BuiltValueField(wireName: r'life_points')
@@ -45,6 +46,10 @@ abstract class EntryState implements Built<EntryState, EntryStateBuilder> {
 
   @BuiltValueField(wireName: r'underwater_counters')
   int get underwaterCounters;
+
+  /// Whether this model has already been activated on its *owner's* current turn (each player has an independent turn cursor). Derived server-side, so it flips back to false on its own when the owning player advances the turn.
+  @BuiltValueField(wireName: r'activated')
+  bool get activated;
 
   EntryState._();
 
@@ -109,6 +114,11 @@ class _$EntryStateSerializer implements PrimitiveSerializer<EntryState> {
       object.underwaterCounters,
       specifiedType: const FullType(int),
     );
+    yield r'activated';
+    yield serializers.serialize(
+      object.activated,
+      specifiedType: const FullType(bool),
+    );
   }
 
   @override
@@ -117,7 +127,11 @@ class _$EntryStateSerializer implements PrimitiveSerializer<EntryState> {
     EntryState object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
+    return _serializeProperties(
+      serializers,
+      object,
+      specifiedType: specifiedType,
+    ).toList();
   }
 
   void _deserializeProperties(
@@ -133,60 +147,82 @@ class _$EntryStateSerializer implements PrimitiveSerializer<EntryState> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'life_points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(EntryStatValue),
-          ) as EntryStatValue;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(EntryStatValue),
+                  )
+                  as EntryStatValue;
           result.lifePoints.replace(valueDes);
           break;
         case r'will_points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(EntryStatValue),
-          ) as EntryStatValue;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(EntryStatValue),
+                  )
+                  as EntryStatValue;
           result.willPoints.replace(valueDes);
           break;
         case r'command_points':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(EntryStatValue),
-          ) as EntryStatValue;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(EntryStatValue),
+                  )
+                  as EntryStatValue;
           result.commandPoints.replace(valueDes);
           break;
         case r'stunned':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.stunned = valueDes;
           break;
         case r'hidden':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.hidden = valueDes;
           break;
         case r'guarding':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.guarding = valueDes;
           break;
         case r'carrying_objective':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
           result.carryingObjective = valueDes;
           break;
         case r'underwater_counters':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int;
+          final valueDes =
+              serializers.deserialize(value, specifiedType: const FullType(int))
+                  as int;
           result.underwaterCounters = valueDes;
+          break;
+        case r'activated':
+          final valueDes =
+              serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(bool),
+                  )
+                  as bool;
+          result.activated = valueDes;
           break;
         default:
           unhandled.add(key);
@@ -216,4 +252,3 @@ class _$EntryStateSerializer implements PrimitiveSerializer<EntryState> {
     return result.build();
   }
 }
-
