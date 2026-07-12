@@ -134,6 +134,9 @@ api.Profile fakeProfile({
   String faction = 'guild',
   int ducats = 20,
   List<String> keywords = const ['Leader'],
+  List<String> abilities = const [],
+  List<api.Weapon> weapons = const [],
+  List<api.SpecialRule> specialRules = const [],
   List<api.CardReference> cardReferences = const [],
 }) => api.Profile(
   (b) => b
@@ -154,16 +157,48 @@ api.Profile fakeProfile({
     ..version = 'v1'
     ..mage = false
     ..spellSlots = 0
-    ..abilities = ListBuilder<String>()
+    ..abilities = ListBuilder<String>(abilities)
     ..keywords = ListBuilder<String>(keywords)
     ..disciplines = ListBuilder<String>()
-    ..weapons = ListBuilder<api.Weapon>()
-    ..specialRules = ListBuilder<api.SpecialRule>()
+    ..weapons = ListBuilder<api.Weapon>(weapons)
+    ..specialRules = ListBuilder<api.SpecialRule>(specialRules)
     ..cardReferences = ListBuilder<api.CardReference>(
       cardReferences.isEmpty
           ? [fakeCardReference(profileName: name)]
           : cardReferences,
     ),
+);
+
+api.Weapon fakeWeapon({
+  int id = 1,
+  String name = 'Stiletto',
+  List<String> abilities = const [],
+}) => api.Weapon(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..damage = 3
+    ..range = 0
+    ..penetration = 1
+    ..evasion = 0
+    ..abilities = ListBuilder<String>(abilities),
+);
+
+api.SpecialRule fakeSpecialRule({
+  int id = 1,
+  String name = 'Blood Frenzy',
+  String description = 'Attacks twice when wounded.',
+  String? spellName,
+  String? spellDescription,
+}) => api.SpecialRule(
+  (b) => b
+    ..id = id
+    ..name = name
+    ..description = description
+    ..spellName = spellName
+    ..spellCost = spellName == null ? null : 2
+    ..spellDifficulty = spellName == null ? null : 3
+    ..spellDescription = spellDescription,
 );
 
 api.Scenario fakeScenario({
