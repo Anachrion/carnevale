@@ -15,10 +15,16 @@ class CardViewerScreen extends StatefulWidget {
     super.key,
     required this.profiles,
     required this.initialIndex,
+    this.onIndexChanged,
   });
 
   final List<api.Profile> profiles;
   final int initialIndex;
+
+  /// Fires as the viewer is paged, so the opener can track which card the user ended on.
+  /// Reported through a callback rather than a pop result because the viewer is dismissed
+  /// several ways (close button, Escape, system/browser back), not all of which we control.
+  final ValueChanged<int>? onIndexChanged;
 
   @override
   State<CardViewerScreen> createState() => _CardViewerScreenState();
@@ -92,6 +98,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
 
   void _onPageChanged(int index) {
     _flipController.reset();
+    widget.onIndexChanged?.call(index);
     setState(() {
       _currentIndex = index;
       _showingFront = true;
