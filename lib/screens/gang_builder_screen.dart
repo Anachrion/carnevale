@@ -58,7 +58,15 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       return 2;
     }
 
+    // Mercenaries always come after the faction's own profiles, whatever the sort
+    // and direction. The hire tab renders these as two sections, and the card
+    // viewer pages through this same list, so both stay in step.
+    int factionRank(api.Profile p) => p.faction == 'gifted' ? 1 : 0;
+
     filtered.sort((a, b) {
+      final factionCmp = factionRank(a).compareTo(factionRank(b));
+      if (factionCmp != 0) return factionCmp;
+
       final asc = _hireSortAsc;
       switch (_hireSort) {
         case _HireSort.cost:
