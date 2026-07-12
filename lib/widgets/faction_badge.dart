@@ -22,7 +22,10 @@ class FactionBadge extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        gradient: AppPalette.factionIconGradient(color),
+        shape: BoxShape.circle,
+      ),
       padding: EdgeInsets.all(size * 0.19),
       child: iconPath != null
           ? Image.asset(

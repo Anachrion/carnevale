@@ -8,6 +8,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     this.showHeader = true,
     this.onEditCounters,
     this.onEditStats,
+    this.onToggleActivated,
   });
 
   final api.ModelList gang;
@@ -22,6 +23,10 @@ class _ReadOnlyGangBody extends StatelessWidget {
 
   /// When set, tapping a model's HP/WP/CP pill opens the stat stepper popup.
   final void Function(api.ListEntry entry)? onEditStats;
+
+  /// When set, model tiles get a tappable bolt that marks the model as having activated this turn.
+  /// Own models only — an opponent's activated models still darken, they just can't be toggled.
+  final void Function(api.ListEntry entry)? onToggleActivated;
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +150,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
           onEditStats: onEditStats != null && entry.state != null
               ? () => onEditStats!(entry)
               : null,
+          onToggleActivated: onToggleActivated != null && entry.state != null
+              ? () => onToggleActivated!(entry)
+              : null,
         );
       },
     );
@@ -158,6 +166,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     this.onTap,
     this.onEditCounters,
     this.onEditStats,
+    this.onToggleActivated,
   });
 
   final api.ListEntry entry;
@@ -165,17 +174,23 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEditCounters;
   final VoidCallback? onEditStats;
+  final VoidCallback? onToggleActivated;
 
   @override
   Widget build(BuildContext context) {
     final state = entry.state;
+    // A model that has already gone this turn sits on a darkened tile, so a glance down the gang
+    // answers the only question that matters mid-turn: who's left? Only the background darkens —
+    // the name, stats and counters stay at full strength, and nothing is disabled: you can still
+    // open the card, edit stats, and (on your own models) tap the bolt again to undo it.
+    final activated = state?.activated ?? false;
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            gradient: AppPalette.entryTileGradient(color),
+            gradient: AppPalette.entryTileGradient(color, dimmed: activated),
           ),
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Column(
@@ -255,6 +270,15 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                       spacing: 6,
                       children: [
                         ..._counterIcons(state),
+                        // Own model: always offer the toggle. Opponent's: show the bolt only once
+                        // they've activated, as a read-only marker to go with the darkened tile.
+                        if (onToggleActivated != null)
+                          _ActivationButton(
+                            activated: activated,
+                            onTap: onToggleActivated!,
+                          )
+                        else if (activated)
+                          const _ActivationButton(activated: true),
                         if (onEditCounters != null)
                           _AddCounterButton(onTap: onEditCounters!),
                       ],
@@ -412,6 +436,46 @@ class _GradientBorderPainter extends CustomPainter {
       oldDelegate.colors != colors ||
       oldDelegate.radius != radius ||
       oldDelegate.strokeWidth != strokeWidth;
+}
+
+/// The "has this model gone yet?" bolt. Solid-filled once activated, so the tile's own darkening
+/// is reinforced by an explicit marker rather than relying on the background alone — and so the
+/// control you'd tap to undo a mis-tap stays obvious. Rendered without an [onTap] for an
+/// opponent's models, where it's read-only.
+class _ActivationButton extends StatelessWidget {
+  const _ActivationButton({required this.activated, this.onTap});
+
+  final bool activated;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: activated ? 'Activated this turn' : 'Mark as activated',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: activated ? Colors.white : Colors.transparent,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: activated ? 1 : 0.5),
+              width: 1.2,
+            ),
+          ),
+          child: Icon(
+            Icons.bolt,
+            size: 22,
+            // Knocked out against the white fill when activated, so the bolt stays readable rather
+            // than disappearing into it.
+            color: activated ? Colors.black87 : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// The small + next to a model's counter icons (own models only): opens the popup for toggling

@@ -10,11 +10,19 @@ import 'package:flutter/material.dart';
 abstract final class AppPalette {
   // ── Brand ──────────────────────────────────────────────────────────────────
   static const gold = Color(0xFFC4A050); // primary accent
-  static const mutedGold = Color(0xFFB1986C); // dark-mode accent / border partner
+  static const mutedGold = Color(
+    0xFFB1986C,
+  ); // dark-mode accent / border partner
   static const red = Color(0xFF8B1A1A); // light-mode accent partner
-  static const brightRed = Color(0xFFC0392B); // stronger red (over-limit, destructive)
-  static const antiqueGold = Color(0xFF8C6B2A); // secondary accent — dark theme (deeper gold)
-  static const terracotta = Color(0xFFB5604D); // secondary accent — light theme (brighter red)
+  static const brightRed = Color(
+    0xFFC0392B,
+  ); // stronger red (over-limit, destructive)
+  static const antiqueGold = Color(
+    0xFF8C6B2A,
+  ); // secondary accent — dark theme (deeper gold)
+  static const terracotta = Color(
+    0xFFB5604D,
+  ); // secondary accent — light theme (brighter red)
 
   // ── Neutrals — light ───────────────────────────────────────────────────────
   static const background = Color(0xFFF0EDE6); // scaffold (light)
@@ -24,7 +32,9 @@ abstract final class AppPalette {
   static const paleStone = Color(0xFFE5E1DA); // decorative circle (home)
 
   // ── Neutrals — dark ────────────────────────────────────────────────────────
-  static const backgroundDark = Color(0xFF14171F); // scaffold / drawer / toast (dark)
+  static const backgroundDark = Color(
+    0xFF14171F,
+  ); // scaffold / drawer / toast (dark)
   static const surfaceDark = Color(0xFF191D27); // raised cards / popups (dark)
   static const inkLight = Color(0xFFEDE8DF); // primary text (dark)
   static const inkLightSubtle = Color(0xFFAA9E92); // secondary text (dark)
@@ -33,7 +43,9 @@ abstract final class AppPalette {
   static const equipment = Color(0xFF4A3F35); // equipment tiles
   static const newsCard = Color(0xFF5A6B78); // home news card
   static const toggleBlue = Color(0xFF6C9BC2); // settings theme-toggle accent
-  static const controlNavyDark = Color(0xFF0E1828); // settings control surface (dark)
+  static const controlNavyDark = Color(
+    0xFF0E1828,
+  ); // settings control surface (dark)
 
   // Stat-pill borders: [current-side, starting-side] gradient stops.
   static const hpBorder = [Color(0xFFCB9898), Color(0xFFA14343)];
@@ -61,11 +73,39 @@ abstract final class AppPalette {
     'vatican': 'assets/images/icons/vatican icon.png',
   };
 
+  /// The gradient behind a circular faction icon — the faction [color] raked toward black on the
+  /// diagonal, so the badge reads as a lit disc rather than a flat one. Same ramp depth as
+  /// [entryTileGradient], so a faction badge and a gang entry tile look like one family; the
+  /// diagonal (rather than left-to-right) is what suits a circle.
+  ///
+  /// [opacity] fades the whole ramp for an unselected/dimmed state. It's applied to both stops
+  /// rather than flattening the badge back to a single translucent color, so an unselected chip
+  /// still reads as the same object, just quieter.
+  static LinearGradient factionIconGradient(Color color, {double opacity = 1}) {
+    final dark = Color.lerp(color, Colors.black, 0.45)!;
+    return LinearGradient(
+      colors: [
+        color.withValues(alpha: opacity),
+        dark.withValues(alpha: opacity),
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+  }
+
   /// The left-to-right gradient behind a gang entry tile: the faction [color]
   /// fading toward black. Shared by the builder and viewer tiles (F-P2-4).
-  static LinearGradient entryTileGradient(Color color) => LinearGradient(
-    colors: [color, Color.lerp(color, Colors.black, 0.45)!],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
+  ///
+  /// [dimmed] darkens the whole ramp — used for a model that has already activated this turn. It
+  /// deliberately darkens only the background, leaving the name, stats and counters on top at full
+  /// strength: fading the entire tile would make the very content you still need to read (and the
+  /// bolt you'd tap to undo it) the hardest thing on it.
+  static LinearGradient entryTileGradient(Color color, {bool dimmed = false}) {
+    final base = dimmed ? Color.lerp(color, Colors.black, 0.6)! : color;
+    return LinearGradient(
+      colors: [base, Color.lerp(base, Colors.black, 0.45)!],
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+    );
+  }
 }
