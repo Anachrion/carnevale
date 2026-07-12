@@ -276,26 +276,28 @@ class _EntryTileState extends State<_EntryTile>
 
 class _HireCardTile extends StatelessWidget {
   const _HireCardTile({
+    super.key,
     required this.profile,
-    required this.allProfiles,
-    required this.index,
     required this.count,
     required this.isUnique,
     required this.factionColor,
     required this.canAdd,
     required this.busy,
+    required this.onOpen,
     required this.onAdd,
     required this.onRemove,
   });
 
   final api.Profile profile;
-  final List<api.Profile> allProfiles;
-  final int index;
   final int count;
   final bool isUnique;
   final Color factionColor;
   final bool canAdd;
   final bool busy;
+
+  /// Opens the card viewer. Owned by the screen rather than the tile so it can await the
+  /// viewer's dismissal and scroll the hire list to whichever card the user ended on.
+  final VoidCallback onOpen;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
@@ -305,13 +307,7 @@ class _HireCardTile extends StatelessWidget {
     final base = AppPalette.factionColors[profile.faction] ?? factionColor;
     final bgColor = inList ? Color.lerp(base, Colors.black, 0.45)! : base;
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              CardViewerScreen(profiles: allProfiles, initialIndex: index),
-        ),
-      ),
+      onTap: onOpen,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(

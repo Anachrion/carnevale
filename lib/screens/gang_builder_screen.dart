@@ -42,6 +42,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   _HireSort _hireSort = _HireSort.role;
   bool _hireSortAsc = true;
   final _searchController = TextEditingController();
+  final _hireScroll = ScrollController();
+
+  // One key per hire tile, so a tile can be located and centred after the card viewer closes.
+  // Keyed by profile id: the list is rebuilt on search/sort, but a profile keeps its key.
+  final Map<int, GlobalKey> _hireTileKeys = {};
 
   // Cached filtered+sorted hire list. Recomputed only when its inputs (search text, sort field/dir,
   // or the loaded profiles) change — not on every rebuild, which the old getter did (F-P3-6).
@@ -101,7 +106,87 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _hireScroll.dispose();
     super.dispose();
+  }
+
+  /// Opens the card viewer on [p], then scrolls the hire list so the card the user ended on
+  /// (they can swipe up/down to others) is centred, rather than leaving them wherever they were.
+  Future<void> _openHireCard(api.Profile p) async {
+    final profiles = _visibleProfiles;
+    var landedOn = profiles.indexOf(p);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CardViewerScreen(
+          profiles: profiles,
+          initialIndex: landedOn,
+          onIndexChanged: (i) => landedOn = i,
+        ),
+      ),
+    );
+    if (!mounted || landedOn < 0 || landedOn >= profiles.length) return;
+    await _centreHireTile(profiles[landedOn]);
+  }
+
+  /// Centres [p]'s tile in the hire list. If the tile is off-screen it has not been built (the
+  /// slivers build lazily), so there is nothing to scroll to: jump to an estimated offset first
+  /// to force it into existence, then let ensureVisible place it exactly.
+  Future<void> _centreHireTile(api.Profile p) async {
+    if (_tab != _Tab.hire || !_hireScroll.hasClients) return;
+
+    var target = _hireTileKeys[p.id]?.currentContext;
+    if (target == null) {
+      final estimate = _estimatedHireOffset(p);
+      if (estimate == null) return;
+      _hireScroll.jumpTo(
+        estimate.clamp(
+          _hireScroll.position.minScrollExtent,
+          _hireScroll.position.maxScrollExtent,
+        ),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+      target = _hireTileKeys[p.id]?.currentContext;
+    }
+    if (target == null || !target.mounted) return;
+
+    await Scrollable.ensureVisible(
+      target,
+      alignment: 0.5,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  /// Rough scroll offset that puts [p]'s tile mid-viewport, measured from a tile that is on
+  /// screen (they are all the same height). Only needs to land within a viewport of the target
+  /// so that it gets built; ensureVisible corrects the rest, so the divider is approximated.
+  double? _estimatedHireOffset(api.Profile p) {
+    final index = _visibleProfiles.indexOf(p);
+    if (index < 0) return null;
+
+    RenderBox? built;
+    for (final key in _hireTileKeys.values) {
+      final box = key.currentContext?.findRenderObject() as RenderBox?;
+      if (box != null && box.hasSize) {
+        built = box;
+        break;
+      }
+    }
+    if (built == null) return null;
+
+    const separator = 8.0;
+    const dividerEstimate = 60.0;
+    final extent = built.size.height + separator;
+    final precedingDivider = p.faction == 'gifted' && _gang.faction != 'gifted'
+        ? dividerEstimate
+        : 0.0;
+    final viewport = _hireScroll.position.viewportDimension;
+    return (index * extent) +
+        precedingDivider -
+        (viewport / 2) +
+        (built.size.height / 2);
   }
 
   Future<void> _loadData() async {
@@ -537,14 +622,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
       final alreadyHiredUnique = isUnique && count > 0;
       final leaderSlotTaken = isLeader && hasLeader && count == 0;
       return _HireCardTile(
+        key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,
-        allProfiles: profiles,
-        index: profiles.indexOf(p),
         count: count,
         isUnique: isUnique,
         factionColor: factionColor,
         canAdd: !alreadyHiredUnique && !leaderSlotTaken,
         busy: _busy,
+        onOpen: () => _openHireCard(p),
         onAdd: () => _add(p),
         onRemove: () => _remove(p),
       );
@@ -569,6 +654,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen> {
                   ),
                 )
               : CustomScrollView(
+                  controller: _hireScroll,
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
