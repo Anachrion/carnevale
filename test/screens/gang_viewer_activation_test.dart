@@ -34,6 +34,25 @@ void main() {
     return gradientOf(tester, modelName) == expected;
   }
 
+  /// The model names in the order they are actually laid out down the list — the whole point of the
+  /// death reorder, so assert on what's rendered rather than on any internal list.
+  ///
+  /// Scoped to the list itself: an open stat/counter dialog is titled with the model's name too, and
+  /// would otherwise be counted as a second row for that model.
+  List<String?> rowOrder(WidgetTester tester) {
+    const names = ['Bruno', 'Vitali', 'Enzo'];
+    return tester
+        .widgetList<Text>(
+          find.descendant(
+            of: find.byType(AnimatedList),
+            matching: find.byType(Text),
+          ),
+        )
+        .map((t) => t.data)
+        .where(names.contains)
+        .toList();
+  }
+
   Future<void> pumpGangs(
     WidgetTester tester,
     FakeApiAdapter adapter, {
@@ -141,8 +160,149 @@ void main() {
     await tester.tap(find.byIcon(Icons.bolt));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
+    // The tile's background is animated (it's what makes a death visible), so let it land before
+    // reading the gradient — mid-flight it's an interpolation between the two.
+    await tester.pumpAndSettle();
 
     expect(isDarkened(tester, 'Vitali', guild), isTrue);
+  });
+
+  testWidgets('sinks a killed model to the bottom of the gang, with a skull', (
+    tester,
+  ) async {
+    final adapter = installFakeApi();
+    final myGang = fakeModelList(
+      name: 'My Gang',
+      entries: [
+        // Dead, but first in the roster — it must still end up last on screen.
+        fakeListEntry(name: 'Bruno', state: fakeEntryState(lifePoints: 0)),
+        fakeListEntry(
+          id: 2,
+          position: 2,
+          name: 'Vitali',
+          state: fakeEntryState(lifePoints: 6),
+        ),
+        fakeListEntry(
+          id: 3,
+          position: 3,
+          name: 'Enzo',
+          state: fakeEntryState(lifePoints: 4),
+        ),
+      ],
+    );
+    await pumpGangs(
+      tester,
+      adapter,
+      myGang: myGang,
+      foeGang: fakeModelList(name: 'Foe Gang'),
+    );
+
+    // The living gang stays together at the top, in roster order; the casualty drops below them.
+    expect(rowOrder(tester), ['Vitali', 'Enzo', 'Bruno']);
+
+    expect(find.text('💀'), findsOneWidget);
+    // Dead drops the faction color entirely, rather than merely darkening it like an activation.
+    expect(
+      gradientOf(tester, 'Bruno'),
+      AppPalette.entryTileGradient(AppPalette.deadEntry),
+    );
+    expect(gradientOf(tester, 'Vitali'), AppPalette.entryTileGradient(guild));
+  });
+
+  testWidgets(
+    'a model that dies stays put while it turns, then drops to the bottom',
+    (tester) async {
+      final adapter = installFakeApi();
+      final myGang = fakeModelList(
+        name: 'My Gang',
+        entries: [
+          fakeListEntry(name: 'Bruno', state: fakeEntryState(lifePoints: 1)),
+          fakeListEntry(
+            id: 2,
+            position: 2,
+            name: 'Vitali',
+            state: fakeEntryState(lifePoints: 6),
+          ),
+        ],
+      );
+      // Bruno takes his last point of damage.
+      adapter.stub(
+        'PATCH',
+        '/games/1/entries/1/stats',
+        entryStateBody(fakeEntryState(lifePoints: 0)),
+      );
+      await pumpGangs(
+        tester,
+        adapter,
+        myGang: myGang,
+        foeGang: fakeModelList(name: 'Foe Gang'),
+      );
+
+      expect(rowOrder(tester), ['Bruno', 'Vitali']);
+
+      await tester.tap(find.text('HP 1/10'));
+      await tester.pumpAndSettle();
+      final lifeRow = find
+          .ancestor(of: find.text('Life Points'), matching: find.byType(Row))
+          .first;
+      await tester.tap(
+        find.descendant(of: lifeRow, matching: find.byIcon(Icons.remove)),
+      );
+      await tester.pump();
+
+      // Beat one: he has died, and the skull is in — but he is still standing in his own place, so
+      // you actually watch it happen rather than seeing a card teleport.
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('💀'), findsOneWidget);
+      expect(rowOrder(tester), ['Bruno', 'Vitali']);
+
+      // Beat two: the body is carried off and the living close ranks.
+      await tester.pumpAndSettle();
+      expect(rowOrder(tester), ['Vitali', 'Bruno']);
+    },
+  );
+
+  testWidgets('a model healed back above 0 is alive again', (tester) async {
+    final adapter = installFakeApi();
+    final myGang = fakeModelList(
+      name: 'My Gang',
+      entries: [
+        fakeListEntry(name: 'Vitali', state: fakeEntryState(lifePoints: 0)),
+      ],
+    );
+    // Death is derived from HP, so healing through the ordinary stats endpoint revives the model —
+    // there is no separate "un-kill" action to get out of step with the HP shown beside it.
+    adapter.stub(
+      'PATCH',
+      '/games/1/entries/1/stats',
+      entryStateBody(fakeEntryState(lifePoints: 5)),
+    );
+    await pumpGangs(
+      tester,
+      adapter,
+      myGang: myGang,
+      foeGang: fakeModelList(name: 'Foe Gang'),
+    );
+
+    expect(find.text('💀'), findsOneWidget);
+
+    // Heal it through the ordinary HP stepper — the pill reads "HP 0/10".
+    await tester.tap(find.text('HP 0/10'));
+    await tester.pumpAndSettle();
+
+    // Scoped to the Life Points row: the tile behind the dialog has an add-counter button that is
+    // also an Icons.add, and it comes first in the tree.
+    final lifeRow = find
+        .ancestor(of: find.text('Life Points'), matching: find.byType(Row))
+        .first;
+    await tester.tap(
+      find.descendant(of: lifeRow, matching: find.byIcon(Icons.add)),
+    );
+    // Settle rather than pumping a fixed slice: the heal is a round-trip through the real service,
+    // and a fixed 50ms is a race that loses whenever the machine is busy.
+    await tester.pumpAndSettle();
+
+    expect(find.text('💀'), findsNothing);
   });
 
   testWidgets('offers no activation toggle on the opponent\'s models', (

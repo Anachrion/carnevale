@@ -80,37 +80,38 @@ void main() {
     });
 
     test('free text still matches a name', () {
-      expect(
-        namesOf(service.matching(const ProfileQuery(text: 'capo'))),
-        ['Capodecina'],
-      );
+      expect(namesOf(service.matching(const ProfileQuery(text: 'capo'))), [
+        'Capodecina',
+      ]);
     });
 
-    test('free text reaches abilities, keywords, weapons and special rules', () {
-      // An ability, on two models.
-      expect(
-        namesOf(service.matching(const ProfileQuery(text: 'brave'))),
-        ['Bombardier', 'Capodecina'],
-      );
-      // A weapon's name, and a weapon ability.
-      expect(
-        namesOf(service.matching(const ProfileQuery(text: 'stiletto'))),
-        ['Capodecina'],
-      );
-      expect(
-        namesOf(service.matching(const ProfileQuery(text: 'blast'))),
-        ['Bombardier'],
-      );
-      // A special rule's name, and the spell it grants.
-      expect(
-        namesOf(service.matching(const ProfileQuery(text: 'blood frenzy'))),
-        ['Capodecina'],
-      );
-      expect(
-        namesOf(service.matching(const ProfileQuery(text: 'blood boil'))),
-        ['Doge'],
-      );
-    });
+    test(
+      'free text reaches abilities, keywords, weapons and special rules',
+      () {
+        // An ability, on two models.
+        expect(namesOf(service.matching(const ProfileQuery(text: 'brave'))), [
+          'Bombardier',
+          'Capodecina',
+        ]);
+        // A weapon's name, and a weapon ability.
+        expect(
+          namesOf(service.matching(const ProfileQuery(text: 'stiletto'))),
+          ['Capodecina'],
+        );
+        expect(namesOf(service.matching(const ProfileQuery(text: 'blast'))), [
+          'Bombardier',
+        ]);
+        // A special rule's name, and the spell it grants.
+        expect(
+          namesOf(service.matching(const ProfileQuery(text: 'blood frenzy'))),
+          ['Capodecina'],
+        );
+        expect(
+          namesOf(service.matching(const ProfileQuery(text: 'blood boil'))),
+          ['Doge'],
+        );
+      },
+    );
 
     test('every word must match, so extra words narrow the results', () {
       expect(
@@ -125,9 +126,7 @@ void main() {
       expect(
         namesOf(
           service.matching(
-            ProfileQuery(
-              facets: {Facet(FacetKind.ability, 'Acrobatic')},
-            ),
+            ProfileQuery(facets: {Facet(FacetKind.ability, 'Acrobatic')}),
           ),
         ),
         ['Advanced Hybrid', 'Capodecina'],
@@ -154,9 +153,7 @@ void main() {
       expect(
         namesOf(
           service.matching(
-            ProfileQuery(
-              facets: {Facet(FacetKind.weaponAbility, 'Reload')},
-            ),
+            ProfileQuery(facets: {Facet(FacetKind.weaponAbility, 'Reload')}),
           ),
         ),
         ['Bombardier'],
@@ -165,13 +162,16 @@ void main() {
 
     test('facets, faction and text all narrow together', () {
       expect(
-        service.matching(
-          ProfileQuery(
-            text: 'bomb',
-            factions: {'guild'},
-            facets: {Facet(FacetKind.ability, 'Brave')},
-          ),
-        ).single.name,
+        service
+            .matching(
+              ProfileQuery(
+                text: 'bomb',
+                factions: {'guild'},
+                facets: {Facet(FacetKind.ability, 'Brave')},
+              ),
+            )
+            .single
+            .name,
         'Bombardier',
       );
       // Same query against the wrong faction finds nothing.
@@ -195,16 +195,19 @@ void main() {
       expect(hits.single.count, 2);
     });
 
-    test('offers keywords and weapon abilities, not just character abilities', () {
-      expect(
-        service.suggest('lead').single.facet,
-        const Facet(FacetKind.keyword, 'Leader'),
-      );
-      expect(
-        service.suggest('poison').single.facet,
-        const Facet(FacetKind.weaponAbility, 'Poisoned'),
-      );
-    });
+    test(
+      'offers keywords and weapon abilities, not just character abilities',
+      () {
+        expect(
+          service.suggest('lead').single.facet,
+          const Facet(FacetKind.keyword, 'Leader'),
+        );
+        expect(
+          service.suggest('poison').single.facet,
+          const Facet(FacetKind.weaponAbility, 'Poisoned'),
+        );
+      },
+    );
 
     test('ranks prefix matches first, then the most common facets', () {
       // Only "Acrobatic" starts with an "a", so it leads despite tying on count; the rest contain

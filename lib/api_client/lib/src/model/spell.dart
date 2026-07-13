@@ -12,13 +12,13 @@ part 'spell.g.dart';
 /// Spell
 ///
 /// Properties:
-/// * [id]
-/// * [name]
-/// * [discipline]
+/// * [id] 
+/// * [name] 
+/// * [discipline] 
 /// * [cost] - Will Points spent to attempt the spell.
 /// * [difficulty] - Magic Roll result needed to score an Ace.
 /// * [cantrip] - Whether this is the Discipline's free Cantrip (always known, doesn't count against spell_slots).
-/// * [description]
+/// * [description] 
 @BuiltValue()
 abstract class Spell implements Built<Spell, SpellBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -70,7 +70,10 @@ class _$SpellSerializer implements PrimitiveSerializer<Spell> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(object.id, specifiedType: const FullType(int));
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(int),
+    );
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -109,11 +112,7 @@ class _$SpellSerializer implements PrimitiveSerializer<Spell> {
     Spell object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -129,57 +128,52 @@ class _$SpellSerializer implements PrimitiveSerializer<Spell> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.name = valueDes;
           break;
         case r'discipline':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(SpellDisciplineEnum),
-                  )
-                  as SpellDisciplineEnum;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(SpellDisciplineEnum),
+          ) as SpellDisciplineEnum;
           result.discipline = valueDes;
           break;
         case r'cost':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.cost = valueDes;
           break;
         case r'difficulty':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.difficulty = valueDes;
           break;
         case r'cantrip':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.cantrip = valueDes;
           break;
         case r'description':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.description = valueDes;
           break;
         default:
@@ -212,27 +206,23 @@ class _$SpellSerializer implements PrimitiveSerializer<Spell> {
 }
 
 class SpellDisciplineEnum extends EnumClass {
+
   @BuiltValueEnumConst(wireName: r'blood_rites')
-  static const SpellDisciplineEnum bloodRites =
-      _$spellDisciplineEnum_bloodRites;
+  static const SpellDisciplineEnum bloodRites = _$spellDisciplineEnum_bloodRites;
   @BuiltValueEnumConst(wireName: r'divinity')
   static const SpellDisciplineEnum divinity = _$spellDisciplineEnum_divinity;
   @BuiltValueEnumConst(wireName: r'fateweaving')
-  static const SpellDisciplineEnum fateweaving =
-      _$spellDisciplineEnum_fateweaving;
+  static const SpellDisciplineEnum fateweaving = _$spellDisciplineEnum_fateweaving;
   @BuiltValueEnumConst(wireName: r'runes_of_sovereignty')
-  static const SpellDisciplineEnum runesOfSovereignty =
-      _$spellDisciplineEnum_runesOfSovereignty;
+  static const SpellDisciplineEnum runesOfSovereignty = _$spellDisciplineEnum_runesOfSovereignty;
   @BuiltValueEnumConst(wireName: r'wild_magic')
   static const SpellDisciplineEnum wildMagic = _$spellDisciplineEnum_wildMagic;
 
-  static Serializer<SpellDisciplineEnum> get serializer =>
-      _$spellDisciplineEnumSerializer;
+  static Serializer<SpellDisciplineEnum> get serializer => _$spellDisciplineEnumSerializer;
 
-  const SpellDisciplineEnum._(String name) : super(name);
+  const SpellDisciplineEnum._(String name): super(name);
 
-  static BuiltSet<SpellDisciplineEnum> get values =>
-      _$spellDisciplineEnumValues;
-  static SpellDisciplineEnum valueOf(String name) =>
-      _$spellDisciplineEnumValueOf(name);
+  static BuiltSet<SpellDisciplineEnum> get values => _$spellDisciplineEnumValues;
+  static SpellDisciplineEnum valueOf(String name) => _$spellDisciplineEnumValueOf(name);
 }
+

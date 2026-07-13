@@ -12,7 +12,7 @@ part 'login_input.g.dart';
 /// LoginInput
 ///
 /// Properties:
-/// * [user]
+/// * [user] 
 @BuiltValue()
 abstract class LoginInput implements Built<LoginInput, LoginInputBuilder> {
   @BuiltValueField(wireName: r'user')
@@ -54,11 +54,7 @@ class _$LoginInputSerializer implements PrimitiveSerializer<LoginInput> {
     LoginInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -74,12 +70,10 @@ class _$LoginInputSerializer implements PrimitiveSerializer<LoginInput> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'user':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(LoginInputUser),
-                  )
-                  as LoginInputUser;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(LoginInputUser),
+          ) as LoginInputUser;
           result.user.replace(valueDes);
           break;
         default:
@@ -110,3 +104,4 @@ class _$LoginInputSerializer implements PrimitiveSerializer<LoginInput> {
     return result.build();
   }
 }
+

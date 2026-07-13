@@ -17,9 +17,7 @@ import 'gang_builder_screen.dart';
 import 'gang_viewer_screen.dart';
 import 'score_tab.dart';
 
-const _kGangsVisibleStatuses = {
-  api.GameStatusEnum.agendaDraw,
-};
+const _kGangsVisibleStatuses = {api.GameStatusEnum.agendaDraw};
 const _kScrollablePhaseStatuses = {
   api.GameStatusEnum.pending,
   api.GameStatusEnum.gangSelection,
@@ -486,7 +484,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     final Widget trailing;
     if (isSelected) {
       trailing = OutlinedButton.icon(
-        onPressed: _busy ? null : () => _run(() => _service.deselectGang(game.id)),
+        onPressed: _busy
+            ? null
+            : () => _run(() => _service.deselectGang(game.id)),
         icon: const Icon(Icons.check, size: 16),
         style: OutlinedButton.styleFrom(
           foregroundColor: context.accentColor,
@@ -673,7 +673,11 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
               color: context.accentColor,
             ),
           ),
-          Divider(height: 16, thickness: 1, color: context.secondaryAccentColor),
+          Divider(
+            height: 16,
+            thickness: 1,
+            color: context.secondaryAccentColor,
+          ),
           Text(
             a.description,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
@@ -689,7 +693,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: context.secondaryAccentColor,
                   side: BorderSide(color: context.secondaryAccentColor),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   visualDensity: VisualDensity.compact,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -713,8 +720,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InkWell(
-          onTap: () =>
-              setState(() => _discardedExpanded = !_discardedExpanded),
+          onTap: () => setState(() => _discardedExpanded = !_discardedExpanded),
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),

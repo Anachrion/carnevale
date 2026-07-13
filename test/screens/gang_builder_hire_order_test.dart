@@ -18,14 +18,40 @@ void main() {
       'GET',
       '/profiles',
       listBody<api.Profile>([
-        fakeProfile(id: 1, name: 'Il Dottore', faction: 'gifted', ducats: 12, keywords: const ['Hero']),
+        fakeProfile(
+          id: 1,
+          name: 'Il Dottore',
+          faction: 'gifted',
+          ducats: 12,
+          keywords: const ['Hero'],
+        ),
         fakeProfile(id: 2, name: 'Capodecina', faction: 'guild', ducats: 20),
-        fakeProfile(id: 3, name: 'Colombina', faction: 'gifted', ducats: 10, keywords: const []),
-        fakeProfile(id: 4, name: 'Bravoes', faction: 'guild', ducats: 30, keywords: const []),
+        fakeProfile(
+          id: 3,
+          name: 'Colombina',
+          faction: 'gifted',
+          ducats: 10,
+          keywords: const [],
+        ),
+        fakeProfile(
+          id: 4,
+          name: 'Bravoes',
+          faction: 'guild',
+          ducats: 30,
+          keywords: const [],
+        ),
       ], const FullType(api.Profile)),
     );
-    adapter.stub('GET', '/equipment', listBody<api.Equipment>([], const FullType(api.Equipment)));
-    adapter.stub('GET', '/spells', listBody<api.Spell>([], const FullType(api.Spell)));
+    adapter.stub(
+      'GET',
+      '/equipment',
+      listBody<api.Equipment>([], const FullType(api.Equipment)),
+    );
+    adapter.stub(
+      'GET',
+      '/spells',
+      listBody<api.Spell>([], const FullType(api.Spell)),
+    );
 
     final gang = fakeModelList(name: 'The Rooks', entries: []);
 
@@ -41,11 +67,15 @@ void main() {
     await tester.tap(find.text('Capodecina').first);
     await tester.pumpAndSettle();
 
-    final viewer = tester.widget<CardViewerScreen>(find.byType(CardViewerScreen));
-    expect(
-      viewer.profiles.map((p) => p.name).toList(),
-      ['Capodecina', 'Bravoes', 'Il Dottore', 'Colombina'],
+    final viewer = tester.widget<CardViewerScreen>(
+      find.byType(CardViewerScreen),
     );
+    expect(viewer.profiles.map((p) => p.name).toList(), [
+      'Capodecina',
+      'Bravoes',
+      'Il Dottore',
+      'Colombina',
+    ]);
     // ...and it opened on the card that was actually tapped.
     expect(viewer.profiles[viewer.initialIndex].name, 'Capodecina');
   });

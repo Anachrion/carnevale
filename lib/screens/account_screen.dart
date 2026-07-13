@@ -490,7 +490,10 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                   ),
                 ),
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: context.accentColor, width: 1.5),
+                  borderSide: BorderSide(
+                    color: context.accentColor,
+                    width: 1.5,
+                  ),
                 ),
               ),
               validator: (v) {

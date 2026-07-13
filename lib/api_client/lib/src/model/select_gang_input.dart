@@ -11,28 +11,24 @@ part 'select_gang_input.g.dart';
 /// SelectGangInput
 ///
 /// Properties:
-/// * [listId]
+/// * [listId] 
 @BuiltValue()
-abstract class SelectGangInput
-    implements Built<SelectGangInput, SelectGangInputBuilder> {
+abstract class SelectGangInput implements Built<SelectGangInput, SelectGangInputBuilder> {
   @BuiltValueField(wireName: r'list_id')
   int get listId;
 
   SelectGangInput._();
 
-  factory SelectGangInput([void updates(SelectGangInputBuilder b)]) =
-      _$SelectGangInput;
+  factory SelectGangInput([void updates(SelectGangInputBuilder b)]) = _$SelectGangInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(SelectGangInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<SelectGangInput> get serializer =>
-      _$SelectGangInputSerializer();
+  static Serializer<SelectGangInput> get serializer => _$SelectGangInputSerializer();
 }
 
-class _$SelectGangInputSerializer
-    implements PrimitiveSerializer<SelectGangInput> {
+class _$SelectGangInputSerializer implements PrimitiveSerializer<SelectGangInput> {
   @override
   final Iterable<Type> types = const [SelectGangInput, _$SelectGangInput];
 
@@ -57,11 +53,7 @@ class _$SelectGangInputSerializer
     SelectGangInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -77,9 +69,10 @@ class _$SelectGangInputSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'list_id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.listId = valueDes;
           break;
         default:
@@ -110,3 +103,4 @@ class _$SelectGangInputSerializer
     return result.build();
   }
 }
+

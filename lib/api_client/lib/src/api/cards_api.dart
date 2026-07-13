@@ -12,6 +12,7 @@ import 'package:carnevale_api/src/api_util.dart';
 import 'package:carnevale_api/src/model/get_cards_manifest200_response.dart';
 
 class CardsApi {
+
   final Dio _dio;
 
   final Serializers _serializers;
@@ -19,10 +20,10 @@ class CardsApi {
   const CardsApi(this._dio, this._serializers);
 
   /// Card image sync manifest (identifier, internal_version, download URLs)
-  /// One entry per card with its current internal_version and the versioned URLs to download its front/back images. Clients cache images locally and re-download only cards whose internal_version is higher than the cached one. Card stats come from /profiles.
+  /// One entry per card with its current internal_version and the versioned URLs to download its front/back images. Clients cache images locally and re-download only cards whose internal_version is higher than the cached one. Card stats come from /profiles. 
   ///
   /// Parameters:
-  /// * [faction]
+  /// * [faction] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -32,7 +33,7 @@ class CardsApi {
   ///
   /// Returns a [Future] containing a [Response] with a [GetCardsManifest200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<GetCardsManifest200Response>> getCardsManifest({
+  Future<Response<GetCardsManifest200Response>> getCardsManifest({ 
     String? faction,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -44,7 +45,9 @@ class CardsApi {
     final _path = r'/cards/manifest';
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{...?headers},
+      headers: <String, dynamic>{
+        ...?headers,
+      },
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -60,12 +63,7 @@ class CardsApi {
     );
 
     final _queryParameters = <String, dynamic>{
-      if (faction != null)
-        r'faction': encodeQueryParameter(
-          _serializers,
-          faction,
-          const FullType(String),
-        ),
+      if (faction != null) r'faction': encodeQueryParameter(_serializers, faction, const FullType(String)),
     };
 
     final _response = await _dio.request<Object>(
@@ -81,13 +79,11 @@ class CardsApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null
-          ? null
-          : _serializers.deserialize(
-                  rawResponse,
-                  specifiedType: const FullType(GetCardsManifest200Response),
-                )
-                as GetCardsManifest200Response;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(GetCardsManifest200Response),
+      ) as GetCardsManifest200Response;
+
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -109,4 +105,5 @@ class CardsApi {
       extra: _response.extra,
     );
   }
+
 }

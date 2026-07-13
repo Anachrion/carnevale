@@ -5,17 +5,20 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String _fakeToken(Map<String, dynamic> payload) {
-  String encode(Object o) => base64Url.encode(utf8.encode(json.encode(o))).replaceAll('=', '');
-  return '${encode({
-        'alg': 'HS256',
-      })}.${encode(payload)}.signature';
+  String encode(Object o) =>
+      base64Url.encode(utf8.encode(json.encode(o))).replaceAll('=', '');
+  return '${encode({'alg': 'HS256'})}.${encode(payload)}.signature';
 }
 
 DioException _errorResponse(Object? data, {int statusCode = 422}) {
   final requestOptions = RequestOptions(path: '/x');
   return DioException(
     requestOptions: requestOptions,
-    response: Response(requestOptions: requestOptions, statusCode: statusCode, data: data),
+    response: Response(
+      requestOptions: requestOptions,
+      statusCode: statusCode,
+      data: data,
+    ),
   );
 }
 
@@ -84,7 +87,9 @@ void main() {
     });
 
     test('falls back to the provided message when there is no errors map', () {
-      final e = _errorResponse({'error': 'Invalid email or password.'}, statusCode: 401);
+      final e = _errorResponse({
+        'error': 'Invalid email or password.',
+      }, statusCode: 401);
       expect(auth.parseAuthError(e, fallback: 'nope'), 'nope');
     });
 

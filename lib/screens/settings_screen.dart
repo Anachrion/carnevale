@@ -272,7 +272,10 @@ class _OptionPicker<T> extends StatelessWidget {
           color: isDark ? AppPalette.controlNavyDark : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: accentColor.withValues(alpha: 0.45), width: 1.0),
+            side: BorderSide(
+              color: accentColor.withValues(alpha: 0.45),
+              width: 1.0,
+            ),
           ),
           items: options.map((o) {
             final selected = o == value;
@@ -528,7 +531,10 @@ class _SyncProgress extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           total > 0 ? 'Downloading $done / $total' : 'Checking for updates…',
-          style: GoogleFonts.cinzel(fontSize: 12, color: context.subtleTextColor),
+          style: GoogleFonts.cinzel(
+            fontSize: 12,
+            color: context.subtleTextColor,
+          ),
         ),
       ],
     );

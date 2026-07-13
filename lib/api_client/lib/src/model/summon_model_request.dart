@@ -6,51 +6,52 @@
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
-part 'create_cable_ticket201_response.g.dart';
+part 'summon_model_request.g.dart';
 
-/// CreateCableTicket201Response
+/// SummonModelRequest
 ///
 /// Properties:
-/// * [ticket] 
+/// * [cardReferenceId] - The Catalog::CardReference to summon (a profile's card).
 @BuiltValue()
-abstract class CreateCableTicket201Response implements Built<CreateCableTicket201Response, CreateCableTicket201ResponseBuilder> {
-  @BuiltValueField(wireName: r'ticket')
-  String get ticket;
+abstract class SummonModelRequest implements Built<SummonModelRequest, SummonModelRequestBuilder> {
+  /// The Catalog::CardReference to summon (a profile's card).
+  @BuiltValueField(wireName: r'card_reference_id')
+  int get cardReferenceId;
 
-  CreateCableTicket201Response._();
+  SummonModelRequest._();
 
-  factory CreateCableTicket201Response([void updates(CreateCableTicket201ResponseBuilder b)]) = _$CreateCableTicket201Response;
+  factory SummonModelRequest([void updates(SummonModelRequestBuilder b)]) = _$SummonModelRequest;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(CreateCableTicket201ResponseBuilder b) => b;
+  static void _defaults(SummonModelRequestBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<CreateCableTicket201Response> get serializer => _$CreateCableTicket201ResponseSerializer();
+  static Serializer<SummonModelRequest> get serializer => _$SummonModelRequestSerializer();
 }
 
-class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<CreateCableTicket201Response> {
+class _$SummonModelRequestSerializer implements PrimitiveSerializer<SummonModelRequest> {
   @override
-  final Iterable<Type> types = const [CreateCableTicket201Response, _$CreateCableTicket201Response];
+  final Iterable<Type> types = const [SummonModelRequest, _$SummonModelRequest];
 
   @override
-  final String wireName = r'CreateCableTicket201Response';
+  final String wireName = r'SummonModelRequest';
 
   Iterable<Object?> _serializeProperties(
     Serializers serializers,
-    CreateCableTicket201Response object, {
+    SummonModelRequest object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
-    yield r'ticket';
+    yield r'card_reference_id';
     yield serializers.serialize(
-      object.ticket,
-      specifiedType: const FullType(String),
+      object.cardReferenceId,
+      specifiedType: const FullType(int),
     );
   }
 
   @override
   Object serialize(
     Serializers serializers,
-    CreateCableTicket201Response object, {
+    SummonModelRequest object, {
     FullType specifiedType = FullType.unspecified,
   }) {
     return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
@@ -61,19 +62,19 @@ class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<Cr
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
     required List<Object?> serializedList,
-    required CreateCableTicket201ResponseBuilder result,
+    required SummonModelRequestBuilder result,
     required List<Object?> unhandled,
   }) {
     for (var i = 0; i < serializedList.length; i += 2) {
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
-        case r'ticket':
+        case r'card_reference_id':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.ticket = valueDes;
+            specifiedType: const FullType(int),
+          ) as int;
+          result.cardReferenceId = valueDes;
           break;
         default:
           unhandled.add(key);
@@ -84,12 +85,12 @@ class _$CreateCableTicket201ResponseSerializer implements PrimitiveSerializer<Cr
   }
 
   @override
-  CreateCableTicket201Response deserialize(
+  SummonModelRequest deserialize(
     Serializers serializers,
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    final result = CreateCableTicket201ResponseBuilder();
+    final result = SummonModelRequestBuilder();
     final serializedList = (serialized as Iterable<Object?>).toList();
     final unhandled = <Object?>[];
     _deserializeProperties(

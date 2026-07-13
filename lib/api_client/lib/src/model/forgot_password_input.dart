@@ -12,33 +12,26 @@ part 'forgot_password_input.g.dart';
 /// ForgotPasswordInput
 ///
 /// Properties:
-/// * [user]
+/// * [user] 
 @BuiltValue()
-abstract class ForgotPasswordInput
-    implements Built<ForgotPasswordInput, ForgotPasswordInputBuilder> {
+abstract class ForgotPasswordInput implements Built<ForgotPasswordInput, ForgotPasswordInputBuilder> {
   @BuiltValueField(wireName: r'user')
   ForgotPasswordInputUser get user;
 
   ForgotPasswordInput._();
 
-  factory ForgotPasswordInput([void updates(ForgotPasswordInputBuilder b)]) =
-      _$ForgotPasswordInput;
+  factory ForgotPasswordInput([void updates(ForgotPasswordInputBuilder b)]) = _$ForgotPasswordInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(ForgotPasswordInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<ForgotPasswordInput> get serializer =>
-      _$ForgotPasswordInputSerializer();
+  static Serializer<ForgotPasswordInput> get serializer => _$ForgotPasswordInputSerializer();
 }
 
-class _$ForgotPasswordInputSerializer
-    implements PrimitiveSerializer<ForgotPasswordInput> {
+class _$ForgotPasswordInputSerializer implements PrimitiveSerializer<ForgotPasswordInput> {
   @override
-  final Iterable<Type> types = const [
-    ForgotPasswordInput,
-    _$ForgotPasswordInput,
-  ];
+  final Iterable<Type> types = const [ForgotPasswordInput, _$ForgotPasswordInput];
 
   @override
   final String wireName = r'ForgotPasswordInput';
@@ -61,11 +54,7 @@ class _$ForgotPasswordInputSerializer
     ForgotPasswordInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -81,12 +70,10 @@ class _$ForgotPasswordInputSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'user':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(ForgotPasswordInputUser),
-                  )
-                  as ForgotPasswordInputUser;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ForgotPasswordInputUser),
+          ) as ForgotPasswordInputUser;
           result.user.replace(valueDes);
           break;
         default:
@@ -117,3 +104,4 @@ class _$ForgotPasswordInputSerializer
     return result.build();
   }
 }
+

@@ -13,35 +13,26 @@ part 'get_cards_manifest200_response.g.dart';
 /// GetCardsManifest200Response
 ///
 /// Properties:
-/// * [cards]
+/// * [cards] 
 @BuiltValue()
-abstract class GetCardsManifest200Response
-    implements
-        Built<GetCardsManifest200Response, GetCardsManifest200ResponseBuilder> {
+abstract class GetCardsManifest200Response implements Built<GetCardsManifest200Response, GetCardsManifest200ResponseBuilder> {
   @BuiltValueField(wireName: r'cards')
   BuiltList<CardManifestEntry> get cards;
 
   GetCardsManifest200Response._();
 
-  factory GetCardsManifest200Response([
-    void updates(GetCardsManifest200ResponseBuilder b),
-  ]) = _$GetCardsManifest200Response;
+  factory GetCardsManifest200Response([void updates(GetCardsManifest200ResponseBuilder b)]) = _$GetCardsManifest200Response;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(GetCardsManifest200ResponseBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<GetCardsManifest200Response> get serializer =>
-      _$GetCardsManifest200ResponseSerializer();
+  static Serializer<GetCardsManifest200Response> get serializer => _$GetCardsManifest200ResponseSerializer();
 }
 
-class _$GetCardsManifest200ResponseSerializer
-    implements PrimitiveSerializer<GetCardsManifest200Response> {
+class _$GetCardsManifest200ResponseSerializer implements PrimitiveSerializer<GetCardsManifest200Response> {
   @override
-  final Iterable<Type> types = const [
-    GetCardsManifest200Response,
-    _$GetCardsManifest200Response,
-  ];
+  final Iterable<Type> types = const [GetCardsManifest200Response, _$GetCardsManifest200Response];
 
   @override
   final String wireName = r'GetCardsManifest200Response';
@@ -64,11 +55,7 @@ class _$GetCardsManifest200ResponseSerializer
     GetCardsManifest200Response object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -84,14 +71,10 @@ class _$GetCardsManifest200ResponseSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'cards':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [
-                      FullType(CardManifestEntry),
-                    ]),
-                  )
-                  as BuiltList<CardManifestEntry>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(CardManifestEntry)]),
+          ) as BuiltList<CardManifestEntry>;
           result.cards.replace(valueDes);
           break;
         default:
@@ -122,3 +105,4 @@ class _$GetCardsManifest200ResponseSerializer
     return result.build();
   }
 }
+

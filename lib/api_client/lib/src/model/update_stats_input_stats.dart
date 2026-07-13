@@ -11,12 +11,11 @@ part 'update_stats_input_stats.g.dart';
 /// Partial set of current stat values to change — omitted ones keep their current values. Absolute values, not deltas.
 ///
 /// Properties:
-/// * [lifePoints]
-/// * [willPoints]
-/// * [commandPoints]
+/// * [lifePoints] 
+/// * [willPoints] 
+/// * [commandPoints] 
 @BuiltValue()
-abstract class UpdateStatsInputStats
-    implements Built<UpdateStatsInputStats, UpdateStatsInputStatsBuilder> {
+abstract class UpdateStatsInputStats implements Built<UpdateStatsInputStats, UpdateStatsInputStatsBuilder> {
   @BuiltValueField(wireName: r'life_points')
   int? get lifePoints;
 
@@ -28,25 +27,18 @@ abstract class UpdateStatsInputStats
 
   UpdateStatsInputStats._();
 
-  factory UpdateStatsInputStats([
-    void updates(UpdateStatsInputStatsBuilder b),
-  ]) = _$UpdateStatsInputStats;
+  factory UpdateStatsInputStats([void updates(UpdateStatsInputStatsBuilder b)]) = _$UpdateStatsInputStats;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(UpdateStatsInputStatsBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<UpdateStatsInputStats> get serializer =>
-      _$UpdateStatsInputStatsSerializer();
+  static Serializer<UpdateStatsInputStats> get serializer => _$UpdateStatsInputStatsSerializer();
 }
 
-class _$UpdateStatsInputStatsSerializer
-    implements PrimitiveSerializer<UpdateStatsInputStats> {
+class _$UpdateStatsInputStatsSerializer implements PrimitiveSerializer<UpdateStatsInputStats> {
   @override
-  final Iterable<Type> types = const [
-    UpdateStatsInputStats,
-    _$UpdateStatsInputStats,
-  ];
+  final Iterable<Type> types = const [UpdateStatsInputStats, _$UpdateStatsInputStats];
 
   @override
   final String wireName = r'UpdateStatsInputStats';
@@ -85,11 +77,7 @@ class _$UpdateStatsInputStatsSerializer
     UpdateStatsInputStats object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -105,21 +93,24 @@ class _$UpdateStatsInputStatsSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'life_points':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.lifePoints = valueDes;
           break;
         case r'will_points':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.willPoints = valueDes;
           break;
         case r'command_points':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.commandPoints = valueDes;
           break;
         default:
@@ -150,3 +141,4 @@ class _$UpdateStatsInputStatsSerializer
     return result.build();
   }
 }
+

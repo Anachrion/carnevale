@@ -68,6 +68,7 @@ Serializers _$serializers =
           ..add(SpecialRule.serializer)
           ..add(Spell.serializer)
           ..add(SpellDisciplineEnum.serializer)
+          ..add(SummonModelRequest.serializer)
           ..add(UpdateAccountInput.serializer)
           ..add(UpdateAccountInputUser.serializer)
           ..add(UpdateCountersInput.serializer)

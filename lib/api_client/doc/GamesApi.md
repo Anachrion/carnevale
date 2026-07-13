@@ -16,6 +16,7 @@ Method | HTTP request | Description
 [**deleteGame**](GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [**deselectGang**](GamesApi.md#deselectgang) | **DELETE** /games/{id}/select_gang | Clear the current user&#39;s gang selection for this game (still in gang selection)
 [**discardAgenda**](GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
+[**dismissSummon**](GamesApi.md#dismisssummon) | **DELETE** /games/{id}/summons/{list_entry_id} | Remove a summoned model from the current player&#39;s gang
 [**drawAgendas**](GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Draw a single in-play Agenda card
 [**finishGame**](GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side
 [**getAvailableGangs**](GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
@@ -27,6 +28,7 @@ Method | HTTP request | Description
 [**rewindTurn**](GamesApi.md#rewindturn) | **POST** /games/{id}/turns/rewind | Rewind the requesting player&#39;s turn cursor
 [**scoreAgenda**](GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
+[**summonModel**](GamesApi.md#summonmodel) | **POST** /games/{id}/summons | Conjure a model onto the board and add it to the current player&#39;s gang
 [**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [**unfinishGame**](GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [**updateCounters**](GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
@@ -359,6 +361,55 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **dismissSummon**
+> BuiltList dismissSummon(id, listEntryId)
+
+Remove a summoned model from the current player's gang
+
+Undoes a summon — a mis-tap, or a rule that no longer sustains the model. Only summoned models can be removed: the hired roster is frozen the moment the game starts, so a player cannot quietly delete a model they are losing with. Attempting it on a hired model is a 422. Broadcast to both players; the response is the player's updated gang. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int listEntryId = 56; // int | 
+
+try {
+    final response = api.dismissSummon(id, listEntryId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->dismissSummon: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **listEntryId** | **int**|  | 
+
+### Return type
+
+[**BuiltList**](BuiltList.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -874,6 +925,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Game**](Game.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **summonModel**
+> BuiltList summonModel(id, summonModelRequest)
+
+Conjure a model onto the board and add it to the current player's gang
+
+For the rare models whose special rules summon or raise new models mid-battle. Only available while the game is in_progress.  Any model in the catalog may be summoned — the rule lives on the summoner's card, so the app tracks the summon rather than adjudicating it, and a summon from outside the gang's own faction is expected rather than exceptional.  The new model joins the player's (otherwise frozen) gang with an entry state of its own, so it takes damage, carries counters and activates like any hired model. It is flagged `summoned`, which exempts it from the gang-building rules: it costs the gang no ducats and cannot push it over its limit or flip it to invalid. Broadcast to both players as a `game_state` event; the response is the player's updated gang. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final SummonModelRequest summonModelRequest = ; // SummonModelRequest | 
+
+try {
+    final response = api.summonModel(id, summonModelRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->summonModel: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **summonModelRequest** | [**SummonModelRequest**](SummonModelRequest.md)|  | 
+
+### Return type
+
+[**BuiltList**](BuiltList.md)
 
 ### Authorization
 

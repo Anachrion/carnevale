@@ -7,8 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_api.dart';
 
 void main() {
-  testWidgets('CardViewerScreen renders the card pager for the given profiles', (tester) async {
-    final profiles = [fakeProfile(name: 'Capodecina'), fakeProfile(id: 2, name: 'Bombardier')];
+  testWidgets('CardViewerScreen renders the card pager for the given profiles', (
+    tester,
+  ) async {
+    final profiles = [
+      fakeProfile(name: 'Capodecina'),
+      fakeProfile(id: 2, name: 'Bombardier'),
+    ];
 
     await tester.pumpWidget(
       MaterialApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
@@ -19,9 +24,15 @@ void main() {
     expect(find.textContaining('1 / 2'), findsOneWidget);
   });
 
-  testWidgets('The abilities button sits at the bottom right and opens the sheet', (tester) async {
+  testWidgets('The abilities button sits at the bottom right and opens the sheet', (
+    tester,
+  ) async {
     final adapter = installFakeApi();
-    adapter.stub('GET', '/abilities', listBody<api.Ability>([], const FullType(api.Ability)));
+    adapter.stub(
+      'GET',
+      '/abilities',
+      listBody<api.Ability>([], const FullType(api.Ability)),
+    );
 
     final profiles = [fakeProfile(name: 'Capodecina')];
 
@@ -36,7 +47,10 @@ void main() {
     final screen = tester.getSize(find.byType(Scaffold));
 
     // Bottom right: below the close button it used to sit beside, and right of centre.
-    expect(tester.getCenter(button).dy, greaterThan(tester.getCenter(close).dy));
+    expect(
+      tester.getCenter(button).dy,
+      greaterThan(tester.getCenter(close).dy),
+    );
     expect(tester.getCenter(button).dx, greaterThan(screen.width / 2));
     // On the same line as the flip/swipe hint, which sits on the left.
     expect(tester.getCenter(button).dy, closeTo(tester.getCenter(hint).dy, 1));
@@ -49,6 +63,9 @@ void main() {
     await tester.tap(button);
     await tester.pumpAndSettle();
 
-    expect(find.text('This character has no special abilities.'), findsOneWidget);
+    expect(
+      find.text('This character has no special abilities.'),
+      findsOneWidget,
+    );
   });
 }

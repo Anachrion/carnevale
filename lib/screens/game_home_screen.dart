@@ -431,7 +431,10 @@ class _GameTileState extends State<_GameTile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Divider(color: context.subtleTextColor.withValues(alpha: 0.2), height: 1),
+          Divider(
+            color: context.subtleTextColor.withValues(alpha: 0.2),
+            height: 1,
+          ),
           const SizedBox(height: 12),
           Text(
             _game.scenario.name,
@@ -502,7 +505,10 @@ class _GameTileState extends State<_GameTile> {
 
   // A compact pill for one scenario agenda special rule (rulebook p.36), mirroring the labels the
   // in-game Score tab uses. Shown on the expanded game card so the rules are visible before opening.
-  Widget _agendaRuleChip(BuildContext context, api.ScenarioAgendaRulesEnum rule) {
+  Widget _agendaRuleChip(
+    BuildContext context,
+    api.ScenarioAgendaRulesEnum rule,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -522,7 +528,8 @@ class _GameTileState extends State<_GameTile> {
     );
   }
 
-  static String _agendaRuleLabel(api.ScenarioAgendaRulesEnum rule) => switch (rule) {
+  static String _agendaRuleLabel(api.ScenarioAgendaRulesEnum rule) =>
+      switch (rule) {
         api.ScenarioAgendaRulesEnum.cycle => 'Cycle',
         api.ScenarioAgendaRulesEnum.secondary => 'Secondary',
         api.ScenarioAgendaRulesEnum.double_ => 'Double',
@@ -847,11 +854,7 @@ class _ScenarioTile extends StatelessWidget {
                 ),
               ),
               if (selected)
-                Icon(
-                  Icons.check_circle,
-                  color: context.accentColor,
-                  size: 20,
-                ),
+                Icon(Icons.check_circle, color: context.accentColor, size: 20),
             ],
           ),
         ),

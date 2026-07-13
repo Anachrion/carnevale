@@ -11,9 +11,9 @@ part 'agenda.g.dart';
 /// Agenda
 ///
 /// Properties:
-/// * [id]
-/// * [name]
-/// * [description]
+/// * [id] 
+/// * [name] 
+/// * [description] 
 @BuiltValue()
 abstract class Agenda implements Built<Agenda, AgendaBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -49,7 +49,10 @@ class _$AgendaSerializer implements PrimitiveSerializer<Agenda> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(object.id, specifiedType: const FullType(int));
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(int),
+    );
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -68,11 +71,7 @@ class _$AgendaSerializer implements PrimitiveSerializer<Agenda> {
     Agenda object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -88,27 +87,24 @@ class _$AgendaSerializer implements PrimitiveSerializer<Agenda> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.name = valueDes;
           break;
         case r'description':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.description = valueDes;
           break;
         default:
@@ -139,3 +135,4 @@ class _$AgendaSerializer implements PrimitiveSerializer<Agenda> {
     return result.build();
   }
 }
+

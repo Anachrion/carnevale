@@ -11,16 +11,15 @@ part 'card_manifest_entry.g.dart';
 /// CardManifestEntry
 ///
 /// Properties:
-/// * [identifier]
-/// * [faction]
+/// * [identifier] 
+/// * [faction] 
 /// * [internalVersion] - Bumps whenever the card's image bytes change; drives client re-download.
 /// * [frontUrl] - Versioned (?v=internal_version) URL of the front image, or null if missing.
-/// * [backUrl]
+/// * [backUrl] 
 /// * [frontBytes] - Size in bytes of the front image, or null if the file is missing.
-/// * [backBytes]
+/// * [backBytes] 
 @BuiltValue()
-abstract class CardManifestEntry
-    implements Built<CardManifestEntry, CardManifestEntryBuilder> {
+abstract class CardManifestEntry implements Built<CardManifestEntry, CardManifestEntryBuilder> {
   @BuiltValueField(wireName: r'identifier')
   String get identifier;
 
@@ -47,19 +46,16 @@ abstract class CardManifestEntry
 
   CardManifestEntry._();
 
-  factory CardManifestEntry([void updates(CardManifestEntryBuilder b)]) =
-      _$CardManifestEntry;
+  factory CardManifestEntry([void updates(CardManifestEntryBuilder b)]) = _$CardManifestEntry;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(CardManifestEntryBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<CardManifestEntry> get serializer =>
-      _$CardManifestEntrySerializer();
+  static Serializer<CardManifestEntry> get serializer => _$CardManifestEntrySerializer();
 }
 
-class _$CardManifestEntrySerializer
-    implements PrimitiveSerializer<CardManifestEntry> {
+class _$CardManifestEntrySerializer implements PrimitiveSerializer<CardManifestEntry> {
   @override
   final Iterable<Type> types = const [CardManifestEntry, _$CardManifestEntry];
 
@@ -124,11 +120,7 @@ class _$CardManifestEntrySerializer
     CardManifestEntry object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -144,67 +136,56 @@ class _$CardManifestEntrySerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'identifier':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.identifier = valueDes;
           break;
         case r'faction':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.faction = valueDes;
           break;
         case r'internal_version':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.internalVersion = valueDes;
           break;
         case r'front_url':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.frontUrl = valueDes;
           break;
         case r'back_url':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.backUrl = valueDes;
           break;
         case r'front_bytes':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(int),
-                  )
-                  as int?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
           if (valueDes == null) continue;
           result.frontBytes = valueDes;
           break;
         case r'back_bytes':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(int),
-                  )
-                  as int?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
           if (valueDes == null) continue;
           result.backBytes = valueDes;
           break;
@@ -236,3 +217,4 @@ class _$CardManifestEntrySerializer
     return result.build();
   }
 }
+

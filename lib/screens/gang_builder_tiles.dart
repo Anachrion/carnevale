@@ -157,7 +157,9 @@ class _EntryTileState extends State<_EntryTile>
                                     widget.role!,
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.white.withValues(alpha: 0.65),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.65,
+                                      ),
                                       fontStyle: FontStyle.italic,
                                     ),
                                   ),
@@ -247,7 +249,10 @@ class _EntryTileState extends State<_EntryTile>
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 0.5),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.35),
+            width: 0.5,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

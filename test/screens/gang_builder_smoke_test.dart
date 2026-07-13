@@ -7,12 +7,27 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_api.dart';
 
 void main() {
-  testWidgets('GangBuilderScreen renders the gang and its entries', (tester) async {
+  testWidgets('GangBuilderScreen renders the gang and its entries', (
+    tester,
+  ) async {
     final adapter = installFakeApi();
-    adapter.stub('GET', '/profiles',
-        listBody<api.Profile>([fakeProfile(name: 'Capodecina')], const FullType(api.Profile)));
-    adapter.stub('GET', '/equipment', listBody<api.Equipment>([], const FullType(api.Equipment)));
-    adapter.stub('GET', '/spells', listBody<api.Spell>([], const FullType(api.Spell)));
+    adapter.stub(
+      'GET',
+      '/profiles',
+      listBody<api.Profile>([
+        fakeProfile(name: 'Capodecina'),
+      ], const FullType(api.Profile)),
+    );
+    adapter.stub(
+      'GET',
+      '/equipment',
+      listBody<api.Equipment>([], const FullType(api.Equipment)),
+    );
+    adapter.stub(
+      'GET',
+      '/spells',
+      listBody<api.Spell>([], const FullType(api.Spell)),
+    );
 
     final gang = fakeModelList(
       name: 'The Rooks',

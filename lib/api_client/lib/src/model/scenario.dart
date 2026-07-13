@@ -12,20 +12,20 @@ part 'scenario.g.dart';
 /// Scenario
 ///
 /// Properties:
-/// * [id]
-/// * [name]
+/// * [id] 
+/// * [name] 
 /// * [ducats] - Default ducat limit recommended by the rulebook for this scenario.
 /// * [asymmetric] - True for scenarios with Attacker/Defender roles (e.g. Street Fight), which run a role roll-off once both players have joined.
-/// * [setup]
-/// * [primaryObjective]
+/// * [setup] 
+/// * [primaryObjective] 
 /// * [agendas] - Free-text rendering of the scenario's agenda instructions (e.g. \"3 scoring 1 Victory Point each.\", \"Secret, Cycle, Double.\"). See `agenda_rules`/`agenda_count` for the structured form.
 /// * [agendaRules] - The agenda special rules in effect for this scenario (rulebook p.36). `secret` hides opponents' in-hand agendas; `cycle` auto-draws a replacement when an agenda is scored.
 /// * [agendaCount] - How many agendas each player draws for their initial hand.
-/// * [specialRules]
+/// * [specialRules] 
 /// * [duration] - Free-text rendering of the scenario's duration (e.g. \"5 rounds.\"). See `turns` for the structured count.
 /// * [turns] - Number of turns the scenario lasts.
-/// * [deploymentZones]
-/// * [illustration]
+/// * [deploymentZones] 
+/// * [illustration] 
 @BuiltValue()
 abstract class Scenario implements Built<Scenario, ScenarioBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -102,7 +102,10 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(object.id, specifiedType: const FullType(int));
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(int),
+    );
     yield r'name';
     yield serializers.serialize(
       object.name,
@@ -136,9 +139,7 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
     yield r'agenda_rules';
     yield serializers.serialize(
       object.agendaRules,
-      specifiedType: const FullType(BuiltList, [
-        FullType(ScenarioAgendaRulesEnum),
-      ]),
+      specifiedType: const FullType(BuiltList, [FullType(ScenarioAgendaRulesEnum)]),
     );
     yield r'agenda_count';
     yield serializers.serialize(
@@ -180,11 +181,7 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
     Scenario object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -200,125 +197,101 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.id = valueDes;
           break;
         case r'name':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.name = valueDes;
           break;
         case r'ducats':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.ducats = valueDes;
           break;
         case r'asymmetric':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.asymmetric = valueDes;
           break;
         case r'setup':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.setup = valueDes;
           break;
         case r'primary_objective':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.primaryObjective = valueDes;
           break;
         case r'agendas':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [
-                      FullType(String),
-                    ]),
-                  )
-                  as BuiltList<String>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
           result.agendas.replace(valueDes);
           break;
         case r'agenda_rules':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [
-                      FullType(ScenarioAgendaRulesEnum),
-                    ]),
-                  )
-                  as BuiltList<ScenarioAgendaRulesEnum>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(ScenarioAgendaRulesEnum)]),
+          ) as BuiltList<ScenarioAgendaRulesEnum>;
           result.agendaRules.replace(valueDes);
           break;
         case r'agenda_count':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.agendaCount = valueDes;
           break;
         case r'special_rules':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [
-                      FullType(String),
-                    ]),
-                  )
-                  as BuiltList<String>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
           result.specialRules.replace(valueDes);
           break;
         case r'duration':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.duration = valueDes;
           break;
         case r'turns':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.turns = valueDes;
           break;
         case r'deployment_zones':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [
-                      FullType(String),
-                    ]),
-                  )
-                  as BuiltList<String>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
           result.deploymentZones.replace(valueDes);
           break;
         case r'illustration':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.illustration = valueDes;
           break;
@@ -352,27 +325,23 @@ class _$ScenarioSerializer implements PrimitiveSerializer<Scenario> {
 }
 
 class ScenarioAgendaRulesEnum extends EnumClass {
+
   @BuiltValueEnumConst(wireName: r'cycle')
   static const ScenarioAgendaRulesEnum cycle = _$scenarioAgendaRulesEnum_cycle;
   @BuiltValueEnumConst(wireName: r'secondary')
-  static const ScenarioAgendaRulesEnum secondary =
-      _$scenarioAgendaRulesEnum_secondary;
+  static const ScenarioAgendaRulesEnum secondary = _$scenarioAgendaRulesEnum_secondary;
   @BuiltValueEnumConst(wireName: r'double')
-  static const ScenarioAgendaRulesEnum double_ =
-      _$scenarioAgendaRulesEnum_double_;
+  static const ScenarioAgendaRulesEnum double_ = _$scenarioAgendaRulesEnum_double_;
   @BuiltValueEnumConst(wireName: r'secret')
-  static const ScenarioAgendaRulesEnum secret =
-      _$scenarioAgendaRulesEnum_secret;
+  static const ScenarioAgendaRulesEnum secret = _$scenarioAgendaRulesEnum_secret;
   @BuiltValueEnumConst(wireName: r'total')
   static const ScenarioAgendaRulesEnum total = _$scenarioAgendaRulesEnum_total;
 
-  static Serializer<ScenarioAgendaRulesEnum> get serializer =>
-      _$scenarioAgendaRulesEnumSerializer;
+  static Serializer<ScenarioAgendaRulesEnum> get serializer => _$scenarioAgendaRulesEnumSerializer;
 
-  const ScenarioAgendaRulesEnum._(String name) : super(name);
+  const ScenarioAgendaRulesEnum._(String name): super(name);
 
-  static BuiltSet<ScenarioAgendaRulesEnum> get values =>
-      _$scenarioAgendaRulesEnumValues;
-  static ScenarioAgendaRulesEnum valueOf(String name) =>
-      _$scenarioAgendaRulesEnumValueOf(name);
+  static BuiltSet<ScenarioAgendaRulesEnum> get values => _$scenarioAgendaRulesEnumValues;
+  static ScenarioAgendaRulesEnum valueOf(String name) => _$scenarioAgendaRulesEnumValueOf(name);
 }
+

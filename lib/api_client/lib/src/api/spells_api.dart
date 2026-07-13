@@ -13,6 +13,7 @@ import 'package:carnevale_api/src/api_util.dart';
 import 'package:carnevale_api/src/model/spell.dart';
 
 class SpellsApi {
+
   final Dio _dio;
 
   final Serializers _serializers;
@@ -20,10 +21,10 @@ class SpellsApi {
   const SpellsApi(this._dio, this._serializers);
 
   /// List all spells, optionally filtered by Discipline
-  ///
+  /// 
   ///
   /// Parameters:
-  /// * [discipline]
+  /// * [discipline] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -33,7 +34,7 @@ class SpellsApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList<Spell>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<BuiltList<Spell>>> getSpells({
+  Future<Response<BuiltList<Spell>>> getSpells({ 
     String? discipline,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -45,7 +46,9 @@ class SpellsApi {
     final _path = r'/spells';
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{...?headers},
+      headers: <String, dynamic>{
+        ...?headers,
+      },
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -53,8 +56,11 @@ class SpellsApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
           },
-          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -62,12 +68,7 @@ class SpellsApi {
     );
 
     final _queryParameters = <String, dynamic>{
-      if (discipline != null)
-        r'discipline': encodeQueryParameter(
-          _serializers,
-          discipline,
-          const FullType(String),
-        ),
+      if (discipline != null) r'discipline': encodeQueryParameter(_serializers, discipline, const FullType(String)),
     };
 
     final _response = await _dio.request<Object>(
@@ -83,13 +84,11 @@ class SpellsApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null
-          ? null
-          : _serializers.deserialize(
-                  rawResponse,
-                  specifiedType: const FullType(BuiltList, [FullType(Spell)]),
-                )
-                as BuiltList<Spell>;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(BuiltList, [FullType(Spell)]),
+      ) as BuiltList<Spell>;
+
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -111,4 +110,5 @@ class SpellsApi {
       extra: _response.extra,
     );
   }
+
 }

@@ -11,16 +11,14 @@ part 'update_counters_input_counters.g.dart';
 /// Partial set of counters to change — omitted ones keep their current values.
 ///
 /// Properties:
-/// * [stunned]
-/// * [hidden]
-/// * [guarding]
-/// * [carryingObjective]
-/// * [underwaterCounters]
-/// * [activated] - Whether this model has been activated on the acting player's current turn. Persisted server-side as the turn it was activated on, so it resets itself when that player advances the turn (and is restored intact if they rewind). The turn is always taken from the acting player's own cursor — it cannot be supplied by the client.
+/// * [stunned] 
+/// * [hidden] 
+/// * [guarding] 
+/// * [carryingObjective] 
+/// * [underwaterCounters] 
+/// * [activated] - Whether this model has been activated on the acting player's current turn. Persisted server-side as the turn it was activated on, so it resets itself when that player advances the turn (and is restored intact if they rewind). The turn is always taken from the acting player's own cursor — it cannot be supplied by the client. 
 @BuiltValue()
-abstract class UpdateCountersInputCounters
-    implements
-        Built<UpdateCountersInputCounters, UpdateCountersInputCountersBuilder> {
+abstract class UpdateCountersInputCounters implements Built<UpdateCountersInputCounters, UpdateCountersInputCountersBuilder> {
   @BuiltValueField(wireName: r'stunned')
   bool? get stunned;
 
@@ -36,31 +34,24 @@ abstract class UpdateCountersInputCounters
   @BuiltValueField(wireName: r'underwater_counters')
   int? get underwaterCounters;
 
-  /// Whether this model has been activated on the acting player's current turn. Persisted server-side as the turn it was activated on, so it resets itself when that player advances the turn (and is restored intact if they rewind). The turn is always taken from the acting player's own cursor — it cannot be supplied by the client.
+  /// Whether this model has been activated on the acting player's current turn. Persisted server-side as the turn it was activated on, so it resets itself when that player advances the turn (and is restored intact if they rewind). The turn is always taken from the acting player's own cursor — it cannot be supplied by the client. 
   @BuiltValueField(wireName: r'activated')
   bool? get activated;
 
   UpdateCountersInputCounters._();
 
-  factory UpdateCountersInputCounters([
-    void updates(UpdateCountersInputCountersBuilder b),
-  ]) = _$UpdateCountersInputCounters;
+  factory UpdateCountersInputCounters([void updates(UpdateCountersInputCountersBuilder b)]) = _$UpdateCountersInputCounters;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(UpdateCountersInputCountersBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<UpdateCountersInputCounters> get serializer =>
-      _$UpdateCountersInputCountersSerializer();
+  static Serializer<UpdateCountersInputCounters> get serializer => _$UpdateCountersInputCountersSerializer();
 }
 
-class _$UpdateCountersInputCountersSerializer
-    implements PrimitiveSerializer<UpdateCountersInputCounters> {
+class _$UpdateCountersInputCountersSerializer implements PrimitiveSerializer<UpdateCountersInputCounters> {
   @override
-  final Iterable<Type> types = const [
-    UpdateCountersInputCounters,
-    _$UpdateCountersInputCounters,
-  ];
+  final Iterable<Type> types = const [UpdateCountersInputCounters, _$UpdateCountersInputCounters];
 
   @override
   final String wireName = r'UpdateCountersInputCounters';
@@ -120,11 +111,7 @@ class _$UpdateCountersInputCountersSerializer
     UpdateCountersInputCounters object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -140,54 +127,45 @@ class _$UpdateCountersInputCountersSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'stunned':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.stunned = valueDes;
           break;
         case r'hidden':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.hidden = valueDes;
           break;
         case r'guarding':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.guarding = valueDes;
           break;
         case r'carrying_objective':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.carryingObjective = valueDes;
           break;
         case r'underwater_counters':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.underwaterCounters = valueDes;
           break;
         case r'activated':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.activated = valueDes;
           break;
         default:
@@ -218,3 +196,4 @@ class _$UpdateCountersInputCountersSerializer
     return result.build();
   }
 }
+

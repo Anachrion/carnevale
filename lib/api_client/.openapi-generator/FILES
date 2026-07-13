@@ -57,6 +57,7 @@ doc/SetEntrySpellsInputEntry.md
 doc/SpecialRule.md
 doc/Spell.md
 doc/SpellsApi.md
+doc/SummonModelRequest.md
 doc/UpdateAccountInput.md
 doc/UpdateAccountInputUser.md
 doc/UpdateCountersInput.md
@@ -131,6 +132,7 @@ lib/src/model/set_entry_spells_input.dart
 lib/src/model/set_entry_spells_input_entry.dart
 lib/src/model/special_rule.dart
 lib/src/model/spell.dart
+lib/src/model/summon_model_request.dart
 lib/src/model/update_account_input.dart
 lib/src/model/update_account_input_user.dart
 lib/src/model/update_counters_input.dart
@@ -141,6 +143,4 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/card_manifest_entry_test.dart
-test/cards_api_test.dart
-test/get_cards_manifest200_response_test.dart
+test/summon_model_request_test.dart
