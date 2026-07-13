@@ -80,6 +80,8 @@ class _$ListEntry extends ListEntry {
   @override
   final int cost;
   @override
+  final bool summoned;
+  @override
   final EntryState? state;
   @override
   final bool mage;
@@ -104,6 +106,7 @@ class _$ListEntry extends ListEntry {
     required this.entryId,
     required this.name,
     required this.cost,
+    required this.summoned,
     this.state,
     required this.mage,
     required this.spellSlots,
@@ -129,6 +132,7 @@ class _$ListEntry extends ListEntry {
         entryId == other.entryId &&
         name == other.name &&
         cost == other.cost &&
+        summoned == other.summoned &&
         state == other.state &&
         mage == other.mage &&
         spellSlots == other.spellSlots &&
@@ -147,6 +151,7 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, entryId.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, cost.hashCode);
+    _$hash = $jc(_$hash, summoned.hashCode);
     _$hash = $jc(_$hash, state.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
     _$hash = $jc(_$hash, spellSlots.hashCode);
@@ -167,6 +172,7 @@ class _$ListEntry extends ListEntry {
           ..add('entryId', entryId)
           ..add('name', name)
           ..add('cost', cost)
+          ..add('summoned', summoned)
           ..add('state', state)
           ..add('mage', mage)
           ..add('spellSlots', spellSlots)
@@ -205,6 +211,10 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   int? _cost;
   int? get cost => _$this._cost;
   set cost(int? cost) => _$this._cost = cost;
+
+  bool? _summoned;
+  bool? get summoned => _$this._summoned;
+  set summoned(bool? summoned) => _$this._summoned = summoned;
 
   EntryStateBuilder? _state;
   EntryStateBuilder get state => _$this._state ??= EntryStateBuilder();
@@ -250,6 +260,7 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _entryId = $v.entryId;
       _name = $v.name;
       _cost = $v.cost;
+      _summoned = $v.summoned;
       _state = $v.state?.toBuilder();
       _mage = $v.mage;
       _spellSlots = $v.spellSlots;
@@ -306,6 +317,11 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               cost,
               r'ListEntry',
               'cost',
+            ),
+            summoned: BuiltValueNullFieldError.checkNotNull(
+              summoned,
+              r'ListEntry',
+              'summoned',
             ),
             state: _state?.build(),
             mage: BuiltValueNullFieldError.checkNotNull(

@@ -14,12 +14,13 @@ part 'list_entry.g.dart';
 /// ListEntry
 ///
 /// Properties:
-/// * [id]
-/// * [position]
-/// * [entryType]
-/// * [entryId]
-/// * [name]
-/// * [cost]
+/// * [id] 
+/// * [position] 
+/// * [entryType] 
+/// * [entryId] 
+/// * [name] 
+/// * [cost] 
+/// * [summoned] - Conjured onto the board mid-game by a special rule, rather than hired during gang building. A summoned model tracks HP/counters/activation like any other, but costs the gang nothing and is exempt from the gang-building rules (ducat limit, faction consistency, unique/Leader/ratio), so a legal summon can't push a gang over its limit or flip it to invalid. It is also the only kind of model that can be removed mid-game. 
 /// * [state] - Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
 /// * [mage] - Whether this model is a Mage and can therefore be given spells. Always false for Equipment.
 /// * [spellSlots] - Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
@@ -47,6 +48,10 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
 
   @BuiltValueField(wireName: r'cost')
   int get cost;
+
+  /// Conjured onto the board mid-game by a special rule, rather than hired during gang building. A summoned model tracks HP/counters/activation like any other, but costs the gang nothing and is exempt from the gang-building rules (ducat limit, faction consistency, unique/Leader/ratio), so a legal summon can't push a gang over its limit or flip it to invalid. It is also the only kind of model that can be removed mid-game. 
+  @BuiltValueField(wireName: r'summoned')
+  bool get summoned;
 
   /// Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
   @BuiltValueField(wireName: r'state')
@@ -100,7 +105,10 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(object.id, specifiedType: const FullType(int));
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(int),
+    );
     yield r'position';
     yield serializers.serialize(
       object.position,
@@ -125,6 +133,11 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
     yield serializers.serialize(
       object.cost,
       specifiedType: const FullType(int),
+    );
+    yield r'summoned';
+    yield serializers.serialize(
+      object.summoned,
+      specifiedType: const FullType(bool),
     );
     if (object.state != null) {
       yield r'state';
@@ -175,11 +188,7 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
     ListEntry object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -195,110 +204,104 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.id = valueDes;
           break;
         case r'position':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.position = valueDes;
           break;
         case r'entry_type':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(ListEntryEntryTypeEnum),
-                  )
-                  as ListEntryEntryTypeEnum;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ListEntryEntryTypeEnum),
+          ) as ListEntryEntryTypeEnum;
           result.entryType = valueDes;
           break;
         case r'entry_id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.entryId = valueDes;
           break;
         case r'name':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.name = valueDes;
           break;
         case r'cost':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.cost = valueDes;
           break;
+        case r'summoned':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.summoned = valueDes;
+          break;
         case r'state':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(EntryState),
-                  )
-                  as EntryState?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(EntryState),
+          ) as EntryState?;
           if (valueDes == null) continue;
           result.state.replace(valueDes);
           break;
         case r'mage':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(bool),
-                  )
-                  as bool;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
           result.mage = valueDes;
           break;
         case r'spell_slots':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.spellSlots = valueDes;
           break;
         case r'disciplines':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [
-                      FullType(String),
-                    ]),
-                  )
-                  as BuiltList<String>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
           result.disciplines.replace(valueDes);
           break;
         case r'spell_discipline':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.spellDiscipline = valueDes;
           break;
         case r'cantrip':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(Spell),
-                  )
-                  as Spell?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(Spell),
+          ) as Spell?;
           if (valueDes == null) continue;
           result.cantrip.replace(valueDes);
           break;
         case r'spells':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [FullType(Spell)]),
-                  )
-                  as BuiltList<Spell>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(Spell)]),
+          ) as BuiltList<Spell>;
           result.spells.replace(valueDes);
           break;
         default:
@@ -331,20 +334,17 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
 }
 
 class ListEntryEntryTypeEnum extends EnumClass {
+
   @BuiltValueEnumConst(wireName: r'Catalog::CardReference')
-  static const ListEntryEntryTypeEnum catalogColonColonCardReference =
-      _$listEntryEntryTypeEnum_catalogColonColonCardReference;
+  static const ListEntryEntryTypeEnum catalogColonColonCardReference = _$listEntryEntryTypeEnum_catalogColonColonCardReference;
   @BuiltValueEnumConst(wireName: r'Catalog::Equipment')
-  static const ListEntryEntryTypeEnum catalogColonColonEquipment =
-      _$listEntryEntryTypeEnum_catalogColonColonEquipment;
+  static const ListEntryEntryTypeEnum catalogColonColonEquipment = _$listEntryEntryTypeEnum_catalogColonColonEquipment;
 
-  static Serializer<ListEntryEntryTypeEnum> get serializer =>
-      _$listEntryEntryTypeEnumSerializer;
+  static Serializer<ListEntryEntryTypeEnum> get serializer => _$listEntryEntryTypeEnumSerializer;
 
-  const ListEntryEntryTypeEnum._(String name) : super(name);
+  const ListEntryEntryTypeEnum._(String name): super(name);
 
-  static BuiltSet<ListEntryEntryTypeEnum> get values =>
-      _$listEntryEntryTypeEnumValues;
-  static ListEntryEntryTypeEnum valueOf(String name) =>
-      _$listEntryEntryTypeEnumValueOf(name);
+  static BuiltSet<ListEntryEntryTypeEnum> get values => _$listEntryEntryTypeEnumValues;
+  static ListEntryEntryTypeEnum valueOf(String name) => _$listEntryEntryTypeEnumValueOf(name);
 }
+

@@ -41,6 +41,11 @@ abstract final class AppPalette {
 
   // ── Accents / misc ─────────────────────────────────────────────────────────
   static const equipment = Color(0xFF4A3F35); // equipment tiles
+
+  /// A killed model's tile. The faction color drains away to a cold slate, so a dead model reads as
+  /// *out of the game* rather than merely quiet — distinct from an activated model, which keeps its
+  /// faction color and is only darkened.
+  static const deadEntry = Color(0xFF33383F);
   static const newsCard = Color(0xFF5A6B78); // home news card
   static const toggleBlue = Color(0xFF6C9BC2); // settings theme-toggle accent
   static const controlNavyDark = Color(

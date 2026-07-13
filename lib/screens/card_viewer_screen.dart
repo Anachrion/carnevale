@@ -229,7 +229,11 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                 child: Align(
                   alignment: Alignment.topLeft,
                   child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
@@ -309,7 +313,9 @@ class _AbilitiesSheet extends StatelessWidget {
                 return SizedBox(
                   height: 160,
                   child: Center(
-                    child: CircularProgressIndicator(color: context.accentColor),
+                    child: CircularProgressIndicator(
+                      color: context.accentColor,
+                    ),
                   ),
                 );
               }
@@ -356,7 +362,10 @@ class _AbilitiesSheet extends StatelessWidget {
                   if (character.isEmpty && weapon.isEmpty)
                     Text(
                       'This character has no special abilities.',
-                      style: TextStyle(color: context.subtleTextColor, fontSize: 14),
+                      style: TextStyle(
+                        color: context.subtleTextColor,
+                        fontSize: 14,
+                      ),
                     ),
                   if (character.isNotEmpty) ...[
                     const _SectionTitle('Character Abilities'),
@@ -443,7 +452,9 @@ class _CardImage extends StatelessWidget {
     final filename = path.split('/').last;
     // Faces are fetched from the backend and cached locally (mobile) or by the browser (web),
     // rather than bundled with the app — see CardImageService.
-    final provider = filename.isEmpty ? null : CardImageService().provider(filename);
+    final provider = filename.isEmpty
+        ? null
+        : CardImageService().provider(filename);
     if (provider == null) {
       return const Center(
         child: Icon(Icons.broken_image, color: Colors.white38, size: 64),

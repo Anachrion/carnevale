@@ -11,34 +11,26 @@ part 'update_account_input_user.g.dart';
 /// UpdateAccountInputUser
 ///
 /// Properties:
-/// * [username]
+/// * [username] 
 @BuiltValue()
-abstract class UpdateAccountInputUser
-    implements Built<UpdateAccountInputUser, UpdateAccountInputUserBuilder> {
+abstract class UpdateAccountInputUser implements Built<UpdateAccountInputUser, UpdateAccountInputUserBuilder> {
   @BuiltValueField(wireName: r'username')
   String get username;
 
   UpdateAccountInputUser._();
 
-  factory UpdateAccountInputUser([
-    void updates(UpdateAccountInputUserBuilder b),
-  ]) = _$UpdateAccountInputUser;
+  factory UpdateAccountInputUser([void updates(UpdateAccountInputUserBuilder b)]) = _$UpdateAccountInputUser;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(UpdateAccountInputUserBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<UpdateAccountInputUser> get serializer =>
-      _$UpdateAccountInputUserSerializer();
+  static Serializer<UpdateAccountInputUser> get serializer => _$UpdateAccountInputUserSerializer();
 }
 
-class _$UpdateAccountInputUserSerializer
-    implements PrimitiveSerializer<UpdateAccountInputUser> {
+class _$UpdateAccountInputUserSerializer implements PrimitiveSerializer<UpdateAccountInputUser> {
   @override
-  final Iterable<Type> types = const [
-    UpdateAccountInputUser,
-    _$UpdateAccountInputUser,
-  ];
+  final Iterable<Type> types = const [UpdateAccountInputUser, _$UpdateAccountInputUser];
 
   @override
   final String wireName = r'UpdateAccountInputUser';
@@ -61,11 +53,7 @@ class _$UpdateAccountInputUserSerializer
     UpdateAccountInputUser object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -81,12 +69,10 @@ class _$UpdateAccountInputUserSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'username':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.username = valueDes;
           break;
         default:
@@ -117,3 +103,4 @@ class _$UpdateAccountInputUserSerializer
     return result.build();
   }
 }
+

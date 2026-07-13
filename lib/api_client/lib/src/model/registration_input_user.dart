@@ -11,13 +11,12 @@ part 'registration_input_user.g.dart';
 /// RegistrationInputUser
 ///
 /// Properties:
-/// * [username]
-/// * [email]
-/// * [password]
-/// * [passwordConfirmation]
+/// * [username] 
+/// * [email] 
+/// * [password] 
+/// * [passwordConfirmation] 
 @BuiltValue()
-abstract class RegistrationInputUser
-    implements Built<RegistrationInputUser, RegistrationInputUserBuilder> {
+abstract class RegistrationInputUser implements Built<RegistrationInputUser, RegistrationInputUserBuilder> {
   @BuiltValueField(wireName: r'username')
   String get username;
 
@@ -32,25 +31,18 @@ abstract class RegistrationInputUser
 
   RegistrationInputUser._();
 
-  factory RegistrationInputUser([
-    void updates(RegistrationInputUserBuilder b),
-  ]) = _$RegistrationInputUser;
+  factory RegistrationInputUser([void updates(RegistrationInputUserBuilder b)]) = _$RegistrationInputUser;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(RegistrationInputUserBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<RegistrationInputUser> get serializer =>
-      _$RegistrationInputUserSerializer();
+  static Serializer<RegistrationInputUser> get serializer => _$RegistrationInputUserSerializer();
 }
 
-class _$RegistrationInputUserSerializer
-    implements PrimitiveSerializer<RegistrationInputUser> {
+class _$RegistrationInputUserSerializer implements PrimitiveSerializer<RegistrationInputUser> {
   @override
-  final Iterable<Type> types = const [
-    RegistrationInputUser,
-    _$RegistrationInputUser,
-  ];
+  final Iterable<Type> types = const [RegistrationInputUser, _$RegistrationInputUser];
 
   @override
   final String wireName = r'RegistrationInputUser';
@@ -88,11 +80,7 @@ class _$RegistrationInputUserSerializer
     RegistrationInputUser object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -108,39 +96,31 @@ class _$RegistrationInputUserSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'username':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.username = valueDes;
           break;
         case r'email':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.email = valueDes;
           break;
         case r'password':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.password = valueDes;
           break;
         case r'password_confirmation':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.passwordConfirmation = valueDes;
           break;
         default:
@@ -171,3 +151,4 @@ class _$RegistrationInputUserSerializer
     return result.build();
   }
 }
+

@@ -463,3 +463,258 @@ class _CounterIcon extends StatelessWidget {
     );
   }
 }
+
+/// The summon picker: search the whole catalog and conjure a model onto the board mid-game.
+///
+/// Deliberately unrestricted, unlike the gang builder's Hire tab (own faction + Gifted). A summoning
+/// rule lives on the summoner's own card and routinely reaches outside the gang's faction — raising
+/// the dead, calling up a spawn — so restricting the pool here would make legal summons impossible.
+/// The app tracks the summon; the player adjudicates it.
+class _SummonPickerDialog extends StatefulWidget {
+  const _SummonPickerDialog({required this.gameId, required this.onSummoned});
+
+  final int gameId;
+  final void Function(api.ModelList gang) onSummoned;
+
+  @override
+  State<_SummonPickerDialog> createState() => _SummonPickerDialogState();
+}
+
+class _SummonPickerDialogState extends State<_SummonPickerDialog>
+    with ProfileSearchMixin {
+  final _service = ProfileService();
+  List<api.Profile> _results = [];
+  bool _loading = true;
+  bool _busy = false;
+
+  /// Empty: the summon pool is the whole catalog, with no faction narrowing.
+  @override
+  Set<String> get searchFactions => const {};
+
+  @override
+  void onSearchChanged() => _results = _service.matching(searchQuery);
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    disposeSearch();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    await _service.loadAll();
+    if (!mounted) return;
+    setState(() => _loading = false);
+    applySearch();
+  }
+
+  Future<void> _summon(api.Profile profile) async {
+    final refId = profile.cardReferenceId;
+    // No printed card means nothing to put on the table.
+    if (_busy || refId == null) return;
+    setState(() => _busy = true);
+    try {
+      final gang = await GameService().summon(widget.gameId, refId);
+      if (!mounted) return;
+      widget.onSummoned(gang);
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) {
+        setState(() => _busy = false);
+        showAppToast(context, 'Could not summon that model. Please try again.');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ThemedDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Summon a model',
+            style: GoogleFonts.cinzel(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Any model may be summoned, from any faction. It costs no ducats.',
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+          ),
+          const SizedBox(height: 12),
+          buildSearchField(hintText: 'Search names, abilities, rules...'),
+          if (pickedFacets.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            buildFacetChips(),
+          ],
+          const SizedBox(height: 8),
+          // Fixed height, not Expanded: the dialog's Column is mainAxisSize.min, so it has no bounded
+          // height to divide up. The suggestions float over the results rather than pushing them
+          // down, as they do everywhere else the catalog search appears.
+          SizedBox(
+            height: 300,
+            child: Stack(
+              children: [
+                _buildResults(context),
+                if (hasSuggestions)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: buildSuggestions(),
+                  ),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.cinzel(
+                  fontWeight: FontWeight.w700,
+                  color: context.accentColor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResults(BuildContext context) {
+    if (_loading) {
+      return Center(
+        child: CircularProgressIndicator(color: context.accentColor),
+      );
+    }
+    if (_results.isEmpty) {
+      return Center(
+        child: Text(
+          'No models found.',
+          style: TextStyle(fontSize: 13, color: context.subtleTextColor),
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: EdgeInsets.zero,
+      itemCount: _results.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 6),
+      itemBuilder: (_, i) {
+        final profile = _results[i];
+        final color =
+            AppPalette.factionColors[profile.faction] ?? context.accentColor;
+        return Opacity(
+          opacity: _busy ? 0.5 : 1,
+          child: GestureDetector(
+            onTap: () => _summon(profile),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: AppPalette.entryTileGradient(color),
+                ),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        profile.name,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      profile.faction,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: Colors.white.withValues(alpha: 0.75),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Confirms removing a summoned model. Worth a tap of friction: dismissing is destructive (the
+/// model and everything tracked on it are gone), and the button sits right beside the counters you
+/// tap constantly.
+class _ConfirmDismissDialog extends StatelessWidget {
+  const _ConfirmDismissDialog({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return ThemedDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Remove $name?',
+            style: GoogleFonts.cinzel(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'This summoned model leaves the board. Its wounds and counters go with it.',
+            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: context.subtleTextColor,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  'Remove',
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: AppPalette.brightRed,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

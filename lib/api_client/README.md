@@ -75,6 +75,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**deleteGame**](doc/GamesApi.md#deletegame) | **DELETE** /games/{id} | Soft-delete this game for the current user only
 [*GamesApi*](doc/GamesApi.md) | [**deselectGang**](doc/GamesApi.md#deselectgang) | **DELETE** /games/{id}/select_gang | Clear the current user&#39;s gang selection for this game (still in gang selection)
 [*GamesApi*](doc/GamesApi.md) | [**discardAgenda**](doc/GamesApi.md#discardagenda) | **POST** /games/{id}/agendas/{agenda_id}/discard | Discard an Agenda from this player&#39;s hand
+[*GamesApi*](doc/GamesApi.md) | [**dismissSummon**](doc/GamesApi.md#dismisssummon) | **DELETE** /games/{id}/summons/{list_entry_id} | Remove a summoned model from the current player&#39;s gang
 [*GamesApi*](doc/GamesApi.md) | [**drawAgendas**](doc/GamesApi.md#drawagendas) | **POST** /games/{id}/agendas/draw | Draw a single in-play Agenda card
 [*GamesApi*](doc/GamesApi.md) | [**finishGame**](doc/GamesApi.md#finishgame) | **POST** /games/{id}/finish | End the game from the requesting player&#39;s side
 [*GamesApi*](doc/GamesApi.md) | [**getAvailableGangs**](doc/GamesApi.md#getavailablegangs) | **GET** /games/{id}/available_lists | The current user&#39;s lists, flagged selectable against this game&#39;s ducat_limit
@@ -86,6 +87,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**rewindTurn**](doc/GamesApi.md#rewindturn) | **POST** /games/{id}/turns/rewind | Rewind the requesting player&#39;s turn cursor
 [*GamesApi*](doc/GamesApi.md) | [**scoreAgenda**](doc/GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
+[*GamesApi*](doc/GamesApi.md) | [**summonModel**](doc/GamesApi.md#summonmodel) | **POST** /games/{id}/summons | Conjure a model onto the board and add it to the current player&#39;s gang
 [*GamesApi*](doc/GamesApi.md) | [**unarchiveGame**](doc/GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [*GamesApi*](doc/GamesApi.md) | [**unfinishGame**](doc/GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [*GamesApi*](doc/GamesApi.md) | [**updateCounters**](doc/GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
@@ -160,6 +162,7 @@ Class | Method | HTTP request | Description
  - [SetEntrySpellsInputEntry](doc/SetEntrySpellsInputEntry.md)
  - [SpecialRule](doc/SpecialRule.md)
  - [Spell](doc/Spell.md)
+ - [SummonModelRequest](doc/SummonModelRequest.md)
  - [UpdateAccountInput](doc/UpdateAccountInput.md)
  - [UpdateAccountInputUser](doc/UpdateAccountInputUser.md)
  - [UpdateCountersInput](doc/UpdateCountersInput.md)

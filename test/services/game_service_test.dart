@@ -7,16 +7,25 @@ void main() {
   final service = GameService();
 
   group('wireEnum', () {
-    test('converts a multi-word enum constant to its snake_case wire value', () {
-      expect(
-        service.wireEnum(api.GameStatusEnum.gangSelection, const FullType(api.GameStatusEnum)),
-        'gang_selection',
-      );
-      expect(
-        service.wireEnum(api.GameStatusEnum.inProgress, const FullType(api.GameStatusEnum)),
-        'in_progress',
-      );
-    });
+    test(
+      'converts a multi-word enum constant to its snake_case wire value',
+      () {
+        expect(
+          service.wireEnum(
+            api.GameStatusEnum.gangSelection,
+            const FullType(api.GameStatusEnum),
+          ),
+          'gang_selection',
+        );
+        expect(
+          service.wireEnum(
+            api.GameStatusEnum.inProgress,
+            const FullType(api.GameStatusEnum),
+          ),
+          'in_progress',
+        );
+      },
+    );
 
     test('matches the documented wire value for every status', () {
       const expected = {
@@ -27,7 +36,10 @@ void main() {
         api.GameStatusEnum.completed: 'completed',
       };
       for (final entry in expected.entries) {
-        expect(service.wireEnum(entry.key, const FullType(api.GameStatusEnum)), entry.value);
+        expect(
+          service.wireEnum(entry.key, const FullType(api.GameStatusEnum)),
+          entry.value,
+        );
       }
     });
   });

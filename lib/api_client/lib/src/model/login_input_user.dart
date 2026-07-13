@@ -11,11 +11,10 @@ part 'login_input_user.g.dart';
 /// LoginInputUser
 ///
 /// Properties:
-/// * [email]
-/// * [password]
+/// * [email] 
+/// * [password] 
 @BuiltValue()
-abstract class LoginInputUser
-    implements Built<LoginInputUser, LoginInputUserBuilder> {
+abstract class LoginInputUser implements Built<LoginInputUser, LoginInputUserBuilder> {
   @BuiltValueField(wireName: r'email')
   String get email;
 
@@ -24,19 +23,16 @@ abstract class LoginInputUser
 
   LoginInputUser._();
 
-  factory LoginInputUser([void updates(LoginInputUserBuilder b)]) =
-      _$LoginInputUser;
+  factory LoginInputUser([void updates(LoginInputUserBuilder b)]) = _$LoginInputUser;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(LoginInputUserBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<LoginInputUser> get serializer =>
-      _$LoginInputUserSerializer();
+  static Serializer<LoginInputUser> get serializer => _$LoginInputUserSerializer();
 }
 
-class _$LoginInputUserSerializer
-    implements PrimitiveSerializer<LoginInputUser> {
+class _$LoginInputUserSerializer implements PrimitiveSerializer<LoginInputUser> {
   @override
   final Iterable<Type> types = const [LoginInputUser, _$LoginInputUser];
 
@@ -66,11 +62,7 @@ class _$LoginInputUserSerializer
     LoginInputUser object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -86,21 +78,17 @@ class _$LoginInputUserSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'email':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.email = valueDes;
           break;
         case r'password':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.password = valueDes;
           break;
         default:
@@ -131,3 +119,4 @@ class _$LoginInputUserSerializer
     return result.build();
   }
 }
+

@@ -8,16 +8,20 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_api.dart';
 
 void main() {
-  testWidgets('GangsScreen renders the current user\'s gangs from the API', (tester) async {
-    AuthService().debugLogin(const AuthUser(id: 1, email: 'a@b.c', username: 'tester'));
+  testWidgets('GangsScreen renders the current user\'s gangs from the API', (
+    tester,
+  ) async {
+    AuthService().debugLogin(
+      const AuthUser(id: 1, email: 'a@b.c', username: 'tester'),
+    );
     final adapter = installFakeApi();
     adapter.stub(
       'GET',
       '/lists',
-      listBody<api.ModelList>(
-        [fakeModelList(name: 'The Rooks'), fakeModelList(id: 2, name: 'Canal Crows')],
-        const FullType(api.ModelList),
-      ),
+      listBody<api.ModelList>([
+        fakeModelList(name: 'The Rooks'),
+        fakeModelList(id: 2, name: 'Canal Crows'),
+      ], const FullType(api.ModelList)),
     );
 
     await tester.pumpWidget(const MaterialApp(home: GangsScreen()));

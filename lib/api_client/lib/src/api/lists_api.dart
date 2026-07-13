@@ -15,6 +15,7 @@ import 'package:carnevale_api/src/model/model_list.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
 class ListsApi {
+
   final Dio _dio;
 
   final Serializers _serializers;
@@ -22,10 +23,10 @@ class ListsApi {
   const ListsApi(this._dio, this._serializers);
 
   /// Create a list owned by the current user
-  ///
+  /// 
   ///
   /// Parameters:
-  /// * [listInput]
+  /// * [listInput] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -35,7 +36,7 @@ class ListsApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> createList({
+  Future<Response<ModelList>> createList({ 
     required ListInput listInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -47,7 +48,9 @@ class ListsApi {
     final _path = r'/lists';
     final _options = Options(
       method: r'POST',
-      headers: <String, dynamic>{...?headers},
+      headers: <String, dynamic>{
+        ...?headers,
+      },
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -55,8 +58,11 @@ class ListsApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
           },
-          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -69,9 +75,13 @@ class ListsApi {
     try {
       const _type = FullType(ListInput);
       _bodyData = _serializers.serialize(listInput, specifiedType: _type);
-    } catch (error, stackTrace) {
+
+    } catch(error, stackTrace) {
       throw DioException(
-        requestOptions: _options.compose(_dio.options, _path),
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -91,13 +101,11 @@ class ListsApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null
-          ? null
-          : _serializers.deserialize(
-                  rawResponse,
-                  specifiedType: const FullType(ModelList),
-                )
-                as ModelList;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(ModelList),
+      ) as ModelList;
+
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -124,7 +132,7 @@ class ListsApi {
   /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
-  /// * [id]
+  /// * [id] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -134,7 +142,7 @@ class ListsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> deleteList({
+  Future<Response<void>> deleteList({ 
     required int id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -143,15 +151,12 @@ class ListsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/lists/{id}'.replaceAll(
-      '{'
-      r'id'
-      '}',
-      encodeQueryParameter(_serializers, id, const FullType(int)).toString(),
-    );
+    final _path = r'/lists/{id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
     final _options = Options(
       method: r'DELETE',
-      headers: <String, dynamic>{...?headers},
+      headers: <String, dynamic>{
+        ...?headers,
+      },
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -159,8 +164,11 @@ class ListsApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
           },
-          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -182,7 +190,7 @@ class ListsApi {
   /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
-  /// * [id]
+  /// * [id] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -192,7 +200,7 @@ class ListsApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> getList({
+  Future<Response<ModelList>> getList({ 
     required int id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -201,15 +209,12 @@ class ListsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/lists/{id}'.replaceAll(
-      '{'
-      r'id'
-      '}',
-      encodeQueryParameter(_serializers, id, const FullType(int)).toString(),
-    );
+    final _path = r'/lists/{id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{...?headers},
+      headers: <String, dynamic>{
+        ...?headers,
+      },
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -217,8 +222,11 @@ class ListsApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
           },
-          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -237,13 +245,11 @@ class ListsApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null
-          ? null
-          : _serializers.deserialize(
-                  rawResponse,
-                  specifiedType: const FullType(ModelList),
-                )
-                as ModelList;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(ModelList),
+      ) as ModelList;
+
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -267,7 +273,7 @@ class ListsApi {
   }
 
   /// List the current user&#39;s lists
-  ///
+  /// 
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -279,7 +285,7 @@ class ListsApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList<BuiltList>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<BuiltList<ModelList>>> getLists({
+  Future<Response<BuiltList<ModelList>>> getLists({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -290,7 +296,9 @@ class ListsApi {
     final _path = r'/lists';
     final _options = Options(
       method: r'GET',
-      headers: <String, dynamic>{...?headers},
+      headers: <String, dynamic>{
+        ...?headers,
+      },
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -298,8 +306,11 @@ class ListsApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
           },
-          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -318,15 +329,11 @@ class ListsApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null
-          ? null
-          : _serializers.deserialize(
-                  rawResponse,
-                  specifiedType: const FullType(BuiltList, [
-                    FullType(ModelList),
-                  ]),
-                )
-                as BuiltList<ModelList>;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(BuiltList, [FullType(ModelList)]),
+      ) as BuiltList<ModelList>;
+
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -353,8 +360,8 @@ class ListsApi {
   /// Returns 404 if the list doesn&#39;t belong to the current user.
   ///
   /// Parameters:
-  /// * [id]
-  /// * [listInput]
+  /// * [id] 
+  /// * [listInput] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -364,7 +371,7 @@ class ListsApi {
   ///
   /// Returns a [Future] containing a [Response] with a [BuiltList] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ModelList>> updateList({
+  Future<Response<ModelList>> updateList({ 
     required int id,
     required ListInput listInput,
     CancelToken? cancelToken,
@@ -374,15 +381,12 @@ class ListsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/lists/{id}'.replaceAll(
-      '{'
-      r'id'
-      '}',
-      encodeQueryParameter(_serializers, id, const FullType(int)).toString(),
-    );
+    final _path = r'/lists/{id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
     final _options = Options(
       method: r'PATCH',
-      headers: <String, dynamic>{...?headers},
+      headers: <String, dynamic>{
+        ...?headers,
+      },
       extra: <String, dynamic>{
         'secure': <Map<String, String>>[
           {
@@ -390,8 +394,11 @@ class ListsApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
           },
-          {'type': 'http', 'scheme': 'bearer', 'name': 'bearerAuth'},
         ],
         ...?extra,
       },
@@ -404,9 +411,13 @@ class ListsApi {
     try {
       const _type = FullType(ListInput);
       _bodyData = _serializers.serialize(listInput, specifiedType: _type);
-    } catch (error, stackTrace) {
+
+    } catch(error, stackTrace) {
       throw DioException(
-        requestOptions: _options.compose(_dio.options, _path),
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
         type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
@@ -426,13 +437,11 @@ class ListsApi {
 
     try {
       final rawResponse = _response.data;
-      _responseData = rawResponse == null
-          ? null
-          : _serializers.deserialize(
-                  rawResponse,
-                  specifiedType: const FullType(ModelList),
-                )
-                as ModelList;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(ModelList),
+      ) as ModelList;
+
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -454,4 +463,5 @@ class ListsApi {
       extra: _response.extra,
     );
   }
+
 }

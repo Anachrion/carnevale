@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_api.dart';
 
 void main() {
-  testWidgets('Returning from the card viewer centres the card you ended on', (tester) async {
+  testWidgets('Returning from the card viewer centres the card you ended on', (
+    tester,
+  ) async {
     // Enough profiles that the hire list scrolls and the target starts well off-screen. All are
     // rank-and-file guild so the default role sort leaves them in name order, and there is no
     // mercenaries section to offset the list.
@@ -25,11 +27,25 @@ void main() {
     ];
 
     final adapter = installFakeApi();
-    adapter.stub('GET', '/profiles', listBody<api.Profile>(profiles, const FullType(api.Profile)));
-    adapter.stub('GET', '/equipment', listBody<api.Equipment>([], const FullType(api.Equipment)));
-    adapter.stub('GET', '/spells', listBody<api.Spell>([], const FullType(api.Spell)));
+    adapter.stub(
+      'GET',
+      '/profiles',
+      listBody<api.Profile>(profiles, const FullType(api.Profile)),
+    );
+    adapter.stub(
+      'GET',
+      '/equipment',
+      listBody<api.Equipment>([], const FullType(api.Equipment)),
+    );
+    adapter.stub(
+      'GET',
+      '/spells',
+      listBody<api.Spell>([], const FullType(api.Spell)),
+    );
 
-    await tester.pumpWidget(MaterialApp(home: GangBuilderScreen(gang: fakeModelList())));
+    await tester.pumpWidget(
+      MaterialApp(home: GangBuilderScreen(gang: fakeModelList())),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 

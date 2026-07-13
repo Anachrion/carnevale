@@ -9,6 +9,8 @@ class _ReadOnlyGangBody extends StatelessWidget {
     this.onEditCounters,
     this.onEditStats,
     this.onToggleActivated,
+    this.onSummon,
+    this.onDismissSummon,
   });
 
   final api.ModelList gang;
@@ -28,6 +30,13 @@ class _ReadOnlyGangBody extends StatelessWidget {
   /// Own models only — an opponent's activated models still darken, they just can't be toggled.
   final void Function(api.ListEntry entry)? onToggleActivated;
 
+  /// When set, a Summon button is offered above the gang — for the rare models whose special rules
+  /// conjure new models mid-battle. Own gang only.
+  final VoidCallback? onSummon;
+
+  /// Removes a summoned model. Offered only on summoned ones: the hired roster is frozen.
+  final void Function(api.ListEntry entry)? onDismissSummon;
+
   @override
   Widget build(BuildContext context) {
     final factionColor =
@@ -43,8 +52,32 @@ class _ReadOnlyGangBody extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
+        if (onSummon != null) _buildSummonButton(context),
         Expanded(child: _buildEntries(context, factionColor)),
       ],
+    );
+  }
+
+  /// Deliberately understated: summoning is rare (a handful of models in the game can do it at all),
+  /// so it earns a quiet text button rather than a permanent chunk of the gang screen.
+  Widget _buildSummonButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+        child: TextButton.icon(
+          onPressed: onSummon,
+          icon: Icon(Icons.auto_awesome, size: 16, color: context.accentColor),
+          label: Text(
+            'Summon',
+            style: GoogleFonts.cinzel(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: context.accentColor,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -72,8 +105,19 @@ class _ReadOnlyGangBody extends StatelessWidget {
     );
   }
 
+  /// True once the model has lost its last life point. Equipment (and any entry outside a live game)
+  /// has no state, so it is never dead and stays with the living.
+  static bool _isDead(api.ListEntry entry) => entry.state?.dead ?? false;
+
   Widget _buildEntries(BuildContext context, Color factionColor) {
-    final entries = gang.entries;
+    // Casualties sink to the bottom: mid-game you act on the models still standing, so the living
+    // gang stays together at the top instead of being punctuated by corpses. Order is otherwise
+    // preserved within each group, so the roster you built still reads the way you built it. The
+    // card viewer pages through this same list, so it follows suit.
+    final entries = [
+      ...gang.entries.where((e) => !_isDead(e)),
+      ...gang.entries.where(_isDead),
+    ];
     if (entries.isEmpty) {
       return Center(
         child: Text(
@@ -98,12 +142,11 @@ class _ReadOnlyGangBody extends StatelessWidget {
         )
         .whereType<api.Profile>()
         .toList();
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
-      itemCount: entries.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) {
-        final entry = entries[i];
+    // Ordering (and the death animation that reorders) lives in _GangEntryList, which is given the
+    // roster as-is so it can tell a *fresh* casualty from one that was already down.
+    return _GangEntryList(
+      entries: gang.entries.toList(),
+      buildTile: (entry) {
         final profile =
             entry.entryType ==
                 api.ListEntryEntryTypeEnum.catalogColonColonCardReference
@@ -153,8 +196,138 @@ class _ReadOnlyGangBody extends StatelessWidget {
           onToggleActivated: onToggleActivated != null && entry.state != null
               ? () => onToggleActivated!(entry)
               : null,
+          // Only summoned models can be removed mid-game; the hired roster is frozen.
+          onDismiss: onDismissSummon != null && entry.summoned
+              ? () => onDismissSummon!(entry)
+              : null,
         );
       },
+    );
+  }
+}
+
+/// The gang list, and the one place that knows where a model *sits*: the living in roster order,
+/// then the dead.
+///
+/// A death plays in two beats rather than snapping. First the tile is left exactly where it stands
+/// while its contents refresh, so it turns to slate and grows a skull *where you can see it happen*
+/// (that transition belongs to [_ReadOnlyEntryTile] itself). Only then is the body carried off: its
+/// slot collapses shut, the living close ranks, and it re-expands at the bottom.
+///
+/// The alternative — literally sliding the card down the viewport — was rejected: a gang usually
+/// runs longer than a phone screen, so the graveyard is below the fold and the card would sail off
+/// the edge to nowhere. Collapsing out and expanding in reads as a journey either way.
+class _GangEntryList extends StatefulWidget {
+  const _GangEntryList({required this.entries, required this.buildTile});
+
+  /// The roster, in roster order — deliberately *not* pre-sorted, so the list can compare against
+  /// what it is already showing and tell a new casualty from one that was already down.
+  final List<api.ListEntry> entries;
+  final Widget Function(api.ListEntry entry) buildTile;
+
+  @override
+  State<_GangEntryList> createState() => _GangEntryListState();
+}
+
+class _GangEntryListState extends State<_GangEntryList> {
+  /// Replaced (not just re-keyed) whenever the roster itself changes, which forces Flutter to build
+  /// a *new* AnimatedList element that honours the new `initialItemCount`. Re-keying the subtree
+  /// above it is not enough: a GlobalKey outranks an ancestor's ValueKey, so the old element — and
+  /// with it AnimatedListState's stale item count — would simply be moved across, and a summoned
+  /// model would never appear.
+  GlobalKey<AnimatedListState> _listKey = GlobalKey();
+
+  /// How long the corpse is left in place before it's carried off — long enough for the tile's own
+  /// colour/skull transition to land, so the death is read where it happened.
+  static const _deathBeat = Duration(milliseconds: 500);
+  static const _collapse = Duration(milliseconds: 260);
+  static const _expand = Duration(milliseconds: 340);
+
+  late List<api.ListEntry> _items = _ordered(widget.entries);
+
+  static bool _isDead(api.ListEntry entry) => entry.state?.dead ?? false;
+
+  static List<api.ListEntry> _ordered(List<api.ListEntry> entries) => [
+    ...entries.where((e) => !_isDead(e)),
+    ...entries.where(_isDead),
+  ];
+
+  @override
+  void didUpdateWidget(_GangEntryList old) {
+    super.didUpdateWidget(old);
+
+    final byId = {for (final e in widget.entries) e.id: e};
+    final sameRoster =
+        _items.length == widget.entries.length &&
+        _items.every((e) => byId.containsKey(e.id));
+
+    final wasDead = {for (final e in old.entries) e.id: _isDead(e)};
+    final freshlyDead = widget.entries
+        .where((e) => _isDead(e) && !(wasDead[e.id] ?? false))
+        .toList();
+    final revived = widget.entries.any(
+      (e) => !_isDead(e) && (wasDead[e.id] ?? false),
+    );
+
+    // A roster change (a summon, a dismissal, the first load) or a revival re-sorts outright, on a
+    // fresh list. Reviving is an undo — usually of a mis-tapped kill — so it wants to look like a
+    // correction, not a ceremony; and a summon/dismissal changes the item count, which AnimatedList
+    // can only pick up from a newly-built element.
+    if (!sameRoster || revived) {
+      setState(() {
+        _items = _ordered(widget.entries);
+        _listKey = GlobalKey();
+      });
+      return;
+    }
+
+    // Same models, new state. Refresh each tile's contents *in place*, leaving the order alone, so a
+    // model that just died turns to slate where it stands instead of teleporting mid-transition.
+    setState(() => _items = [for (final e in _items) byId[e.id]!]);
+
+    for (final entry in freshlyDead) {
+      Future.delayed(_deathBeat, () {
+        if (mounted) _carryOff(entry.id);
+      });
+    }
+  }
+
+  /// Collapses the model's slot where it fell and re-expands it at the foot of the list.
+  void _carryOff(int id) {
+    final from = _items.indexWhere((e) => e.id == id);
+    // Already moved, or the roster was rebuilt under us while the beat played out.
+    if (from < 0 || !_isDead(_items[from])) return;
+
+    final entry = _items.removeAt(from);
+    _listKey.currentState?.removeItem(
+      from,
+      (context, animation) => _slot(animation, widget.buildTile(entry)),
+      duration: _collapse,
+    );
+    _items.add(entry);
+    _listKey.currentState?.insertItem(_items.length - 1, duration: _expand);
+    setState(() {});
+  }
+
+  /// One row: the tile plus the gap below it. The gap lives *inside* the row rather than in a
+  /// separator, so it collapses along with the tile — a separator would be left behind as a stray
+  /// 8px of dead space where the model used to be.
+  Widget _slot(Animation<double> animation, Widget child) => SizeTransition(
+    sizeFactor: animation.drive(CurveTween(curve: Curves.easeInOut)),
+    // Pinned to the top, so the slot closes downward from where the tile sat rather than
+    // squeezing shut from both edges.
+    alignment: Alignment.topCenter,
+    child: Padding(padding: const EdgeInsets.only(bottom: 8), child: child),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedList(
+      key: _listKey,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+      initialItemCount: _items.length,
+      itemBuilder: (context, i, animation) =>
+          _slot(animation, widget.buildTile(_items[i])),
     );
   }
 }
@@ -167,6 +340,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     this.onEditCounters,
     this.onEditStats,
     this.onToggleActivated,
+    this.onDismiss,
   });
 
   final api.ListEntry entry;
@@ -176,6 +350,14 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   final VoidCallback? onEditStats;
   final VoidCallback? onToggleActivated;
 
+  /// Removes this model from the gang. Only ever set on a summoned model of your own.
+  final VoidCallback? onDismiss;
+
+  /// The tile's own death transition — colour draining to slate, skull growing in. Deliberately
+  /// shorter than the beat _GangEntryList waits before carrying the body off, so the death has
+  /// fully landed before the tile starts to move.
+  static const _deathTransition = Duration(milliseconds: 420);
+
   @override
   Widget build(BuildContext context) {
     final state = entry.state;
@@ -184,13 +366,26 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     // the name, stats and counters stay at full strength, and nothing is disabled: you can still
     // open the card, edit stats, and (on your own models) tap the bolt again to undo it.
     final activated = state?.activated ?? false;
+    // A dead model drops its faction color entirely for a cold slate, which reads as "out of the
+    // game" rather than merely quiet. It stays fully editable — healing it back above 0 HP revives
+    // it — so nothing here is disabled; `dead` is simply derived from its HP.
+    final dead = state?.dead ?? false;
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Container(
+        // Animated, so a model that dies visibly bleeds out from its faction colour to slate where
+        // it stands — before _GangEntryList carries it off to the bottom. Also smooths the (much
+        // smaller) darkening when a model is activated.
+        child: AnimatedContainer(
+          duration: _deathTransition,
+          curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            gradient: AppPalette.entryTileGradient(color, dimmed: activated),
+            gradient: AppPalette.entryTileGradient(
+              dead ? AppPalette.deadEntry : color,
+              // Death already darkens the tile; dimming a corpse on top of that just muddies it.
+              dimmed: activated && !dead,
+            ),
           ),
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Column(
@@ -198,6 +393,18 @@ class _ReadOnlyEntryTile extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  // Grows in alongside the tile's colour change rather than popping into existence,
+                  // so the two read as one event. Collapses to nothing when the model is alive.
+                  AnimatedSize(
+                    duration: _deathTransition,
+                    curve: Curves.easeOut,
+                    child: dead
+                        ? const Padding(
+                            padding: EdgeInsets.only(right: 6),
+                            child: Text('💀', style: TextStyle(fontSize: 13)),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                   Expanded(
                     child: Text(
                       entry.name,
@@ -209,9 +416,19 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  // Conjured onto the board, not hired — so it's marked, and its cost is shown as a
+                  // dash rather than a number it never actually cost the gang.
+                  if (entry.summoned) ...[
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.auto_awesome,
+                      size: 13,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                  ],
                   const SizedBox(width: 8),
                   Text(
-                    '${entry.cost}',
+                    entry.summoned ? '—' : '${entry.cost}',
                     style: GoogleFonts.cinzel(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -281,6 +498,8 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                           const _ActivationButton(activated: true),
                         if (onEditCounters != null)
                           _AddCounterButton(onTap: onEditCounters!),
+                        if (onDismiss != null)
+                          _DismissButton(onTap: onDismiss!),
                       ],
                     ),
                   ],
@@ -472,6 +691,36 @@ class _ActivationButton extends StatelessWidget {
             // than disappearing into it.
             color: activated ? Colors.black87 : Colors.white,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Removes a summoned model. Only ever shown on your own summoned models — a hired model can't be
+/// removed mid-game, so this never appears on one, and the server refuses it regardless.
+class _DismissButton extends StatelessWidget {
+  const _DismissButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Remove this summoned model',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.5),
+              width: 1.2,
+            ),
+          ),
+          child: const Icon(Icons.close, size: 20, color: Colors.white),
         ),
       ),
     );

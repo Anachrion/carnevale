@@ -11,9 +11,9 @@ part 'session_user.g.dart';
 /// SessionUser
 ///
 /// Properties:
-/// * [id]
-/// * [email]
-/// * [username]
+/// * [id] 
+/// * [email] 
+/// * [username] 
 @BuiltValue()
 abstract class SessionUser implements Built<SessionUser, SessionUserBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -49,7 +49,10 @@ class _$SessionUserSerializer implements PrimitiveSerializer<SessionUser> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(object.id, specifiedType: const FullType(int));
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(int),
+    );
     yield r'email';
     yield serializers.serialize(
       object.email,
@@ -68,11 +71,7 @@ class _$SessionUserSerializer implements PrimitiveSerializer<SessionUser> {
     SessionUser object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -88,27 +87,24 @@ class _$SessionUserSerializer implements PrimitiveSerializer<SessionUser> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.id = valueDes;
           break;
         case r'email':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.email = valueDes;
           break;
         case r'username':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.username = valueDes;
           break;
         default:
@@ -139,3 +135,4 @@ class _$SessionUserSerializer implements PrimitiveSerializer<SessionUser> {
     return result.build();
   }
 }
+

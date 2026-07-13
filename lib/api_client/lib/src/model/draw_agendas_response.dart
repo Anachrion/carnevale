@@ -13,33 +13,26 @@ part 'draw_agendas_response.g.dart';
 /// DrawAgendasResponse
 ///
 /// Properties:
-/// * [agendas]
+/// * [agendas] 
 @BuiltValue()
-abstract class DrawAgendasResponse
-    implements Built<DrawAgendasResponse, DrawAgendasResponseBuilder> {
+abstract class DrawAgendasResponse implements Built<DrawAgendasResponse, DrawAgendasResponseBuilder> {
   @BuiltValueField(wireName: r'agendas')
   BuiltList<Agenda> get agendas;
 
   DrawAgendasResponse._();
 
-  factory DrawAgendasResponse([void updates(DrawAgendasResponseBuilder b)]) =
-      _$DrawAgendasResponse;
+  factory DrawAgendasResponse([void updates(DrawAgendasResponseBuilder b)]) = _$DrawAgendasResponse;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(DrawAgendasResponseBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<DrawAgendasResponse> get serializer =>
-      _$DrawAgendasResponseSerializer();
+  static Serializer<DrawAgendasResponse> get serializer => _$DrawAgendasResponseSerializer();
 }
 
-class _$DrawAgendasResponseSerializer
-    implements PrimitiveSerializer<DrawAgendasResponse> {
+class _$DrawAgendasResponseSerializer implements PrimitiveSerializer<DrawAgendasResponse> {
   @override
-  final Iterable<Type> types = const [
-    DrawAgendasResponse,
-    _$DrawAgendasResponse,
-  ];
+  final Iterable<Type> types = const [DrawAgendasResponse, _$DrawAgendasResponse];
 
   @override
   final String wireName = r'DrawAgendasResponse';
@@ -62,11 +55,7 @@ class _$DrawAgendasResponseSerializer
     DrawAgendasResponse object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -82,14 +71,10 @@ class _$DrawAgendasResponseSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'agendas':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltList, [
-                      FullType(Agenda),
-                    ]),
-                  )
-                  as BuiltList<Agenda>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(Agenda)]),
+          ) as BuiltList<Agenda>;
           result.agendas.replace(valueDes);
           break;
         default:
@@ -120,3 +105,4 @@ class _$DrawAgendasResponseSerializer
     return result.build();
   }
 }
+

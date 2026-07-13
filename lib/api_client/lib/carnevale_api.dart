@@ -67,6 +67,7 @@ export 'package:carnevale_api/src/model/set_entry_spells_input.dart';
 export 'package:carnevale_api/src/model/set_entry_spells_input_entry.dart';
 export 'package:carnevale_api/src/model/special_rule.dart';
 export 'package:carnevale_api/src/model/spell.dart';
+export 'package:carnevale_api/src/model/summon_model_request.dart';
 export 'package:carnevale_api/src/model/update_account_input.dart';
 export 'package:carnevale_api/src/model/update_account_input_user.dart';
 export 'package:carnevale_api/src/model/update_counters_input.dart';
@@ -75,3 +76,4 @@ export 'package:carnevale_api/src/model/update_stats_input.dart';
 export 'package:carnevale_api/src/model/update_stats_input_stats.dart';
 export 'package:carnevale_api/src/model/validation_errors.dart';
 export 'package:carnevale_api/src/model/weapon.dart';
+

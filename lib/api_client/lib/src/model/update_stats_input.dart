@@ -12,28 +12,24 @@ part 'update_stats_input.g.dart';
 /// UpdateStatsInput
 ///
 /// Properties:
-/// * [stats]
+/// * [stats] 
 @BuiltValue()
-abstract class UpdateStatsInput
-    implements Built<UpdateStatsInput, UpdateStatsInputBuilder> {
+abstract class UpdateStatsInput implements Built<UpdateStatsInput, UpdateStatsInputBuilder> {
   @BuiltValueField(wireName: r'stats')
   UpdateStatsInputStats get stats;
 
   UpdateStatsInput._();
 
-  factory UpdateStatsInput([void updates(UpdateStatsInputBuilder b)]) =
-      _$UpdateStatsInput;
+  factory UpdateStatsInput([void updates(UpdateStatsInputBuilder b)]) = _$UpdateStatsInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(UpdateStatsInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<UpdateStatsInput> get serializer =>
-      _$UpdateStatsInputSerializer();
+  static Serializer<UpdateStatsInput> get serializer => _$UpdateStatsInputSerializer();
 }
 
-class _$UpdateStatsInputSerializer
-    implements PrimitiveSerializer<UpdateStatsInput> {
+class _$UpdateStatsInputSerializer implements PrimitiveSerializer<UpdateStatsInput> {
   @override
   final Iterable<Type> types = const [UpdateStatsInput, _$UpdateStatsInput];
 
@@ -58,11 +54,7 @@ class _$UpdateStatsInputSerializer
     UpdateStatsInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -78,12 +70,10 @@ class _$UpdateStatsInputSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'stats':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(UpdateStatsInputStats),
-                  )
-                  as UpdateStatsInputStats;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UpdateStatsInputStats),
+          ) as UpdateStatsInputStats;
           result.stats.replace(valueDes);
           break;
         default:
@@ -114,3 +104,4 @@ class _$UpdateStatsInputSerializer
     return result.build();
   }
 }
+

@@ -11,24 +11,21 @@ part 'join_game_input.g.dart';
 /// JoinGameInput
 ///
 /// Properties:
-/// * [joinCode]
+/// * [joinCode] 
 @BuiltValue()
-abstract class JoinGameInput
-    implements Built<JoinGameInput, JoinGameInputBuilder> {
+abstract class JoinGameInput implements Built<JoinGameInput, JoinGameInputBuilder> {
   @BuiltValueField(wireName: r'join_code')
   String get joinCode;
 
   JoinGameInput._();
 
-  factory JoinGameInput([void updates(JoinGameInputBuilder b)]) =
-      _$JoinGameInput;
+  factory JoinGameInput([void updates(JoinGameInputBuilder b)]) = _$JoinGameInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(JoinGameInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<JoinGameInput> get serializer =>
-      _$JoinGameInputSerializer();
+  static Serializer<JoinGameInput> get serializer => _$JoinGameInputSerializer();
 }
 
 class _$JoinGameInputSerializer implements PrimitiveSerializer<JoinGameInput> {
@@ -56,11 +53,7 @@ class _$JoinGameInputSerializer implements PrimitiveSerializer<JoinGameInput> {
     JoinGameInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -76,12 +69,10 @@ class _$JoinGameInputSerializer implements PrimitiveSerializer<JoinGameInput> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'join_code':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.joinCode = valueDes;
           break;
         default:
@@ -112,3 +103,4 @@ class _$JoinGameInputSerializer implements PrimitiveSerializer<JoinGameInput> {
     return result.build();
   }
 }
+

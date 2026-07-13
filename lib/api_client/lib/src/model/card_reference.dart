@@ -11,14 +11,13 @@ part 'card_reference.g.dart';
 /// CardReference
 ///
 /// Properties:
-/// * [id]
-/// * [identifier]
-/// * [name]
-/// * [cardFront]
-/// * [cardBack]
+/// * [id] 
+/// * [identifier] 
+/// * [name] 
+/// * [cardFront] 
+/// * [cardBack] 
 @BuiltValue()
-abstract class CardReference
-    implements Built<CardReference, CardReferenceBuilder> {
+abstract class CardReference implements Built<CardReference, CardReferenceBuilder> {
   @BuiltValueField(wireName: r'id')
   int get id;
 
@@ -36,15 +35,13 @@ abstract class CardReference
 
   CardReference._();
 
-  factory CardReference([void updates(CardReferenceBuilder b)]) =
-      _$CardReference;
+  factory CardReference([void updates(CardReferenceBuilder b)]) = _$CardReference;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(CardReferenceBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<CardReference> get serializer =>
-      _$CardReferenceSerializer();
+  static Serializer<CardReference> get serializer => _$CardReferenceSerializer();
 }
 
 class _$CardReferenceSerializer implements PrimitiveSerializer<CardReference> {
@@ -60,7 +57,10 @@ class _$CardReferenceSerializer implements PrimitiveSerializer<CardReference> {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'id';
-    yield serializers.serialize(object.id, specifiedType: const FullType(int));
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(int),
+    );
     yield r'identifier';
     yield serializers.serialize(
       object.identifier,
@@ -95,11 +95,7 @@ class _$CardReferenceSerializer implements PrimitiveSerializer<CardReference> {
     CardReference object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -115,47 +111,40 @@ class _$CardReferenceSerializer implements PrimitiveSerializer<CardReference> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.id = valueDes;
           break;
         case r'identifier':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.identifier = valueDes;
           break;
         case r'name':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.name = valueDes;
           break;
         case r'card_front':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.cardFront = valueDes;
           break;
         case r'card_back':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType.nullable(String),
-                  )
-                  as String?;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
           if (valueDes == null) continue;
           result.cardBack = valueDes;
           break;
@@ -187,3 +176,4 @@ class _$CardReferenceSerializer implements PrimitiveSerializer<CardReference> {
     return result.build();
   }
 }
+

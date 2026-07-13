@@ -12,6 +12,7 @@ import '../widgets/app_toast.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
 import '../widgets/points_bar.dart';
+import '../widgets/profile_search.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
@@ -355,6 +356,46 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  /// Replaces the whole gang after a summon or dismissal — unlike a counter/stat edit, the roster
+  /// itself changed, so there is no single entry to patch in.
+  void _applyGang(api.ModelList gang) {
+    final data = _data;
+    if (data == null) return;
+    _mutationSeq++;
+    setState(() {
+      _data = _GangTabData(
+        gang: gang,
+        profiles: data.profiles,
+        equipment: data.equipment,
+      );
+    });
+  }
+
+  void _summon() {
+    showDialog(
+      context: context,
+      builder: (_) =>
+          _SummonPickerDialog(gameId: widget.gameId, onSummoned: _applyGang),
+    );
+  }
+
+  /// Removes a summoned model. Only offered on summoned models — the hired roster is frozen for the
+  /// game, and the server refuses anything else.
+  Future<void> _dismissSummon(api.ListEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => _ConfirmDismissDialog(name: entry.name),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      _applyGang(await GameService().dismissSummon(widget.gameId, entry.id));
+    } catch (_) {
+      if (mounted) {
+        showAppToast(context, 'Could not remove that model. Please try again.');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -380,6 +421,8 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       onEditCounters: widget.editable ? _editCounters : null,
       onEditStats: widget.editable ? _editStats : null,
       onToggleActivated: widget.editable ? _toggleActivated : null,
+      onSummon: widget.editable ? _summon : null,
+      onDismissSummon: widget.editable ? _dismissSummon : null,
     );
   }
 }

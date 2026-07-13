@@ -92,6 +92,7 @@ api.ListEntry fakeListEntry({
   String name = 'Capodecina',
   int cost = 20,
   api.EntryState? state,
+  bool summoned = false,
 }) => api.ListEntry(
   (b) => b
     ..id = id
@@ -100,6 +101,7 @@ api.ListEntry fakeListEntry({
     ..entryId = entryId
     ..name = name
     ..cost = cost
+    ..summoned = summoned
     ..mage = false
     ..spellSlots = 0
     ..disciplines = ListBuilder<String>()
@@ -134,7 +136,10 @@ api.EntryState fakeEntryState({
     ..guarding = guarding
     ..carryingObjective = carryingObjective
     ..underwaterCounters = underwaterCounters
-    ..activated = activated,
+    ..activated = activated
+    // Derived server-side from HP, so the fixture derives it the same way rather than letting a
+    // test set up a model that is dead at full health (or alive at 0) — a state the API can't produce.
+    ..dead = lifePoints == 0,
 );
 
 api.Spell fakeSpell({

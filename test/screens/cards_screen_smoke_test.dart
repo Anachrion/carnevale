@@ -7,15 +7,17 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_api.dart';
 
 void main() {
-  testWidgets('CardsScreen loads and renders profiles from the API', (tester) async {
+  testWidgets('CardsScreen loads and renders profiles from the API', (
+    tester,
+  ) async {
     final adapter = installFakeApi();
     adapter.stub(
       'GET',
       '/profiles',
-      listBody<api.Profile>(
-        [fakeProfile(name: 'Capodecina'), fakeProfile(id: 2, name: 'Bombardier')],
-        const FullType(api.Profile),
-      ),
+      listBody<api.Profile>([
+        fakeProfile(name: 'Capodecina'),
+        fakeProfile(id: 2, name: 'Bombardier'),
+      ], const FullType(api.Profile)),
     );
 
     await tester.pumpWidget(const MaterialApp(home: CardsScreen()));

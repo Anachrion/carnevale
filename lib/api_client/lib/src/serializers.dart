@@ -60,6 +60,7 @@ import 'package:carnevale_api/src/model/set_entry_spells_input.dart';
 import 'package:carnevale_api/src/model/set_entry_spells_input_entry.dart';
 import 'package:carnevale_api/src/model/special_rule.dart';
 import 'package:carnevale_api/src/model/spell.dart';
+import 'package:carnevale_api/src/model/summon_model_request.dart';
 import 'package:carnevale_api/src/model/update_account_input.dart';
 import 'package:carnevale_api/src/model/update_account_input_user.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
@@ -118,6 +119,7 @@ part 'serializers.g.dart';
   SetEntrySpellsInputEntry,
   SpecialRule,
   Spell,
+  SummonModelRequest,
   UpdateAccountInput,
   UpdateAccountInputUser,
   UpdateCountersInput,
@@ -127,45 +129,44 @@ part 'serializers.g.dart';
   ValidationErrors,
   Weapon,
 ])
-Serializers serializers =
-    (_$serializers.toBuilder()
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(Equipment)]),
-            () => ListBuilder<Equipment>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(Spell)]),
-            () => ListBuilder<Spell>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(Ability)]),
-            () => ListBuilder<Ability>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(Game)]),
-            () => ListBuilder<Game>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(Scenario)]),
-            () => ListBuilder<Scenario>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(Profile)]),
-            () => ListBuilder<Profile>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(ModelList)]),
-            () => ListBuilder<ModelList>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, [FullType(AvailableGang)]),
-            () => ListBuilder<AvailableGang>(),
-          )
-          ..add(const OneOfSerializer())
-          ..add(const AnyOfSerializer())
-          ..add(const DateSerializer())
-          ..add(Iso8601DateTimeSerializer()))
-        .build();
+Serializers serializers = (_$serializers.toBuilder()
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Equipment)]),
+        () => ListBuilder<Equipment>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Spell)]),
+        () => ListBuilder<Spell>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Ability)]),
+        () => ListBuilder<Ability>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Game)]),
+        () => ListBuilder<Game>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Scenario)]),
+        () => ListBuilder<Scenario>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Profile)]),
+        () => ListBuilder<Profile>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ModelList)]),
+        () => ListBuilder<ModelList>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(AvailableGang)]),
+        () => ListBuilder<AvailableGang>(),
+      )
+      ..add(const OneOfSerializer())
+      ..add(const AnyOfSerializer())
+      ..add(const DateSerializer())
+      ..add(Iso8601DateTimeSerializer())
+    ).build();
 
 Serializers standardSerializers =
     (serializers.toBuilder()..addPlugin(StandardJsonPlugin())).build();

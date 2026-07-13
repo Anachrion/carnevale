@@ -12,29 +12,25 @@ part 'draw_agenda_input.g.dart';
 /// Required — `origin` identifies what granted the in-play draw.
 ///
 /// Properties:
-/// * [origin]
+/// * [origin] 
 @BuiltValue()
-abstract class DrawAgendaInput
-    implements Built<DrawAgendaInput, DrawAgendaInputBuilder> {
+abstract class DrawAgendaInput implements Built<DrawAgendaInput, DrawAgendaInputBuilder> {
   @BuiltValueField(wireName: r'origin')
   DrawAgendaInputOriginEnum? get origin;
   // enum originEnum {  special_rule,  command_point,  };
 
   DrawAgendaInput._();
 
-  factory DrawAgendaInput([void updates(DrawAgendaInputBuilder b)]) =
-      _$DrawAgendaInput;
+  factory DrawAgendaInput([void updates(DrawAgendaInputBuilder b)]) = _$DrawAgendaInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(DrawAgendaInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<DrawAgendaInput> get serializer =>
-      _$DrawAgendaInputSerializer();
+  static Serializer<DrawAgendaInput> get serializer => _$DrawAgendaInputSerializer();
 }
 
-class _$DrawAgendaInputSerializer
-    implements PrimitiveSerializer<DrawAgendaInput> {
+class _$DrawAgendaInputSerializer implements PrimitiveSerializer<DrawAgendaInput> {
   @override
   final Iterable<Type> types = const [DrawAgendaInput, _$DrawAgendaInput];
 
@@ -61,11 +57,7 @@ class _$DrawAgendaInputSerializer
     DrawAgendaInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -81,12 +73,10 @@ class _$DrawAgendaInputSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'origin':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(DrawAgendaInputOriginEnum),
-                  )
-                  as DrawAgendaInputOriginEnum;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DrawAgendaInputOriginEnum),
+          ) as DrawAgendaInputOriginEnum;
           result.origin = valueDes;
           break;
         default:
@@ -119,20 +109,17 @@ class _$DrawAgendaInputSerializer
 }
 
 class DrawAgendaInputOriginEnum extends EnumClass {
+
   @BuiltValueEnumConst(wireName: r'special_rule')
-  static const DrawAgendaInputOriginEnum specialRule =
-      _$drawAgendaInputOriginEnum_specialRule;
+  static const DrawAgendaInputOriginEnum specialRule = _$drawAgendaInputOriginEnum_specialRule;
   @BuiltValueEnumConst(wireName: r'command_point')
-  static const DrawAgendaInputOriginEnum commandPoint =
-      _$drawAgendaInputOriginEnum_commandPoint;
+  static const DrawAgendaInputOriginEnum commandPoint = _$drawAgendaInputOriginEnum_commandPoint;
 
-  static Serializer<DrawAgendaInputOriginEnum> get serializer =>
-      _$drawAgendaInputOriginEnumSerializer;
+  static Serializer<DrawAgendaInputOriginEnum> get serializer => _$drawAgendaInputOriginEnumSerializer;
 
-  const DrawAgendaInputOriginEnum._(String name) : super(name);
+  const DrawAgendaInputOriginEnum._(String name): super(name);
 
-  static BuiltSet<DrawAgendaInputOriginEnum> get values =>
-      _$drawAgendaInputOriginEnumValues;
-  static DrawAgendaInputOriginEnum valueOf(String name) =>
-      _$drawAgendaInputOriginEnumValueOf(name);
+  static BuiltSet<DrawAgendaInputOriginEnum> get values => _$drawAgendaInputOriginEnumValues;
+  static DrawAgendaInputOriginEnum valueOf(String name) => _$drawAgendaInputOriginEnumValueOf(name);
 }
+

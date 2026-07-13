@@ -12,28 +12,24 @@ part 'validation_errors.g.dart';
 /// ValidationErrors
 ///
 /// Properties:
-/// * [errors]
+/// * [errors] 
 @BuiltValue()
-abstract class ValidationErrors
-    implements Built<ValidationErrors, ValidationErrorsBuilder> {
+abstract class ValidationErrors implements Built<ValidationErrors, ValidationErrorsBuilder> {
   @BuiltValueField(wireName: r'errors')
   BuiltMap<String, BuiltList<String>> get errors;
 
   ValidationErrors._();
 
-  factory ValidationErrors([void updates(ValidationErrorsBuilder b)]) =
-      _$ValidationErrors;
+  factory ValidationErrors([void updates(ValidationErrorsBuilder b)]) = _$ValidationErrors;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(ValidationErrorsBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<ValidationErrors> get serializer =>
-      _$ValidationErrorsSerializer();
+  static Serializer<ValidationErrors> get serializer => _$ValidationErrorsSerializer();
 }
 
-class _$ValidationErrorsSerializer
-    implements PrimitiveSerializer<ValidationErrors> {
+class _$ValidationErrorsSerializer implements PrimitiveSerializer<ValidationErrors> {
   @override
   final Iterable<Type> types = const [ValidationErrors, _$ValidationErrors];
 
@@ -48,10 +44,7 @@ class _$ValidationErrorsSerializer
     yield r'errors';
     yield serializers.serialize(
       object.errors,
-      specifiedType: const FullType(BuiltMap, [
-        FullType(String),
-        FullType(BuiltList, [FullType(String)]),
-      ]),
+      specifiedType: const FullType(BuiltMap, [FullType(String), FullType(BuiltList, [FullType(String)])]),
     );
   }
 
@@ -61,11 +54,7 @@ class _$ValidationErrorsSerializer
     ValidationErrors object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -81,15 +70,10 @@ class _$ValidationErrorsSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'errors':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(BuiltMap, [
-                      FullType(String),
-                      FullType(BuiltList, [FullType(String)]),
-                    ]),
-                  )
-                  as BuiltMap<String, BuiltList<String>>;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltMap, [FullType(String), FullType(BuiltList, [FullType(String)])]),
+          ) as BuiltMap<String, BuiltList<String>>;
           result.errors.replace(valueDes);
           break;
         default:
@@ -120,3 +104,4 @@ class _$ValidationErrorsSerializer
     return result.build();
   }
 }
+

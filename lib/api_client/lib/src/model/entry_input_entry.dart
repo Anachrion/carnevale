@@ -12,12 +12,11 @@ part 'entry_input_entry.g.dart';
 /// EntryInputEntry
 ///
 /// Properties:
-/// * [listId]
-/// * [entryType]
-/// * [entryId]
+/// * [listId] 
+/// * [entryType] 
+/// * [entryId] 
 @BuiltValue()
-abstract class EntryInputEntry
-    implements Built<EntryInputEntry, EntryInputEntryBuilder> {
+abstract class EntryInputEntry implements Built<EntryInputEntry, EntryInputEntryBuilder> {
   @BuiltValueField(wireName: r'list_id')
   int get listId;
 
@@ -30,19 +29,16 @@ abstract class EntryInputEntry
 
   EntryInputEntry._();
 
-  factory EntryInputEntry([void updates(EntryInputEntryBuilder b)]) =
-      _$EntryInputEntry;
+  factory EntryInputEntry([void updates(EntryInputEntryBuilder b)]) = _$EntryInputEntry;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(EntryInputEntryBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<EntryInputEntry> get serializer =>
-      _$EntryInputEntrySerializer();
+  static Serializer<EntryInputEntry> get serializer => _$EntryInputEntrySerializer();
 }
 
-class _$EntryInputEntrySerializer
-    implements PrimitiveSerializer<EntryInputEntry> {
+class _$EntryInputEntrySerializer implements PrimitiveSerializer<EntryInputEntry> {
   @override
   final Iterable<Type> types = const [EntryInputEntry, _$EntryInputEntry];
 
@@ -77,11 +73,7 @@ class _$EntryInputEntrySerializer
     EntryInputEntry object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -97,24 +89,24 @@ class _$EntryInputEntrySerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'list_id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.listId = valueDes;
           break;
         case r'entry_type':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(EntryInputEntryEntryTypeEnum),
-                  )
-                  as EntryInputEntryEntryTypeEnum;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(EntryInputEntryEntryTypeEnum),
+          ) as EntryInputEntryEntryTypeEnum;
           result.entryType = valueDes;
           break;
         case r'entry_id':
-          final valueDes =
-              serializers.deserialize(value, specifiedType: const FullType(int))
-                  as int;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
           result.entryId = valueDes;
           break;
         default:
@@ -147,20 +139,17 @@ class _$EntryInputEntrySerializer
 }
 
 class EntryInputEntryEntryTypeEnum extends EnumClass {
+
   @BuiltValueEnumConst(wireName: r'Catalog::CardReference')
-  static const EntryInputEntryEntryTypeEnum catalogColonColonCardReference =
-      _$entryInputEntryEntryTypeEnum_catalogColonColonCardReference;
+  static const EntryInputEntryEntryTypeEnum catalogColonColonCardReference = _$entryInputEntryEntryTypeEnum_catalogColonColonCardReference;
   @BuiltValueEnumConst(wireName: r'Catalog::Equipment')
-  static const EntryInputEntryEntryTypeEnum catalogColonColonEquipment =
-      _$entryInputEntryEntryTypeEnum_catalogColonColonEquipment;
+  static const EntryInputEntryEntryTypeEnum catalogColonColonEquipment = _$entryInputEntryEntryTypeEnum_catalogColonColonEquipment;
 
-  static Serializer<EntryInputEntryEntryTypeEnum> get serializer =>
-      _$entryInputEntryEntryTypeEnumSerializer;
+  static Serializer<EntryInputEntryEntryTypeEnum> get serializer => _$entryInputEntryEntryTypeEnumSerializer;
 
-  const EntryInputEntryEntryTypeEnum._(String name) : super(name);
+  const EntryInputEntryEntryTypeEnum._(String name): super(name);
 
-  static BuiltSet<EntryInputEntryEntryTypeEnum> get values =>
-      _$entryInputEntryEntryTypeEnumValues;
-  static EntryInputEntryEntryTypeEnum valueOf(String name) =>
-      _$entryInputEntryEntryTypeEnumValueOf(name);
+  static BuiltSet<EntryInputEntryEntryTypeEnum> get values => _$entryInputEntryEntryTypeEnumValues;
+  static EntryInputEntryEntryTypeEnum valueOf(String name) => _$entryInputEntryEntryTypeEnumValueOf(name);
 }
+

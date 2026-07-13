@@ -7,18 +7,26 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_api.dart';
 
 void main() {
-  testWidgets('GameSessionScreen renders the lobby for a pending game', (tester) async {
-    AuthService().debugLogin(const AuthUser(id: 1, email: 'a@b.c', username: 'tester'));
+  testWidgets('GameSessionScreen renders the lobby for a pending game', (
+    tester,
+  ) async {
+    AuthService().debugLogin(
+      const AuthUser(id: 1, email: 'a@b.c', username: 'tester'),
+    );
     final adapter = installFakeApi();
     adapter.stub(
       'GET',
       '/games/1',
-      gameBody(fakeGame(id: 1, joinCode: 'XYZ789', status: api.GameStatusEnum.pending)),
+      gameBody(
+        fakeGame(id: 1, joinCode: 'XYZ789', status: api.GameStatusEnum.pending),
+      ),
     );
     // watch() opens an ActionCable connection, which first mints a ticket over REST.
     adapter.stub('POST', '/cable_tickets', {'ticket': 'test-ticket'});
 
-    await tester.pumpWidget(const MaterialApp(home: GameSessionScreen(gameId: 1)));
+    await tester.pumpWidget(
+      const MaterialApp(home: GameSessionScreen(gameId: 1)),
+    );
     await tester.pump(); // initial snapshot resolves
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -74,7 +82,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(find.text("Ready"), findsOneWidget);
-      expect(find.text('Waiting for the opponent to be ready...'), findsNothing);
+      expect(
+        find.text('Waiting for the opponent to be ready...'),
+        findsNothing,
+      );
       // Mulliganed agendas live under a collapsed "Discarded (N)" header; the name is hidden until
       // the section is expanded by tapping it.
       expect(find.text('Discarded (1)'), findsOneWidget);

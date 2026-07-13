@@ -146,8 +146,12 @@ class ScoreTab extends StatelessWidget {
                 height: 40,
                 color: context.subtleTextColor.withValues(alpha: 0.3),
               ),
-              _scoreColumn(context, opponent.username, opponent.score,
-                  isMe: false),
+              _scoreColumn(
+                context,
+                opponent.username,
+                opponent.score,
+                isMe: false,
+              ),
             ],
           ),
           _finishArea(context),
@@ -175,7 +179,9 @@ class ScoreTab extends StatelessWidget {
             onPressed: busy ? null : onUnfinish,
             icon: const Icon(Icons.undo, size: 18),
             label: const Text('Undo — keep scoring'),
-            style: OutlinedButton.styleFrom(foregroundColor: context.accentColor),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: context.accentColor,
+            ),
           ),
         ],
       );
@@ -198,8 +204,12 @@ class ScoreTab extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _scoreColumn(BuildContext context, String name, int score,
-      {required bool isMe}) {
+  Widget _scoreColumn(
+    BuildContext context,
+    String name,
+    int score, {
+    required bool isMe,
+  }) {
     return Expanded(
       child: Column(
         children: [
@@ -229,10 +239,14 @@ class ScoreTab extends StatelessWidget {
   // ── My agendas ──────────────────────────────────────────────────────────────
 
   Widget _myAgendasPanel(BuildContext context) {
-    final scored = _historyNames(me.agendaHistory,
-        api.AgendaHistoryEntryActionEnum.scored);
-    final discarded = _historyEntries(me.agendaHistory,
-        api.AgendaHistoryEntryActionEnum.discarded);
+    final scored = _historyNames(
+      me.agendaHistory,
+      api.AgendaHistoryEntryActionEnum.scored,
+    );
+    final discarded = _historyEntries(
+      me.agendaHistory,
+      api.AgendaHistoryEntryActionEnum.discarded,
+    );
 
     return GlassPanel(
       child: Column(
@@ -271,24 +285,32 @@ class ScoreTab extends StatelessWidget {
             _emptyNote(context, 'No agendas in hand.')
           else
             ...me.agendas.asMap().entries.map(
-                  (e) => _handTile(context, e.value, e.key + 1),
-                ),
+              (e) => _handTile(context, e.value, e.key + 1),
+            ),
           if (scored.isNotEmpty) ...[
             const SizedBox(height: 12),
             _sectionLabel(context, 'Scored'),
-            ...scored.map((n) => _resolvedRow(context, n, Icons.check_circle,
-                context.accentColor)),
+            ...scored.map(
+              (n) => _resolvedRow(
+                context,
+                n,
+                Icons.check_circle,
+                context.accentColor,
+              ),
+            ),
           ],
           if (discarded.isNotEmpty) ...[
             const SizedBox(height: 12),
             _sectionLabel(context, 'Discarded'),
-            ...discarded.map((e) => _resolvedRow(
-                  context,
-                  e.agenda.name,
-                  Icons.cancel,
-                  context.subtleTextColor,
-                  tag: _originLabel(e.origin),
-                )),
+            ...discarded.map(
+              (e) => _resolvedRow(
+                context,
+                e.agenda.name,
+                Icons.cancel,
+                context.subtleTextColor,
+                tag: _originLabel(e.origin),
+              ),
+            ),
           ],
         ],
       ),
@@ -314,7 +336,11 @@ class ScoreTab extends StatelessWidget {
               color: context.accentColor,
             ),
           ),
-          Divider(height: 16, thickness: 1, color: context.secondaryAccentColor),
+          Divider(
+            height: 16,
+            thickness: 1,
+            color: context.secondaryAccentColor,
+          ),
           Text(
             a.description,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
@@ -346,10 +372,14 @@ class ScoreTab extends StatelessWidget {
   // ── Opponent agendas ─────────────────────────────────────────────────────────
 
   Widget _opponentAgendasPanel(BuildContext context) {
-    final scored = _historyNames(opponent.agendaHistory,
-        api.AgendaHistoryEntryActionEnum.scored);
-    final discarded = _historyEntries(opponent.agendaHistory,
-        api.AgendaHistoryEntryActionEnum.discarded);
+    final scored = _historyNames(
+      opponent.agendaHistory,
+      api.AgendaHistoryEntryActionEnum.scored,
+    );
+    final discarded = _historyEntries(
+      opponent.agendaHistory,
+      api.AgendaHistoryEntryActionEnum.discarded,
+    );
 
     return GlassPanel(
       child: Column(
@@ -379,29 +409,36 @@ class ScoreTab extends StatelessWidget {
           else if (opponent.agendas.isEmpty)
             _emptyNote(context, 'No agendas in hand.')
           else
-            ...opponent.agendas.map((a) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Text(
-                    a.name,
-                    style: TextStyle(color: context.textColor),
-                  ),
-                )),
+            ...opponent.agendas.map(
+              (a) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(a.name, style: TextStyle(color: context.textColor)),
+              ),
+            ),
           if (scored.isNotEmpty) ...[
             const SizedBox(height: 12),
             _sectionLabel(context, 'Scored'),
-            ...scored.map((n) => _resolvedRow(context, n, Icons.check_circle,
-                context.accentColor)),
+            ...scored.map(
+              (n) => _resolvedRow(
+                context,
+                n,
+                Icons.check_circle,
+                context.accentColor,
+              ),
+            ),
           ],
           if (discarded.isNotEmpty) ...[
             const SizedBox(height: 12),
             _sectionLabel(context, 'Discarded'),
-            ...discarded.map((e) => _resolvedRow(
-                  context,
-                  e.agenda.name,
-                  Icons.cancel,
-                  context.subtleTextColor,
-                  tag: _originLabel(e.origin),
-                )),
+            ...discarded.map(
+              (e) => _resolvedRow(
+                context,
+                e.agenda.name,
+                Icons.cancel,
+                context.subtleTextColor,
+                tag: _originLabel(e.origin),
+              ),
+            ),
           ],
         ],
       ),
@@ -411,26 +448,26 @@ class ScoreTab extends StatelessWidget {
   // ── Shared bits ────────────────────────────────────────────────────────────
 
   Widget _sectionLabel(BuildContext context, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(
-          text.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            letterSpacing: 1.2,
-            fontWeight: FontWeight.w600,
-            color: context.subtleTextColor,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text.toUpperCase(),
+      style: TextStyle(
+        fontSize: 11,
+        letterSpacing: 1.2,
+        fontWeight: FontWeight.w600,
+        color: context.subtleTextColor,
+      ),
+    ),
+  );
 
   Widget _emptyNote(BuildContext context, String text) => Text(
-        text,
-        style: TextStyle(
-          fontSize: 13,
-          fontStyle: FontStyle.italic,
-          color: context.subtleTextColor,
-        ),
-      );
+    text,
+    style: TextStyle(
+      fontSize: 13,
+      fontStyle: FontStyle.italic,
+      color: context.subtleTextColor,
+    ),
+  );
 
   Widget _resolvedRow(
     BuildContext context,
@@ -495,8 +532,11 @@ class ScoreTab extends StatelessWidget {
 
   // ── Log ────────────────────────────────────────────────────────────────────
 
-  Widget _logButton(BuildContext context, api.GamePlayer player,
-      {required bool isMe}) {
+  Widget _logButton(
+    BuildContext context,
+    api.GamePlayer player, {
+    required bool isMe,
+  }) {
     return TextButton.icon(
       onPressed: () => _showLog(context, player, isMe: isMe),
       icon: const Icon(Icons.history, size: 18),
@@ -505,8 +545,11 @@ class ScoreTab extends StatelessWidget {
     );
   }
 
-  void _showLog(BuildContext context, api.GamePlayer player,
-      {required bool isMe}) {
+  void _showLog(
+    BuildContext context,
+    api.GamePlayer player, {
+    required bool isMe,
+  }) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -569,18 +612,24 @@ class ScoreTab extends StatelessWidget {
                 const SizedBox(height: 8),
                 if (includeUnachievable)
                   ListTile(
-                    title: Text('Unachievable',
-                        style: TextStyle(color: ctx.textColor)),
+                    title: Text(
+                      'Unachievable',
+                      style: TextStyle(color: ctx.textColor),
+                    ),
                     onTap: () => Navigator.pop(ctx, 'unachievable'),
                   ),
                 ListTile(
-                  title: Text('Special Rule',
-                      style: TextStyle(color: ctx.textColor)),
+                  title: Text(
+                    'Special Rule',
+                    style: TextStyle(color: ctx.textColor),
+                  ),
                   onTap: () => Navigator.pop(ctx, 'special_rule'),
                 ),
                 ListTile(
-                  title: Text('Command Point',
-                      style: TextStyle(color: ctx.textColor)),
+                  title: Text(
+                    'Command Point',
+                    style: TextStyle(color: ctx.textColor),
+                  ),
                   onTap: () => Navigator.pop(ctx, 'command_point'),
                 ),
               ],
@@ -596,14 +645,12 @@ class ScoreTab extends StatelessWidget {
   Iterable<api.AgendaHistoryEntry> _historyEntries(
     Iterable<api.AgendaHistoryEntry> history,
     api.AgendaHistoryEntryActionEnum action,
-  ) =>
-      history.where((e) => e.action == action);
+  ) => history.where((e) => e.action == action);
 
   Iterable<String> _historyNames(
     Iterable<api.AgendaHistoryEntry> history,
     api.AgendaHistoryEntryActionEnum action,
-  ) =>
-      _historyEntries(history, action).map((e) => e.agenda.name);
+  ) => _historyEntries(history, action).map((e) => e.agenda.name);
 
   String? _originLabel(api.AgendaHistoryEntryOriginEnum? origin) =>
       switch (origin) {
@@ -620,30 +667,31 @@ class _AgendaRuleChip extends StatelessWidget {
 
   final api.ScenarioAgendaRulesEnum rule;
 
-  (String, String) _describe(api.ScenarioAgendaRulesEnum rule) =>
-      switch (rule) {
-        api.ScenarioAgendaRulesEnum.cycle => (
-            'Cycle',
-            'Scoring an agenda immediately draws a replacement.'
-          ),
-        api.ScenarioAgendaRulesEnum.secondary => (
-            'Secondary',
-            'You must achieve at least one agenda to score any Victory Points from any source.'
-          ),
-        api.ScenarioAgendaRulesEnum.double_ => (
-            'Double',
-            'On achieving an agenda you may keep it in play; achieving it again scores double, otherwise nothing.'
-          ),
-        api.ScenarioAgendaRulesEnum.secret => (
-            'Secret',
-            "Keep your agendas secret from your opponent until achieved. Without this rule, all players can see each other's agendas."
-          ),
-        api.ScenarioAgendaRulesEnum.total => (
-            'Total',
-            'You must achieve all of your agendas to score their Victory Points.'
-          ),
-        _ => (rule.name, ''),
-      };
+  (String, String) _describe(
+    api.ScenarioAgendaRulesEnum rule,
+  ) => switch (rule) {
+    api.ScenarioAgendaRulesEnum.cycle => (
+      'Cycle',
+      'Scoring an agenda immediately draws a replacement.',
+    ),
+    api.ScenarioAgendaRulesEnum.secondary => (
+      'Secondary',
+      'You must achieve at least one agenda to score any Victory Points from any source.',
+    ),
+    api.ScenarioAgendaRulesEnum.double_ => (
+      'Double',
+      'On achieving an agenda you may keep it in play; achieving it again scores double, otherwise nothing.',
+    ),
+    api.ScenarioAgendaRulesEnum.secret => (
+      'Secret',
+      "Keep your agendas secret from your opponent until achieved. Without this rule, all players can see each other's agendas.",
+    ),
+    api.ScenarioAgendaRulesEnum.total => (
+      'Total',
+      'You must achieve all of your agendas to score their Victory Points.',
+    ),
+    _ => (rule.name, ''),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -671,8 +719,7 @@ class _AgendaRuleChip extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.info_outline,
-                size: 13, color: context.subtleTextColor),
+            Icon(Icons.info_outline, size: 13, color: context.subtleTextColor),
           ],
         ),
       ),
@@ -759,7 +806,10 @@ class _AgendaLogSheet extends StatelessWidget {
   }
 
   Widget _turnBlock(
-      BuildContext context, int turn, List<api.AgendaHistoryEntry> events) {
+    BuildContext context,
+    int turn,
+    List<api.AgendaHistoryEntry> events,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -784,15 +834,15 @@ class _AgendaLogSheet extends StatelessWidget {
   Widget _eventRow(BuildContext context, api.AgendaHistoryEntry e) {
     final (IconData icon, Color color, String verb) = switch (e.action) {
       api.AgendaHistoryEntryActionEnum.scored => (
-          Icons.check_circle,
-          context.accentColor,
-          'Scored'
-        ),
+        Icons.check_circle,
+        context.accentColor,
+        'Scored',
+      ),
       api.AgendaHistoryEntryActionEnum.discarded => (
-          Icons.cancel,
-          context.subtleTextColor,
-          'Discarded'
-        ),
+        Icons.cancel,
+        context.subtleTextColor,
+        'Discarded',
+      ),
       _ => (Icons.add_circle_outline, context.subtleTextColor, 'Drew'),
     };
     return Padding(

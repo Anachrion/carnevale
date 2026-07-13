@@ -12,28 +12,24 @@ part 'entry_position_input.g.dart';
 /// EntryPositionInput
 ///
 /// Properties:
-/// * [entry]
+/// * [entry] 
 @BuiltValue()
-abstract class EntryPositionInput
-    implements Built<EntryPositionInput, EntryPositionInputBuilder> {
+abstract class EntryPositionInput implements Built<EntryPositionInput, EntryPositionInputBuilder> {
   @BuiltValueField(wireName: r'entry')
   EntryPositionInputEntry get entry;
 
   EntryPositionInput._();
 
-  factory EntryPositionInput([void updates(EntryPositionInputBuilder b)]) =
-      _$EntryPositionInput;
+  factory EntryPositionInput([void updates(EntryPositionInputBuilder b)]) = _$EntryPositionInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(EntryPositionInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<EntryPositionInput> get serializer =>
-      _$EntryPositionInputSerializer();
+  static Serializer<EntryPositionInput> get serializer => _$EntryPositionInputSerializer();
 }
 
-class _$EntryPositionInputSerializer
-    implements PrimitiveSerializer<EntryPositionInput> {
+class _$EntryPositionInputSerializer implements PrimitiveSerializer<EntryPositionInput> {
   @override
   final Iterable<Type> types = const [EntryPositionInput, _$EntryPositionInput];
 
@@ -58,11 +54,7 @@ class _$EntryPositionInputSerializer
     EntryPositionInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -78,12 +70,10 @@ class _$EntryPositionInputSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'entry':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(EntryPositionInputEntry),
-                  )
-                  as EntryPositionInputEntry;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(EntryPositionInputEntry),
+          ) as EntryPositionInputEntry;
           result.entry.replace(valueDes);
           break;
         default:
@@ -114,3 +104,4 @@ class _$EntryPositionInputSerializer
     return result.build();
   }
 }
+

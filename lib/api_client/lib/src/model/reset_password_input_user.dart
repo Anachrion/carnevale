@@ -11,12 +11,11 @@ part 'reset_password_input_user.g.dart';
 /// ResetPasswordInputUser
 ///
 /// Properties:
-/// * [resetPasswordToken]
-/// * [password]
-/// * [passwordConfirmation]
+/// * [resetPasswordToken] 
+/// * [password] 
+/// * [passwordConfirmation] 
 @BuiltValue()
-abstract class ResetPasswordInputUser
-    implements Built<ResetPasswordInputUser, ResetPasswordInputUserBuilder> {
+abstract class ResetPasswordInputUser implements Built<ResetPasswordInputUser, ResetPasswordInputUserBuilder> {
   @BuiltValueField(wireName: r'reset_password_token')
   String get resetPasswordToken;
 
@@ -28,25 +27,18 @@ abstract class ResetPasswordInputUser
 
   ResetPasswordInputUser._();
 
-  factory ResetPasswordInputUser([
-    void updates(ResetPasswordInputUserBuilder b),
-  ]) = _$ResetPasswordInputUser;
+  factory ResetPasswordInputUser([void updates(ResetPasswordInputUserBuilder b)]) = _$ResetPasswordInputUser;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(ResetPasswordInputUserBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<ResetPasswordInputUser> get serializer =>
-      _$ResetPasswordInputUserSerializer();
+  static Serializer<ResetPasswordInputUser> get serializer => _$ResetPasswordInputUserSerializer();
 }
 
-class _$ResetPasswordInputUserSerializer
-    implements PrimitiveSerializer<ResetPasswordInputUser> {
+class _$ResetPasswordInputUserSerializer implements PrimitiveSerializer<ResetPasswordInputUser> {
   @override
-  final Iterable<Type> types = const [
-    ResetPasswordInputUser,
-    _$ResetPasswordInputUser,
-  ];
+  final Iterable<Type> types = const [ResetPasswordInputUser, _$ResetPasswordInputUser];
 
   @override
   final String wireName = r'ResetPasswordInputUser';
@@ -79,11 +71,7 @@ class _$ResetPasswordInputUserSerializer
     ResetPasswordInputUser object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -99,30 +87,24 @@ class _$ResetPasswordInputUserSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'reset_password_token':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.resetPasswordToken = valueDes;
           break;
         case r'password':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.password = valueDes;
           break;
         case r'password_confirmation':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(String),
-                  )
-                  as String;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
           result.passwordConfirmation = valueDes;
           break;
         default:
@@ -153,3 +135,4 @@ class _$ResetPasswordInputUserSerializer
     return result.build();
   }
 }
+

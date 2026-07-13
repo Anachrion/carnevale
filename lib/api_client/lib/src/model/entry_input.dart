@@ -12,7 +12,7 @@ part 'entry_input.g.dart';
 /// EntryInput
 ///
 /// Properties:
-/// * [entry]
+/// * [entry] 
 @BuiltValue()
 abstract class EntryInput implements Built<EntryInput, EntryInputBuilder> {
   @BuiltValueField(wireName: r'entry')
@@ -54,11 +54,7 @@ class _$EntryInputSerializer implements PrimitiveSerializer<EntryInput> {
     EntryInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -74,12 +70,10 @@ class _$EntryInputSerializer implements PrimitiveSerializer<EntryInput> {
       final value = serializedList[i + 1];
       switch (key) {
         case r'entry':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(EntryInputEntry),
-                  )
-                  as EntryInputEntry;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(EntryInputEntry),
+          ) as EntryInputEntry;
           result.entry.replace(valueDes);
           break;
         default:
@@ -110,3 +104,4 @@ class _$EntryInputSerializer implements PrimitiveSerializer<EntryInput> {
     return result.build();
   }
 }
+

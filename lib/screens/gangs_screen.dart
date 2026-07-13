@@ -181,9 +181,8 @@ class _GangsScreenState extends State<GangsScreen> {
               totalCost: gang.totalCost,
               points: gang.points,
               onLongPress: () => _confirmDelete(gang),
-              onTap: () => setState(
-                () => _expandedId = expanded ? null : gang.id,
-              ),
+              onTap: () =>
+                  setState(() => _expandedId = expanded ? null : gang.id),
               trailing: AnimatedRotation(
                 turns: expanded ? 0.25 : 0,
                 duration: const Duration(milliseconds: 400),
@@ -347,10 +346,7 @@ class _GangRosterPreview extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Text(
                 'No models hired yet.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: context.subtleTextColor,
-                ),
+                style: TextStyle(fontSize: 13, color: context.subtleTextColor),
               ),
             )
           else
@@ -362,7 +358,10 @@ class _GangRosterPreview extends StatelessWidget {
                     Expanded(
                       child: Text(
                         entry.name,
-                        style: TextStyle(fontSize: 13, color: context.textColor),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: context.textColor,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

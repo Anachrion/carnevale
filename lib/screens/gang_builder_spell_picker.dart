@@ -261,7 +261,9 @@ class _SpellRow extends StatelessWidget {
               size: 20,
               color: checked
                   ? accent
-                  : context.subtleTextColor.withValues(alpha: enabled ? 0.6 : 0.25),
+                  : context.subtleTextColor.withValues(
+                      alpha: enabled ? 0.6 : 0.25,
+                    ),
             ),
             const SizedBox(width: 10),
             Expanded(

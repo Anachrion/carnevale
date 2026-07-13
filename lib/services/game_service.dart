@@ -222,6 +222,34 @@ class GameService extends ChangeNotifier {
         return res.data!;
       });
 
+  /// Conjures a model onto the board mid-game (a summon/raise granted by a special rule) and adds
+  /// it to the current player's gang. Any model in the catalog may be summoned — the rule lives on
+  /// the summoner's card, so the app tracks the summon rather than adjudicating it.
+  ///
+  /// A summoned model tracks HP, counters and activation like any hired one, but costs the gang
+  /// nothing and can't push it over its ducat limit. Returns the player's updated gang.
+  Future<api.ModelList> summon(int gameId, int cardReferenceId) =>
+      _guard(() async {
+        final res = await _client.games.summonModel(
+          id: gameId,
+          summonModelRequest: api.SummonModelRequest(
+            (b) => b..cardReferenceId = cardReferenceId,
+          ),
+        );
+        return res.data!;
+      });
+
+  /// Removes a summoned model. Only summoned models can be removed — the hired roster is frozen
+  /// once the game starts.
+  Future<api.ModelList> dismissSummon(int gameId, int listEntryId) =>
+      _guard(() async {
+        final res = await _client.games.dismissSummon(
+          id: gameId,
+          listEntryId: listEntryId,
+        );
+        return res.data!;
+      });
+
   /// Updates status counters on one of the current player's own models — only the values
   /// passed change, the rest keep their current state. Returns the model's full updated
   /// state; the server also broadcasts a game_state event to both players.

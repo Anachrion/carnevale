@@ -12,28 +12,24 @@ part 'registration_input.g.dart';
 /// RegistrationInput
 ///
 /// Properties:
-/// * [user]
+/// * [user] 
 @BuiltValue()
-abstract class RegistrationInput
-    implements Built<RegistrationInput, RegistrationInputBuilder> {
+abstract class RegistrationInput implements Built<RegistrationInput, RegistrationInputBuilder> {
   @BuiltValueField(wireName: r'user')
   RegistrationInputUser get user;
 
   RegistrationInput._();
 
-  factory RegistrationInput([void updates(RegistrationInputBuilder b)]) =
-      _$RegistrationInput;
+  factory RegistrationInput([void updates(RegistrationInputBuilder b)]) = _$RegistrationInput;
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(RegistrationInputBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<RegistrationInput> get serializer =>
-      _$RegistrationInputSerializer();
+  static Serializer<RegistrationInput> get serializer => _$RegistrationInputSerializer();
 }
 
-class _$RegistrationInputSerializer
-    implements PrimitiveSerializer<RegistrationInput> {
+class _$RegistrationInputSerializer implements PrimitiveSerializer<RegistrationInput> {
   @override
   final Iterable<Type> types = const [RegistrationInput, _$RegistrationInput];
 
@@ -58,11 +54,7 @@ class _$RegistrationInputSerializer
     RegistrationInput object, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    return _serializeProperties(
-      serializers,
-      object,
-      specifiedType: specifiedType,
-    ).toList();
+    return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
   }
 
   void _deserializeProperties(
@@ -78,12 +70,10 @@ class _$RegistrationInputSerializer
       final value = serializedList[i + 1];
       switch (key) {
         case r'user':
-          final valueDes =
-              serializers.deserialize(
-                    value,
-                    specifiedType: const FullType(RegistrationInputUser),
-                  )
-                  as RegistrationInputUser;
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RegistrationInputUser),
+          ) as RegistrationInputUser;
           result.user.replace(valueDes);
           break;
         default:
@@ -114,3 +104,4 @@ class _$RegistrationInputSerializer
     return result.build();
   }
 }
+

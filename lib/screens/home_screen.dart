@@ -41,7 +41,9 @@ class HomeScreen extends StatelessWidget {
                               const _Header(),
                               const SizedBox(height: 24),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                ),
                                 child: Column(
                                   children: [
                                     _MenuItem(
@@ -77,7 +79,8 @@ class HomeScreen extends StatelessWidget {
                                       onTap: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => const GameHomeScreen(),
+                                          builder: (_) =>
+                                              const GameHomeScreen(),
                                         ),
                                       ),
                                     ),
@@ -96,7 +99,8 @@ class HomeScreen extends StatelessWidget {
                                       onTap: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => const SettingsScreen(),
+                                          builder: (_) =>
+                                              const SettingsScreen(),
                                         ),
                                       ),
                                     ),
