@@ -1,11 +1,11 @@
 {
-    "name": "carnevale",
-    "short_name": "carnevale",
+    "name": "Carnevale",
+    "short_name": "Carnevale",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#021f49",
     "theme_color": "#021f49",
-    "description": "A new Flutter project.",
+    "description": "Companion app for the Carnevale tabletop miniatures game: build gangs, browse cards, track your games, and read the rules.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

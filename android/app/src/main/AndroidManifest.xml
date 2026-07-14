@@ -3,7 +3,7 @@
          automatically to the debug/profile manifests, so release builds need it declared here. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="carnevale"
+        android:label="Carnevale"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
