@@ -41,6 +41,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   bool _loading = true;
   bool _busy = false;
   _Tab _tab = _Tab.list;
+  final _pageController = PageController();
   _HireSort _hireSort = _HireSort.role;
   bool _hireSortAsc = true;
   final _hireScroll = ScrollController();
@@ -139,7 +140,34 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   void dispose() {
     disposeSearch();
     _hireScroll.dispose();
+    _pageController.dispose();
     super.dispose();
+  }
+
+  /// Switches tabs by driving the [PageView], so a tap animates across just like a swipe does; the
+  /// page's onPageChanged is what actually updates [_tab]. Before the list loads the PageView isn't
+  /// mounted, so fall back to setting the tab directly.
+  void _selectTab(_Tab tab) {
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        tab.index,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    } else {
+      setState(() => _tab = tab);
+    }
+  }
+
+  /// Back from the Hire tab returns to the List tab rather than leaving the builder; from the List
+  /// tab it pops the screen (back to the gangs index). Shared by the header button and, via
+  /// [PopScope], the OS back gesture.
+  void _handleBack() {
+    if (_tab != _Tab.list) {
+      _selectTab(_Tab.list);
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   /// Opens the card viewer on [p], then scrolls the hire list so the card the user ended on
@@ -361,25 +389,33 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   Widget build(BuildContext context) {
     final factionColor =
         AppPalette.factionColors[_gang.faction] ?? context.accentColor;
-    return Scaffold(
-      backgroundColor: AppPalette.background,
-      body: AppBackground(
-        child: Column(
-          children: [
-            _buildHeader(context, factionColor),
-            PointsBar(
-              used: _gang.totalCost,
-              limit: _gang.points,
-              factionColor: factionColor,
-              editable: true,
-            ),
-            if (_gang.entries.isNotEmpty && !_gang.selectionValid)
-              _buildValidityPanel(),
-            const SizedBox(height: 12),
-            _buildTabBar(factionColor),
-            const SizedBox(height: 8),
-            Expanded(child: _buildTabContent(factionColor)),
-          ],
+    return PopScope(
+      // On the Hire tab, swallow the pop and drop back to List instead; on List, let it pop the
+      // screen. canPop mirrors this so the OS back gesture is intercepted only when it should be.
+      canPop: _tab == _Tab.list,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _tab != _Tab.list) _selectTab(_Tab.list);
+      },
+      child: Scaffold(
+        backgroundColor: AppPalette.background,
+        body: AppBackground(
+          child: Column(
+            children: [
+              _buildHeader(context, factionColor),
+              PointsBar(
+                used: _gang.totalCost,
+                limit: _gang.points,
+                factionColor: factionColor,
+                editable: true,
+              ),
+              if (_gang.entries.isNotEmpty && !_gang.selectionValid)
+                _buildValidityPanel(),
+              const SizedBox(height: 12),
+              _buildTabBar(factionColor),
+              const SizedBox(height: 8),
+              Expanded(child: _buildTabContent(factionColor)),
+            ],
+          ),
         ),
       ),
     );
@@ -392,7 +428,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back, color: context.textColor),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: _handleBack,
           ),
           const SizedBox(width: 4),
           Expanded(
@@ -490,13 +526,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
               label: 'List',
               selected: _tab == _Tab.list,
               factionColor: factionColor,
-              onTap: () => setState(() => _tab = _Tab.list),
+              onTap: () => _selectTab(_Tab.list),
             ),
             _TabButton(
               label: 'Hire',
               selected: _tab == _Tab.hire,
               factionColor: factionColor,
-              onTap: () => setState(() => _tab = _Tab.hire),
+              onTap: () => _selectTab(_Tab.hire),
             ),
           ],
         ),
@@ -510,11 +546,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         child: CircularProgressIndicator(color: context.accentColor),
       );
     }
-    // Build only the active tab rather than eagerly laying out both (F-P3-6). The list/hire tabs
-    // hold no scroll/selection state worth preserving across a switch.
-    return _tab == _Tab.list
-        ? _buildListTab(factionColor)
-        : _buildHireTab(factionColor);
+    // A PageView so List and Hire can be swiped between, not just tapped. onPageChanged is the single
+    // source of truth for [_tab] — both a swipe and a tab-bar tap (which animates the page) land
+    // here. Order must match _Tab: index 0 = list, 1 = hire.
+    return PageView(
+      controller: _pageController,
+      onPageChanged: (i) => setState(() => _tab = _Tab.values[i]),
+      children: [_buildListTab(factionColor), _buildHireTab(factionColor)],
+    );
   }
 
   Widget _buildListTab(Color factionColor) {

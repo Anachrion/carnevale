@@ -39,6 +39,11 @@ class CardImageService {
 
   bool _manifestLoaded = false;
 
+  /// True once an *unfiltered* manifest (the whole catalog) has been loaded. Pruning orphaned faces
+  /// off disk is only safe against a full manifest — a faction-filtered one would look like every
+  /// other gang's cards had been removed.
+  bool _fullManifestLoaded = false;
+
   /// True while a [sync] is in flight, so a second call (e.g. the settings button tapped during the
   /// startup sync) doesn't kick off a concurrent download.
   bool _syncing = false;
@@ -86,9 +91,36 @@ class CardImageService {
       }
     }
     _manifestLoaded = true;
+    if (faction == null) _fullManifestLoaded = true;
   }
 
   String _filenameOf(String url) => Uri.parse(url).pathSegments.last;
+
+  /// Deletes cached faces that are no longer in the catalog — cards that were removed, or whose face
+  /// filename changed across a version (the old name would otherwise linger on disk forever, since
+  /// [sync] only ever visits faces that are still in the manifest). No-op until a full manifest has
+  /// loaded, so a faction-filtered load can't wipe every other gang's faces.
+  Future<void> _pruneOrphans(Directory dir) async {
+    if (!_fullManifestLoaded) return;
+    try {
+      var changed = false;
+      for (final entity in dir.listSync()) {
+        if (entity is! File) continue;
+        final name = entity.uri.pathSegments.last;
+        if (_faces.containsKey(name)) continue;
+        try {
+          await entity.delete();
+          await FileImage(entity).evict();
+        } catch (e) {
+          debugPrint('Card image prune failed for $name: $e');
+        }
+        if (_downloaded.remove(name) != null) changed = true;
+      }
+      if (changed) await _prefs?.setString(_versionsKey, jsonEncode(_downloaded));
+    } catch (e) {
+      debugPrint('Card image prune failed: $e');
+    }
+  }
 
   /// Absolute, version-busted URL for a face. Falls back to an unversioned URL when the manifest
   /// has not loaded yet, so the image still resolves.
@@ -153,7 +185,12 @@ class CardImageService {
           );
           final bytes = res.data;
           if (bytes != null) {
-            await File('${dir.path}/${entry.key}').writeAsBytes(bytes);
+            final file = File('${dir.path}/${entry.key}');
+            await file.writeAsBytes(bytes);
+            // The on-disk path is our [FileImage] cache key and carries no version, so overwriting
+            // the bytes leaves Flutter's in-memory ImageCache holding the OLD decoded face. Evict it
+            // so the new version shows without an app restart.
+            await FileImage(file).evict();
             _downloaded[entry.key] = entry.value.version;
             // Persist after each face so a sync interrupted by the app being killed resumes from
             // here next launch instead of re-downloading everything it had already fetched.
@@ -165,6 +202,8 @@ class CardImageService {
         done++;
         syncStatus.value = CardSyncStatus(done, stale.length);
       }
+
+      await _pruneOrphans(dir);
     } finally {
       _syncing = false;
       syncStatus.value = null;
