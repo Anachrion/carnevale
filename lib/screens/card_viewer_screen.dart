@@ -16,6 +16,8 @@ class CardViewerScreen extends StatefulWidget {
     required this.profiles,
     required this.initialIndex,
     this.onIndexChanged,
+    this.selectedReferenceIds,
+    this.onIllustrationChanged,
   });
 
   final List<api.Profile> profiles;
@@ -25,6 +27,16 @@ class CardViewerScreen extends StatefulWidget {
   /// Reported through a callback rather than a pop result because the viewer is dismissed
   /// several ways (close button, Escape, system/browser back), not all of which we control.
   final ValueChanged<int>? onIndexChanged;
+
+  /// The card reference id to show for each profile initially (parallel to [profiles]); a missing
+  /// or unmatched entry falls back to the profile's first card reference. Lets a hired model open
+  /// on the illustration it was actually hired as.
+  final List<int>? selectedReferenceIds;
+
+  /// Called when the user switches a card to a different illustration, with the profile's index and
+  /// the chosen card reference id. When null (e.g. the catalog browser) switching only previews
+  /// locally and persists nothing.
+  final void Function(int index, int cardReferenceId)? onIllustrationChanged;
 
   @override
   State<CardViewerScreen> createState() => _CardViewerScreenState();
@@ -38,11 +50,20 @@ class _CardViewerScreenState extends State<CardViewerScreen>
   late int _currentIndex;
   bool _showingFront = true;
   int _flipSign = 1; // 1 = left-swipe rotation, -1 = right-swipe (mirror)
+  // Profile index -> chosen card reference id (which illustration to display). Seeded from
+  // widget.selectedReferenceIds; updated as the user cycles illustrations.
+  final Map<int, int> _selectedRef = {};
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    final ids = widget.selectedReferenceIds;
+    if (ids != null) {
+      for (var i = 0; i < ids.length && i < widget.profiles.length; i++) {
+        _selectedRef[i] = ids[i];
+      }
+    }
     _pageController = PageController(initialPage: widget.initialIndex);
     _flipController = AnimationController(
       vsync: this,
@@ -85,6 +106,37 @@ class _CardViewerScreenState extends State<CardViewerScreen>
       _flipController.reverse();
       setState(() => _showingFront = true);
     }
+  }
+
+  /// The card reference currently shown for [index] — the selected illustration, or the profile's
+  /// first when nothing is selected. Null only for a profile with no printed card.
+  api.CardReference? _refFor(int index) {
+    final refs = widget.profiles[index].cardReferences;
+    if (refs.isEmpty) return null;
+    final selId = _selectedRef[index];
+    return refs.firstWhere((r) => r.id == selId, orElse: () => refs.first);
+  }
+
+  String _frontOf(int index) =>
+      _refFor(index)?.cardFront ?? widget.profiles[index].frontImage;
+  String _backOf(int index) =>
+      _refFor(index)?.cardBack ?? widget.profiles[index].backImage;
+
+  /// Advances the current card to its next illustration (wrapping), resets it to the front, and
+  /// reports the choice so the opener can persist it. No-op for a card with a single illustration.
+  void _cycleIllustration() {
+    final index = _currentIndex;
+    final refs = widget.profiles[index].cardReferences.toList();
+    if (refs.length < 2) return;
+    final curId = _refFor(index)?.id;
+    final curPos = refs.indexWhere((r) => r.id == curId);
+    final next = refs[(curPos + 1) % refs.length];
+    setState(() {
+      _selectedRef[index] = next.id;
+      _flipController.reset();
+      _showingFront = true;
+    });
+    widget.onIllustrationChanged?.call(index, next.id);
   }
 
   void _goTo(int index) {
@@ -141,10 +193,10 @@ class _CardViewerScreenState extends State<CardViewerScreen>
   /// Builds the current card with its reveal animation. The flip controller drives a value
   /// `t` from 0 (front) to 1 (back); [_flipSign] carries the swipe direction so the motion
   /// follows the gesture. The animation style is a user preference.
-  Widget _buildAnimatedCard(api.Profile profile) {
+  Widget _buildAnimatedCard(int index) {
     final style = SettingsService().cardFlipStyle;
-    final front = _CardImage(path: profile.frontImage);
-    final back = _CardImage(path: profile.backImage);
+    final front = _CardImage(path: _frontOf(index));
+    final back = _CardImage(path: _backOf(index));
     return AnimatedBuilder(
       animation: _flipAnimation,
       builder: (context, _) {
@@ -203,7 +255,6 @@ class _CardViewerScreenState extends State<CardViewerScreen>
               itemCount: widget.profiles.length,
               onPageChanged: _onPageChanged,
               itemBuilder: (context, index) {
-                final profile = widget.profiles[index];
                 final isCurrent = index == _currentIndex;
                 return Center(
                   child: GestureDetector(
@@ -216,8 +267,8 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                           }
                         : null,
                     child: isCurrent
-                        ? _buildAnimatedCard(profile)
-                        : _CardImage(path: profile.frontImage),
+                        ? _buildAnimatedCard(index)
+                        : _CardImage(path: _frontOf(index)),
                   ),
                 );
               },
@@ -239,6 +290,26 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                 ),
               ),
             ),
+            // Switch-illustration button (top-right), only when this card has more than one. Cycles
+            // through the profile's illustrations; the opener decides whether the choice persists.
+            if (widget.profiles[_currentIndex].cardReferences.length > 1)
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      tooltip: 'Switch illustration',
+                      icon: const Icon(
+                        Icons.collections,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                      onPressed: _cycleIllustration,
+                    ),
+                  ),
+                ),
+              ),
             // Bottom bar: the navigation hint on the left, the abilities button on the right. The
             // Row gives the button its natural height, so nothing is clipped.
             Positioned(

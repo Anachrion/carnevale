@@ -330,6 +330,28 @@ class _GangRosterPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final entries = gang.entries.toList()
       ..sort((a, b) => a.position.compareTo(b.position));
+    // Label each model by its profile name (dropping the card-reference letter) and number the
+    // copies in list order when a model is hired more than once. Equipment (no profileName) keeps
+    // its own name and isn't numbered.
+    final counts = <String, int>{};
+    for (final e in entries) {
+      final key = e.profileName;
+      if (key != null) counts[key] = (counts[key] ?? 0) + 1;
+    }
+    final seen = <String, int>{};
+    final displayName = <int, String>{};
+    for (final e in entries) {
+      final base = e.profileName;
+      if (base == null) {
+        displayName[e.id] = e.name;
+      } else if ((counts[base] ?? 0) > 1) {
+        final n = (seen[base] ?? 0) + 1;
+        seen[base] = n;
+        displayName[e.id] = '$base $n';
+      } else {
+        displayName[e.id] = base;
+      }
+    }
     return Container(
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
@@ -357,7 +379,7 @@ class _GangRosterPreview extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        entry.name,
+                        displayName[entry.id] ?? entry.name,
                         style: TextStyle(
                           fontSize: 13,
                           color: context.textColor,

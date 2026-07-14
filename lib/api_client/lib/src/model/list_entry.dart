@@ -19,6 +19,10 @@ part 'list_entry.g.dart';
 /// * [entryType] 
 /// * [entryId] 
 /// * [name] 
+/// * [profileName] - The underlying profile's name without the card-reference letter suffix (e.g. \"Beggar\" rather than \"Beggar (A)\"). Use this to label a hired model and number duplicates client-side. Null for Equipment entries. 
+/// * [identifier] - Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
+/// * [cardFront] - Front face filename of the chosen card reference (served from /cards). Null for Equipment.
+/// * [cardBack] - Back face filename of the chosen card reference (served from /cards). Null for Equipment.
 /// * [cost] 
 /// * [summoned] - Conjured onto the board mid-game by a special rule, rather than hired during gang building. A summoned model tracks HP/counters/activation like any other, but costs the gang nothing and is exempt from the gang-building rules (ducat limit, faction consistency, unique/Leader/ratio), so a legal summon can't push a gang over its limit or flip it to invalid. It is also the only kind of model that can be removed mid-game. 
 /// * [state] - Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
@@ -45,6 +49,22 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
 
   @BuiltValueField(wireName: r'name')
   String get name;
+
+  /// The underlying profile's name without the card-reference letter suffix (e.g. \"Beggar\" rather than \"Beggar (A)\"). Use this to label a hired model and number duplicates client-side. Null for Equipment entries. 
+  @BuiltValueField(wireName: r'profile_name')
+  String? get profileName;
+
+  /// Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
+  @BuiltValueField(wireName: r'identifier')
+  String? get identifier;
+
+  /// Front face filename of the chosen card reference (served from /cards). Null for Equipment.
+  @BuiltValueField(wireName: r'card_front')
+  String? get cardFront;
+
+  /// Back face filename of the chosen card reference (served from /cards). Null for Equipment.
+  @BuiltValueField(wireName: r'card_back')
+  String? get cardBack;
 
   @BuiltValueField(wireName: r'cost')
   int get cost;
@@ -129,6 +149,34 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
       object.name,
       specifiedType: const FullType(String),
     );
+    if (object.profileName != null) {
+      yield r'profile_name';
+      yield serializers.serialize(
+        object.profileName,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.identifier != null) {
+      yield r'identifier';
+      yield serializers.serialize(
+        object.identifier,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.cardFront != null) {
+      yield r'card_front';
+      yield serializers.serialize(
+        object.cardFront,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.cardBack != null) {
+      yield r'card_back';
+      yield serializers.serialize(
+        object.cardBack,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
     yield r'cost';
     yield serializers.serialize(
       object.cost,
@@ -237,6 +285,38 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
             specifiedType: const FullType(String),
           ) as String;
           result.name = valueDes;
+          break;
+        case r'profile_name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.profileName = valueDes;
+          break;
+        case r'identifier':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.identifier = valueDes;
+          break;
+        case r'card_front':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.cardFront = valueDes;
+          break;
+        case r'card_back':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.cardBack = valueDes;
           break;
         case r'cost':
           final valueDes = serializers.deserialize(

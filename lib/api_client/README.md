@@ -94,6 +94,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**updateStats**](doc/GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
+[*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntryIllustration**](doc/ListEntriesApi.md#setlistentryillustration) | **PATCH** /list_entries/{id}/illustration | Switch which illustration (card reference) a model is hired as
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntrySpells**](doc/ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline) a Mage model knows
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 [*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list owned by the current user
@@ -128,6 +129,8 @@ Class | Method | HTTP request | Description
  - [DiscardAgendaInput](doc/DiscardAgendaInput.md)
  - [DrawAgendaInput](doc/DrawAgendaInput.md)
  - [DrawAgendasResponse](doc/DrawAgendasResponse.md)
+ - [EntryIllustrationInput](doc/EntryIllustrationInput.md)
+ - [EntryIllustrationInputEntry](doc/EntryIllustrationInputEntry.md)
  - [EntryInput](doc/EntryInput.md)
  - [EntryInputEntry](doc/EntryInputEntry.md)
  - [EntryPositionInput](doc/EntryPositionInput.md)
