@@ -53,6 +53,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   built_value_generator: '>=8.4.0 <9.0.0'
   build_runner: any
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

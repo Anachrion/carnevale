@@ -1,0 +1,20 @@
+flutter_launcher_icons:
+  # iOS + Android legacy launcher icon: the opaque blue master
+  image_path: "assets/icon/carnevale_icon.png"
+
+  android: true
+  min_sdk_android: 21
+  # Android adaptive icon: solid deep-blue background + glowing gold mask foreground
+  adaptive_icon_background: "#021f49"
+  adaptive_icon_foreground: "assets/icon/carnevale_foreground.png"
+
+  ios: true
+  # App Store rejects icons with an alpha channel; flatten it
+  remove_alpha_ios: true
+
+  # Web favicon + PWA icons
+  web:
+    generate: true
+    image_path: "assets/icon/carnevale_icon.png"
+    background_color: "#021f49"
+    theme_color: "#021f49"
