@@ -58,6 +58,7 @@ class ApiClient {
     games = GamesApi(_dio, standardSerializers);
     scenarios = ScenariosApi(_dio, standardSerializers);
     spells = SpellsApi(_dio, standardSerializers);
+    rules = RulesApi(_dio, standardSerializers);
   }
 
   late final Dio _dio;
@@ -95,4 +96,5 @@ class ApiClient {
   late final GamesApi games;
   late final ScenariosApi scenarios;
   late final SpellsApi spells;
+  late final RulesApi rules;
 }

@@ -7,6 +7,7 @@ import '../widgets/glass_panel.dart';
 import 'cards_screen.dart';
 import 'game_home_screen.dart';
 import 'gangs_screen.dart';
+import 'rules_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -89,6 +90,12 @@ class HomeScreen extends StatelessWidget {
                                       icon: Icons.menu_book_outlined,
                                       imagePath: 'assets/images/book_icon.png',
                                       title: 'Rules',
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const RulesScreen(),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(height: 12),
                                     _MenuItem(
