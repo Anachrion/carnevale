@@ -6,6 +6,7 @@ import '../screens/account_screen.dart';
 import '../screens/cards_screen.dart';
 import '../screens/game_home_screen.dart';
 import '../screens/gangs_screen.dart';
+import '../screens/rules_screen.dart';
 import '../screens/settings_screen.dart';
 
 enum AppDrawerRoute { home, cards, gangs, game, rules, account, settings }
@@ -111,7 +112,7 @@ class AppDrawer extends StatelessWidget {
                     label: 'Rules',
                     active: current == AppDrawerRoute.rules,
                     accent: accent,
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => _navigate(context, AppDrawerRoute.rules, const RulesScreen()),
                   ),
                   _NavItem(
                     label: 'Settings',

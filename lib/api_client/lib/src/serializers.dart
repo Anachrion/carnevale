@@ -54,6 +54,7 @@ import 'package:carnevale_api/src/model/registration_input_user.dart';
 import 'package:carnevale_api/src/model/reset_password_input.dart';
 import 'package:carnevale_api/src/model/reset_password_input_user.dart';
 import 'package:carnevale_api/src/model/role_input.dart';
+import 'package:carnevale_api/src/model/rules_document.dart';
 import 'package:carnevale_api/src/model/scenario.dart';
 import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/session.dart';
@@ -115,6 +116,7 @@ part 'serializers.g.dart';
   ResetPasswordInput,
   ResetPasswordInputUser,
   RoleInput,
+  RulesDocument,
   Scenario,
   SelectGangInput,
   Session,
@@ -145,6 +147,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Ability)]),
         () => ListBuilder<Ability>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(RulesDocument)]),
+        () => ListBuilder<RulesDocument>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Game)]),

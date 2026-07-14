@@ -59,6 +59,7 @@ Serializers _$serializers =
           ..add(ResetPasswordInputUser.serializer)
           ..add(RoleInput.serializer)
           ..add(RoleInputRoleEnum.serializer)
+          ..add(RulesDocument.serializer)
           ..add(Scenario.serializer)
           ..add(ScenarioAgendaRulesEnum.serializer)
           ..add(SelectGangInput.serializer)

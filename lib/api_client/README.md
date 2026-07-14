@@ -104,6 +104,7 @@ Class | Method | HTTP request | Description
 [*ListsApi*](doc/ListsApi.md) | [**updateList**](doc/ListsApi.md#updatelist) | **PATCH** /lists/{id} | Update a list
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfile**](doc/ProfilesApi.md#getprofile) | **GET** /profiles/{id} | Get a profile
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfiles**](doc/ProfilesApi.md#getprofiles) | **GET** /profiles | List all profiles
+[*RulesApi*](doc/RulesApi.md) | [**getRulesDocuments**](doc/RulesApi.md#getrulesdocuments) | **GET** /rules_documents | List the rules PDFs the app&#39;s Rules page offers, in display order
 [*ScenariosApi*](doc/ScenariosApi.md) | [**getScenarios**](doc/ScenariosApi.md#getscenarios) | **GET** /scenarios | List all scenarios
 [*SessionApi*](doc/SessionApi.md) | [**createCableTicket**](doc/SessionApi.md#createcableticket) | **POST** /cable_tickets | Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
 [*SessionApi*](doc/SessionApi.md) | [**forgotPassword**](doc/SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
@@ -157,6 +158,7 @@ Class | Method | HTTP request | Description
  - [ResetPasswordInput](doc/ResetPasswordInput.md)
  - [ResetPasswordInputUser](doc/ResetPasswordInputUser.md)
  - [RoleInput](doc/RoleInput.md)
+ - [RulesDocument](doc/RulesDocument.md)
  - [Scenario](doc/Scenario.md)
  - [SelectGangInput](doc/SelectGangInput.md)
  - [Session](doc/Session.md)

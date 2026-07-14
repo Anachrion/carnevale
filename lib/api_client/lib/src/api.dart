@@ -16,6 +16,7 @@ import 'package:carnevale_api/src/api/games_api.dart';
 import 'package:carnevale_api/src/api/list_entries_api.dart';
 import 'package:carnevale_api/src/api/lists_api.dart';
 import 'package:carnevale_api/src/api/profiles_api.dart';
+import 'package:carnevale_api/src/api/rules_api.dart';
 import 'package:carnevale_api/src/api/scenarios_api.dart';
 import 'package:carnevale_api/src/api/session_api.dart';
 import 'package:carnevale_api/src/api/spells_api.dart';
@@ -154,6 +155,12 @@ class CarnevaleApi {
   /// by doing that all interceptors will not be executed
   ProfilesApi getProfilesApi() {
     return ProfilesApi(dio, serializers);
+  }
+
+  /// Get RulesApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  RulesApi getRulesApi() {
+    return RulesApi(dio, serializers);
   }
 
   /// Get ScenariosApi instance, base route and serializer can be overridden by a given but be careful,
