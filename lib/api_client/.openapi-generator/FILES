@@ -15,6 +15,8 @@ doc/CreateGameInput.md
 doc/DiscardAgendaInput.md
 doc/DrawAgendaInput.md
 doc/DrawAgendasResponse.md
+doc/EntryIllustrationInput.md
+doc/EntryIllustrationInputEntry.md
 doc/EntryInput.md
 doc/EntryInputEntry.md
 doc/EntryPositionInput.md
@@ -98,6 +100,8 @@ lib/src/model/date.dart
 lib/src/model/discard_agenda_input.dart
 lib/src/model/draw_agenda_input.dart
 lib/src/model/draw_agendas_response.dart
+lib/src/model/entry_illustration_input.dart
+lib/src/model/entry_illustration_input_entry.dart
 lib/src/model/entry_input.dart
 lib/src/model/entry_input_entry.dart
 lib/src/model/entry_position_input.dart
@@ -143,4 +147,3 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/summon_model_request_test.dart

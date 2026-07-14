@@ -26,6 +26,8 @@ import 'package:carnevale_api/src/model/create_game_input.dart';
 import 'package:carnevale_api/src/model/discard_agenda_input.dart';
 import 'package:carnevale_api/src/model/draw_agenda_input.dart';
 import 'package:carnevale_api/src/model/draw_agendas_response.dart';
+import 'package:carnevale_api/src/model/entry_illustration_input.dart';
+import 'package:carnevale_api/src/model/entry_illustration_input_entry.dart';
 import 'package:carnevale_api/src/model/entry_input.dart';
 import 'package:carnevale_api/src/model/entry_input_entry.dart';
 import 'package:carnevale_api/src/model/entry_position_input.dart';
@@ -85,6 +87,8 @@ part 'serializers.g.dart';
   DiscardAgendaInput,
   DrawAgendaInput,
   DrawAgendasResponse,
+  EntryIllustrationInput,
+  EntryIllustrationInputEntry,
   EntryInput,
   EntryInputEntry,
   EntryPositionInput,

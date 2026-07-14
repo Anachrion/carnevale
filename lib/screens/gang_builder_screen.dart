@@ -266,6 +266,20 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     });
   }
 
+  /// Persists an illustration switch made in the card viewer: repoints the entry at the chosen
+  /// sibling card reference and refreshes the gang. The viewer owns the displayed art, so this only
+  /// syncs the backend and local state (no _busy gate — it must not block the viewer's own paging).
+  Future<void> _onEntryIllustrationChanged(
+    api.ListEntry entry,
+    int cardReferenceId,
+  ) async {
+    final updated = await GangService().setEntryIllustration(
+      entry.id,
+      cardReferenceId,
+    );
+    if (mounted) setState(() => _gang = updated);
+  }
+
   Future<void> _editSpells(api.ListEntry entry) async {
     if (_busy) return;
     final result = await showDialog<_SpellSelection>(
@@ -588,19 +602,42 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         ),
       );
     }
-    final hiredProfiles = entries
+    // The hired card-reference entries paired with their profile, in list order. The card viewer
+    // pages through these; it needs the entry behind each card so switching a card's illustration
+    // can repoint that exact entry (and persist it).
+    final hiredCards = entries
         .where(
           (e) =>
               e.entryType ==
               api.ListEntryEntryTypeEnum.catalogColonColonCardReference,
         )
-        .map(
-          (e) => _profiles
-              .where((p) => p.cardReferenceIds.contains(e.entryId))
-              .firstOrNull,
-        )
-        .whereType<api.Profile>()
+        .map((e) {
+          final p = _profiles
+              .where((pp) => pp.cardReferenceIds.contains(e.entryId))
+              .firstOrNull;
+          return p == null ? null : (entry: e, profile: p);
+        })
+        .whereType<({api.ListEntry entry, api.Profile profile})>()
         .toList();
+    final hiredProfiles = hiredCards.map((c) => c.profile).toList();
+    // Display names, keyed by entry id: use the profile name (dropping the card-reference letter),
+    // and when the same profile is hired more than once, number the copies in list order —
+    // "Common Strigoi 1", "Common Strigoi 2". A profile hired once keeps its plain name.
+    final profileCounts = <int, int>{};
+    for (final c in hiredCards) {
+      profileCounts[c.profile.id] = (profileCounts[c.profile.id] ?? 0) + 1;
+    }
+    final profileSeen = <int, int>{};
+    final entryDisplayName = <int, String>{};
+    for (final c in hiredCards) {
+      if ((profileCounts[c.profile.id] ?? 0) > 1) {
+        final n = (profileSeen[c.profile.id] ?? 0) + 1;
+        profileSeen[c.profile.id] = n;
+        entryDisplayName[c.entry.id] = '${c.profile.name} $n';
+      } else {
+        entryDisplayName[c.entry.id] = c.profile.name;
+      }
+    }
     return ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
       onReorder: _reorderEntry,
@@ -638,21 +675,31 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             : null;
         VoidCallback? onTap;
         if (profile != null) {
-          final hiredIndex = hiredProfiles.indexWhere(
-            (p) => p.cardReferenceId == profile.cardReferenceId,
-          );
+          // Open on this exact entry (matched by entry id, so two copies of one profile that were
+          // hired with different illustrations open on their own card, not the first occurrence).
+          final hiredIndex = hiredCards.indexWhere((c) => c.entry.id == entry.id);
           onTap = () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => CardViewerScreen(
                 profiles: hiredProfiles,
-                initialIndex: hiredIndex,
+                initialIndex: hiredIndex < 0 ? 0 : hiredIndex,
+                // Each card opens on the illustration its entry was hired as; switching in the
+                // viewer repoints that entry and persists it.
+                selectedReferenceIds: hiredCards
+                    .map((c) => c.entry.entryId)
+                    .toList(),
+                onIllustrationChanged: (index, refId) =>
+                    _onEntryIllustrationChanged(hiredCards[index].entry, refId),
               ),
             ),
           );
         } else if (equipmentItem != null) {
           onTap = () => showEquipmentDetailDialog(context, equipmentItem);
         }
+        final tileName = profile != null
+            ? (entryDisplayName[entry.id] ?? profile.name)
+            : (equipmentItem?.name ?? entry.name);
         // Delayed (long-press) rather than immediate: an immediate listener claims horizontal drags
         // too, which stole the swipe that switches to the Hire tab whenever the list had entries.
         // Long-press-then-drag reorders; a quick horizontal swipe now reaches the tab PageView.
@@ -663,6 +710,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             padding: EdgeInsets.only(bottom: i < entries.length - 1 ? 8 : 0),
             child: _EntryTile(
               entry: entry,
+              name: tileName,
               factionColor: entryColor,
               role: role,
               busy: _busy,

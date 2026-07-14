@@ -44,6 +44,7 @@ class _TabButton extends StatelessWidget {
 class _EntryTile extends StatefulWidget {
   const _EntryTile({
     required this.entry,
+    required this.name,
     required this.factionColor,
     required this.busy,
     required this.onRemove,
@@ -53,6 +54,9 @@ class _EntryTile extends StatefulWidget {
   });
 
   final api.ListEntry entry;
+  // Display name for the tile: the card-reference letter dropped, with a per-copy number when the
+  // profile is hired more than once. Not necessarily entry.name (which is the card-reference name).
+  final String name;
   final Color factionColor;
   final String? role;
   final bool busy;
@@ -142,7 +146,7 @@ class _EntryTileState extends State<_EntryTile>
                               children: [
                                 Flexible(
                                   child: Text(
-                                    widget.entry.name,
+                                    widget.name,
                                     style: GoogleFonts.cinzel(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,

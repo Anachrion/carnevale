@@ -78,6 +78,14 @@ class _$ListEntry extends ListEntry {
   @override
   final String name;
   @override
+  final String? profileName;
+  @override
+  final String? identifier;
+  @override
+  final String? cardFront;
+  @override
+  final String? cardBack;
+  @override
   final int cost;
   @override
   final bool summoned;
@@ -105,6 +113,10 @@ class _$ListEntry extends ListEntry {
     required this.entryType,
     required this.entryId,
     required this.name,
+    this.profileName,
+    this.identifier,
+    this.cardFront,
+    this.cardBack,
     required this.cost,
     required this.summoned,
     this.state,
@@ -131,6 +143,10 @@ class _$ListEntry extends ListEntry {
         entryType == other.entryType &&
         entryId == other.entryId &&
         name == other.name &&
+        profileName == other.profileName &&
+        identifier == other.identifier &&
+        cardFront == other.cardFront &&
+        cardBack == other.cardBack &&
         cost == other.cost &&
         summoned == other.summoned &&
         state == other.state &&
@@ -150,6 +166,10 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, entryType.hashCode);
     _$hash = $jc(_$hash, entryId.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
+    _$hash = $jc(_$hash, profileName.hashCode);
+    _$hash = $jc(_$hash, identifier.hashCode);
+    _$hash = $jc(_$hash, cardFront.hashCode);
+    _$hash = $jc(_$hash, cardBack.hashCode);
     _$hash = $jc(_$hash, cost.hashCode);
     _$hash = $jc(_$hash, summoned.hashCode);
     _$hash = $jc(_$hash, state.hashCode);
@@ -171,6 +191,10 @@ class _$ListEntry extends ListEntry {
           ..add('entryType', entryType)
           ..add('entryId', entryId)
           ..add('name', name)
+          ..add('profileName', profileName)
+          ..add('identifier', identifier)
+          ..add('cardFront', cardFront)
+          ..add('cardBack', cardBack)
           ..add('cost', cost)
           ..add('summoned', summoned)
           ..add('state', state)
@@ -207,6 +231,22 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   String? _name;
   String? get name => _$this._name;
   set name(String? name) => _$this._name = name;
+
+  String? _profileName;
+  String? get profileName => _$this._profileName;
+  set profileName(String? profileName) => _$this._profileName = profileName;
+
+  String? _identifier;
+  String? get identifier => _$this._identifier;
+  set identifier(String? identifier) => _$this._identifier = identifier;
+
+  String? _cardFront;
+  String? get cardFront => _$this._cardFront;
+  set cardFront(String? cardFront) => _$this._cardFront = cardFront;
+
+  String? _cardBack;
+  String? get cardBack => _$this._cardBack;
+  set cardBack(String? cardBack) => _$this._cardBack = cardBack;
 
   int? _cost;
   int? get cost => _$this._cost;
@@ -259,6 +299,10 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _entryType = $v.entryType;
       _entryId = $v.entryId;
       _name = $v.name;
+      _profileName = $v.profileName;
+      _identifier = $v.identifier;
+      _cardFront = $v.cardFront;
+      _cardBack = $v.cardBack;
       _cost = $v.cost;
       _summoned = $v.summoned;
       _state = $v.state?.toBuilder();
@@ -313,6 +357,10 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               r'ListEntry',
               'name',
             ),
+            profileName: profileName,
+            identifier: identifier,
+            cardFront: cardFront,
+            cardBack: cardBack,
             cost: BuiltValueNullFieldError.checkNotNull(
               cost,
               r'ListEntry',

@@ -11,6 +11,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**createListEntry**](ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [**deleteListEntry**](ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
+[**setListEntryIllustration**](ListEntriesApi.md#setlistentryillustration) | **PATCH** /list_entries/{id}/illustration | Switch which illustration (card reference) a model is hired as
 [**setListEntrySpells**](ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline) a Mage model knows
 [**updateListEntryPosition**](ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 
@@ -105,6 +106,55 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setListEntryIllustration**
+> BuiltList setListEntryIllustration(id, entryIllustrationInput)
+
+Switch which illustration (card reference) a model is hired as
+
+Repoints a hired model at a different card reference of the same profile — swapping the illustration without changing who the model is or its cost. Rejected with 422 if the target reference belongs to a different profile, or if the entry has no card (Equipment). Returns 404 if the entry's list doesn't belong to the current user. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getListEntriesApi();
+final int id = 56; // int | 
+final EntryIllustrationInput entryIllustrationInput = ; // EntryIllustrationInput | 
+
+try {
+    final response = api.setListEntryIllustration(id, entryIllustrationInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ListEntriesApi->setListEntryIllustration: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **entryIllustrationInput** | [**EntryIllustrationInput**](EntryIllustrationInput.md)|  | 
+
+### Return type
+
+[**BuiltList**](BuiltList.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

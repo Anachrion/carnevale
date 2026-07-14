@@ -108,6 +108,23 @@ class GangService {
     return res.data!;
   });
 
+  /// Repoints an entry at a different card reference of the same profile — swaps which illustration
+  /// the model is hired as, without changing who it is. `cardReferenceId` must be a sibling card
+  /// reference of the entry's current profile; the backend rejects anything else.
+  Future<api.ModelList> setEntryIllustration(int entryId, int cardReferenceId) =>
+      _guard(() async {
+        final res = await _client.listEntries.setListEntryIllustration(
+          id: entryId,
+          entryIllustrationInput: api.EntryIllustrationInput(
+            (b) => b
+              ..entry = api.EntryIllustrationInputEntry(
+                (eb) => eb..entryId = cardReferenceId,
+              ).toBuilder(),
+          ),
+        );
+        return res.data!;
+      });
+
   Future<List<api.Spell>> loadSpells() => _guard(() async {
     final res = await _client.spells.getSpells();
     return res.data?.toList() ?? [];

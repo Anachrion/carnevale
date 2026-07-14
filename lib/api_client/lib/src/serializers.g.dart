@@ -25,6 +25,8 @@ Serializers _$serializers =
           ..add(DrawAgendaInput.serializer)
           ..add(DrawAgendaInputOriginEnum.serializer)
           ..add(DrawAgendasResponse.serializer)
+          ..add(EntryIllustrationInput.serializer)
+          ..add(EntryIllustrationInputEntry.serializer)
           ..add(EntryInput.serializer)
           ..add(EntryInputEntry.serializer)
           ..add(EntryInputEntryEntryTypeEnum.serializer)
