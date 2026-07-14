@@ -653,7 +653,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         } else if (equipmentItem != null) {
           onTap = () => showEquipmentDetailDialog(context, equipmentItem);
         }
-        return ReorderableDragStartListener(
+        // Delayed (long-press) rather than immediate: an immediate listener claims horizontal drags
+        // too, which stole the swipe that switches to the Hire tab whenever the list had entries.
+        // Long-press-then-drag reorders; a quick horizontal swipe now reaches the tab PageView.
+        return ReorderableDelayedDragStartListener(
           key: ValueKey(entry.id),
           index: i,
           child: Padding(
