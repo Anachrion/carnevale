@@ -41,6 +41,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final factionColor =
         AppPalette.factionColors[gang.faction] ?? context.accentColor;
+    final entries = _buildEntries(context, factionColor);
     return Column(
       children: [
         if (showHeader) ...[
@@ -52,30 +53,72 @@ class _ReadOnlyGangBody extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
-        if (onSummon != null) _buildSummonButton(context),
-        Expanded(child: _buildEntries(context, factionColor)),
+        // The action row (faction rule + Summon) is pinned above the roster but tucks itself away
+        // as you scroll down into the list, rather than floating over the models — see
+        // _ScrollHidingActions.
+        Expanded(
+          child: _hasActionRow
+              ? _ScrollHidingActions(
+                  actions: _buildActionRow(context),
+                  list: entries,
+                )
+              : entries,
+        ),
       ],
+    );
+  }
+
+  /// The faction rule is reference, shown for any gang (your own, the opponent's); Summon is only
+  /// your own. The row appears if either belongs on it.
+  bool get _hasActionRow =>
+      onSummon != null || factionSpecialRules.containsKey(gang.faction);
+
+  /// The strip above the roster: the faction's Command Ability on the left (reference, shown for
+  /// every faction) and — on your own gang only — the Summon action on the right. Both are
+  /// deliberately quiet text buttons rather than permanent chunks of the screen.
+  Widget _buildActionRow(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      child: Row(
+        children: [
+          if (factionSpecialRules.containsKey(gang.faction))
+            _buildFactionRuleButton(context),
+          const Spacer(),
+          if (onSummon != null) _buildSummonButton(context),
+        ],
+      ),
+    );
+  }
+
+  /// Opens the faction's signature Command Ability. Shown only when we have that faction's rule on
+  /// file, so the button never leads to an empty dialog.
+  Widget _buildFactionRuleButton(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => showFactionRuleDialog(context, gang.faction),
+      icon: Icon(Icons.auto_stories, size: 16, color: context.accentColor),
+      label: Text(
+        'Faction Rule',
+        style: GoogleFonts.cinzel(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: context.accentColor,
+        ),
+      ),
     );
   }
 
   /// Deliberately understated: summoning is rare (a handful of models in the game can do it at all),
   /// so it earns a quiet text button rather than a permanent chunk of the gang screen.
   Widget _buildSummonButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-        child: TextButton.icon(
-          onPressed: onSummon,
-          icon: Icon(Icons.auto_awesome, size: 16, color: context.accentColor),
-          label: Text(
-            'Summon',
-            style: GoogleFonts.cinzel(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: context.accentColor,
-            ),
-          ),
+    return TextButton.icon(
+      onPressed: onSummon,
+      icon: Icon(Icons.auto_awesome, size: 16, color: context.accentColor),
+      label: Text(
+        'Summon',
+        style: GoogleFonts.cinzel(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: context.accentColor,
         ),
       ),
     );
@@ -202,6 +245,57 @@ class _ReadOnlyGangBody extends StatelessWidget {
               : null,
         );
       },
+    );
+  }
+}
+
+/// Floats the action row (faction rule + Summon) above the roster, pinned to the top, and slides it
+/// out of the way the moment you scroll down into the list — so it never sits on top of the models
+/// you're reading. Scrolling back up toward the top brings it straight back. Losing it mid-scroll
+/// costs nothing: these are deliberate acts you'd scroll up to reach anyway.
+class _ScrollHidingActions extends StatefulWidget {
+  const _ScrollHidingActions({required this.actions, required this.list});
+
+  final Widget actions;
+  final Widget list;
+
+  @override
+  State<_ScrollHidingActions> createState() => _ScrollHidingActionsState();
+}
+
+class _ScrollHidingActionsState extends State<_ScrollHidingActions> {
+  bool _visible = true;
+
+  bool _onScroll(UserScrollNotification notification) {
+    // Only the roster's own vertical drags should move the button; the idle settle after a fling
+    // is left alone so the button doesn't flicker back the instant scrolling stops.
+    if (notification.metrics.axis != Axis.vertical) return false;
+    final visible = switch (notification.direction) {
+      ScrollDirection.reverse => false, // dragging content up — reading down the list
+      ScrollDirection.forward => true, // dragging back down toward the top
+      ScrollDirection.idle => _visible,
+    };
+    if (visible != _visible) setState(() => _visible = visible);
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<UserScrollNotification>(
+      onNotification: _onScroll,
+      child: Column(
+        children: [
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: _visible
+                ? widget.actions
+                : const SizedBox(width: double.infinity),
+          ),
+          Expanded(child: widget.list),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/profile.dart';
@@ -11,6 +12,7 @@ import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
+import '../widgets/faction_rule.dart';
 import '../widgets/points_bar.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/spell_chips.dart';

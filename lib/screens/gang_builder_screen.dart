@@ -9,6 +9,7 @@ import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
+import '../widgets/faction_rule.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/points_bar.dart';
 import '../widgets/profile_search.dart';
@@ -458,7 +459,20 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             ),
           ),
           const SizedBox(width: 8),
-          FactionBadge(faction: _gang.faction, color: factionColor, size: 38),
+          // The faction emblem doubles as the way into the faction's Command Ability — tap it to
+          // read the rule. Only made tappable when we have that faction's rule on file.
+          if (factionSpecialRules.containsKey(_gang.faction))
+            GestureDetector(
+              onTap: () => showFactionRuleDialog(context, _gang.faction),
+              behavior: HitTestBehavior.opaque,
+              child: FactionBadge(
+                faction: _gang.faction,
+                color: factionColor,
+                size: 38,
+              ),
+            )
+          else
+            FactionBadge(faction: _gang.faction, color: factionColor, size: 38),
         ],
       ),
     );
