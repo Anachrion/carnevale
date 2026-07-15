@@ -58,7 +58,7 @@ Seeds create `admin@dev.local` / `password123` with `admin: true` (the `.update!
 
 **Suggested fix:** `validates :entry_type, inclusion: { in: %w[Catalog::CardReference Catalog::Equipment] }` on `Gang::Entry` (this matches the OpenAPI enum) and reject early in the controller.
 
-### C-3. Concurrent `select_gang` deals both opening agenda hands twice
+### C-3. Concurrent `select_gang` deals both opening agenda hands twice — ✅ Fixed (`carnevale-backend@4f0b68b`)
 
 **Backend — `app/controllers/api/v1/games_controller.rb:331-344`, `app/models/encounter/agenda_deck.rb:16-23`**
 
@@ -66,7 +66,7 @@ Seeds create `admin@dev.local` / `password123` with `admin: true` (the `.update!
 
 **Failure scenario:** both players tap "Select" within each other's request window — very likely, since they are sitting at the same table being told to pick a gang. Both requests see `status == "gang_selection"`, both see two lists committed, both run the transaction: `draw_initial` runs **twice per player**. With a large agenda pool the second deal usually doesn't collide with the unique `(game_player_id, agenda_id, action)` index, so it commits: each player has a 6-card hand instead of 3, with no in-app way to shed the extras (mulligan is 1-for-1). If it does collide, the loser gets an unrescued `RecordInvalid` → 500.
 
-**Suggested fix:** wrap the check-and-deal in `@game.with_lock { break unless @game.reload.gang_selection?; ... }`, and make `draw_initial` idempotent (skip if the player already has `origin: "initial"` events; exclude `game_player.drawn_agenda_ids` from `draw_one`). Apply the same treatment to `maybe_start_game!`.
+**Fix applied:** the transition moved onto the model as `Encounter::Game#advance_to_agenda_draw_if_ready!`, wrapped in `with_lock` and re-checking the reloaded `gang_selection?`, so a stale second request bails. `AgendaDeck#draw_initial` is now idempotent too (skips a player who already holds an `origin: "initial"` event) as a second line of defence. Covered by a deterministic stale-read test in `spec/models/encounter/game_spec.rb` (a second instance holding the stale status deals nothing more) plus a direct `draw_initial` idempotency test in `agenda_deck_spec.rb`.
 
 ### C-4. The app cannot detect a dead websocket
 
@@ -106,29 +106,41 @@ Neither Dio instance configures `connectTimeout`/`receiveTimeout`. `main()` awai
 
 The root cause behind most findings here is one repeated pattern: **check in-memory `@game` state → mutate → maybe transition**, with no lock and no reload. `GamesController#destroy` already handles its race correctly (`with_lock` + `RecordNotFound` rescue) — that pattern should be extracted into a shared `with_game_lock` helper (reload + re-check status) and applied to `join`, `select_gang`, `deselect_gang`, `confirm_agendas`, and `finish`/`unfinish`. Ideally the `maybe_advance_*`/`maybe_start_*` transition logic moves onto `Encounter::Game` where it can be locked coherently.
 
-### B-1. Major — `join` race creates a 3-player game and wedges it
+**Resolution (`carnevale-backend@4f0b68b`):** rather than a controller-side `with_game_lock` helper, the lifecycle transitions were moved onto the models as locked methods — `Game#join!`, `Game#advance_to_agenda_draw_if_ready!`, `Game#start!`, `Player#select_gang!`/`#deselect_gang!`/`#finish!`/`#unfinish!` — each opening `with_lock` (which `SELECT … FOR UPDATE`-reloads the row) and re-checking status against the reloaded state. The controller's `maybe_advance_*`/`maybe_start_*` helpers were removed. This eliminates C-3, B-1, B-2, B-3, B-4, and B-6 below. **A note on test coverage:** the stale-read-then-reload behaviour is tested deterministically (two AR instances of one game standing in for two requests — see `spec/models/encounter/game_spec.rb`), which fully proves C-3, B-1, B-2, and the B-6 duplicate-guard. B-3's benefit is *only* observable under genuine cross-connection concurrency (a serial test passes with or without the lock), so it is covered by the correct serial behaviour rather than a test that would distinguish the fix; a true threaded test was deliberately not added (flaky, slow).
 
-`app/controllers/api/v1/games_controller.rb:47-64`. The game-full check is a non-transactional check-then-create. Two users posting the same join code concurrently both pass `count >= 2` (each sees 1 player) and both create a `Player`. `assign_roll_winners!` then reloads, sees 3 players, and returns **without assigning any roll winner** — yet status still flips to `gang_selection`. For an asymmetric scenario, `role_roll_winner` is nil forever, so `ensure_roles_resolved!` 422s `select_gang` for everyone: the game is permanently stuck. For symmetric scenarios the 2-player UI (`_opponent` = first other player) shows different opponents to different players. Alternatively, two racing joins can each reach `assign_roll_winners!` and the partial unique indexes turn the loser into an unrescued `RecordNotUnique` 500. **Fix:** `game.with_lock` around count-check + create + roll assignment + status flip (reject a third player inside the lock); make `assign_roll_winners!` a no-op when winners already exist.
+### B-1. Major — `join` race creates a 3-player game and wedges it — ✅ Fixed (`carnevale-backend@4f0b68b`)
 
-### B-2. Major — `deselect_gang` racing the opponent's select destroys a list the game depends on
+`app/controllers/api/v1/games_controller.rb:47-64`. The game-full check is a non-transactional check-then-create. Two users posting the same join code concurrently both pass `count >= 2` (each sees 1 player) and both create a `Player`. `assign_roll_winners!` then reloads, sees 3 players, and returns **without assigning any roll winner** — yet status still flips to `gang_selection`. For an asymmetric scenario, `role_roll_winner` is nil forever, so `ensure_roles_resolved!` 422s `select_gang` for everyone: the game is permanently stuck. For symmetric scenarios the 2-player UI (`_opponent` = first other player) shows different opponents to different players. Alternatively, two racing joins can each reach `assign_roll_winners!` and the partial unique indexes turn the loser into an unrescued `RecordNotUnique` 500.
 
-`app/controllers/api/v1/games_controller.rb:112-126`. Both `select_gang` and `deselect_gang` validate `@game.gang_selection?` against the stale in-memory game. If A taps Select (completing both picks → advances to `agenda_draw`, deals hands) at the same moment B taps Deselect, B's request passes the status check and destroys B's snapshot. The game is now in `agenda_draw`/`in_progress` with B list-less: `start!`'s `create_entry_states!` skips the nil list, `player_list` 422s ("List not selected yet"), the gang tab shows "Could not load this gang" forever, and B can never re-select (status guard). The game is permanently bricked for B. **Fix:** same `with_lock` + reload-status re-check on both endpoints.
+**Fix applied:** `Game#join!` does the whole find-or-create-second-player + roll assignment + status flip inside `with_lock`, so the second racer reloads under the lock, sees the game full, and returns nil (the controller renders "Game is full"). `assign_roll_winners!` is now idempotent (skips a roll whose winner already exists), so a retried join can't reassign or trip the partial unique indexes. Deterministic stale-read test in `game_spec.rb` (a stale instance that still sees one player refuses the third seat).
 
-### B-3. Major — both players finishing simultaneously permanently loses the `completed` status
+### B-2. Major — `deselect_gang` racing the opponent's select destroys a list the game depends on — ✅ Fixed (`carnevale-backend@4f0b68b`)
 
-`app/models/encounter/player.rb:76-84`, `app/models/encounter/game.rb:81-90`. `finish!` wraps `update!(finished: true)` and `refresh_completion!` in one transaction, so the reload of the opponent's row happens **before commit**. If A and B finish concurrently (natural at game end), each reads the other's uncommitted `finished: false`, both `refresh_completion!` calls no-op, both commit: both players are finished but `status` stays `in_progress`, with nothing left to re-derive it. (By contrast, `confirm_agendas` is safe: the flag commit precedes the read.) **Fix:** run `refresh_completion!` after commit, or take `game.with_lock` around flag-write + derivation.
+`app/controllers/api/v1/games_controller.rb:112-126`. Both `select_gang` and `deselect_gang` validate `@game.gang_selection?` against the stale in-memory game. If A taps Select (completing both picks → advances to `agenda_draw`, deals hands) at the same moment B taps Deselect, B's request passes the status check and destroys B's snapshot. The game is now in `agenda_draw`/`in_progress` with B list-less: `start!`'s `create_entry_states!` skips the nil list, `player_list` 422s ("List not selected yet"), the gang tab shows "Could not load this gang" forever, and B can never re-select (status guard). The game is permanently bricked for B.
 
-### B-4. Major — same user on two devices can end up with two gang snapshots
+**Fix applied:** the snapshot teardown/rebuild moved into `Player#select_gang!`/`#deselect_gang!`, both wrapped in `game.with_lock` and re-checking the reloaded `gang_selection?` (returning false → controller renders "Gangs can no longer be changed"). The controller keeps a cheap in-memory pre-check to avoid the lock in the common already-advanced case. Deterministic test in `player_spec.rb` (both refuse once the reloaded game has left gang selection).
 
-`app/controllers/api/v1/games_controller.rb:101-105`. `lists` has no unique index on `(owner_type, owner_id)`; two concurrent `select_gang` requests both see `@game_player.list` nil (or destroy the same old one), both call `snapshot_for` → two `Gang::List` rows owned by one `Encounter::Player`. `has_one :list` then returns an arbitrary one; the orphan is invisible and never cleaned. **Fix:** lock the game_player row for the destroy + snapshot, and/or add a partial unique index on `lists(owner_type, owner_id)` for `owner_type = 'Encounter::Player'`.
+### B-3. Major — both players finishing simultaneously permanently loses the `completed` status — ✅ Fixed (`carnevale-backend@4f0b68b`)
+
+`app/models/encounter/player.rb:76-84`, `app/models/encounter/game.rb:81-90`. `finish!` wraps `update!(finished: true)` and `refresh_completion!` in one transaction, so the reload of the opponent's row happens **before commit**. If A and B finish concurrently (natural at game end), each reads the other's uncommitted `finished: false`, both `refresh_completion!` calls no-op, both commit: both players are finished but `status` stays `in_progress`, with nothing left to re-derive it. (By contrast, `confirm_agendas` is safe: the flag commit precedes the read.)
+
+**Fix applied:** `Player#finish!`/`#unfinish!` now take `game.with_lock` around the flag write + `refresh_completion!`, so the two finishes serialize on the games row and the second reads the first's committed `finished` flag before deriving completion. As noted in the section intro, this guarantee is concurrency-only — the existing serial completion test still holds, but no test distinguishes the fix from the bug without real threads.
+
+### B-4. Major — same user on two devices can end up with two gang snapshots — ✅ Fixed (`carnevale-backend@4f0b68b`)
+
+`app/controllers/api/v1/games_controller.rb:101-105`. `lists` has no unique index on `(owner_type, owner_id)`; two concurrent `select_gang` requests both see `@game_player.list` nil (or destroy the same old one), both call `snapshot_for` → two `Gang::List` rows owned by one `Encounter::Player`. `has_one :list` then returns an arbitrary one; the orphan is invisible and never cleaned.
+
+**Fix applied:** the same `game.with_lock` in `Player#select_gang!` (B-2) serializes the destroy-then-snapshot, so two concurrent selects can't both create a snapshot. A defensive partial unique index on `lists(owner_type, owner_id)` for `Encounter::Player` was **not** added in this pass (the lock closes the race for the single-game path); noted as a possible belt-and-braces follow-up.
 
 ### B-5. Major — no idempotency for retried mobile mutations
 
 `app/controllers/api/v1/games_controller.rb:131-143`, `app/controllers/api/v1/list_entries_controller.rb:6-16`. A Flutter client that times out and retries `POST /games/:id/agendas/draw` draws two agendas (separate events, no client request id); the extra one can only be removed by attributing a fictitious discard. Retrying `POST /list_entries` hires the same model twice — legal for non-unique models, so silent. Two devices adding entries concurrently also race `maximum(:position) + 1` into the `(list_id, position)` unique index → unrescued `RecordNotUnique` → 500. **Fix:** accept an idempotency key on mutating game/list endpoints (unique-indexed); retry position assignment on `RecordNotUnique`.
 
-### B-6. Minor — concurrent `confirm_agendas` 500s for the loser
+### B-6. Minor — concurrent `confirm_agendas` 500s for the loser — ✅ Fixed (`carnevale-backend@4f0b68b`)
 
-`app/models/encounter/game.rb:66-75`. Both players tapping "Ready" together can both pass `start!`'s checks; the loser hits the `EntryState` unique `list_entry_id` validation/index → unrescued 500 (state self-heals via the winner's broadcast). **Fix:** `game.with_lock` in `start!`, re-checking `in_progress?` after reload.
+`app/models/encounter/game.rb:66-75`. Both players tapping "Ready" together can both pass `start!`'s checks; the loser hits the `EntryState` unique `list_entry_id` validation/index → unrescued 500 (state self-heals via the winner's broadcast).
+
+**Fix applied:** `Game#start!` now runs inside `with_lock`, re-checking `in_progress?`/`completed?` and both-confirmed against the reloaded row, so the second confirm reloads to `in_progress` and returns false without re-creating entry states. Deterministic stale-read test in `game_spec.rb` (second start returns false, entry-state count unchanged).
 
 ### B-7. Minor — agenda score/discard and the recycle draw are not atomic
 
@@ -179,9 +191,11 @@ The generated Dart client (built_value) is strict about required/nullable fields
 - `doc/openapi.yaml:1682-1688` — `DrawAgendaInput` requestBody is `required: false` and `origin` isn't required, yet the controller 422s without a valid origin.
 - `doc/openapi.yaml:71-84` — `/logout` documents a 401 but `sessions#destroy` always returns 204 (revocation silently skipped when the token is absent/invalid).
 
-### B-17. Minor — unrescued errors produce non-API-shaped responses
+### B-17. Minor — unrescued errors produce non-API-shaped responses — ✅ Fixed (`carnevale-backend@aebd09d`)
 
-`app/controllers/api/v1/base_controller.rb:6`, `app/controllers/api/v1/list_entries_controller.rb:40-44`. `BaseController` rescues only `RecordNotFound`. A bogus `spell_id` raises `RecordInvalid` → 500; any `params.require` miss — including `PATCH .../counters` with `counters: {}`, which raises `ParameterMissing` on an empty hash even though the spec allows a partial set — returns Rails' default 400 body, not the documented `{errors:{...}}` shape the app parses. **Fix:** `rescue_from RecordInvalid` → `render_error(record.errors)` and `rescue_from ParameterMissing` → 400 in the API error shape. This also converts several of the benign race losers above from 500s into clean 422s.
+`app/controllers/api/v1/base_controller.rb:6`, `app/controllers/api/v1/list_entries_controller.rb:40-44`. `BaseController` rescues only `RecordNotFound`. A bogus `spell_id` raises `RecordInvalid` → 500; any `params.require` miss — including `PATCH .../counters` with `counters: {}`, which raises `ParameterMissing` on an empty hash even though the spec allows a partial set — returns Rails' default 400 body, not the documented `{errors:{...}}` shape the app parses.
+
+**Fix applied:** added `rescue_from ActiveRecord::RecordInvalid` → `render_error(e.record.errors)` (422) and `rescue_from ActionController::ParameterMissing` → `render_error(e.message, status: :bad_request)` (400) to `Api::V1::BaseController`. Covered by a request spec on the spells endpoint (unknown spell id → 422 with `errors`) and on the counters endpoint (missing `counters` → 400 with `errors`).
 
 ---
 
@@ -452,7 +466,7 @@ Backend coverage is strong where it exists (games: 66 request examples; lists, l
 ## 12. Suggested plan of attack
 
 1. **Security criticals** (small, urgent): ~~C-1 seeds/entrypoint guard~~ (deferred — no CI yet); C-2 `entry_type` inclusion validation ✅; B-18 (render-token scope) ✅; B-19 (API key on auth endpoints) ✅.
-2. **Backend race class**: one shared `with_game_lock` helper + idempotent `draw_initial`, applied per section 2 (fixes C-3, B-1, B-2, B-3, B-4, B-6). Add `rescue_from RecordInvalid`/`ParameterMissing` (B-17) at the same time.
+2. **Backend race class** ✅: locked lifecycle methods on `Encounter::Game`/`Encounter::Player` + idempotent `draw_initial`, per section 2 (fixed C-3, B-1, B-2, B-3, B-4, B-6). `rescue_from RecordInvalid`/`ParameterMissing` (B-17) ✅ done alongside.
 3. **App connection resilience bundle**: Dio timeouts + non-blocking startup (C-6), ping watchdog + lifecycle resync (C-4), apply REST responses to `currentGame` (A-1), `watch()` generation guard (C-5), stop reconnecting on auth failure (A-2). Consider the snapshot sequence number (A-3) here — it hardens everything above.
 4. **App error-handling bundle**: shared `guard()` helper across builder/list screens; surface `ApiException.message` in `_run`; fix the remove-animation ordering (A-7), double-submit (A-8), and back-button trap (A-10).
 5. **Card sync coherence**: profiles ETag (S-1), JSON cache invalidation on Sync Cards + a catalog version signal (S-3), Wi-Fi/consent gate on the first-launch bulk download (S-5), web manifest retry (S-4), render-drift signal (S-2).
