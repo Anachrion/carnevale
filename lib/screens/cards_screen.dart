@@ -10,7 +10,7 @@ import '../widgets/screen_header.dart';
 import '../widgets/sort_chip.dart';
 import 'card_viewer_screen.dart';
 
-enum _CardSort { name, cost }
+enum _CardSort { role, name, cost }
 
 class CardsScreen extends StatefulWidget {
   const CardsScreen({super.key});
@@ -41,6 +41,14 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
     _recomputeSorted();
   }
 
+  // Leaders first, then Heroes, then everyone else — the same ranking the Hire tab sorts by, so
+  // "Role" means the same thing on both screens.
+  static int _roleRank(api.Profile p) {
+    if (p.keywords.contains('Leader')) return 0;
+    if (p.keywords.contains('Hero')) return 1;
+    return 2;
+  }
+
   void _recomputeSorted() {
     final list = List<api.Profile>.from(_results);
     list.sort((a, b) {
@@ -51,6 +59,12 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
         case _CardSort.name:
           final c = a.name.compareTo(b.name);
           return _sortAsc ? c : -c;
+        case _CardSort.role:
+          final rankCmp = _roleRank(a).compareTo(_roleRank(b));
+          if (rankCmp != 0) return _sortAsc ? rankCmp : -rankCmp;
+          // Ties (same role) fall back to name, so each role band reads alphabetically.
+          final nameCmp = a.name.compareTo(b.name);
+          return _sortAsc ? nameCmp : -nameCmp;
       }
     });
     _sorted = list;
@@ -160,6 +174,8 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Row(
         children: [
+          chip('Role', _CardSort.role),
+          const SizedBox(width: 6),
           chip('Name', _CardSort.name),
           const SizedBox(width: 6),
           chip('Cost', _CardSort.cost),
