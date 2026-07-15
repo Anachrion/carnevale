@@ -42,8 +42,31 @@ class ApiClient {
         }
         handler.next(options);
       },
-      onError: (error, handler) {
-        if (error.response?.statusCode == 401 && !error.requestOptions.path.endsWith('/login')) {
+      onError: (error, handler) async {
+        final options = error.requestOptions;
+        final path = options.path;
+        // /login and /token are the endpoints that mint tokens; a 401 from them is a real auth
+        // failure, not an expired access token, so they never trigger a refresh-and-retry.
+        final isAuthEndpoint = path.endsWith('/login') || path.endsWith('/token');
+        final alreadyRetried = options.extra[_retriedKey] == true;
+
+        // A 401 on any other request means the short-lived access token has expired. Renew it once
+        // from the refresh token and replay the original request transparently; only clear the
+        // session if the renewal itself fails. The already-retried guard stops a still-401 replay
+        // from looping.
+        if (error.response?.statusCode == 401 && !isAuthEndpoint && !alreadyRetried) {
+          final newToken = await _refreshOnce();
+          if (newToken != null) {
+            options
+              ..extra[_retriedKey] = true
+              ..headers['Authorization'] = 'Bearer $newToken';
+            try {
+              return handler.resolve(await _dio.fetch(options));
+            } on DioException catch (e) {
+              if (e.response?.statusCode == 401) onUnauthorized?.call();
+              return handler.reject(e);
+            }
+          }
           onUnauthorized?.call();
         }
         handler.next(error);
@@ -84,8 +107,29 @@ class ApiClient {
   /// Set by [AuthService] once a user is logged in; sent as a Bearer token on every request.
   String? authToken;
 
-  /// Called when a request fails with 401, so [AuthService] can clear the stale session.
+  /// Called when a request fails with 401 and the session can't be recovered, so [AuthService]
+  /// can clear the stale session.
   void Function()? onUnauthorized;
+
+  /// Set by [AuthService]: renews the access token from the stored refresh token and returns the
+  /// new token, or null if renewal isn't possible. Invoked on a 401 to recover silently instead of
+  /// logging the user out.
+  Future<String?> Function()? performRefresh;
+
+  /// Marks a request that has already been replayed after a refresh, so a still-401 replay falls
+  /// through to [onUnauthorized] instead of triggering another refresh.
+  static const _retriedKey = 'carnevale_retried';
+
+  Future<String?>? _refreshInFlight;
+
+  /// Runs at most one refresh at a time: concurrent 401s (a screen firing several requests at once)
+  /// all await the same renewal, so the single-use refresh token is rotated once, not once per
+  /// request — which would invalidate all but the first.
+  Future<String?> _refreshOnce() {
+    return _refreshInFlight ??=
+        (performRefresh?.call() ?? Future<String?>.value())
+            .whenComplete(() => _refreshInFlight = null);
+  }
 
   late final SessionApi session;
   late final ListsApi lists;
