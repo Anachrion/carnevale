@@ -35,10 +35,12 @@ class AuthService extends ChangeNotifier {
 
   AuthService._() {
     _client.onUnauthorized = _clear;
+    _client.performRefresh = _refreshSession;
   }
 
   static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
+  static const _refreshTokenKey = 'refresh_token';
   static const _userKey = 'auth_user';
 
   final _client = ApiClient();
@@ -59,13 +61,24 @@ class AuthService extends ChangeNotifier {
   Future<void> load() async {
     final token = await _storage.read(key: _tokenKey);
     final rawUser = await _storage.read(key: _userKey);
-    if (token == null || rawUser == null || isTokenExpired(token)) {
+    if (rawUser == null) {
       await _clear();
       return;
     }
-    _client.authToken = token;
-    _currentUser = _userFromJson(rawUser);
-    notifyListeners();
+    if (token != null && !isTokenExpired(token)) {
+      _client.authToken = token;
+      _currentUser = _userFromJson(rawUser);
+      notifyListeners();
+      return;
+    }
+    // The stored access token is missing or expired. Rather than forcing a login, mint a fresh one
+    // from the refresh token; only clear the session if that fails (refresh token expired/revoked).
+    if (await _refreshSession() != null) {
+      _currentUser = _userFromJson(rawUser);
+      notifyListeners();
+    } else {
+      await _clear();
+    }
   }
 
   Future<void> signUp({
@@ -94,35 +107,33 @@ class AuthService extends ChangeNotifier {
 
   Future<void> logIn({required String email, required String password}) async {
     try {
-      final res = await _client.session.login(
-        loginInput: api.LoginInput(
-          (b) => b
-            ..user = api.LoginInputUser(
-              (ub) => ub
-                ..email = email
-                ..password = password,
-            ).toBuilder(),
-        ),
+      // Called through the raw Dio rather than the generated client so the response body's
+      // `refresh_token` (a field the generated Session model doesn't carry) is readable alongside
+      // the JWT header — the same raw-endpoint approach used for cable tickets.
+      final res = await _client.dio.post<Map<String, dynamic>>(
+        '/login',
+        data: {
+          'user': {'email': email, 'password': password},
+        },
       );
-      final authHeader = res.headers.value('authorization');
-      final token = authHeader
-          ?.replaceFirst(RegExp(r'^Bearer\s+', caseSensitive: false), '')
-          .trim();
-      if (token == null || token.isEmpty) {
+      final token = _bearer(res.headers.value('authorization'));
+      final refresh = res.data?['refresh_token'] as String?;
+      final userMap = res.data?['user'] as Map<String, dynamic>?;
+      if (token == null || refresh == null || refresh.isEmpty || userMap == null) {
         throw AuthException(
           'Login succeeded but no session token was returned.',
         );
       }
-      final user = res.data!.user;
       final authUser = AuthUser(
-        id: user.id,
-        email: user.email,
-        username: user.username,
+        id: userMap['id'] as int,
+        email: userMap['email'] as String,
+        username: userMap['username'] as String,
       );
 
       _client.authToken = token;
       _currentUser = authUser;
       await _storage.write(key: _tokenKey, value: token);
+      await _storage.write(key: _refreshTokenKey, value: refresh);
       await _storage.write(key: _userKey, value: _userToJson(authUser));
       notifyListeners();
     } on DioException catch (e) {
@@ -133,6 +144,40 @@ class AuthService extends ChangeNotifier {
         ),
       );
     }
+  }
+
+  /// Trades the stored refresh token for a fresh access JWT (and a rotated refresh token), updating
+  /// storage and the client, and returns the new access token — or null if there is no refresh
+  /// token or the server rejects it. Wired into [ApiClient.performRefresh] so a 401 recovers
+  /// silently, and used by [load] to resume a session whose access token has expired.
+  Future<String?> _refreshSession() async {
+    final refresh = await _storage.read(key: _refreshTokenKey);
+    if (refresh == null || refresh.isEmpty) return null;
+    try {
+      final res = await _client.dio.post<Map<String, dynamic>>(
+        '/token',
+        data: {'refresh_token': refresh},
+      );
+      final token = _bearer(res.headers.value('authorization'));
+      final newRefresh = res.data?['refresh_token'] as String?;
+      if (token == null || newRefresh == null || newRefresh.isEmpty) return null;
+      _client.authToken = token;
+      await _storage.write(key: _tokenKey, value: token);
+      await _storage.write(key: _refreshTokenKey, value: newRefresh);
+      return token;
+    } on DioException {
+      return null;
+    }
+  }
+
+  /// Strips the `Bearer ` prefix from an Authorization header, returning null for a missing or
+  /// empty value so callers can treat "no token" uniformly.
+  String? _bearer(String? header) {
+    if (header == null) return null;
+    final token = header
+        .replaceFirst(RegExp(r'^Bearer\s+', caseSensitive: false), '')
+        .trim();
+    return token.isEmpty ? null : token;
   }
 
   Future<void> forgotPassword(String email) async {
@@ -209,6 +254,7 @@ class AuthService extends ChangeNotifier {
     _client.authToken = null;
     _currentUser = null;
     await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _refreshTokenKey);
     await _storage.delete(key: _userKey);
     notifyListeners();
   }
