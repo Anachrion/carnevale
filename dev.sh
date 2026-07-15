@@ -9,7 +9,14 @@ mkfifo "$PIPE"
 # Keep the pipe open so flutter run doesn't exit when watcher writes to it
 exec 3<>"$PIPE"
 
-flutter run -d chrome --web-port=56569 <"$PIPE" &
+# Give the dev Chrome a stable profile dir. Without this, `flutter run -d chrome` spins up a
+# fresh temporary profile each run, so the browser localStorage/IndexedDB backing
+# flutter_secure_storage is wiped and you're logged out on every restart. A fixed dir persists
+# the auth token across restarts.
+CHROME_PROFILE="${CARNEVALE_CHROME_PROFILE:-/tmp/carnevale-chrome-dev}"
+
+flutter run -d chrome --web-port=56569 \
+  --web-browser-flag="--user-data-dir=$CHROME_PROFILE" <"$PIPE" &
 FLUTTER_PID=$!
 
 # Watch lib/ and assets/ for changes, send hot restart (R, not r — hot reload alone doesn't
