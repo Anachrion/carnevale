@@ -15,6 +15,8 @@ Every finding below was verified against the actual code (both sides where a cla
 - **Major** — a real user-facing failure under plausible conditions (races both players will hit, offline/flaky network, retries), or spec drift that breaks the generated client.
 - **Minor** — edge cases, latent bugs, hygiene, performance.
 
+Findings that have been addressed are marked **✅ Fixed** with the commit and the tests added. Everything else is still open.
+
 ---
 
 ## Executive summary
@@ -26,15 +28,17 @@ The codebases are well-crafted on the happy path: consistent conventions, unusua
 3. **Silent error handling in the app UI** — the gang builder and list screens perform mutations with `try/finally` and no `catch`: offline failures produce ghost entries, duplicate gangs, permanent spinners, and a back-button trap.
 4. **Card sync coherence** — catalog JSON and card images travel two independent pipelines with no shared version signal. Stale-JSON-with-fresh-images (and the reverse) is reachable in at least five distinct ways, plus a ~600 MB unconsented first-launch download on whatever network is available.
 
-Two standalone security criticals: production seeding creates a backoffice admin with a hardcoded password from the public repo, and an unvalidated polymorphic type lets a single API request semi-permanently brick an account.
+Two standalone security criticals: production seeding creates a backoffice admin with a hardcoded password from the public repo (C-1, deferred until a real CI/deploy pipeline exists), and an unvalidated polymorphic type lets a single API request semi-permanently brick an account (C-2, ✅ fixed).
 
 ---
 
 ## 1. Critical findings
 
-### C-1. Production can boot with a publicly-known backoffice admin password
+### C-1. Production can boot with a publicly-known backoffice admin password — *deferred*
 
 **Backend — `db/seeds.rb:51-54`, `bin/docker-entrypoint:4-6`**
+
+**Deferred:** this project doesn't have a real CI/deploy pipeline yet, and the current environment is still a test one — revisit this once that exists rather than patching seeds now.
 
 Seeds create `admin@dev.local` / `password123` with `admin: true` (the `.update!(admin: true)` re-asserts admin on every seed run), plus `player1@dev.local` / `player2@dev.local` with the same password. The production Docker entrypoint runs `rails db:prepare`, which **seeds a freshly created database**.
 
@@ -42,9 +46,11 @@ Seeds create `admin@dev.local` / `password123` with `admin: true` (the `.update!
 
 **Suggested fix:** guard the dev accounts with `unless Rails.env.production?` (or move them to a conditionally-loaded `db/seeds/development.rb`), and never seed a static admin password — create no admin in production, or read credentials from ENV.
 
-### C-2. Unvalidated polymorphic `entry_type` lets one request brick an account
+### C-2. Unvalidated polymorphic `entry_type` lets one request brick an account — ✅ Fixed (`carnevale-backend@7058b76`)
 
 **Backend — `app/models/gang/entry.rb:8`, `app/controllers/api/v1/list_entries_controller.rb:9-11`**
+
+**Fix applied:** added `validates :entry_type, inclusion: { in: %w[Catalog::CardReference Catalog::Equipment] }` to `Gang::Entry`. The controller already rendered `entry.errors` on a failed save, so no controller change was needed — a bad `entry_type` now returns a clean 422 instead of saving and breaking every later read. Covered by two new specs in `spec/models/list_entry_spec.rb` (valid Equipment entry; rejected `entry_type: "User"`).
 
 `entry_type` is client-controlled and has no inclusion validation anywhere; the polymorphic `belongs_to` will constantize any ActiveRecord class name.
 
@@ -183,13 +189,17 @@ The generated Dart client (built_value) is strict about required/nullable fields
 
 Verified good, for the record: JWT secret lives in encrypted credentials (`config/master.key` not committed); denylist revocation is wired to `DELETE /logout`; `CableTicket` is a genuinely good design (30 s TTL, row-lock single-use redemption, opportunistic pruning, per-device tickets); IDOR scoping is consistently correct (`current_user.lists`, `find_owned_entry` join, `set_game_and_player`); mass assignment is tight (`admin` never permittable); Rack::Attack has sane general + auth throttles with API-shaped 429 bodies; CORS fails closed to localhost when `ALLOWED_ORIGINS` is unset; Secret-rule agenda hands are trimmed per-viewer in `PlayerSerializer` for both REST and per-player broadcast streams.
 
-### B-18. Major — the render token grants every backoffice GET, not just the card page
+### B-18. Major — the render token grants every backoffice GET, not just the card page — ✅ Fixed (`carnevale-backend@ceeabe8`)
 
-`app/controllers/backoffice/base_controller.rb:39-45`. `valid_render_token?` only checks `request.get?`, but `edit`, `index`, `publish`, `illustration_editor`, and crucially `export_pdf`/`export_png` are all GETs — contradicting the comment ("it can never reach the editing/export… actions"). The token is a permanent SHA-256 of `secret_key_base` (unrotatable without rotating the app secret) and can leak via proxy/CDN logs that record query strings. Anyone holding it can browse the entire backoffice read surface and trigger full-catalog PDF export, which spawns headless Chrome per face — a cheap DoS. **Fix:** restrict the bypass to the one action it exists for (`valid_render_token? && action_name == "card"`), and ideally switch to a short-lived signed token (`message_verifier.generate(profile_id, expires_in: 5.minutes)`).
+`app/controllers/backoffice/base_controller.rb:39-45`. `valid_render_token?` only checks `request.get?`, but `edit`, `index`, `publish`, `illustration_editor`, and crucially `export_pdf`/`export_png` are all GETs — contradicting the comment ("it can never reach the editing/export… actions"). The token is a permanent SHA-256 of `secret_key_base` (unrotatable without rotating the app secret) and can leak via proxy/CDN logs that record query strings. Anyone holding it can browse the entire backoffice read surface and trigger full-catalog PDF export, which spawns headless Chrome per face — a cheap DoS.
 
-### B-19. Major — `X-Api-Key` is silently not enforced on any auth endpoint
+**Fix applied:** `valid_render_token?` now also requires `action_name == "card"` — confirmed by tracing `card_url_for` (the only place the token is ever generated), which builds URLs exclusively through `card_backoffice_profile_path`. A short-lived signed token was considered but not done (out of scope for this pass); the token is still a permanent secret, just no longer over-scoped. Covered by a new spec in `spec/requests/backoffice/profiles_spec.rb` asserting the token is rejected on `index`, `edit`, and `export_pdf`.
 
-`app/controllers/api/v1/sessions_controller.rb`, `registrations_controller.rb`, `passwords_controller.rb`. These inherit `Devise::*Controller` → `ApplicationController`, not `Api::V1::BaseController`, so `authenticate_client!` never runs on `/api/v1/login`, `/signup`, `/password`, `/account`, `/logout` — yet `doc/openapi.yaml` declares ApiKeyAuth globally ("Required on every request"). The endpoints most worth gating against bots (credential stuffing, spam signups) are exactly the ones without the key; only Rack::Attack covers them. **Fix:** extract `authenticate_client!` into a concern and `before_action` it in the three Devise-derived controllers, or move the check to Rack middleware scoped to `/api`. A small shared API auth base class would also remove the inherited `ActionController::Base` extras (layouts, CSRF machinery) these controllers must skip.
+### B-19. Major — `X-Api-Key` is silently not enforced on any auth endpoint — ✅ Fixed (`carnevale-backend@a317ed9`)
+
+`app/controllers/api/v1/sessions_controller.rb`, `registrations_controller.rb`, `passwords_controller.rb`. These inherit `Devise::*Controller` → `ApplicationController`, not `Api::V1::BaseController`, so `authenticate_client!` never runs on `/api/v1/login`, `/signup`, `/password`, `/account`, `/logout` — yet `doc/openapi.yaml` declares ApiKeyAuth globally ("Required on every request"). The endpoints most worth gating against bots (credential stuffing, spam signups) are exactly the ones without the key; only Rack::Attack covers them.
+
+**Fix applied:** extracted the check into `app/controllers/concerns/authenticates_client.rb` (mirroring how `RendersApiErrors` is already shared the same way) and included it in `Api::V1::BaseController` plus the three Devise-derived controllers. Note: at review time, `API_KEY` did not appear to be set anywhere in this deployment's committed config (`.env.example`, `config/deploy.yml`) — so today this closes a gap in a check that is likely fail-open in production regardless; it becomes load-bearing the day `API_KEY` is actually configured as a Kamal secret. Covered by new specs in `spec/requests/api/v1/client_authentication_spec.rb` (login/signup/password all reject a missing key when `API_KEY` is configured; login still works unauthenticated when it isn't).
 
 ### B-20. Minor — account enumeration on password reset
 
@@ -441,7 +451,7 @@ Backend coverage is strong where it exists (games: 66 request examples; lists, l
 
 ## 12. Suggested plan of attack
 
-1. **Security criticals** (small, urgent): C-1 seeds/entrypoint guard; C-2 `entry_type` inclusion validation. Also B-18 (render-token scope) and B-19 (API key on auth endpoints) while in the area.
+1. **Security criticals** (small, urgent): ~~C-1 seeds/entrypoint guard~~ (deferred — no CI yet); C-2 `entry_type` inclusion validation ✅; B-18 (render-token scope) ✅; B-19 (API key on auth endpoints) ✅.
 2. **Backend race class**: one shared `with_game_lock` helper + idempotent `draw_initial`, applied per section 2 (fixes C-3, B-1, B-2, B-3, B-4, B-6). Add `rescue_from RecordInvalid`/`ParameterMissing` (B-17) at the same time.
 3. **App connection resilience bundle**: Dio timeouts + non-blocking startup (C-6), ping watchdog + lifecycle resync (C-4), apply REST responses to `currentGame` (A-1), `watch()` generation guard (C-5), stop reconnecting on auth failure (A-2). Consider the snapshot sequence number (A-3) here — it hardens everything above.
 4. **App error-handling bundle**: shared `guard()` helper across builder/list screens; surface `ApiException.message` in `_run`; fix the remove-animation ordering (A-7), double-submit (A-8), and back-button trap (A-10).
