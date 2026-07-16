@@ -6,6 +6,7 @@ import 'package:built_value/serializer.dart';
 import 'package:carnevale/services/api_client.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A Dio adapter that returns canned JSON per `METHOD /path`, so widget/service tests can drive the
 /// real service -> generated-client -> model-mapping stack without a backend. Installed on the
@@ -48,7 +49,12 @@ class FakeApiAdapter implements HttpClientAdapter {
 }
 
 /// Installs a fresh [FakeApiAdapter] on the shared ApiClient and returns it for stubbing.
+///
+/// Also seeds an in-memory SharedPreferences: the catalog services now persist their last-good
+/// data through it (offline cache, C-6), and without a mock `getInstance()` never completes in a
+/// widget test, hanging the load. An empty store is the right blank-slate default per test.
 FakeApiAdapter installFakeApi() {
+  SharedPreferences.setMockInitialValues({});
   final adapter = FakeApiAdapter();
   ApiClient().dio.httpClientAdapter = adapter;
   return adapter;

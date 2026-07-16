@@ -1,9 +1,11 @@
+import 'package:built_value/serializer.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:dio/dio.dart';
 import '../models/profile_query.dart';
 import 'ability_service.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
+import 'catalog_cache.dart';
 
 /// The searchable projection of one profile, built once when the catalog is cached: the base facets
 /// it carries, and a lowercased blob of every string free text sweeps. Precomputed because the
@@ -37,6 +39,8 @@ class ProfileService {
   /// matches nothing.
   final Map<Facet, int> _vocabulary = {};
 
+  static const _cacheKey = 'catalog_profiles';
+
   Future<List<api.Profile>> loadAll() async {
     if (_cache != null) return _cache!;
     try {
@@ -45,10 +49,30 @@ class ProfileService {
         ..sort((a, b) => a.name.compareTo(b.name));
       _reindex(profiles);
       _cache = profiles;
+      // Persist the last-good catalog so a later offline launch can still browse cards (C-6).
+      await CatalogCache.save(_cacheKey, profiles, const FullType(api.Profile));
       return profiles;
     } on DioException catch (e) {
+      // Offline / server down: fall back to the last-good catalog on disk rather than failing.
+      final restored = await CatalogCache.restore<api.Profile>(
+        _cacheKey,
+        const FullType(api.Profile),
+      );
+      if (restored != null) {
+        _reindex(restored);
+        _cache = restored;
+        return restored;
+      }
       throw ApiException.from(e);
     }
+  }
+
+  /// Drops the in-memory catalog so the next [loadAll] refetches. Called when the user re-syncs
+  /// card data, so freshly published stats/illustrations show without an app restart (S-3).
+  void reset() {
+    _cache = null;
+    _index.clear();
+    _vocabulary.clear();
   }
 
   /// Profiles matching [query], in catalog order. Synchronous, so a caller that has already awaited
