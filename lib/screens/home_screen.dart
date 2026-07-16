@@ -48,7 +48,6 @@ class HomeScreen extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     _MenuItem(
-                                      icon: Icons.style_outlined,
                                       imagePath: 'assets/images/cards_icon.png',
                                       title: 'Cards',
                                       onTap: () => Navigator.push(
@@ -60,7 +59,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 12),
                                     _MenuItem(
-                                      icon: Icons.flag_outlined,
                                       imagePath: 'assets/images/list_icon.png',
                                       imageScale: 1.2,
                                       title: 'Gangs',
@@ -73,7 +71,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 12),
                                     _MenuItem(
-                                      icon: Icons.sports_esports_outlined,
                                       imagePath: 'assets/images/games_icon.png',
                                       imageScale: 1.10,
                                       title: 'Games',
@@ -87,7 +84,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 12),
                                     _MenuItem(
-                                      icon: Icons.menu_book_outlined,
                                       imagePath: 'assets/images/book_icon.png',
                                       title: 'Rules',
                                       onTap: () => Navigator.push(
@@ -99,7 +95,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 12),
                                     _MenuItem(
-                                      icon: Icons.settings_outlined,
                                       imagePath: 'assets/images/gear_icon.png',
                                       imageScale: 1.2,
                                       title: 'Settings',
@@ -194,16 +189,14 @@ class _Header extends StatelessWidget {
 
 class _MenuItem extends StatelessWidget {
   const _MenuItem({
-    required this.icon,
     required this.title,
-    this.imagePath,
+    required this.imagePath,
     this.imageScale = 1.0,
     this.onTap,
   });
 
-  final IconData icon;
   final String title;
-  final String? imagePath;
+  final String imagePath;
   final double imageScale;
   final VoidCallback? onTap;
 
@@ -223,21 +216,18 @@ class _MenuItem extends StatelessWidget {
                 SizedBox(
                   width: 64,
                   height: 64,
-                  child: imagePath != null
-                      ? Transform.scale(
-                          scale: imageScale,
-                          child: Image.asset(
-                            imagePath!,
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.high,
-                            color:
-                                Theme.of(context).brightness == Brightness.light
-                                ? AppPalette.red
-                                : AppPalette.mutedGold,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
-                        )
-                      : Icon(icon, color: context.textColor, size: 26),
+                  child: Transform.scale(
+                    scale: imageScale,
+                    child: Image.asset(
+                      imagePath,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? AppPalette.red
+                          : AppPalette.mutedGold,
+                      colorBlendMode: BlendMode.srcIn,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

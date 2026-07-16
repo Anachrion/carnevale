@@ -29,7 +29,6 @@ abstract final class AppPalette {
   static const paper = Color(0xFFF5F2EE); // cards / panels (light)
   static const ink = Color(0xFF2C2418); // primary text (light)
   static const inkSubtle = Color(0xFF7A6E62); // secondary text (light)
-  static const paleStone = Color(0xFFE5E1DA); // decorative circle (home)
 
   // ── Neutrals — dark ────────────────────────────────────────────────────────
   static const backgroundDark = Color(
@@ -46,7 +45,6 @@ abstract final class AppPalette {
   /// *out of the game* rather than merely quiet — distinct from an activated model, which keeps its
   /// faction color and is only darkened.
   static const deadEntry = Color(0xFF33383F);
-  static const newsCard = Color(0xFF5A6B78); // home news card
   static const toggleBlue = Color(0xFF6C9BC2); // settings theme-toggle accent
   static const controlNavyDark = Color(
     0xFF0E1828,
