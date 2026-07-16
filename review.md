@@ -25,7 +25,7 @@ The codebases are well-crafted on the happy path: consistent conventions, unusua
 
 1. **Backend concurrency** — a repeated *check in-memory state → mutate → maybe transition* pattern without locks. Two players acting simultaneously (the normal case in a two-player lobby) can double-deal agenda hands, create 3-player games, destroy a list mid-game, or lose the game's completed status. One shared `with_lock` helper eliminates the class.
 2. **App connection resilience** *(✅ addressed in Step 3)* — the app assumes a reliable network. No Dio timeouts anywhere, no dead-socket detection, no app-lifecycle handling, REST mutation responses discarded in favour of websocket echoes, and an infinite 401 loop on token expiry.
-3. **Silent error handling in the app UI** — the gang builder and list screens perform mutations with `try/finally` and no `catch`: offline failures produce ghost entries, duplicate gangs, permanent spinners, and a back-button trap.
+3. **Silent error handling in the app UI** *(✅ addressed in Step 4)* — the gang builder and list screens perform mutations with `try/finally` and no `catch`: offline failures produce ghost entries, duplicate gangs, permanent spinners, and a back-button trap.
 4. **Card sync coherence** — catalog JSON and card images travel two independent pipelines with no shared version signal. Stale-JSON-with-fresh-images (and the reverse) is reachable in at least five distinct ways, plus a ~600 MB unconsented first-launch download on whatever network is available.
 
 Two standalone security criticals: production seeding creates a backoffice admin with a hardcoded password from the public repo (C-1, deferred until a real CI/deploy pipeline exists), and an unvalidated polymorphic type lets a single API request semi-permanently brick an account (C-2, ✅ fixed).
@@ -100,7 +100,7 @@ Neither Dio instance configures `connectTimeout`/`receiveTimeout`. `main()` awai
 
 **Failure scenario:** on a captive-portal or black-hole network at launch, the manifest request hangs indefinitely and the app never renders its first frame. Starting in airplane mode, the Cards screen and gang builder show spinners forever with unhandled exceptions and no retry UI — even though every card image is already on disk. On flaky networks, every REST call and the rules PDF download can spin indefinitely. The `ProfileService` doc comment ("keeps search working offline") is only true within a session that already fetched once.
 
-**This finding was split across three steps.** Done in Step 3 (`bc37d73`): `connectTimeout: 10s` / `receiveTimeout: 30s` on both Dio instances (`api_client.dart`, and the rules `_downloader`), so a black-hole network surfaces as a timeout rather than an indefinite hang; and `main()` no longer awaits the card manifest before `runApp` (init→sync is fired unawaited), so a bad network at launch can't hang the splash. **Still open:** the Cards/gang-builder spinner-forever + retry UI moves to **Step 4** (the error-handling bundle, with the shared `guard()` helper); persisting the last-good catalog JSON for a true offline start moves to **Step 5** (card sync).
+**This finding was split across three steps.** Step 3 (`bc37d73`): `connectTimeout: 10s` / `receiveTimeout: 30s` on both Dio instances (`api_client.dart`, and the rules `_downloader`), so a black-hole network surfaces as a timeout rather than an indefinite hang; and `main()` no longer awaits the card manifest before `runApp` (init→sync is fired unawaited), so a bad network at launch can't hang the splash. Step 4 (`67ecd56`, `dc2e150`): the Cards screen and gang builder now catch load failures and render `ErrorRetryView` with a working Retry instead of an infinite spinner (covered by `test/screens/cards_screen_error_test.dart`). **Still open:** persisting the last-good catalog JSON for a *true* offline start (showing cards with no network at all) moves to **Step 5** (card sync).
 
 ---
 
@@ -349,25 +349,37 @@ Verified good, for the record: controller/listener disposal and `mounted` guards
 
 The systemic gap: the in-game dialogs catch and toast errors; the gang builder and list screens don't. A small shared helper — `Future<void> guard(BuildContext context, Future<void> Function() action)` that toasts `ApiException.message` — would fix A-6 through A-9 in one pass. Relatedly, `GameSessionScreen._run` (`game_session_screen.dart:126-137`) collapses every failure into "Something went wrong", discarding the human-readable messages the services carefully build; surfacing `ApiException.message` would make the backend races self-explaining instead of mysterious.
 
-### A-6. Major — all gang-builder mutations fail silently; reorder never rolls back
+**Resolution (`carnevale-anachrion@e966f2a` … `@41fc079`):** added `lib/widgets/guarded_action.dart` — `Future<bool> guard(BuildContext, Future<void> Function())` which toasts an `ApiException`'s message (generic fallback otherwise) and returns whether the action succeeded (so callers can roll back optimistic changes or reverse animations). Applied across the gang builder, create sheet, gangs list, and cards screen below; `GameSessionScreen._run` now surfaces `ApiException.message` too (`@41fc079`). Covered by `test/widgets/guarded_action_test.dart` (success → no toast; `ApiException` → its message; other error → generic).
 
-`lib/screens/gang_builder_screen.dart:326-400`. `_add`, `_addEquipment`, `_remove`, `_removeEntry`, `_editSpells`, `_reorderEntry` all use `try/finally` with **no catch**: on network failure the `_busy` spinner appears and disappears, the tap seems to have worked, nothing happened, and the exception is unhandled. `_reorderEntry` (381-400) is worst: it applies the reorder optimistically to `_gang` before the request and never rolls back, so the UI shows an order the server doesn't have until the screen reloads. **Fix:** catch + toast everywhere; roll back the optimistic reorder.
+### A-6. Major — all gang-builder mutations fail silently; reorder never rolls back — ✅ Fixed (`carnevale-anachrion@67ecd56`)
 
-### A-7. Major — remove-entry animation runs before the removal is confirmed
+`lib/screens/gang_builder_screen.dart:326-400`. `_add`, `_addEquipment`, `_remove`, `_removeEntry`, `_editSpells`, `_reorderEntry` all use `try/finally` with **no catch**: on network failure the `_busy` spinner appears and disappears, the tap seems to have worked, nothing happened, and the exception is unhandled. `_reorderEntry` (381-400) is worst: it applies the reorder optimistically to `_gang` before the request and never rolls back, so the UI shows an order the server doesn't have until the screen reloads.
 
-`lib/screens/gang_builder_tiles.dart:112-114`, `lib/screens/gang_builder_screen.dart:369-379`. `_handleRemove` plays the full slide/fade/collapse animation, *then* calls `_removeEntry`. If the request fails (offline) or is skipped (tap remove on tile B while tile A's request is in flight — the `if (_busy) return;` silently no-ops), the tile's `AnimationController` is left at its end value: the entry is **invisible but still present** in `_gang`, still counted in `totalCost` and validity, until the user leaves and re-enters. **Fix:** run the request first (or in parallel) and reverse the animation on failure/skip; toast errors.
+**Fix applied:** every mutation (`_add`, `_addEquipment`, `_remove`, `_removeEntry`, `_editSpells`, `_reorderEntry`, `_onEntryIllustrationChanged`) now runs inside `guard`, so failures toast the backend message. `_reorderEntry` snapshots `_gang` before the optimistic reorder and restores it when the request fails.
 
-### A-8. Major — double-submit creates duplicate gangs; creation failures are invisible
+### A-7. Major — remove-entry animation runs before the removal is confirmed — ✅ Fixed (`carnevale-anachrion@67ecd56`)
 
-`lib/widgets/create_gang_sheet.dart:52-63, 76`. The button is disabled while saving but the name field's `onSubmitted` has no `_saving` guard — pressing Enter/Done twice creates two gangs (the duplicate invisible until the list reloads). `catch (_)` just resets `_saving`: on any error the spinner stops and nothing says why. Also line 55: an unparseable point-limit input silently becomes 100. **Fix:** early-return when `_saving`; show the error in the catch.
+`lib/screens/gang_builder_tiles.dart:112-114`, `lib/screens/gang_builder_screen.dart:369-379`. `_handleRemove` plays the full slide/fade/collapse animation, *then* calls `_removeEntry`. If the request fails (offline) or is skipped (tap remove on tile B while tile A's request is in flight — the `if (_busy) return;` silently no-ops), the tile's `AnimationController` is left at its end value: the entry is **invisible but still present** in `_gang`, still counted in `totalCost` and validity, until the user leaves and re-enters.
 
-### A-9. Major — deleting a gang offline silently does nothing
+**Fix applied:** `_EntryTile.onRemove` is now `Future<bool> Function()`. `_handleRemove` bails if `busy` (no animation for a removal that can't proceed), plays the exit animation, awaits the removal, and `_ctrl.reverse()`s the tile back into view if it failed; `_removeEntry` returns the guarded success flag and toasts on failure. The slide-out is preserved on success. Verified by review + the `guard` test (the animation-reversal branch itself is not widget-tested — it would require driving the reorderable list under the environmental `enterText` limitation noted below).
 
-`lib/screens/gangs_screen.dart:83-86, 279-282`. `_deleteGang` is fire-and-forget from the confirm dialog and `GangService.delete` throws on failure: the dialog closes, the gang stays, no message. **Fix:** await + try/catch with a toast.
+### A-8. Major — double-submit creates duplicate gangs; creation failures are invisible — ✅ Fixed (`carnevale-anachrion@12a48bc`)
 
-### A-10. Major — back-button trap when tapping "Hire" during load
+`lib/widgets/create_gang_sheet.dart:52-63, 76`. The button is disabled while saving but the name field's `onSubmitted` has no `_saving` guard — pressing Enter/Done twice creates two gangs (the duplicate invisible until the list reloads). `catch (_)` just resets `_saving`: on any error the spinner stops and nothing says why. Also line 55: an unparseable point-limit input silently becomes 100.
 
-`lib/screens/gang_builder_screen.dart:150-160, 44, 406-411`. During `_loading` the tab bar is shown but the `PageView` isn't built, so `_selectTab` falls back to `setState(() => _tab = tab)`. The `PageView` then mounts at `initialPage: 0` while `_tab == _Tab.hire`: `PopScope.canPop` is false and `_handleBack` calls `animateToPage(0)` — which never fires `onPageChanged` because the page is already 0 — so back is permanently swallowed until the user happens to swipe to Hire and back. Easy to hit on a slow network. **Fix:** set `_tab` in `_selectTab`'s fallback (or in `_handleBack` directly), or recreate the controller with the right `initialPage`.
+**Fix applied:** `_submit` early-returns when `_saving` (closing the Enter-key path), toasts the `ApiException` message (or a generic one) on failure instead of swallowing it, and defaults an unparseable point limit to `widget.initialPoints` rather than a hardcoded 100.
+
+### A-9. Major — deleting a gang offline silently does nothing — ✅ Fixed (`carnevale-anachrion@dc2e150`)
+
+`lib/screens/gangs_screen.dart:83-86, 279-282`. `_deleteGang` is fire-and-forget from the confirm dialog and `GangService.delete` throws on failure: the dialog closes, the gang stays, no message.
+
+**Fix applied:** `_deleteGang` runs `_service.delete` through `guard` (toasting on failure) and only reloads the list when the delete actually succeeded.
+
+### A-10. Major — back-button trap when tapping "Hire" during load — ✅ Fixed (`carnevale-anachrion@67ecd56`)
+
+`lib/screens/gang_builder_screen.dart:150-160, 44, 406-411`. During `_loading` the tab bar is shown but the `PageView` isn't built, so `_selectTab` falls back to `setState(() => _tab = tab)`. The `PageView` then mounts at `initialPage: 0` while `_tab == _Tab.hire`: `PopScope.canPop` is false and `_handleBack` calls `animateToPage(0)` — which never fires `onPageChanged` because the page is already 0 — so back is permanently swallowed until the user happens to swipe to Hire and back. Easy to hit on a slow network.
+
+**Fix applied:** `_pageController` is now `late final PageController(initialPage: _tab.index)`, and `_selectTab` only drives the controller when `!_loading` (falling back to `setState(_tab)` during load). When the list finishes loading the PageView opens on whatever tab was selected, so `_tab` and the page can't desync — no trap.
 
 ### A-11. Minor — assorted UI findings
 
@@ -476,7 +488,7 @@ Backend coverage is strong where it exists (games: 66 request examples; lists, l
 1. **Security criticals** (small, urgent): ~~C-1 seeds/entrypoint guard~~ (deferred — no CI yet); C-2 `entry_type` inclusion validation ✅; B-18 (render-token scope) ✅; B-19 (API key on auth endpoints) ✅.
 2. **Backend race class** ✅: locked lifecycle methods on `Encounter::Game`/`Encounter::Player` + idempotent `draw_initial`, per section 2 (fixed C-3, B-1, B-2, B-3, B-4, B-6). `rescue_from RecordInvalid`/`ParameterMissing` (B-17) ✅ done alongside.
 3. **App connection resilience bundle** ✅: Dio timeouts + non-blocking startup (C-6, partial), ping watchdog + lifecycle resync (C-4), apply REST responses to `currentGame` (A-1), `watch()` generation guard (C-5), stop reconnecting on auth failure (A-2), backoff+jitter and frame-decode guard (A-4, partial), dropped the racy REST resync (A-3, partial). Snapshot sequence number (A-3 remainder) deferred to Step 6 (needs a serialized field + regen).
-4. **App error-handling bundle**: shared `guard()` helper across builder/list screens; surface `ApiException.message` in `_run`; fix the remove-animation ordering (A-7), double-submit (A-8), and back-button trap (A-10).
+4. **App error-handling bundle** ✅: shared `guard()` helper across builder/list screens (A-6, A-9); surfaced `ApiException.message` in `_run`; fixed the remove-animation ordering (A-7), double-submit (A-8), back-button trap (A-10), and the Cards/gang-builder retry UI (C-6 remainder).
 5. **Card sync coherence**: profiles ETag (S-1), JSON cache invalidation on Sync Cards + a catalog version signal (S-3), Wi-Fi/consent gate on the first-launch bulk download (S-5), web manifest retry (S-4), render-drift signal (S-2).
 6. **Contract & data integrity**: OpenAPI spec audit (B-14/15/16), equipment validations (B-27), missing indexes/FKs (B-26), catalog-edit validity refresh (B-24).
 7. **Backlog**: remaining minors, performance items (B-34/35/36, per-row blur, `cacheWidth`), maintainability refactors, and the test gaps above.
