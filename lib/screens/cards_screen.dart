@@ -2,12 +2,14 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../services/api_exception.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/sort_chip.dart';
+import '../widgets/status_views.dart';
 import 'card_viewer_screen.dart';
 
 enum _CardSort { role, name, cost }
@@ -28,6 +30,7 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
   List<api.Profile> _sorted = [];
   final Set<String> _selectedFactions = {};
   bool _loading = true;
+  String? _error;
   _CardSort _sort = _CardSort.name;
   bool _sortAsc = true;
 
@@ -83,10 +86,24 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
   }
 
   Future<void> _load() async {
-    await _service.loadAll();
-    if (!mounted) return;
-    setState(() => _loading = false);
-    applySearch();
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await _service.loadAll();
+      if (!mounted) return;
+      setState(() => _loading = false);
+      applySearch();
+    } catch (e) {
+      // The catalog isn't persisted, so an offline first launch has nothing to show — offer a
+      // retry instead of spinning forever with an unhandled exception (C-6).
+      if (!mounted) return;
+      setState(() {
+        _error = e is ApiException ? e.message : 'Could not reach server';
+        _loading = false;
+      });
+    }
   }
 
   void _toggleFaction(String faction) {
@@ -241,6 +258,9 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
       return Center(
         child: CircularProgressIndicator(color: context.accentColor),
       );
+    }
+    if (_error != null) {
+      return ErrorRetryView(message: _error!, onRetry: _load);
     }
     if (_results.isEmpty) {
       return Center(

@@ -15,15 +15,22 @@ final settingsService = SettingsService();
 final authService = AuthService();
 final navigatorKey = GlobalKey<NavigatorState>();
 
+/// Lets a screen know when a route pushed above it is popped and it becomes visible again — used by
+/// GameSessionScreen to re-establish its live watch after another game is opened over it (A-5).
+final routeObserver = RouteObserver<PageRoute<dynamic>>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await settingsService.load();
   await authService.load();
-  // Load the card image manifest (and cache dir on mobile) before the UI needs a face. Then kick
-  // off a background download of any stale/missing faces — unawaited so startup isn't blocked;
-  // faces stream from the network until their local copy lands. No-op on web.
-  await CardImageService().init();
-  unawaited(CardImageService().sync());
+  // Card images load off the critical path: init() fetches the manifest over the network, so
+  // awaiting it here would let a captive-portal / black-hole network hang on the splash screen
+  // before the first frame. Kick init() -> maybeAutoSync() off unawaited instead. maybeAutoSync
+  // bulk-downloads only when the user's download-mode setting allows it (default: on demand, i.e.
+  // not here — faces then cache lazily as they're viewed). No-op on web.
+  unawaited(
+    CardImageService().init().then((_) => CardImageService().maybeAutoSync()),
+  );
   runApp(const CarnevaleApp());
 }
 
@@ -37,6 +44,7 @@ class CarnevaleApp extends StatefulWidget {
 class _CarnevaleAppState extends State<CarnevaleApp> {
   final _appLinks = AppLinks();
   Uri? _lastHandledLink;
+  DateTime? _lastHandledAt;
 
   @override
   void initState() {
@@ -58,11 +66,19 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
   }
 
   void _handleDeepLink(Uri uri) {
-    if (uri == _lastHandledLink) return;
+    // Dedup only a rapid duplicate of the same link (app_links can deliver one twice); a deliberate
+    // re-tap of the same link later must still work, so this is a short time window, not forever (A-5).
+    final now = DateTime.now();
+    if (uri == _lastHandledLink &&
+        _lastHandledAt != null &&
+        now.difference(_lastHandledAt!) < const Duration(seconds: 2)) {
+      return;
+    }
     if (uri.path == '/reset-password') {
       final token = uri.queryParameters['reset_password_token'];
       if (token == null || token.isEmpty) return;
       _lastHandledLink = uri;
+      _lastHandledAt = now;
       navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (_) => ResetPasswordScreen(token: token)),
       );
@@ -72,6 +88,7 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
       final code = uri.queryParameters['code'];
       if (code == null || code.isEmpty) return;
       _lastHandledLink = uri;
+      _lastHandledAt = now;
       navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (_) => GameHomeScreen(initialJoinCode: code)),
       );
@@ -91,6 +108,7 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
+      navigatorObservers: [routeObserver],
       title: 'Carnevale',
       debugShowCheckedModeBanner: false,
       themeMode: settingsService.themeMode,

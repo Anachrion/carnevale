@@ -86,6 +86,17 @@ void main() {
       expect(auth.parseAuthError(e), 'something went wrong');
     });
 
+    test('handles a scalar (non-array) error value without crashing', () {
+      // A-12: some error shapes carry a bare string instead of an array; the parser used to
+      // blindly cast to List and throw a TypeError on the error path itself.
+      final e = _errorResponse({
+        'errors': {
+          'base': 'something went wrong',
+        },
+      });
+      expect(auth.parseAuthError(e), 'something went wrong');
+    });
+
     test('falls back to the provided message when there is no errors map', () {
       final e = _errorResponse({
         'error': 'Invalid email or password.',

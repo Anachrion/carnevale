@@ -81,6 +81,9 @@ void main() {
 
     await tester.tap(find.text('Hire'));
     await tester.pump();
+    // Let the 250ms tab-switch PageView animation finish, so the Hire tab (and its search field)
+    // is actually built before a test types into it — a single pump lands mid-animation.
+    await tester.pump(const Duration(milliseconds: 400));
   }
 
   testWidgets(

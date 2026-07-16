@@ -5,6 +5,7 @@ import '../app_colors.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart';
+import '../services/api_exception.dart';
 import '../services/game_service.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
@@ -13,6 +14,7 @@ import '../widgets/create_gang_sheet.dart';
 import '../widgets/gang_tile.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/status_views.dart';
+import 'account_screen.dart';
 import 'gang_builder_screen.dart';
 import 'gang_viewer_screen.dart';
 import 'score_tab.dart';
@@ -37,7 +39,8 @@ class GameSessionScreen extends StatefulWidget {
   State<GameSessionScreen> createState() => _GameSessionScreenState();
 }
 
-class _GameSessionScreenState extends State<GameSessionScreen> {
+class _GameSessionScreenState extends State<GameSessionScreen>
+    with WidgetsBindingObserver, RouteAware {
   final _service = GameService();
   final _gangService = GangService();
   bool _loading = true;
@@ -51,23 +54,73 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   api.GameStatusEnum? _lastStatus;
 
   api.Game? get _game => _service.currentGame;
-  api.GamePlayer? get _me => _game?.playerFor(authService.currentUser!.id);
-  api.GamePlayer? get _opponent => _game?.players
-      .where((p) => p.userId != authService.currentUser!.id)
-      .firstOrNull;
+  // Null-safe on currentUser: the session can expire mid-game (JWT lapses), and these getters run
+  // during build — a null-assert here would crash the screen instead of surfacing the expiry (A-2).
+  api.GamePlayer? get _me {
+    final userId = authService.currentUser?.id;
+    return userId == null ? null : _game?.playerFor(userId);
+  }
+
+  api.GamePlayer? get _opponent {
+    final userId = authService.currentUser?.id;
+    if (userId == null) return null;
+    return _game?.players.where((p) => p.userId != userId).firstOrNull;
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _service.addListener(_onUpdate);
+    _service.onSessionExpired = _onSessionExpired;
     _init();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route changes so didPopNext fires when a screen pushed over us is popped.
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) routeObserver.subscribe(this, route);
+  }
+
+  @override
   void dispose() {
+    routeObserver.unsubscribe(this);
+    WidgetsBinding.instance.removeObserver(this);
     _service.removeListener(_onUpdate);
+    if (_service.onSessionExpired == _onSessionExpired) {
+      _service.onSessionExpired = null;
+    }
     _service.stopWatching();
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // A screen pushed above us — e.g. another game opened from a join deep link — was popped and
+    // we're visible again. The singleton GameService may now be watching that other game (or
+    // nothing, since its dispose called stopWatching), so re-establish our own watch rather than
+    // sit on a dead, empty screen (A-5).
+    if (!_service.isWatching(widget.gameId)) {
+      setState(() => _loading = true);
+      _init();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Coming back to the foreground, the live socket may have died while suspended without ever
+    // surfacing an error — force an immediate reconnect + resync rather than wait for the watchdog.
+    if (state == AppLifecycleState.resumed) {
+      _service.resumeConnection();
+    }
+  }
+
+  // The JWT expired mid-session: the cable stopped reconnecting and cleared the session. Rebuild so
+  // the body shows the expired state instead of a stale board, and let the user back out to log in.
+  void _onSessionExpired() {
+    if (mounted) setState(() {});
   }
 
   void _onUpdate() {
@@ -129,8 +182,14 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     try {
       await action();
     } catch (e) {
-      if (mounted)
-        showAppToast(context, 'Something went wrong. Please try again.');
+      // Surface the backend's actual message ("Agenda not in hand", "Gangs can no longer be
+      // changed", …) rather than a blanket "something went wrong", which hid why an action failed.
+      if (mounted) {
+        showAppToast(
+          context,
+          e is ApiException ? e.message : 'Something went wrong. Please try again.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -204,6 +263,17 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   Widget _buildBody(BuildContext context) {
     if (_loading) return const LoadingView();
+    // Session expired mid-game (JWT lapsed): the cable stopped and the user was signed out. Say so
+    // and offer a way back, rather than the null-assert crash the old `_me` getter would have hit.
+    if (authService.currentUser == null) {
+      return LoggedOutView(
+        message: 'Your session expired. Please log in again.',
+        onLogin: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AccountScreen()),
+        ),
+      );
+    }
     if (_error != null) {
       return ErrorRetryView(
         message: _error!,

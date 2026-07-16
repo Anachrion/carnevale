@@ -486,6 +486,7 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
   List<api.Profile> _results = [];
   bool _loading = true;
   bool _busy = false;
+  String? _error;
 
   /// Empty: the summon pool is the whole catalog, with no faction narrowing.
   @override
@@ -507,10 +508,23 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
   }
 
   Future<void> _load() async {
-    await _service.loadAll();
-    if (!mounted) return;
-    setState(() => _loading = false);
-    applySearch();
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await _service.loadAll();
+      if (!mounted) return;
+      setState(() => _loading = false);
+      applySearch();
+    } catch (e) {
+      // A cache-cold offline open used to hang on the spinner forever; show a retry instead (A-11).
+      if (!mounted) return;
+      setState(() {
+        _error = e is ApiException ? e.message : 'Could not reach server';
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _summon(api.Profile profile) async {
@@ -599,6 +613,9 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
       return Center(
         child: CircularProgressIndicator(color: context.accentColor),
       );
+    }
+    if (_error != null) {
+      return ErrorRetryView(message: _error!, onRetry: _load);
     }
     if (_results.isEmpty) {
       return Center(

@@ -26,8 +26,25 @@ class GameService extends ChangeNotifier {
   final _client = ApiClient();
   ActionCableClient? _cable;
   int? _watchedGameId;
+  // Bumped by every watch()/stopWatching() so an in-flight watch that resumes after it has been
+  // superseded (screen popped, or a newer watch started) can detect it lost the race and bail
+  // instead of installing a leaked cable or clobbering currentGame with the wrong game (C-5).
+  int _watchGeneration = 0;
 
   api.Game? currentGame;
+
+  /// Whether the live subscription is currently on [gameId] — lets a screen re-established over
+  /// another game (A-5) tell if it needs to re-watch.
+  bool isWatching(int gameId) => _watchedGameId == gameId;
+
+  /// Fired when the live connection hits an unrecoverable auth failure (the session expired while
+  /// watching). The UI listens so it can route to re-login rather than spin on a dead credential.
+  void Function()? onSessionExpired;
+
+  /// Test seam: overrides the WebSocket transport the live cable opens, so tests can drive the
+  /// connection with a fake channel instead of a real socket. Null in production.
+  @visibleForTesting
+  ChannelFactory? debugChannelFactory;
 
   // Wraps a call so a DioException surfaces as a uniform, user-presentable ApiException (F-P2-2).
   Future<T> _guard<T>(Future<T> Function() call) async {
@@ -36,6 +53,17 @@ class GameService extends ChangeNotifier {
     } on DioException catch (e) {
       throw ApiException.from(e);
     }
+  }
+
+  // Applies a mutation's REST response to the live snapshot immediately, so the acting player's UI
+  // updates without waiting for (or depending on) the ActionCable echo (A-1). Guarded by the
+  // watched-game id so a response for a game we're no longer watching can't clobber currentGame.
+  api.Game _applyGame(int gameId, api.Game game) {
+    if (_watchedGameId == gameId) {
+      currentGame = game;
+      notifyListeners();
+    }
+    return game;
   }
 
   Future<List<api.Scenario>> loadScenarios() => _guard(() async {
@@ -101,7 +129,7 @@ class GameService extends ChangeNotifier {
       id: gameId,
       roleInput: api.RoleInput((b) => b..role = roleEnum),
     );
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   Future<List<AvailableGang>> availableGangs(int gameId) => _guard(() async {
@@ -116,14 +144,14 @@ class GameService extends ChangeNotifier {
       id: gameId,
       selectGangInput: api.SelectGangInput((b) => b..listId = listId),
     );
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   /// Clears the current player's gang pick while still in gang selection, so they can choose a
   /// different one (or none) before the opponent locks in and the game advances.
   Future<api.Game> deselectGang(int gameId) => _guard(() async {
     final res = await _client.games.deselectGang(id: gameId);
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   /// Draws a single in-play replacement agenda during `in_progress`. [origin] (`special_rule`/
@@ -144,14 +172,14 @@ class GameService extends ChangeNotifier {
   /// confirm, the server takes the game straight to in_progress (deployment is done at the table).
   Future<api.Game> confirmAgendas(int gameId) => _guard(() async {
     final res = await _client.games.confirmAgendas(id: gameId);
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   /// Scores an agenda from the player's hand (flat 1 VP). Under a Cycle scenario the server
   /// auto-draws a replacement — nothing to request here.
   Future<api.Game> scoreAgenda(int gameId, int agendaId) => _guard(() async {
     final res = await _client.games.scoreAgenda(id: gameId, agendaId: agendaId);
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   /// Discards an in-play agenda via [origin] (`special_rule`/`command_point`).
@@ -167,7 +195,7 @@ class GameService extends ChangeNotifier {
         (b) => b..origin = _discardOrigin(origin),
       ),
     );
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   /// Pre-game mulligan: toss an impossible/duplicated agenda during setup; the server always
@@ -177,24 +205,24 @@ class GameService extends ChangeNotifier {
 
   Future<api.Game> advanceTurn(int gameId) => _guard(() async {
     final res = await _client.games.advanceTurn(id: gameId);
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   Future<api.Game> rewindTurn(int gameId) => _guard(() async {
     final res = await _client.games.rewindTurn(id: gameId);
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   /// Ends the game from this player's side (only valid on the last turn) — archives it for them
   /// while the opponent keeps playing.
   Future<api.Game> finishGame(int gameId) => _guard(() async {
     final res = await _client.games.finishGame(id: gameId);
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   Future<api.Game> unfinishGame(int gameId) => _guard(() async {
     final res = await _client.games.unfinishGame(id: gameId);
-    return res.data!;
+    return _applyGame(gameId, res.data!);
   });
 
   api.DrawAgendaInputOriginEnum _drawOrigin(String origin) => switch (origin) {
@@ -308,38 +336,54 @@ class GameService extends ChangeNotifier {
 
   /// Fetches an initial snapshot and opens a live ActionCable subscription for
   /// [gameId], keeping [currentGame] in sync until [stopWatching] is called.
+  ///
+  /// Guarded by a generation token: if the screen is popped (stopWatching) or a different game is
+  /// watched while this call is still awaiting, the superseded watch bails after each await instead
+  /// of installing a leaked cable or overwriting currentGame with the wrong game's state (C-5).
   Future<api.Game> watch(int gameId) async {
     stopWatching();
+    final myGeneration = _watchGeneration;
 
     final game = await getGame(gameId);
+    if (myGeneration != _watchGeneration) return game; // superseded while fetching
+
     currentGame = game;
+    _watchedGameId = gameId;
     notifyListeners();
 
-    _watchedGameId = gameId;
-    // The client mints a fresh single-use cable ticket for every connection attempt; on reconnect
-    // we refetch the snapshot, since any broadcasts sent while the socket was down are lost.
-    _cable = ActionCableClient(_client.cableConnectionUrl)
-      ..onReconnect = _resyncSnapshot;
-    _cable!.subscribe({
+    // The client mints a fresh single-use cable ticket for every connection attempt. On reconnect
+    // the resubscribe transmits a fresh snapshot, so there's no separate REST resync to race it.
+    final cable = ActionCableClient(
+      _client.cableConnectionUrl,
+      channelFactory: debugChannelFactory,
+    )..onAuthFailure = _onCableAuthFailure;
+    cable.subscribe({
       'channel': 'GameChannel',
       'game_id': gameId,
     }, _onChannelMessage);
-    await _cable!.connect();
+    if (myGeneration != _watchGeneration) {
+      cable.dispose(); // superseded while wiring the cable — don't install a leak
+      return game;
+    }
+    _cable = cable;
+    await cable.connect();
     return game;
   }
 
-  Future<void> _resyncSnapshot() async {
-    final id = _watchedGameId;
-    if (id == null) return;
-    try {
-      currentGame = await getGame(id);
-      notifyListeners();
-    } catch (_) {
-      // Keep the last-known snapshot; a later broadcast or reconnect will refresh it.
-    }
+  /// Forces the live socket to reconnect immediately — called when the app returns to the
+  /// foreground, where a socket that died while suspended may not have surfaced an error yet (C-4).
+  void resumeConnection() {
+    _cable?.reconnectNow();
+  }
+
+  void _onCableAuthFailure() {
+    stopWatching();
+    onSessionExpired?.call();
   }
 
   void stopWatching() {
+    // Invalidate any in-flight watch() so it bails instead of installing its cable / snapshot.
+    _watchGeneration++;
     if (_watchedGameId != null) {
       _cable?.unsubscribe({
         'channel': 'GameChannel',
@@ -364,6 +408,9 @@ class GameService extends ChangeNotifier {
         message['game'],
       );
       if (decoded == null) return;
+      // Ignore a broadcast for a game we're no longer watching (a stale cable that outlived its
+      // watch, or a payload that arrived mid-switch), so it can't clobber the current game (C-5).
+      if (_watchedGameId != null && decoded.id != _watchedGameId) return;
       currentGame = decoded;
       notifyListeners();
     } catch (e, st) {
