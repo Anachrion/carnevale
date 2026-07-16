@@ -28,6 +28,10 @@ class ApiClient {
   ApiClient._() {
     _dio = Dio(BaseOptions(
       baseUrl: '$_httpScheme://$_host/api/v1',
+      // Bound every request so a black-hole network (captive portal, dead wifi that still accepts
+      // SYNs) surfaces as a timeout the caller can show, instead of an indefinite hang / spinner.
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 30),
       // Without this, Devise's failure app treats requests as HTML and redirects
       // (302) instead of returning the documented JSON error body on 401/422.
       headers: {'Accept': 'application/json'},
