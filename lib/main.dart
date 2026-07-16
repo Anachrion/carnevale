@@ -15,6 +15,10 @@ final settingsService = SettingsService();
 final authService = AuthService();
 final navigatorKey = GlobalKey<NavigatorState>();
 
+/// Lets a screen know when a route pushed above it is popped and it becomes visible again — used by
+/// GameSessionScreen to re-establish its live watch after another game is opened over it (A-5).
+final routeObserver = RouteObserver<PageRoute<dynamic>>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await settingsService.load();
@@ -40,6 +44,7 @@ class CarnevaleApp extends StatefulWidget {
 class _CarnevaleAppState extends State<CarnevaleApp> {
   final _appLinks = AppLinks();
   Uri? _lastHandledLink;
+  DateTime? _lastHandledAt;
 
   @override
   void initState() {
@@ -61,11 +66,19 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
   }
 
   void _handleDeepLink(Uri uri) {
-    if (uri == _lastHandledLink) return;
+    // Dedup only a rapid duplicate of the same link (app_links can deliver one twice); a deliberate
+    // re-tap of the same link later must still work, so this is a short time window, not forever (A-5).
+    final now = DateTime.now();
+    if (uri == _lastHandledLink &&
+        _lastHandledAt != null &&
+        now.difference(_lastHandledAt!) < const Duration(seconds: 2)) {
+      return;
+    }
     if (uri.path == '/reset-password') {
       final token = uri.queryParameters['reset_password_token'];
       if (token == null || token.isEmpty) return;
       _lastHandledLink = uri;
+      _lastHandledAt = now;
       navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (_) => ResetPasswordScreen(token: token)),
       );
@@ -75,6 +88,7 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
       final code = uri.queryParameters['code'];
       if (code == null || code.isEmpty) return;
       _lastHandledLink = uri;
+      _lastHandledAt = now;
       navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (_) => GameHomeScreen(initialJoinCode: code)),
       );
@@ -94,6 +108,7 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
+      navigatorObservers: [routeObserver],
       title: 'Carnevale',
       debugShowCheckedModeBanner: false,
       themeMode: settingsService.themeMode,
