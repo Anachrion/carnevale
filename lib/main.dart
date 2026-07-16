@@ -19,11 +19,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await settingsService.load();
   await authService.load();
-  // Load the card image manifest (and cache dir on mobile) before the UI needs a face. Then kick
-  // off a background download of any stale/missing faces — unawaited so startup isn't blocked;
-  // faces stream from the network until their local copy lands. No-op on web.
-  await CardImageService().init();
-  unawaited(CardImageService().sync());
+  // Card images load off the critical path: init() fetches the manifest over the network, so
+  // awaiting it here would let a captive-portal / black-hole network hang on the splash screen
+  // before the first frame. Kick init() -> sync() off unawaited instead; faces stream in once
+  // their local copy lands, and provider() falls back to network URLs until then. No-op on web.
+  unawaited(CardImageService().init().then((_) => CardImageService().sync()));
   runApp(const CarnevaleApp());
 }
 

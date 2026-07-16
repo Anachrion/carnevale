@@ -47,7 +47,13 @@ class RulesService {
   RulesService._();
 
   final _client = ApiClient();
-  final _downloader = Dio();
+  // A bare Dio (no interceptors) for third-party CDN fetches. Timeouts bound a slow/black-hole
+  // network so a rules download can't hang forever; the receive window is generous because a
+  // rulebook PDF is large.
+  final _downloader = Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 60),
+  ));
 
   static const _documentsKey = 'rules_documents';
   static const _cachedUrlsKey = 'rules_document_urls';
