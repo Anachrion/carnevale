@@ -33,6 +33,10 @@ class GameService extends ChangeNotifier {
 
   api.Game? currentGame;
 
+  /// Whether the live subscription is currently on [gameId] — lets a screen re-established over
+  /// another game (A-5) tell if it needs to re-watch.
+  bool isWatching(int gameId) => _watchedGameId == gameId;
+
   /// Fired when the live connection hits an unrecoverable auth failure (the session expired while
   /// watching). The UI listens so it can route to re-login rather than spin on a dead credential.
   void Function()? onSessionExpired;

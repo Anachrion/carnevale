@@ -40,7 +40,7 @@ class GameSessionScreen extends StatefulWidget {
 }
 
 class _GameSessionScreenState extends State<GameSessionScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   final _service = GameService();
   final _gangService = GangService();
   bool _loading = true;
@@ -77,7 +77,16 @@ class _GameSessionScreenState extends State<GameSessionScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route changes so didPopNext fires when a screen pushed over us is popped.
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) routeObserver.subscribe(this, route);
+  }
+
+  @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     _service.removeListener(_onUpdate);
     if (_service.onSessionExpired == _onSessionExpired) {
@@ -85,6 +94,18 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     }
     _service.stopWatching();
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // A screen pushed above us — e.g. another game opened from a join deep link — was popped and
+    // we're visible again. The singleton GameService may now be watching that other game (or
+    // nothing, since its dispose called stopWatching), so re-establish our own watch rather than
+    // sit on a dead, empty screen (A-5).
+    if (!_service.isWatching(widget.gameId)) {
+      setState(() => _loading = true);
+      _init();
+    }
   }
 
   @override
