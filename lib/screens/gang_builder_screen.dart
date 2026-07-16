@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/profile.dart';
+import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
@@ -11,10 +12,12 @@ import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
 import '../widgets/faction_rule.dart';
 import '../widgets/glass_panel.dart';
+import '../widgets/guarded_action.dart';
 import '../widgets/points_bar.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
+import '../widgets/status_views.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
@@ -41,8 +44,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   List<api.Spell> _spells = [];
   bool _loading = true;
   bool _busy = false;
+  String? _error;
   _Tab _tab = _Tab.list;
-  final _pageController = PageController();
+  // Created lazily on first build (after loading), so if the user tapped a tab while the list was
+  // still loading, the PageView opens on that tab instead of desyncing from `_tab` (A-10).
+  late final _pageController = PageController(initialPage: _tab.index);
   _HireSort _hireSort = _HireSort.role;
   bool _hireSortAsc = true;
   final _hireScroll = ScrollController();
@@ -149,7 +155,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   /// page's onPageChanged is what actually updates [_tab]. Before the list loads the PageView isn't
   /// mounted, so fall back to setting the tab directly.
   void _selectTab(_Tab tab) {
-    if (_pageController.hasClients) {
+    // While loading, the PageView isn't mounted yet — just record the tab. The PageController is
+    // created with `initialPage: _tab.index`, so when the list finishes loading the PageView opens
+    // on this tab rather than snapping to page 0 with `_tab` left out of sync (A-10). Guarding on
+    // `_loading` also keeps us from touching the lazy controller before that first build.
+    if (!_loading && _pageController.hasClients) {
       _pageController.animateToPage(
         tab.index,
         duration: const Duration(milliseconds: 250),
@@ -251,20 +261,33 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   }
 
   Future<void> _loadData() async {
-    final results = await Future.wait([
-      ProfileService().search('', factions: {_gang.faction, 'gifted'}),
-      EquipmentService().getAll(),
-      GangService().loadSpells(),
-    ]);
-    if (!mounted) return;
     setState(() {
-      _profiles = results[0] as List<api.Profile>;
-      _equipment = results[1] as List<api.Equipment>;
-      _spells = results[2] as List<api.Spell>;
-      _loading = false;
-      _recomputeVisibleProfiles();
-      _recomputeVisibleEquipment();
+      _loading = true;
+      _error = null;
     });
+    try {
+      final results = await Future.wait([
+        ProfileService().search('', factions: {_gang.faction, 'gifted'}),
+        EquipmentService().getAll(),
+        GangService().loadSpells(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _profiles = results[0] as List<api.Profile>;
+        _equipment = results[1] as List<api.Equipment>;
+        _spells = results[2] as List<api.Spell>;
+        _loading = false;
+        _recomputeVisibleProfiles();
+        _recomputeVisibleEquipment();
+      });
+    } catch (e) {
+      // Offline / flaky network: surface a retry instead of spinning forever (C-6).
+      if (!mounted) return;
+      setState(() {
+        _error = e is ApiException ? e.message : 'Could not reach server';
+        _loading = false;
+      });
+    }
   }
 
   /// Persists an illustration switch made in the card viewer: repoints the entry at the chosen
@@ -274,11 +297,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     api.ListEntry entry,
     int cardReferenceId,
   ) async {
-    final updated = await GangService().setEntryIllustration(
-      entry.id,
-      cardReferenceId,
-    );
-    if (mounted) setState(() => _gang = updated);
+    await guard(context, () async {
+      final updated = await GangService().setEntryIllustration(
+        entry.id,
+        cardReferenceId,
+      );
+      if (mounted) setState(() => _gang = updated);
+    });
   }
 
   Future<void> _editSpells(api.ListEntry entry) async {
@@ -289,7 +314,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     );
     if (result == null || !mounted) return;
     setState(() => _busy = true);
-    try {
+    await guard(context, () async {
       final updated = await GangService().setEntrySpells(
         entry.id,
         result.discipline,
@@ -297,9 +322,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       );
       if (!mounted) return;
       setState(() => _gang = updated);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    });
+    if (mounted) setState(() => _busy = false);
   }
 
   int _entryCount(api.Profile p) => _gang.entries
@@ -329,7 +353,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     final refId = p.cardReferenceId;
     if (refId == null) return; // no printed card → nothing to hire
     setState(() => _busy = true);
-    try {
+    await guard(context, () async {
       final updated = await GangService().addEntry(
         _gang.id,
         refId,
@@ -337,46 +361,45 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       );
       if (!mounted) return;
       setState(() => _gang = updated);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    });
+    if (mounted) setState(() => _busy = false);
   }
 
   Future<void> _addEquipment(api.Equipment e) async {
     if (_busy) return;
     setState(() => _busy = true);
-    try {
+    await guard(context, () async {
       final updated = await GangService().addEntry(_gang.id, e.id, 'Equipment');
       if (!mounted) return;
       setState(() => _gang = updated);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    });
+    if (mounted) setState(() => _busy = false);
   }
 
   Future<void> _remove(api.Profile p) async {
     final entry = _entryFor(p);
     if (entry == null || _busy) return;
     setState(() => _busy = true);
-    try {
+    await guard(context, () async {
       final updated = await GangService().removeEntry(entry.id);
       if (!mounted) return;
       setState(() => _gang = updated);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    });
+    if (mounted) setState(() => _busy = false);
   }
 
-  Future<void> _removeEntry(api.ListEntry entry) async {
-    if (_busy) return;
+  /// Removes a list entry, returning whether it succeeded so the tile can reverse its exit
+  /// animation on failure instead of vanishing into a ghost that still counts toward ducats (A-7).
+  Future<bool> _removeEntry(api.ListEntry entry) async {
+    if (_busy) return false;
     setState(() => _busy = true);
-    try {
+    final ok = await guard(context, () async {
       final updated = await GangService().removeEntry(entry.id);
       if (!mounted) return;
       setState(() => _gang = updated);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    });
+    if (mounted) setState(() => _busy = false);
+    return ok;
   }
 
   Future<void> _reorderEntry(int oldIndex, int newIndex) async {
@@ -384,6 +407,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     if (newIndex > oldIndex) newIndex--;
     if (newIndex == oldIndex) return;
     final entry = _gang.entries[oldIndex];
+    final previous = _gang; // snapshot so a failed reorder can be rolled back (A-6)
     final reordered = List<api.ListEntry>.from(_gang.entries)
       ..removeAt(oldIndex)
       ..insert(newIndex, entry);
@@ -391,13 +415,15 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       _gang = _gang.rebuild((b) => b..entries.replace(reordered));
       _busy = true;
     });
-    try {
+    final ok = await guard(context, () async {
       final updated = await GangService().reorderEntry(entry.id, newIndex + 1);
       if (!mounted) return;
       setState(() => _gang = updated);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    });
+    // The reorder was applied optimistically; if the server rejected it, restore the prior order
+    // so the UI doesn't keep showing an order the backend never accepted.
+    if (!ok && mounted) setState(() => _gang = previous);
+    if (mounted) setState(() => _busy = false);
   }
 
   @override
@@ -573,6 +599,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       return Center(
         child: CircularProgressIndicator(color: context.accentColor),
       );
+    }
+    if (_error != null) {
+      return ErrorRetryView(message: _error!, onRetry: _loadData);
     }
     // A PageView so List and Hire can be swiped between, not just tapped. onPageChanged is the single
     // source of truth for [_tab] — both a swipe and a tab-bar tap (which animates the page) land
