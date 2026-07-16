@@ -2,7 +2,9 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../services/api_exception.dart';
 import 'app_input.dart';
+import 'app_toast.dart';
 import 'bottom_sheet_surface.dart';
 
 // Faction display order for the create-gang picker (distinct from AppPalette.factionColors' order).
@@ -50,15 +52,27 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
   }
 
   Future<void> _submit() async {
+    // Guard re-entry: the button is disabled while saving, but the name field's onSubmitted (Enter)
+    // isn't — without this, hitting Enter twice created two gangs on the server (A-8).
+    if (_saving) return;
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
-    final points = int.tryParse(_pointsController.text.trim()) ?? 100;
+    final points = int.tryParse(_pointsController.text.trim()) ?? widget.initialPoints;
     setState(() => _saving = true);
     try {
       final gang = await widget.onCreate(name, _selectedFaction, points);
       if (mounted) Navigator.of(context).pop(gang);
+    } on ApiException catch (e) {
+      // Was silently swallowed, leaving the user staring at a stopped spinner with no idea why.
+      if (mounted) {
+        setState(() => _saving = false);
+        showAppToast(context, e.message);
+      }
     } catch (_) {
-      if (mounted) setState(() => _saving = false);
+      if (mounted) {
+        setState(() => _saving = false);
+        showAppToast(context, 'Something went wrong. Please try again.');
+      }
     }
   }
 

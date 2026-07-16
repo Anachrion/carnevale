@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +10,7 @@ import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/create_gang_sheet.dart';
 import '../widgets/gang_tile.dart';
+import '../widgets/guarded_action.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/status_views.dart';
 import 'account_screen.dart';
@@ -81,8 +84,10 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 
   Future<void> _deleteGang(int id) async {
-    await _service.delete(id);
-    await _load();
+    // Was fire-and-forget with no error handling: an offline delete failed silently, leaving the
+    // gang on screen with no explanation (A-9). Guard it, and only reload when it actually deleted.
+    final ok = await guard(context, () => _service.delete(id));
+    if (ok && mounted) await _load();
   }
 
   void _showCreateDialog() async {
@@ -278,7 +283,7 @@ class _GangsScreenState extends State<GangsScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _deleteGang(gang.id);
+              unawaited(_deleteGang(gang.id));
             },
             child: Text('Delete', style: TextStyle(color: context.dangerColor)),
           ),

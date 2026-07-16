@@ -1,5 +1,6 @@
 import 'package:built_value/serializer.dart';
 import 'package:carnevale/models/profile_query.dart';
+import 'package:carnevale/services/api_client.dart';
 import 'package:carnevale/services/profile_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +17,9 @@ void main() {
       profiles.map((p) => p.name).toList()..sort();
 
   setUpAll(() async {
+    // installFakeApi seeds an in-memory prefs store, so loadAll() can persist the catalog (and the
+    // offline-fallback test can later restore it).
+    TestWidgetsFlutterBinding.ensureInitialized();
     final adapter = installFakeApi();
     adapter.stub(
       'GET',
@@ -233,6 +237,28 @@ void main() {
 
     test('an empty query offers nothing', () {
       expect(service.suggest('   '), isEmpty);
+    });
+  });
+
+  // Declared last: these mutate the shared singleton's cache, and the groups above rely on the
+  // catalog loaded in setUpAll.
+  group('offline fallback and reset', () {
+    test('reset() empties the in-memory catalog', () {
+      service.reset();
+      expect(service.matching(const ProfileQuery()), isEmpty);
+    });
+
+    test('falls back to the persisted catalog when the fetch fails (C-6)', () async {
+      // setUpAll loaded and persisted the catalog. Simulate a cold, offline start: swap in a bare
+      // adapter (no /profiles stub -> 404) so the fetch fails. Set it directly rather than via
+      // installFakeApi(), which would reset the mock prefs and wipe the persisted catalog.
+      service.reset();
+      ApiClient().dio.httpClientAdapter = FakeApiAdapter();
+
+      final restored = await service.loadAll();
+
+      expect(restored.length, 4);
+      expect(namesOf(restored), containsAll(['Bombardier', 'Capodecina']));
     });
   });
 }

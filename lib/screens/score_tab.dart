@@ -228,7 +228,7 @@ class ScoreTab extends StatelessWidget {
             ),
           ),
           Text(
-            score == 1 ? 'VP' : 'VP',
+            'VP',
             style: TextStyle(fontSize: 11, color: context.subtleTextColor),
           ),
         ],

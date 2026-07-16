@@ -45,7 +45,12 @@ dependencies:
   flutter_secure_storage: ^10.3.1
   app_links: ^6.4.1
   web_socket_channel: ^3.0.1
+  # Used directly by ActionCableClient's injectable channel-factory seam (StreamChannel type);
+  # also a transitive dep of web_socket_channel, so this just makes the direct import explicit.
+  stream_channel: ^2.1.4
   pdfrx: ^2.4.7
+  # Detects Wi-Fi vs cellular for the "download card images on Wi-Fi only" setting.
+  connectivity_plus: ^7.3.0
 
 dev_dependencies:
   flutter_test:
