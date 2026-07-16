@@ -245,7 +245,12 @@ class CardImageService {
       final bytes = res.data;
       if (bytes == null) return false;
       final file = File('${dir.path}/$filename');
-      await file.writeAsBytes(bytes);
+      // Write beside the real path and rename on success. A download killed halfway (app
+      // backgrounded, signal lost) must not leave a truncated image where the next launch would
+      // treat it as a complete face — rename is atomic, a half-written .part never gets promoted.
+      final temp = File('${file.path}.part');
+      await temp.writeAsBytes(bytes);
+      await temp.rename(file.path);
       // The on-disk path is our [FileImage] cache key and carries no version, so overwriting the
       // bytes leaves Flutter's in-memory ImageCache holding the OLD decoded face. Evict it so the
       // new version shows without an app restart.

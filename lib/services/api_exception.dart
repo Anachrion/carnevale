@@ -21,7 +21,10 @@ class ApiException implements Exception {
       final message = (data['errors'] as Map).entries
           .map((entry) {
             final field = entry.key.toString();
-            final messages = (entry.value as List)
+            // Values are usually arrays of strings, but a single string (or any scalar) shows up
+            // too; coerce so an unexpected shape can't turn the error path into a TypeError crash.
+            final value = entry.value;
+            final messages = (value is List ? value : [value])
                 .map((m) => m.toString())
                 .join(', ');
             return field == 'base' ? messages : '$field $messages';
