@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/profile.dart';
+import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/game_service.dart';
 import '../services/profile_service.dart';
@@ -16,6 +17,7 @@ import '../widgets/faction_rule.dart';
 import '../widgets/points_bar.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/spell_chips.dart';
+import '../widgets/status_views.dart';
 import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
@@ -402,11 +404,12 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     if (_failed) {
-      return Center(
-        child: Text(
-          'Could not load this gang.',
-          style: TextStyle(color: context.subtleTextColor),
-        ),
+      return ErrorRetryView(
+        message: 'Could not load this gang.',
+        onRetry: () {
+          setState(() => _failed = false);
+          _load();
+        },
       );
     }
     final data = _data;

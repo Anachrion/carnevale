@@ -227,7 +227,10 @@ class AuthService extends ChangeNotifier {
             ).toBuilder(),
         ),
       );
-      final user = res.data!.user;
+      final user = res.data?.user;
+      if (user == null) {
+        throw AuthException('The server returned no account details.');
+      }
       final authUser = AuthUser(
         id: user.id,
         email: user.email,
