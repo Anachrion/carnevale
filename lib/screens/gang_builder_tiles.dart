@@ -60,7 +60,9 @@ class _EntryTile extends StatefulWidget {
   final Color factionColor;
   final String? role;
   final bool busy;
-  final VoidCallback onRemove;
+  // Returns whether the removal actually happened, so the exit animation can be reversed when the
+  // server rejects it (offline / race) instead of leaving an invisible entry behind (A-7).
+  final Future<bool> Function() onRemove;
   final VoidCallback? onTap;
   // Non-null only for Mage models; opens the spell picker for this model (rulebook p24).
   final VoidCallback? onEditSpells;
@@ -109,8 +111,14 @@ class _EntryTileState extends State<_EntryTile>
     super.dispose();
   }
 
-  void _handleRemove() {
-    _ctrl.forward().then((_) => widget.onRemove());
+  Future<void> _handleRemove() async {
+    // Don't animate a removal that can't proceed (another mutation is in flight).
+    if (widget.busy) return;
+    await _ctrl.forward();
+    final removed = await widget.onRemove();
+    // On success the parent drops this entry from the gang and the tile is gone; on failure the
+    // entry is still there, so slide it back in and let the toast (raised by the parent) explain.
+    if (!removed && mounted) _ctrl.reverse();
   }
 
   @override
