@@ -4,8 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
+import '../services/ability_service.dart';
 import '../services/auth_service.dart';
 import '../services/card_image_service.dart';
+import '../services/equipment_service.dart';
+import '../services/profile_service.dart';
 import '../services/settings_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
@@ -122,6 +125,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
+                    _SettingRow(
+                      label: 'Download',
+                      child: _OptionPicker<CardDownloadMode>(
+                        value: settingsService.cardDownloadMode,
+                        options: const [
+                          CardDownloadMode.onDemand,
+                          CardDownloadMode.always,
+                          CardDownloadMode.wifiOnly,
+                        ],
+                        labelBuilder: _cardDownloadModeLabel,
+                        onChanged: settingsService.setCardDownloadMode,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     const _CardImageSync(),
                   ],
                   const SizedBox(height: 28),
@@ -228,6 +245,21 @@ String _cardFlipStyleLabel(CardFlipStyle s) => switch (s) {
   CardFlipStyle.flip => 'Flip',
   CardFlipStyle.swipe => 'Swipe',
 };
+
+String _cardDownloadModeLabel(CardDownloadMode m) => switch (m) {
+  CardDownloadMode.onDemand => 'On demand',
+  CardDownloadMode.always => 'Always',
+  CardDownloadMode.wifiOnly => 'Wi-Fi only',
+};
+
+/// " · ~12 MB" style suffix for a download-size hint, or "" when the manifest reported no sizes.
+String _formatBytes(int bytes) {
+  if (bytes <= 0) return '';
+  final mb = bytes / (1024 * 1024);
+  if (mb >= 1) return ' · ~${mb.toStringAsFixed(0)} MB';
+  final kb = bytes / 1024;
+  return ' · ~${kb.toStringAsFixed(0)} KB';
+}
 
 /// A tap-to-open dropdown that shows the current [value] and lets the user pick another
 /// [options] entry, styled to match the settings surface.
@@ -450,6 +482,11 @@ class _CardImageSyncState extends State<_CardImageSync> {
     if (_status.value != null) return; // already syncing
     _sawSync = true;
     _pendingTotal = 0;
+    // Re-syncing means "get me the latest": also drop the in-memory catalog caches so freshly
+    // published stats and illustrations reload on the next screen open, not just the images (S-3).
+    ProfileService().reset();
+    AbilityService().reset();
+    EquipmentService().reset();
     // Fire-and-forget: the service owns the work and publishes progress on syncStatus. `refresh`
     // re-pulls the manifest first; only missing/outdated faces download, so this resumes rather
     // than restarting an interrupted sync.
@@ -493,9 +530,15 @@ class _CardImageSyncState extends State<_CardImageSync> {
                   );
                 });
               }
+              // Show the download cost up front so a sync on a metered connection is a choice, not
+              // a surprise (S-5). Zero pending = nothing to fetch; the label just reads "Sync Cards".
+              final pending = CardImageService().pendingDownload();
+              final label = pending.count == 0
+                  ? 'Sync Cards'
+                  : 'Sync Cards (${pending.count}${_formatBytes(pending.bytes)})';
               return _AccountButton(
                 icon: Icons.cloud_download_outlined,
-                label: 'Sync Cards',
+                label: label,
                 color: AppPalette.toggleBlue,
                 onPressed: _start,
               );
