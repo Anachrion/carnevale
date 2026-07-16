@@ -24,7 +24,7 @@ Findings that have been addressed are marked **✅ Fixed** with the commit and t
 The codebases are well-crafted on the happy path: consistent conventions, unusually good comments, solid backend test coverage, careful REST authorization, and genuinely well-designed subsystems (cable tickets, card image versioning, catalog snapshot). The serious findings cluster into four themes:
 
 1. **Backend concurrency** — a repeated *check in-memory state → mutate → maybe transition* pattern without locks. Two players acting simultaneously (the normal case in a two-player lobby) can double-deal agenda hands, create 3-player games, destroy a list mid-game, or lose the game's completed status. One shared `with_lock` helper eliminates the class.
-2. **App connection resilience** — the app assumes a reliable network. No Dio timeouts anywhere, no dead-socket detection, no app-lifecycle handling, REST mutation responses discarded in favour of websocket echoes, and an infinite 401 loop on token expiry.
+2. **App connection resilience** *(✅ addressed in Step 3)* — the app assumes a reliable network. No Dio timeouts anywhere, no dead-socket detection, no app-lifecycle handling, REST mutation responses discarded in favour of websocket echoes, and an infinite 401 loop on token expiry.
 3. **Silent error handling in the app UI** — the gang builder and list screens perform mutations with `try/finally` and no `catch`: offline failures produce ghost entries, duplicate gangs, permanent spinners, and a back-button trap.
 4. **Card sync coherence** — catalog JSON and card images travel two independent pipelines with no shared version signal. Stale-JSON-with-fresh-images (and the reverse) is reachable in at least five distinct ways, plus a ~600 MB unconsented first-launch download on whatever network is available.
 
@@ -68,7 +68,7 @@ Seeds create `admin@dev.local` / `password123` with `admin: true` (the `.update!
 
 **Fix applied:** the transition moved onto the model as `Encounter::Game#advance_to_agenda_draw_if_ready!`, wrapped in `with_lock` and re-checking the reloaded `gang_selection?`, so a stale second request bails. `AgendaDeck#draw_initial` is now idempotent too (skips a player who already holds an `origin: "initial"` event) as a second line of defence. Covered by a deterministic stale-read test in `spec/models/encounter/game_spec.rb` (a second instance holding the stale status deals nothing more) plus a direct `draw_initial` idempotency test in `agenda_deck_spec.rb`.
 
-### C-4. The app cannot detect a dead websocket
+### C-4. The app cannot detect a dead websocket — ✅ Fixed (`carnevale-anachrion@6e1d313`, `@0b13309`)
 
 **App — `lib/services/action_cable_client.dart:75-78, 100-104`; no `WidgetsBindingObserver` anywhere in `lib/`**
 
@@ -76,13 +76,15 @@ ActionCable `ping` frames (sent by the server every 3 s precisely for liveness d
 
 **Failure scenario:** the app is backgrounded, the phone sleeps, or the network switches wifi→cellular; the TCP connection dies without a FIN (NAT timeout / suspended socket). The game screen silently freezes: the opponent's actions stop arriving, and — because of A-2 below — the player's *own* actions stop rendering too, with no indication anything is wrong.
 
-**Suggested fix:** reset a ~6-10 s watchdog timer on every incoming frame (pings included) and force close + reconnect when it fires; additionally observe `AppLifecycleState.resumed` in `GameService`/`GameSessionScreen` and trigger a reconnect + resync.
+**Fix applied:** `ActionCableClient` now arms a 10 s liveness watchdog re-armed on *every* incoming frame (pings included); if it fires, the socket is torn down and reconnected. `GameSessionScreen` became a `WidgetsBindingObserver` and calls `GameService.resumeConnection()` → `ActionCableClient.reconnectNow()` on `AppLifecycleState.resumed`, so a socket that died while suspended reconnects immediately rather than waiting out the watchdog; the resubscribe transmits a fresh snapshot. Covered by `test/services/action_cable_client_test.dart` (watchdog fires with no frames; a ping stream keeps it alive; `reconnectNow` opens a fresh connection) — the client is now unit-testable via an injected channel factory.
 
-### C-5. `GameService.watch()` has no cancellation guard
+### C-5. `GameService.watch()` has no cancellation guard — ✅ Fixed (`carnevale-anachrion@64d671d`)
 
 **App — `lib/services/game_service.dart:311-329`**
 
 `watch()` awaits `getGame()` and then unconditionally installs state and a cable, with no check that it is still the active watch.
+
+**Fix applied:** added a `_watchGeneration` token bumped by every `watch()`/`stopWatching()`; `watch()` captures its generation and, after each await, bails (disposing the freshly-built cable) if superseded — killing both the leak (scenario A) and the wrong-game install (scenario B). `_onChannelMessage` also drops any broadcast whose `game.id != _watchedGameId`, so a stale cable that briefly outlives its watch can't clobber `currentGame`. Covered by two tests in `test/services/game_service_test.dart` (a superseding `watch` wins; a broadcast for another game is ignored while one for the watched game still applies). The fine-grained await-interleave of scenario B isn't reproduced deterministically (timing-dependent) — the id-guard test covers its observable effect.
 
 **Failure scenario A (leak):** open a game on a slow network → `GameSessionScreen._init` calls `watch(5)`, which is awaiting `getGame(5)` → the user taps back → `dispose()` calls `stopWatching()`, a no-op since `_watchedGameId`/`_cable` are still null → `getGame(5)` resolves and `watch` proceeds: sets `currentGame`, creates an `ActionCableClient`, subscribes. Nothing ever disposes this cable — it holds a live websocket and a 3-second reconnect loop (minting a cable ticket per attempt) for the rest of the process lifetime.
 
@@ -90,7 +92,7 @@ ActionCable `ping` frames (sent by the server every 3 s precisely for liveness d
 
 **Suggested fix:** give each `watch` a generation token (or check `identical(_cable, myCable)` / `_watchedGameId == gameId`) after every await, bail out and dispose the freshly created cable if superseded, and make `stopWatching` invalidate the generation so a disposed screen's in-flight `watch` aborts.
 
-### C-6. Offline or failed loads leave core screens on infinite spinners; no network timeouts anywhere
+### C-6. Offline or failed loads leave core screens on infinite spinners; no network timeouts anywhere — ◑ Partially fixed (`carnevale-anachrion@bc37d73`)
 
 **App — `lib/screens/cards_screen.dart:85-90`, `lib/screens/gang_builder_screen.dart:252-267`, `lib/services/api_client.dart:29-34`, `lib/services/rules_service.dart:50`, `lib/main.dart:25`**
 
@@ -98,7 +100,7 @@ Neither Dio instance configures `connectTimeout`/`receiveTimeout`. `main()` awai
 
 **Failure scenario:** on a captive-portal or black-hole network at launch, the manifest request hangs indefinitely and the app never renders its first frame. Starting in airplane mode, the Cards screen and gang builder show spinners forever with unhandled exceptions and no retry UI — even though every card image is already on disk. On flaky networks, every REST call and the rules PDF download can spin indefinitely. The `ProfileService` doc comment ("keeps search working offline") is only true within a session that already fetched once.
 
-**Suggested fix:** set timeouts (e.g. 10 s connect / 30 s receive) on both Dio `BaseOptions`; don't block `runApp` on the manifest; wrap the load methods in try/catch with an `_error` state and the existing `ErrorRetryView`; persist the last-good catalog JSON keyed by a version, mirroring what `CardImageService` already does for images.
+**This finding was split across three steps.** Done in Step 3 (`bc37d73`): `connectTimeout: 10s` / `receiveTimeout: 30s` on both Dio instances (`api_client.dart`, and the rules `_downloader`), so a black-hole network surfaces as a timeout rather than an indefinite hang; and `main()` no longer awaits the card manifest before `runApp` (init→sync is fired unawaited), so a bad network at launch can't hang the splash. **Still open:** the Cards/gang-builder spinner-forever + retry UI moves to **Step 4** (the error-handling bundle, with the shared `guard()` helper); persisting the last-good catalog JSON for a true offline start moves to **Step 5** (card sync).
 
 ---
 
@@ -309,25 +311,31 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 (See also C-4 and C-5.)
 
-### A-1. Major — REST mutation responses are discarded; the UI updates only via websocket echo
+### A-1. Major — REST mutation responses are discarded; the UI updates only via websocket echo — ✅ Fixed (`carnevale-anachrion@64d671d`)
 
-`lib/services/game_service.dart:96-198`, `lib/screens/game_session_screen.dart:126-137, 852-864`. Every mutation returns the fresh `api.Game`, but `_run(() => _service.advanceTurn(game.id))` throws it away and `currentGame` is only ever set by broadcasts. With the socket dead or lagging (C-4), a player scores an agenda or advances the turn — the server persists it, but the screen doesn't change; a retry then 422s ("Agenda not in hand") → generic "Something went wrong" toast while the score still looks un-scored. Double-tapping "advance turn" with a dead socket advances it twice. The `GameService` class doc ("every update, REST or broadcast, fully replaces it") describes behaviour the code does not implement. **Fix:** in every `Game`-returning method, `currentGame = res.data!; notifyListeners()` (guarded by `_watchedGameId == gameId`) — a one-line-per-method resilience win that also removes the HTTP-200→broadcast latency gap.
+`lib/services/game_service.dart:96-198`, `lib/screens/game_session_screen.dart:126-137, 852-864`. Every mutation returns the fresh `api.Game`, but `_run(() => _service.advanceTurn(game.id))` throws it away and `currentGame` is only ever set by broadcasts. With the socket dead or lagging (C-4), a player scores an agenda or advances the turn — the server persists it, but the screen doesn't change; a retry then 422s ("Agenda not in hand") → generic "Something went wrong" toast while the score still looks un-scored. Double-tapping "advance turn" with a dead socket advances it twice. The `GameService` class doc ("every update, REST or broadcast, fully replaces it") describes behaviour the code does not implement.
 
-### A-2. Major — token expiry mid-session: endless 401 loop plus a crash
+**Fix applied:** added `_applyGame(gameId, game)` which sets `currentGame` + `notifyListeners()` when `_watchedGameId == gameId`, and routed all ten `Game`-returning mutations (`pickRole`, `selectGang`, `deselectGang`, `confirmAgendas`, `scoreAgenda`, `discardAgenda`, `advanceTurn`, `rewindTurn`, `finishGame`, `unfinishGame`) through it. The acting player's UI now updates from the HTTP response, independent of the socket. Covered by the A-1 test in `test/services/game_service_test.dart`.
 
-`lib/services/api_client.dart:45-49`, `lib/services/action_cable_client.dart:38-43, 100-104`, `lib/screens/game_session_screen.dart:54`, `lib/services/auth_service.dart:62`. Token expires during a live game → the next reconnect mints a ticket → `POST /cable_tickets` 401s → the interceptor calls `AuthService._clear()` → the cable client catches and schedules another attempt in 3 s → forever (no backoff, no give-up, one sign-out notification per 3 s). Meanwhile `GameSessionScreen._me` does `authService.currentUser!.id` while `currentGame` is still set → null-assert throws during build → red error screen. `isTokenExpired` is only consulted at cold start. **Fix:** stop reconnecting after an auth failure and surface it (so `GameService` can `stopWatching` and the UI routes to login); make the session screen react to `AuthService` sign-out.
+### A-2. Major — token expiry mid-session: endless 401 loop plus a crash — ✅ Fixed (`carnevale-anachrion@6e1d313`, `@64d671d`, `@0b13309`)
 
-### A-3. Minor — reconnect resync can apply an older snapshot over a newer one
+`lib/services/api_client.dart:45-49`, `lib/services/action_cable_client.dart:38-43, 100-104`, `lib/screens/game_session_screen.dart:54`, `lib/services/auth_service.dart:62`. Token expires during a live game → the next reconnect mints a ticket → `POST /cable_tickets` 401s → the interceptor calls `AuthService._clear()` → the cable client catches and schedules another attempt in 3 s → forever (no backoff, no give-up, one sign-out notification per 3 s). Meanwhile `GameSessionScreen._me` does `authService.currentUser!.id` while `currentGame` is still set → null-assert throws during build → red error screen. `isTokenExpired` is only consulted at cold start.
 
-`lib/services/game_service.dart:331-340`. On `welcome` after reconnect, three sources race: the REST `_resyncSnapshot`, the channel's transmit-on-subscribe, and live broadcasts. A slow REST response fetched before an opponent's action can be applied after that action's broadcast, briefly reverting the screen (e.g. a scored agenda un-scores). Snapshots carry no sequence number, and with a multi-process backend two near-simultaneous broadcasts have no ordering guarantee either. **Fix:** include `updated_at`/a monotonic sequence in the `game_state` payload and apply-only-if-newer in `_applySnapshot` — this single mechanism also hardens A-1 and C-5.
+**Fix applied:** `ActionCableClient` detects a 401 from the ticket mint and fires `onAuthFailure` **without** rescheduling (killing the loop); `GameService` wires that to `stopWatching()` + an `onSessionExpired` callback; `GameSessionScreen` listens and rebuilds. The `_me`/`_opponent` getters are now null-safe on `currentUser`, and the body shows a "session expired, please log in" view instead of null-asserting. Covered by the 401-stops-reconnect test in `action_cable_client_test.dart`; the session-screen expired-state rendering is verified by analyze + review (a widget test would need to simulate a mid-session cable 401, which the harness can't easily drive).
 
-### A-4. Minor — cable client protocol gaps
+### A-3. Minor — reconnect resync can apply an older snapshot over a newer one — ◑ Partially fixed (`carnevale-anachrion@6e1d313`)
+
+`lib/services/game_service.dart:331-340`. On `welcome` after reconnect, three sources race: the REST `_resyncSnapshot`, the channel's transmit-on-subscribe, and live broadcasts. A slow REST response fetched before an opponent's action can be applied after that action's broadcast, briefly reverting the screen (e.g. a scored agenda un-scores). Snapshots carry no sequence number, and with a multi-process backend two near-simultaneous broadcasts have no ordering guarantee either.
+
+**Fix applied (partial):** the redundant REST `_resyncSnapshot` on reconnect was removed — reconnection now relies solely on the channel's resubscribe-transmit (the freshest snapshot), eliminating one of the three racing sources with no schema change. **Still open:** the true out-of-order guard (two broadcasts racing from a multi-process backend) needs a monotonic version/`updated_at` in the `game_state` payload, which requires a serialized field + a client regen — deferred to **Step 6**, which already touches the OpenAPI spec and regeneration.
+
+### A-4. Minor — cable client protocol gaps — ◑ Partially fixed (`carnevale-anachrion@6e1d313`)
 
 `lib/services/action_cable_client.dart`:
 
-- `:89-91` — `reject_subscription` is silently swallowed: a rejected subscription looks like a working one (REST snapshot shown, no live updates, no error, `onReconnect` never fires). A server `disconnect` frame with `reconnect: false` is also ignored. Surface both via callbacks.
-- `:100-104` — fixed 3 s reconnect with no backoff/jitter: with the backend down, every open session hammers the ticket endpoint + WS handshake every 3 s indefinitely (battery; thundering herd on recovery). Use capped exponential backoff with jitter.
-- `:73-74` — `_handleFrame` can throw out of `onData` (`raw as String` on a binary frame, `jsonDecode` on malformed data) as an unhandled zone error. Wrap in try/catch.
+- `:100-104` — ✅ fixed-3s reconnect replaced with capped exponential backoff + jitter (1→2→4…→30 s, plus 0-1 s jitter), reset to 0 on a live `welcome`. Covered by the transient-failure reconnect test.
+- `:73-74` — ✅ `_handleFrame` now wraps the decode in try/catch, so a binary/malformed frame is ignored instead of escaping as an unhandled zone error.
+- `:89-91` — **still open:** `reject_subscription` / `disconnect(reconnect:false)` are still swallowed rather than surfaced via a callback. Low impact (a rejected subscription would mean the player isn't in the game, which the REST layer already guards) — folded into the **Step 7** backlog.
 
 ### A-5. Minor — `/join` deep link while a session is open kills the screen underneath
 
@@ -467,7 +475,7 @@ Backend coverage is strong where it exists (games: 66 request examples; lists, l
 
 1. **Security criticals** (small, urgent): ~~C-1 seeds/entrypoint guard~~ (deferred — no CI yet); C-2 `entry_type` inclusion validation ✅; B-18 (render-token scope) ✅; B-19 (API key on auth endpoints) ✅.
 2. **Backend race class** ✅: locked lifecycle methods on `Encounter::Game`/`Encounter::Player` + idempotent `draw_initial`, per section 2 (fixed C-3, B-1, B-2, B-3, B-4, B-6). `rescue_from RecordInvalid`/`ParameterMissing` (B-17) ✅ done alongside.
-3. **App connection resilience bundle**: Dio timeouts + non-blocking startup (C-6), ping watchdog + lifecycle resync (C-4), apply REST responses to `currentGame` (A-1), `watch()` generation guard (C-5), stop reconnecting on auth failure (A-2). Consider the snapshot sequence number (A-3) here — it hardens everything above.
+3. **App connection resilience bundle** ✅: Dio timeouts + non-blocking startup (C-6, partial), ping watchdog + lifecycle resync (C-4), apply REST responses to `currentGame` (A-1), `watch()` generation guard (C-5), stop reconnecting on auth failure (A-2), backoff+jitter and frame-decode guard (A-4, partial), dropped the racy REST resync (A-3, partial). Snapshot sequence number (A-3 remainder) deferred to Step 6 (needs a serialized field + regen).
 4. **App error-handling bundle**: shared `guard()` helper across builder/list screens; surface `ApiException.message` in `_run`; fix the remove-animation ordering (A-7), double-submit (A-8), and back-button trap (A-10).
 5. **Card sync coherence**: profiles ETag (S-1), JSON cache invalidation on Sync Cards + a catalog version signal (S-3), Wi-Fi/consent gate on the first-launch bulk download (S-5), web manifest retry (S-4), render-drift signal (S-2).
 6. **Contract & data integrity**: OpenAPI spec audit (B-14/15/16), equipment validations (B-27), missing indexes/FKs (B-26), catalog-edit validity refresh (B-24).
