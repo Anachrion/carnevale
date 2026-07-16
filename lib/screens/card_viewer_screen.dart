@@ -359,10 +359,20 @@ class _CardViewerScreenState extends State<CardViewerScreen>
 
 /// Bottom sheet listing the Character and Weapon abilities on a profile, each with its rulebook
 /// description resolved from the glossary (rulebook p44-48).
-class _AbilitiesSheet extends StatelessWidget {
+class _AbilitiesSheet extends StatefulWidget {
   const _AbilitiesSheet({required this.profile});
 
   final api.Profile profile;
+
+  @override
+  State<_AbilitiesSheet> createState() => _AbilitiesSheetState();
+}
+
+class _AbilitiesSheetState extends State<_AbilitiesSheet> {
+  // Resolved once, not per drag frame: the DraggableScrollableSheet's builder re-runs on every
+  // drag, so a future created inline in the FutureBuilder would reset it to a spinner each frame —
+  // and re-hit the network every frame if the first load failed (A-11b).
+  late final Future<void> _abilitiesFuture = AbilityService().load();
 
   @override
   Widget build(BuildContext context) {
@@ -378,7 +388,7 @@ class _AbilitiesSheet extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: FutureBuilder<void>(
-            future: AbilityService().load(),
+            future: _abilitiesFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return SizedBox(
@@ -403,8 +413,8 @@ class _AbilitiesSheet extends StatelessWidget {
               }
 
               final service = AbilityService();
-              final character = service.characterAbilities(profile);
-              final weapon = service.weaponAbilities(profile);
+              final character = service.characterAbilities(widget.profile);
+              final weapon = service.weaponAbilities(widget.profile);
 
               return ListView(
                 controller: scrollController,
@@ -422,7 +432,7 @@ class _AbilitiesSheet extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    profile.name,
+                    widget.profile.name,
                     style: GoogleFonts.cinzel(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
