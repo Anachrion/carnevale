@@ -5,6 +5,7 @@ import '../app_colors.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart';
+import '../services/api_exception.dart';
 import '../services/game_service.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
@@ -160,8 +161,14 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     try {
       await action();
     } catch (e) {
-      if (mounted)
-        showAppToast(context, 'Something went wrong. Please try again.');
+      // Surface the backend's actual message ("Agenda not in hand", "Gangs can no longer be
+      // changed", …) rather than a blanket "something went wrong", which hid why an action failed.
+      if (mounted) {
+        showAppToast(
+          context,
+          e is ApiException ? e.message : 'Something went wrong. Please try again.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
