@@ -34,7 +34,7 @@ Two standalone security criticals: production seeding creates a backoffice admin
 
 ## 1. Critical findings
 
-### C-1. Production can boot with a publicly-known backoffice admin password — *deferred*
+### C-1. Production can boot with a publicly-known backoffice admin password — *deferred* (→ CARNEVALEB-42)
 
 **Backend — `db/seeds.rb:51-54`, `bin/docker-entrypoint:4-6`**
 
@@ -134,7 +134,7 @@ The root cause behind most findings here is one repeated pattern: **check in-mem
 
 **Fix applied:** the same `game.with_lock` in `Player#select_gang!` (B-2) serializes the destroy-then-snapshot, so two concurrent selects can't both create a snapshot. A defensive partial unique index on `lists(owner_type, owner_id)` for `Encounter::Player` was **not** added in this pass (the lock closes the race for the single-game path); noted as a possible belt-and-braces follow-up.
 
-### B-5. Major — no idempotency for retried mobile mutations
+### B-5. Major — no idempotency for retried mobile mutations — follow-up (→ CARNEVALEB-36)
 
 `app/controllers/api/v1/games_controller.rb:131-143`, `app/controllers/api/v1/list_entries_controller.rb:6-16`. A Flutter client that times out and retries `POST /games/:id/agendas/draw` draws two agendas (separate events, no client request id); the extra one can only be removed by attributing a fictitious discard. Retrying `POST /list_entries` hires the same model twice — legal for non-unique models, so silent. Two devices adding entries concurrently also race `maximum(:position) + 1` into the `(list_id, position)` unique index → unrescued `RecordNotUnique` → 500. **Fix:** accept an idempotency key on mutating game/list endpoints (unique-indexed); retry position assignment on `RecordNotUnique`.
 
@@ -237,7 +237,7 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 `app/controllers/backoffice/profiles_controller.rb:326-340`. The `accept=` attribute is client-side only; a 500 MB file or a non-image is stored by ActiveStorage, the card render draws a broken portrait, and `render_to_catalog` stamps and publishes the broken face. **Fix:** validate content type (`png/jpeg/webp`) and a byte-size cap on the model.
 
-### B-23. Minor — production config gaps
+### B-23. Minor — production config gaps — follow-up (→ CARNEVALEB-42)
 
 `config/environments/production.rb:52-53, 100-104`. `solid_cache` is in the Gemfile but `cache_store` is never set, so `Rails.cache` (and Rack::Attack counters) uses the default file store — fine single-host, silently per-host on any scale-out. `config.hosts` is unset, so Host-header protection relies entirely on kamal-proxy. **Fix:** `config.cache_store = :solid_cache_store`; configure `config.hosts`.
 
@@ -291,7 +291,7 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 **Fix applied:** `CardReference#illustration` now applies the same `|| illustrations.first` fallback the `card` render action uses, so the staleness fingerprint reflects what is actually drawn. Covered by a card_reference_spec case (a fallback-rendered card goes stale when the borrowed art is repositioned).
 
-### B-32. Minor — card rendering depends on Google Fonts at render time
+### B-32. Minor — card rendering depends on Google Fonts at render time — follow-up (→ CARNEVALEB-39)
 
 `app/views/backoffice/profiles/card.html.erb:7-9`. The fonts are fetched from fonts.googleapis.com during render and are outside `template_digest`. A production container without outbound network (or a fonts CDN hiccup) makes Grover screenshot system-font fallbacks — visibly different cards get published, and nothing ever reports them stale because the bytes are stamped as current. **Fix:** vendor Pirata One / EB Garamond into `public/card-template/` (already covered by `template_digest`), as Buckingham already is.
 
@@ -313,11 +313,11 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 **Fix applied:** `PlayerSerializer` now sorts the preloaded `agenda_events` in Ruby and resolves both the hand and the history from the preloaded `:agenda` (no per-player queries); the index preload includes `agenda_events: :agenda`; and `Gang::List.total_costs_for` computes every player's list cost in two grouped queries, wired through `GameSerializer` → `ListSummarySerializer`. Per-game queries drop from ~10 to ~2 (a residual: cost is batched *per game*, not across the whole index — noted for a later pass if it matters at scale). Guarded by the serializer's `count_queries` spec (now preloading `:agenda`).
 
-### B-35. Minor — broadcasts omit entry states, multiplying HTTP chatter
+### B-35. Minor — broadcasts omit entry states, multiplying HTTP chatter — follow-up (→ CARNEVALEB-37)
 
 `Encounter::GameBroadcaster` payload + `lib/screens/gang_viewer_screen.dart:283-286` (app side). Every `game_state` broadcast triggers a debounced full `player_list` refetch per gang tab per client — four extra HTTP requests across the table per counter toggle. Including entry states in the game payload (or a slim `entry_state` event) would cut chatter and remove the app's optimistic-update/`_mutationSeq` reconciliation complexity.
 
-### B-36. Minor — list revalidation N+1s on every write
+### B-36. Minor — list revalidation N+1s on every write — follow-up (→ CARNEVALEB-38)
 
 `app/services/list_validation_service.rb:44-46, 66-99`. `projected_items` preloads `:entry` but every `cr.profile`/`cr.cost` in the five checks queries per card reference, and `check_spell_selections` reloads all entries a second time: ~30-40 queries per entry/spell commit on a 15-model list — the hottest callback in the write path. **Fix:** batch-preload profiles; reuse `projected_items`.
 
@@ -402,7 +402,7 @@ The systemic gap: the in-game dialogs catch and toast errors; the gang builder a
 ### A-11. Minor — assorted UI findings — ◑ Partially fixed (`carnevale-anachrion@481b7e9`, `@995c5c3`)
 
 - ✅ `card_viewer_screen.dart:380-381` (A-11b) — `_AbilitiesSheet` is now a `StatefulWidget` holding the abilities future in a field, so the `DraggableScrollableSheet`'s per-drag rebuilds no longer reset the `FutureBuilder` to a spinner (or re-hit the network each frame on a failed load).
-- ✅ `gang_viewer_body.dart:171-173` (A-11a) — the tapped tile's card-viewer index is now found by the **entry's** id (a parallel entry/profile list) instead of matching by profile, so tapping the Nth copy of a duplicated model opens at the Nth position, not the first. (Follow-up filed: the gang viewer still doesn't pass `selectedReferenceIds`, so an A/B-pair model opens on its default art rather than the specific reference it was hired as.)
+- ✅ `gang_viewer_body.dart:171-173` (A-11a) — the tapped tile's card-viewer index is now found by the **entry's** id (a parallel entry/profile list) instead of matching by profile, so tapping the Nth copy of a duplicated model opens at the Nth position, not the first. (Follow-up **CARNEVALEB-43**: the gang viewer still doesn't pass `selectedReferenceIds`, so an A/B-pair model opens on its default art rather than the specific reference it was hired as.)
 - ✅ **Error-handling family** — `gang_viewer_dialogs.dart` summon picker `_load` now try/catches and shows an `ErrorRetryView` (a cache-cold offline open used to hang on the spinner forever); `gang_viewer_screen.dart` gang-tab first-load failure now renders an `ErrorRetryView` with a working Retry instead of a dead-end "Could not load this gang." text; `gang_builder_screen.dart` `_onEntryIllustrationChanged` was already wrapped in the `guard()` helper in Step 4. Covered by a gang-tab retry-and-recover test in `gang_viewer_smoke_test.dart`.
 - `gang_builder_screen.dart:522`, `account_screen.dart:379` — `RichText` doesn't read `MediaQuery.textScaler`: the validity-panel errors and the "Sign Up" toggle ignore accessibility text scaling. Use `Text.rich` or pass the scaler.
 - `app_drawer.dart:19-26` — drawer navigation always `push`es: hopping Cards → Gangs → Cards grows an unbounded navigator stack of live screens; OS back unwinds through every visit. Use `pushReplacement` for peer sections.
@@ -466,12 +466,14 @@ The structural problem: **the only version signal in the system is the image `in
 - ✅ `card_image_service.dart:60-61` — the cache moved from `getApplicationSupportDirectory` to `getApplicationCacheDirectory` (excluded from iOS backups by default), with a one-time cleanup deleting the old support-dir copy on upgrade.
 - ✅ `equipment_service.dart:13-20` — `EquipmentService` now caches its list for the session (with the S-3 `reset()` invalidation and offline persistence), so it no longer refetches on every builder/viewer open.
 - ✅ `card_image_service.dart` `_downloadFace` — face bytes now download to a `.part` file and are atomically `rename`d into place (mirroring `RulesService`), so a download killed halfway can't leave a truncated image that the next launch treats as a complete, cached face.
-- **Still open (Step 7 backlog):** `provider()` still does a blocking `existsSync()` per resolve; card faces still decode at full resolution with no `cacheWidth`/`ResizeImage`, and a `NetworkImage` failure shows a permanent broken-image icon with no retry.
+- **Still open (→ CARNEVALEB-40):** `provider()` still does a blocking `existsSync()` per resolve; card faces still decode at full resolution with no `cacheWidth`/`ResizeImage`, and a `NetworkImage` failure shows a permanent broken-image icon with no retry.
 - `cards_controller.rb:13` (backend) — `expires_in 1.hour, public: true` on the manifest means a CDN/proxy can serve an hour-old manifest, so "Sync Cards" right after a publish can honestly say "already up to date". Acceptable, but consider `no-cache` + ETag for the manifest (revalidation is cheap and the ETag is correct for this endpoint). Left as-is.
 
 ---
 
 ## 11. Quality and maintainability
+
+The structural refactors in this section (god classes, duplicated logic) are filed together as **CARNEVALEB-41**.
 
 ### Backend
 
@@ -479,10 +481,10 @@ The structural problem: **the only version signal in the system is the image `in
 - `card.html.erb` is a 625-line single-file template with per-faction theme hashes and a 20-gsub keyword lambda whose hardcoded ability-name regex (line 248) duplicates the `Catalog::Ability` glossary — a glossary ability added via seeds won't be bolded until someone edits the regex. Generate the alternation from the glossary (it feeds `template_digest`, so invalidation semantics stay correct). The template-digest design itself is thoughtful and well tested.
 - Filter/sort logic is triplicated in `Backoffice::ProfilesController` (`index`, `card`, `export_scope`); extract one `filtered_profiles` method. `def sort_link` is defined inside ERB (`profiles/index.html.erb:6-11`); move it to `CatalogHelper`.
 - `ListSortingService` re-sorts the entire list on every `list_entries#create`, clobbering any manual order made via the reorder endpoint — confirm that's intended UX. Entry positions go sparse after destroy (tolerated by the reorder algorithm, but clients must not assume contiguous 1..N).
-- Annotation drift: `profiles.faction` annotation says `default(NULL)` while the schema has `default: ""` — and `""` is not a valid enum value, a small landmine for validation-skipping code paths. Re-run annotate.
+- Annotation drift (→ CARNEVALEB-45): `profiles.faction` annotation says `default(NULL)` while the schema has `default: ""` — and `""` is not a valid enum value, a small landmine for validation-skipping code paths. Re-run annotate.
 - `Gang::List#total_cost` is used only by `ListSummarySerializer` while `ListSerializer` deliberately re-implements it — the "keep the two in step" comment is doing load-bearing work a shared method could do.
 - Docker: solid multi-stage build; `COPY vendor/* ./vendor/` flattens directory contents (works today, fragile); Chromium `--no-sandbox` is the usual container tradeoff and the process runs as uid 1000.
-- `docs/GAME_SETUP_FLOW.md` is significantly stale versus the implementation (per-`join_code` channel vs actual per-`game_player` streams; `deployment_rolloff`/`deploying` statuses, `role_roll`, `deployment_zone`, `ready` endpoints that don't exist; agenda draw is automatic, not client-initiated). Worth a superseded-by-implementation pass so it stops misleading readers.
+- `docs/GAME_SETUP_FLOW.md` (→ CARNEVALEB-44) is significantly stale versus the implementation (per-`join_code` channel vs actual per-`game_player` streams; `deployment_rolloff`/`deploying` statuses, `role_roll`, `deployment_zone`, `ready` endpoints that don't exist; agenda draw is automatic, not client-initiated). Worth a superseded-by-implementation pass so it stops misleading readers.
 - The seeds/snapshot architecture (`CatalogSnapshot` as source of truth, seeds importing it) is well designed and round-trip tested. Migration hygiene is good.
 
 ### App
@@ -517,5 +519,5 @@ Backend coverage is strong where it exists (games: 66 request examples; lists, l
 3. **App connection resilience bundle** ✅: Dio timeouts + non-blocking startup (C-6, partial), ping watchdog + lifecycle resync (C-4), apply REST responses to `currentGame` (A-1), `watch()` generation guard (C-5), stop reconnecting on auth failure (A-2), backoff+jitter and frame-decode guard (A-4, partial), dropped the racy REST resync (A-3, partial). Snapshot sequence number (A-3 remainder) deferred to Step 6 (needs a serialized field + regen).
 4. **App error-handling bundle** ✅: shared `guard()` helper across builder/list screens (A-6, A-9); surfaced `ApiException.message` in `_run`; fixed the remove-animation ordering (A-7), double-submit (A-8), back-button trap (A-10), and the Cards/gang-builder retry UI (C-6 remainder).
 5. **Card sync coherence** ✅: profiles ETag (S-1); JSON cache invalidation on Sync Cards (S-3); download-mode setting gating the first-launch bulk download (S-5); web manifest persistence (S-4); offline catalog persistence (C-6) and cache-dir/`_faces`/equipment-cache fixes (S-6, partial). Render-drift signal (S-2) deferred to Step 7.
-6. **Contract & data integrity** ✅: OpenAPI spec made honest (B-14/15/16); equipment validations + NOT NULL (B-27); catalog unique indexes + source-list FK + orphan-entry guard (B-26); catalog-edit validity refresh (B-24). The client regen (to propagate structural spec changes) + A-3's snapshot version + the `generate_api.sh` Linux fix are split into a dedicated issue.
-7. **Backlog** (partly done): a "bugs + cheap wins" pass fixed B-7, B-8, B-12, B-13, B-20, B-21, B-22, B-25, B-28, B-31, B-34, A-5, A-11a, A-11b and removed dead code. **Deliberately left** for dedicated follow-ups: B-35/B-36 and per-row blur / `cacheWidth` (performance — need real-device profiling); the god-class/duplication refactors (maintainability, large diffs); B-5 (idempotency keys — needs a client request-id design); the remaining low-impact minors (B-9/B-10/B-11/B-29/B-30, B-32/B-33, A-4/A-12 tails); and the error-handling tail of A-11 (summon-picker / gang-tab / illustration-change want the `guard()` helper). Filed as separate issues: the client regen + A-3 + `generate_api.sh` Linux fix; the deployment/CI config (B-23, C-1); and the gang-viewer `selectedReferenceIds` art fix.
+6. **Contract & data integrity** ✅: OpenAPI spec made honest (B-14/15/16); equipment validations + NOT NULL (B-27); catalog unique indexes + source-list FK + orphan-entry guard (B-26); catalog-edit validity refresh (B-24). The client regen (to propagate structural spec changes) + A-3's snapshot version + the `generate_api.sh` Linux fix are split into a dedicated issue (**CARNEVALEB-34**).
+7. **Backlog**: a "bugs + cheap wins" pass fixed B-7, B-8, B-12, B-13, B-20, B-21, B-22, B-25, B-28, B-31, B-34, A-5, A-11a, A-11b and removed dead code. A later cheap-correctness pass then fixed B-9, B-10, B-29, B-33 (backend) and the A-11 error-handling tail (summon-picker / gang-tab retry — `_onEntryIllustrationChanged` was already on `guard()`), the A-12 guards (non-list error parsing, auth null-asserts), and the S-6 atomic face writes (app). **Filed as dedicated follow-ups:** B-5 idempotency keys (**CARNEVALEB-36**), B-35 entry-state broadcasts (**CARNEVALEB-37**), B-36 validation N+1 (**CARNEVALEB-38**), B-32 vendored card fonts (**CARNEVALEB-39**), app rendering performance — per-row blur / `cacheWidth` / broken-image retry (**CARNEVALEB-40**), the god-class/duplication refactors (**CARNEVALEB-41**), the deployment/CI config B-23 + C-1 (**CARNEVALEB-42**), the gang-viewer `selectedReferenceIds` art (**CARNEVALEB-43**), the stale `GAME_SETUP_FLOW.md` (**CARNEVALEB-44**), and the `profiles.faction` annotation drift (**CARNEVALEB-45**). Genuinely left unticketed as too-minor: B-11/B-30 and the A-4/A-12 service-dedup tails.
