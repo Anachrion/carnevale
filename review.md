@@ -178,20 +178,26 @@ The root cause behind most findings here is one repeated pattern: **check in-mem
 
 The generated Dart client (built_value) is strict about required/nullable fields, so spec drift directly breaks the app. Run a spec-vs-serializer audit before the next `scripts/generate_api.sh` run. (Note: that script uses `sed -i ''`, the macOS/BSD form — it fails on Linux.)
 
-### B-14. Major — `GamePlayer.required` includes a field that doesn't exist
+**Step 6 status:** the spec was made honest at the doc level (B-14/15/16 ✅), which needed no client regen — the committed generated client already matched (e.g. it never had a `ready` field). Propagating the structural changes (`ListInput.name` non-nullable, `DrawAgendaInput.origin` required) into the generated Dart models, plus fixing the `sed -i ''` portability so the client can be regenerated on Linux, are deferred to a dedicated regen task (filed as its own issue, alongside A-3).
 
-`doc/openapi.yaml:2305`. `ready` appears in the required list but not in `properties`, and `PlayerSerializer` never emits it — likely a leftover from a removed readiness flag. Depending on generator behaviour, this either produces a phantom required field (deserialization failure on every Game payload) or is silently dropped; either way the spec is wrong. **Fix:** delete `ready` from the required list.
+### B-14. Major — `GamePlayer.required` includes a field that doesn't exist — ✅ Fixed (`carnevale-backend@8abbab2`)
 
-### B-15. Major — `ListInput.name` documented optional/nullable but the model requires presence
+`doc/openapi.yaml:2305`. `ready` appears in the required list but not in `properties`, and `PlayerSerializer` never emits it — likely a leftover from a removed readiness flag. Depending on generator behaviour, this either produces a phantom required field (deserialization failure on every Game payload) or is silently dropped; either way the spec is wrong.
 
-`doc/openapi.yaml:1570-1574` vs `app/models/gang/list.rb:8`. A spec-conforming client may POST `/lists` without a name and get an unpredicted 422; the `List` response schema also marks `name` nullable although it can never be null. **Fix:** align spec and model (server-side default name, or mark `name` required/non-nullable).
+**Fix applied:** removed `ready` from `GamePlayer.required`. Verified the committed generated client (`lib/api_client/lib/src/model/game_player.dart`) never had a `ready` field, so this is a spec-only cleanup — no client regen needed.
 
-### B-16. Minor — assorted spec drift
+### B-15. Major — `ListInput.name` documented optional/nullable but the model requires presence — ✅ Fixed (`carnevale-backend@8abbab2`)
 
-- `doc/openapi.yaml:469-489` — `/spells` declares bearerAuth + a 401 response but `SpellsController` is public (no `authenticate_user!`).
-- `doc/openapi.yaml:735` — the `/games/{id}` description claims agendas are only populated for the requester, contradicting both `PlayerSerializer` (opponent's hand visible unless the Secret rule applies) and the correct schema description at `:2343`.
-- `doc/openapi.yaml:1682-1688` — `DrawAgendaInput` requestBody is `required: false` and `origin` isn't required, yet the controller 422s without a valid origin.
-- `doc/openapi.yaml:71-84` — `/logout` documents a 401 but `sessions#destroy` always returns 204 (revocation silently skipped when the token is absent/invalid).
+`doc/openapi.yaml:1570-1574` vs `app/models/gang/list.rb:8`. A spec-conforming client may POST `/lists` without a name and get an unpredicted 422; the `List` response schema also marks `name` nullable although it can never be null.
+
+**Fix applied:** marked `ListInput.name` required and dropped its `nullable: true`, matching the model (`validates :name, presence`) and the client (the create sheet already blocks an empty name, so it never sends null). Spec-level; propagating the non-nullable type into the generated Dart model is part of the deferred regen task.
+
+### B-16. Minor — assorted spec drift — ✅ Fixed (`carnevale-backend@8abbab2`)
+
+- ✅ `/spells` — dropped the `bearerAuth` requirement and the 401 response (the controller is public, client-key only).
+- ✅ `/games/{id}` — corrected the description: the opponent's agendas *are* populated, except under the scenario's `secret` rule.
+- ✅ `DrawAgendaInput` — `requestBody` is now `required: true` and `origin` is in `required` (the controller 422s without it).
+- ✅ `/logout` — dropped the phantom 401; it's documented as idempotent 204 (matching `sessions#destroy`).
 
 ### B-17. Minor — unrescued errors produce non-API-shaped responses — ✅ Fixed (`carnevale-backend@aebd09d`)
 
@@ -237,25 +243,29 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 ## 5. Backend — data integrity and models
 
-### B-24. Major — catalog edits never refresh gangs' cached validity
+### B-24. Major — catalog edits never refresh gangs' cached validity — ✅ Fixed (`carnevale-backend@4975cd9`)
 
-`app/models/concerns/refreshes_list_selection_validity.rb`, `app/controllers/backoffice/profiles_controller.rb:93-113`. The `selection_valid`/`selection_errors` refresh fires only on `Gang::List`/`Entry`/`EntrySpell` commits — verified to be the only call sites. A backoffice rebalance (raising a profile's ducats, adding/removing Leader/Unique/Mage/Discipline keywords) leaves every existing gang containing that model claiming `selection_valid: true` until the owner happens to touch the list; the same applies after `CatalogSnapshot.import` on an existing environment. `spec/models/list_entry_spec.rb:55-64` even has to call `entry.touch` to propagate a ducat change. **Fix:** after a backoffice profile save (and after import), refresh affected lists: `Gang::List.where(id: Gang::Entry.where(entry_type: "Catalog::CardReference", entry_id: profile.card_references.select(:id)).select(:list_id)).find_each(&:refresh_selection_validity)` — ideally in a job.
+`app/models/concerns/refreshes_list_selection_validity.rb`, `app/controllers/backoffice/profiles_controller.rb:93-113`. The `selection_valid`/`selection_errors` refresh fires only on `Gang::List`/`Entry`/`EntrySpell` commits — verified to be the only call sites. A backoffice rebalance (raising a profile's ducats, adding/removing Leader/Unique/Mage/Discipline keywords) leaves every existing gang containing that model claiming `selection_valid: true` until the owner happens to touch the list; the same applies after `CatalogSnapshot.import` on an existing environment. `spec/models/list_entry_spec.rb:55-64` even has to call `entry.touch` to propagate a ducat change.
+
+**Fix applied:** added `Catalog::Profile#refresh_dependent_list_validity!` (recomputes validity for every gang that hired one of the profile's card references), called after a successful backoffice profile update; and `CatalogSnapshot.import` now refreshes all gangs after a bulk import. Covered by `spec/models/catalog/profile_spec.rb` (a rebalance over budget flips a dependent gang to invalid; an unrelated gang is untouched). Left synchronous rather than a job — the affected-gang set is small and the backoffice is low-traffic.
 
 ### B-25. Minor — Unique-model check groups by card reference, not profile
 
 `app/services/list_validation_service.rb:66-71`. A Unique model hired via two different references of the same profile is not flagged. Latent today (verified: no Unique profile currently has more than one reference), but the backoffice can create a Unique A/B pair any day, and `list_entries#illustration` explicitly supports repointing an entry to a sibling reference — a player could then field the same Unique character twice with `selection_valid: true`. **Fix:** group by `cr.profile_id`.
 
-### B-26. Minor — missing unique indexes and foreign keys
+### B-26. Minor — missing unique indexes and foreign keys — ✅ Fixed (`carnevale-backend@767d5be`)
 
 `db/schema.rb:69-77, 261-277, 290-299, 214, 191-203`:
 
-- Uniqueness validations without backing unique indexes: `agendas.name`, `scenarios.name`, `spells(name, discipline)` — concurrent seeds/imports can insert duplicates the models claim impossible.
-- `lists.source_list_id` has no FK: deleting a source list leaves dead pointers that are serialized to the client. **Fix:** `add_foreign_key :lists, :lists, column: :source_list_id, on_delete: :nullify`.
-- Polymorphic `list_entries.entry_(type,id)` can orphan when catalog rows are deleted (console/backoffice): `ListValidationService#check_spell_selections` then does `list_entry.entry.name` on nil **inside an `after_commit`**, breaking every subsequent edit to that list. **Fix:** nil-guard `entry` in the validation service; consider `restrict_with_error`-style guards on catalog destroys.
+- ✅ Added unique indexes for `agendas.name`, `scenarios.name`, `spells(name, discipline)`, backing the model validations so concurrent seeds/imports can't insert duplicates.
+- ✅ Added `add_foreign_key :lists, :lists, column: :source_list_id, on_delete: :nullify`, so deleting a source list nullifies the snapshot's pointer instead of leaving it dangling.
+- ✅ Nil-guarded the polymorphic-orphan case: `ListValidationService#projected_items` now `.compact`s and `#check_spell_selections` skips a nil `entry`, so a catalog row deleted out from under an entry can't raise `nil.name`/`nil.cost` inside the `after_commit` and brick every later edit to the list. Covered by a new orphan test in `list_validation_service_spec.rb`. (`restrict_with_error` guards on catalog destroys not added — the nil-guard is the safety net; console deletes remain possible.)
 
-### B-27. Minor — `Catalog::Equipment` has zero validations and nullable columns
+### B-27. Minor — `Catalog::Equipment` has zero validations and nullable columns — ✅ Fixed (`carnevale-backend@1a6afc4`)
 
-`app/models/catalog/equipment.rb`, `db/schema.rb:128-134`. A console/import mistake creates equipment with nil `cost`/`name`: serializers coerce with `to_i` so totals silently treat it as free — and worse, `cost: null` violates the spec's required non-nullable `ListEntry.cost`/`Equipment.cost`, so built_value refuses the payload **for every user whose list contains it**. **Fix:** presence/numericality validations + NOT NULL constraints.
+`app/models/catalog/equipment.rb`, `db/schema.rb:128-134`. A console/import mistake creates equipment with nil `cost`/`name`: serializers coerce with `to_i` so totals silently treat it as free — and worse, `cost: null` violates the spec's required non-nullable `ListEntry.cost`/`Equipment.cost`, so built_value refuses the payload **for every user whose list contains it**.
+
+**Fix applied:** `validates :name, presence` and `:cost, numericality { >= 0 }` on the model, plus a migration backfilling stray nulls and setting `name`/`cost`/`description` `NOT NULL` (`description` defaults to `""`) to match the contract. Covered by `spec/models/equipment_spec.rb`.
 
 ### B-28. Minor — `spell_discipline` accepts any string
 
@@ -498,5 +508,5 @@ Backend coverage is strong where it exists (games: 66 request examples; lists, l
 3. **App connection resilience bundle** ✅: Dio timeouts + non-blocking startup (C-6, partial), ping watchdog + lifecycle resync (C-4), apply REST responses to `currentGame` (A-1), `watch()` generation guard (C-5), stop reconnecting on auth failure (A-2), backoff+jitter and frame-decode guard (A-4, partial), dropped the racy REST resync (A-3, partial). Snapshot sequence number (A-3 remainder) deferred to Step 6 (needs a serialized field + regen).
 4. **App error-handling bundle** ✅: shared `guard()` helper across builder/list screens (A-6, A-9); surfaced `ApiException.message` in `_run`; fixed the remove-animation ordering (A-7), double-submit (A-8), back-button trap (A-10), and the Cards/gang-builder retry UI (C-6 remainder).
 5. **Card sync coherence** ✅: profiles ETag (S-1); JSON cache invalidation on Sync Cards (S-3); download-mode setting gating the first-launch bulk download (S-5); web manifest persistence (S-4); offline catalog persistence (C-6) and cache-dir/`_faces`/equipment-cache fixes (S-6, partial). Render-drift signal (S-2) deferred to Step 7.
-6. **Contract & data integrity**: OpenAPI spec audit (B-14/15/16), equipment validations (B-27), missing indexes/FKs (B-26), catalog-edit validity refresh (B-24).
+6. **Contract & data integrity** ✅: OpenAPI spec made honest (B-14/15/16); equipment validations + NOT NULL (B-27); catalog unique indexes + source-list FK + orphan-entry guard (B-26); catalog-edit validity refresh (B-24). The client regen (to propagate structural spec changes) + A-3's snapshot version + the `generate_api.sh` Linux fix are split into a dedicated issue.
 7. **Backlog**: remaining minors, performance items (B-34/35/36, per-row blur, `cacheWidth`), maintainability refactors, and the test gaps above.
