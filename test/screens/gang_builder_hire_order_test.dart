@@ -61,6 +61,9 @@ void main() {
 
     await tester.tap(find.text('Hire'));
     await tester.pump();
+    // Let the 250ms tab-switch PageView animation finish, so the Hire tab's tiles are built before
+    // we tap one — a single pump lands mid-animation, before they exist.
+    await tester.pump(const Duration(milliseconds: 400));
 
     // Open the card viewer from a faction tile; swiping up/down pages through the
     // list it was handed, which must carry the mercenaries last.
