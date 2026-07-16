@@ -144,11 +144,11 @@ The root cause behind most findings here is one repeated pattern: **check in-mem
 
 **Fix applied:** `Game#start!` now runs inside `with_lock`, re-checking `in_progress?`/`completed?` and both-confirmed against the reloaded row, so the second confirm reloads to `in_progress` and returns false without re-creating entry states. Deterministic stale-read test in `game_spec.rb` (second start returns false, entry-state count unchanged).
 
-### B-7. Minor — agenda score/discard and the recycle draw are not atomic
+### B-7. Minor — agenda score/discard and the recycle draw are not atomic — ✅ Fixed (`carnevale-backend@f584d1e`)
 
 `app/models/encounter/agenda_deck.rb:38-52`. The resolved event and the Cycle/recycle replacement draw are two statements with no transaction. If the replacement draw raises (deck exhausted → nil `agenda_id` → `RecordInvalid`, or a drawn-collision), the scored/discarded event persists but the request 500s and `broadcast_state!` never runs — both screens are stale until the next unrelated action, and the retry 422s "Agenda not in hand" while the UI still shows the agenda in hand. **Fix:** wrap event + recycle draw in a transaction.
 
-### B-8. Minor — finished players can edit entry states; counter updates can be lost
+### B-8. Minor — finished players can edit entry states; counter updates can be lost — ✅ Fixed (`carnevale-backend@f584d1e`)
 
 `app/controllers/api/v1/games_controller.rb:360-377`. `update_entry_state!` checks only `@game.status == "in_progress"`, not `@game_player.playing?` — a finished player can keep editing counters/stats (the draw/score/turn endpoints all block this). `counters.merge` is an unlocked read-modify-write, so the same user on two devices can lose a counter toggle. **Fix:** add the `finished?` guard; optionally `state.with_lock`.
 
@@ -164,11 +164,13 @@ The root cause behind most findings here is one repeated pattern: **check in-mem
 
 `app/controllers/api/v1/games_controller.rb:49-55` vs `doc/openapi.yaml:752-758`. The spec says delete "hides the game … permanently", but `join` finds the deleted game_player and flips it back to `active`, restoring full history — so two clients of the same user can disagree about whether a game exists. **Fix:** exclude deleted players in join, or document the resurrection.
 
-### B-12. Minor — `select_gang` never checks list validity or actual cost
+### B-12. Minor — `select_gang` never checks list validity or actual cost — ✅ Fixed (`carnevale-backend@f584d1e`)
 
-`app/controllers/api/v1/games_controller.rb:89-95`. Only `list.points > @game.ducat_limit` is checked — `points` is the player-declared limit, not `total_cost`, and `selection_valid` is ignored. A 100-point list containing 300 ducats of models is selectable and freezes into the game. **Fix:** also reject on `total_cost > ducat_limit` or `!selection_valid`; reflect it in `available_lists.selectable`.
+`app/controllers/api/v1/games_controller.rb:89-95`. Only `list.points > @game.ducat_limit` is checked — `points` is the player-declared limit, not `total_cost`, and `selection_valid` is ignored. A 100-point list containing 300 ducats of models is selectable and freezes into the game.
 
-### B-13. Minor — game creation is not transactional
+**Fix applied:** `select_gang` now rejects when `list.total_cost > @game.ducat_limit`. `selection_valid` is deliberately *not* enforced — a player may take a work-in-progress gang into a casual game (a product call). Covered by the updated "rejects a gang whose total cost exceeds the ducat limit" test.
+
+### B-13. Minor — game creation is not transactional — ✅ Fixed (`carnevale-backend@f584d1e`)
 
 `app/controllers/api/v1/games_controller.rb:27-41`. `game.save` then `game_players.create!` — if the second raises, an orphaned game with no players persists (unreachable but permanent, join code reserved). **Fix:** wrap in a transaction.
 
@@ -223,15 +225,15 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 **Fix applied:** extracted the check into `app/controllers/concerns/authenticates_client.rb` (mirroring how `RendersApiErrors` is already shared the same way) and included it in `Api::V1::BaseController` plus the three Devise-derived controllers. Note: at review time, `API_KEY` did not appear to be set anywhere in this deployment's committed config (`.env.example`, `config/deploy.yml`) — so today this closes a gap in a check that is likely fail-open in production regardless; it becomes load-bearing the day `API_KEY` is actually configured as a Kamal secret. Covered by new specs in `spec/requests/api/v1/client_authentication_spec.rb` (login/signup/password all reject a missing key when `API_KEY` is configured; login still works unauthenticated when it isn't).
 
-### B-20. Minor — account enumeration on password reset
+### B-20. Minor — account enumeration on password reset — ✅ Fixed (`carnevale-backend@a5eaf43`)
 
 `app/controllers/api/v1/passwords_controller.rb:9-17`. Devise `paranoid` is off, so an unknown email returns 422 `{errors:{email:["not found"]}}` — confirming which emails have accounts. The OpenAPI description even promises paranoid behaviour ("instructions sent if the email is on file"). **Fix:** `config.paranoid = true`.
 
-### B-21. Minor — JWT denylist grows forever
+### B-21. Minor — JWT denylist grows forever — ✅ Fixed (`carnevale-backend@a5eaf43`)
 
 `app/models/jwt_denylist.rb`. Every logout inserts a row with `exp`, but nothing ever deletes expired rows. Unbounded growth and a slowly fattening index consulted on every authenticated request. **Fix:** recurring `JwtDenylist.where(exp: ..Time.current).delete_all`, mirroring `CableTicket.issue!`'s opportunistic prune. Related: there is no token refresh flow at all — with a 1-day TTL, users must re-login daily (see A-5 for what happens when the token expires mid-game).
 
-### B-22. Minor — no server-side validation on illustration uploads
+### B-22. Minor — no server-side validation on illustration uploads — ✅ Fixed (`carnevale-backend@a5eaf43`)
 
 `app/controllers/backoffice/profiles_controller.rb:326-340`. The `accept=` attribute is client-side only; a 500 MB file or a non-image is stored by ActiveStorage, the card render draws a broken portrait, and `render_to_catalog` stamps and publishes the broken face. **Fix:** validate content type (`png/jpeg/webp`) and a byte-size cap on the model.
 
@@ -249,7 +251,7 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 **Fix applied:** added `Catalog::Profile#refresh_dependent_list_validity!` (recomputes validity for every gang that hired one of the profile's card references), called after a successful backoffice profile update; and `CatalogSnapshot.import` now refreshes all gangs after a bulk import. Covered by `spec/models/catalog/profile_spec.rb` (a rebalance over budget flips a dependent gang to invalid; an unrelated gang is untouched). Left synchronous rather than a job — the affected-gang set is small and the backoffice is low-traffic.
 
-### B-25. Minor — Unique-model check groups by card reference, not profile
+### B-25. Minor — Unique-model check groups by card reference, not profile — ✅ Fixed (`carnevale-backend@7db14a5`)
 
 `app/services/list_validation_service.rb:66-71`. A Unique model hired via two different references of the same profile is not flagged. Latent today (verified: no Unique profile currently has more than one reference), but the backoffice can create a Unique A/B pair any day, and `list_entries#illustration` explicitly supports repointing an entry to a sibling reference — a player could then field the same Unique character twice with `selection_valid: true`. **Fix:** group by `cr.profile_id`.
 
@@ -267,7 +269,7 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 **Fix applied:** `validates :name, presence` and `:cost, numericality { >= 0 }` on the model, plus a migration backfilling stray nulls and setting `name`/`cost`/`description` `NOT NULL` (`description` defaults to `""`) to match the contract. Covered by `spec/models/equipment_spec.rb`.
 
-### B-28. Minor — `spell_discipline` accepts any string
+### B-28. Minor — `spell_discipline` accepts any string — ✅ Fixed (`carnevale-backend@7db14a5`)
 
 `app/models/gang/entry.rb` (schema `spell_discipline`). Writing `"Blood Rites"` (display case) instead of `"blood_rites"` is accepted and merely flips the list invalid with a confusing error. **Fix:** `validates :spell_discipline, inclusion: { in: Catalog::Spell::DISCIPLINES }, allow_nil: true`.
 
@@ -283,9 +285,11 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 ## 6. Backend — backoffice and card rendering
 
-### B-31. Major — render fallback and staleness fingerprint disagree about which illustration a card uses
+### B-31. Major — render fallback and staleness fingerprint disagree about which illustration a card uses — ✅ Fixed (`carnevale-backend@127ab9c`)
 
-`app/controllers/backoffice/profiles_controller.rb:138-139` vs `app/models/catalog/card_reference.rb:40-44`. The `card` action falls back to `illustrations.first` when the requested slot doesn't exist, but `CardReference#illustration` (used by `source_fingerprint`/`stale?`) uses an exact `detect` and hashes nil. Create an A/B pair with art only in slot 1 and render both: card B's front is rendered **with art 1** but fingerprinted as having **no illustration**. Repositioning or replacing art 1 marks only card A stale; card B keeps advertising itself as up-to-date on the publish page while its published PNG shows the old framing — wrong art served forever. **Fix:** make the two code paths share one resolution rule (drop the `.first` fallback, or make `CardReference#illustration` apply the same fallback so the fingerprint covers what is actually drawn).
+`app/controllers/backoffice/profiles_controller.rb:138-139` vs `app/models/catalog/card_reference.rb:40-44`. The `card` action falls back to `illustrations.first` when the requested slot doesn't exist, but `CardReference#illustration` (used by `source_fingerprint`/`stale?`) uses an exact `detect` and hashes nil. Create an A/B pair with art only in slot 1 and render both: card B's front is rendered **with art 1** but fingerprinted as having **no illustration**. Repositioning or replacing art 1 marks only card A stale; card B keeps advertising itself as up-to-date on the publish page while its published PNG shows the old framing — wrong art served forever.
+
+**Fix applied:** `CardReference#illustration` now applies the same `|| illustrations.first` fallback the `card` render action uses, so the staleness fingerprint reflects what is actually drawn. Covered by a card_reference_spec case (a fallback-rendered card goes stale when the borrowed art is repositioned).
 
 ### B-32. Minor — card rendering depends on Google Fonts at render time
 
@@ -303,9 +307,11 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 
 ## 7. Backend — performance
 
-### B-34. Major — `games#index` N+1 despite the "no N+1" comment
+### B-34. Major — `games#index` N+1 despite the "no N+1" comment — ✅ Fixed (`carnevale-backend@9f3843a`)
 
-`app/serializers/player_serializer.rb:57, 62`, `app/serializers/list_summary_serializer.rb:8`. `agenda_history` chains `.includes(:agenda).order(:turn, :id)` on the association, which **discards the controller's preload** and issues a fresh query per player; `hand_agendas` runs a `Catalog::Agenda.where` per player; `ListSummarySerializer` calls `Gang::List#total_cost` = 2 aggregate queries per player. `GET /api/v1/games` — the app's landing call — costs ~5 queries per player, ~10 per game: 20 games ≈ 200 queries. The controller comment claims this was fixed (B-P2-4), and there is no query-count spec to pin it. **Fix:** sort/serialize the already-preloaded `agenda_events` in Ruby, batch the agenda name lookup, precompute `total_cost` in one grouped query — and add a `count_queries` assertion.
+`app/serializers/player_serializer.rb:57, 62`, `app/serializers/list_summary_serializer.rb:8`. `agenda_history` chains `.includes(:agenda).order(:turn, :id)` on the association, which **discards the controller's preload** and issues a fresh query per player; `hand_agendas` runs a `Catalog::Agenda.where` per player; `ListSummarySerializer` calls `Gang::List#total_cost` = 2 aggregate queries per player. `GET /api/v1/games` — the app's landing call — costs ~5 queries per player, ~10 per game: 20 games ≈ 200 queries. The controller comment claims this was fixed (B-P2-4), and there is no query-count spec to pin it.
+
+**Fix applied:** `PlayerSerializer` now sorts the preloaded `agenda_events` in Ruby and resolves both the hand and the history from the preloaded `:agenda` (no per-player queries); the index preload includes `agenda_events: :agenda`; and `Gang::List.total_costs_for` computes every player's list cost in two grouped queries, wired through `GameSerializer` → `ListSummarySerializer`. Per-game queries drop from ~10 to ~2 (a residual: cost is batched *per game*, not across the whole index — noted for a later pass if it matters at scale). Guarded by the serializer's `count_queries` spec (now preloading `:agenda`).
 
 ### B-35. Minor — broadcasts omit entry states, multiplying HTTP chatter
 
@@ -347,9 +353,11 @@ Verified good, for the record: JWT secret lives in encrypted credentials (`confi
 - `:73-74` — ✅ `_handleFrame` now wraps the decode in try/catch, so a binary/malformed frame is ignored instead of escaping as an unhandled zone error.
 - `:89-91` — **still open:** `reject_subscription` / `disconnect(reconnect:false)` are still swallowed rather than surfaced via a callback. Low impact (a rejected subscription would mean the player isn't in the game, which the REST layer already guards) — folded into the **Step 7** backlog.
 
-### A-5. Minor — `/join` deep link while a session is open kills the screen underneath
+### A-5. Minor — `/join` deep link while a session is open kills the screen underneath — ✅ Fixed (`carnevale-anachrion@62259e0`)
 
-`lib/main.dart:61, 71-79`, `lib/screens/game_home_screen.dart:103`. With session A open, tapping a join link pushes a second `GameSessionScreen` on the singleton `GameService`; popping it calls `stopWatching()`, leaving screen A with `currentGame == null`, no cable, and no re-watch — a dead screen until manually re-entered. Also `_lastHandledLink` dedupes the same link **forever**, so tapping the same join link twice is ignored. **Fix:** `stopWatching` only if this screen is the current watcher; re-`watch` on `didPopNext` via a `RouteObserver`; dedupe links by time window.
+`lib/main.dart:61, 71-79`, `lib/screens/game_home_screen.dart:103`. With session A open, tapping a join link pushes a second `GameSessionScreen` on the singleton `GameService`; popping it calls `stopWatching()`, leaving screen A with `currentGame == null`, no cable, and no re-watch — a dead screen until manually re-entered. Also `_lastHandledLink` dedupes the same link **forever**, so tapping the same join link twice is ignored.
+
+**Fix applied:** `GameSessionScreen` is now `RouteAware` (via a global `RouteObserver` registered on the `MaterialApp`) and re-establishes its watch on `didPopNext` when it isn't the current watcher, so a screen revealed after another game was opened over it recovers instead of sitting dead. Deep-link dedup is now a 2-second time window rather than forever, so re-tapping the same link later works.
 
 ---
 
@@ -391,13 +399,13 @@ The systemic gap: the in-game dialogs catch and toast errors; the gang builder a
 
 **Fix applied:** `_pageController` is now `late final PageController(initialPage: _tab.index)`, and `_selectTab` only drives the controller when `!_loading` (falling back to `setState(_tab)` during load). When the list finishes loading the PageView opens on whatever tab was selected, so `_tab` and the page can't desync — no trap.
 
-### A-11. Minor — assorted UI findings
+### A-11. Minor — assorted UI findings — ◑ Partially fixed (`carnevale-anachrion@481b7e9`)
 
-- `card_viewer_screen.dart:380-381` — `FutureBuilder(future: AbilityService().load())` creates a new future on every rebuild of the `DraggableScrollableSheet`, whose builder re-runs on every drag: the abilities list flashes a spinner while dragging, and if the first load failed, every drag frame fires a fresh network request. Hoist the future / memoize the in-flight future in the service.
-- `gang_viewer_dialogs.dart:509-514` — summon picker `_load()` doesn't catch `ApiException`: cache-cold offline open hangs the dialog spinner forever.
-- `gang_viewer_screen.dart:274-277, 400-409` — a gang tab that fails its first load shows "Could not load this gang." with no retry affordance (recovery only via a later broadcast). Use `ErrorRetryView`.
-- `gang_viewer_body.dart:171-173` — tapping the second copy of a duplicated model opens the card viewer on the first copy (`indexWhere` by `cardReferenceId`, not entry). The builder fixed exactly this (`gang_builder_screen.dart:680`); apply the same fix.
-- `gang_builder_screen.dart:272-281` — `_onEntryIllustrationChanged` has no error handling: on failure the viewer shows the new art, the entry keeps the old, silently.
+- ✅ `card_viewer_screen.dart:380-381` (A-11b) — `_AbilitiesSheet` is now a `StatefulWidget` holding the abilities future in a field, so the `DraggableScrollableSheet`'s per-drag rebuilds no longer reset the `FutureBuilder` to a spinner (or re-hit the network each frame on a failed load).
+- ✅ `gang_viewer_body.dart:171-173` (A-11a) — the tapped tile's card-viewer index is now found by the **entry's** id (a parallel entry/profile list) instead of matching by profile, so tapping the Nth copy of a duplicated model opens at the Nth position, not the first. (Follow-up filed: the gang viewer still doesn't pass `selectedReferenceIds`, so an A/B-pair model opens on its default art rather than the specific reference it was hired as.)
+- **Still open (Step 7 backlog / error-handling family):** `gang_viewer_dialogs.dart` summon picker `_load` doesn't catch `ApiException`; `gang_viewer_screen.dart` gang-tab first-load failure has no retry; `gang_builder_screen.dart:272-281` `_onEntryIllustrationChanged` has no error handling. These want the `guard()` helper from Step 4.
+- `gang_builder_screen.dart:522`, `account_screen.dart:379` — `RichText` doesn't read `MediaQuery.textScaler`: the validity-panel errors and the "Sign Up" toggle ignore accessibility text scaling. Use `Text.rich` or pass the scaler.
+- `app_drawer.dart:19-26` — drawer navigation always `push`es: hopping Cards → Gangs → Cards grows an unbounded navigator stack of live screens; OS back unwinds through every visit. Use `pushReplacement` for peer sections.
 - `gang_builder_screen.dart:522`, `account_screen.dart:379` — `RichText` doesn't read `MediaQuery.textScaler`: the validity-panel errors and the "Sign Up" toggle ignore accessibility text scaling. Use `Text.rich` or pass the scaler.
 - `app_drawer.dart:19-26` — drawer navigation always `push`es: hopping Cards → Gangs → Cards grows an unbounded navigator stack of live screens; OS back unwinds through every visit. Use `pushReplacement` for peer sections.
 
@@ -509,4 +517,4 @@ Backend coverage is strong where it exists (games: 66 request examples; lists, l
 4. **App error-handling bundle** ✅: shared `guard()` helper across builder/list screens (A-6, A-9); surfaced `ApiException.message` in `_run`; fixed the remove-animation ordering (A-7), double-submit (A-8), back-button trap (A-10), and the Cards/gang-builder retry UI (C-6 remainder).
 5. **Card sync coherence** ✅: profiles ETag (S-1); JSON cache invalidation on Sync Cards (S-3); download-mode setting gating the first-launch bulk download (S-5); web manifest persistence (S-4); offline catalog persistence (C-6) and cache-dir/`_faces`/equipment-cache fixes (S-6, partial). Render-drift signal (S-2) deferred to Step 7.
 6. **Contract & data integrity** ✅: OpenAPI spec made honest (B-14/15/16); equipment validations + NOT NULL (B-27); catalog unique indexes + source-list FK + orphan-entry guard (B-26); catalog-edit validity refresh (B-24). The client regen (to propagate structural spec changes) + A-3's snapshot version + the `generate_api.sh` Linux fix are split into a dedicated issue.
-7. **Backlog**: remaining minors, performance items (B-34/35/36, per-row blur, `cacheWidth`), maintainability refactors, and the test gaps above.
+7. **Backlog** (partly done): a "bugs + cheap wins" pass fixed B-7, B-8, B-12, B-13, B-20, B-21, B-22, B-25, B-28, B-31, B-34, A-5, A-11a, A-11b and removed dead code. **Deliberately left** for dedicated follow-ups: B-35/B-36 and per-row blur / `cacheWidth` (performance — need real-device profiling); the god-class/duplication refactors (maintainability, large diffs); B-5 (idempotency keys — needs a client request-id design); the remaining low-impact minors (B-9/B-10/B-11/B-29/B-30, B-32/B-33, A-4/A-12 tails); and the error-handling tail of A-11 (summon-picker / gang-tab / illustration-change want the `guard()` helper). Filed as separate issues: the client regen + A-3 + `generate_api.sh` Linux fix; the deployment/CI config (B-23, C-1); and the gang-viewer `selectedReferenceIds` art fix.
