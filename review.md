@@ -399,7 +399,7 @@ The systemic gap: the in-game dialogs catch and toast errors; the gang builder a
 
 **Fix applied:** `_pageController` is now `late final PageController(initialPage: _tab.index)`, and `_selectTab` only drives the controller when `!_loading` (falling back to `setState(_tab)` during load). When the list finishes loading the PageView opens on whatever tab was selected, so `_tab` and the page can't desync — no trap.
 
-### A-11. Minor — assorted UI findings — ◑ Partially fixed (`carnevale-anachrion@481b7e9`, `@87189ff`)
+### A-11. Minor — assorted UI findings — ◑ Partially fixed (`carnevale-anachrion@481b7e9`, `@995c5c3`)
 
 - ✅ `card_viewer_screen.dart:380-381` (A-11b) — `_AbilitiesSheet` is now a `StatefulWidget` holding the abilities future in a field, so the `DraggableScrollableSheet`'s per-drag rebuilds no longer reset the `FutureBuilder` to a spinner (or re-hit the network each frame on a failed load).
 - ✅ `gang_viewer_body.dart:171-173` (A-11a) — the tapped tile's card-viewer index is now found by the **entry's** id (a parallel entry/profile list) instead of matching by profile, so tapping the Nth copy of a duplicated model opens at the Nth position, not the first. (Follow-up filed: the gang viewer still doesn't pass `selectedReferenceIds`, so an A/B-pair model opens on its default art rather than the specific reference it was hired as.)
@@ -409,7 +409,7 @@ The systemic gap: the in-game dialogs catch and toast errors; the gang builder a
 - `gang_builder_screen.dart:522`, `account_screen.dart:379` — `RichText` doesn't read `MediaQuery.textScaler`: the validity-panel errors and the "Sign Up" toggle ignore accessibility text scaling. Use `Text.rich` or pass the scaler.
 - `app_drawer.dart:19-26` — drawer navigation always `push`es: hopping Cards → Gangs → Cards grows an unbounded navigator stack of live screens; OS back unwinds through every visit. Use `pushReplacement` for peer sections.
 
-### A-12. Minor — services-layer robustness collection — ◑ Partially fixed (`carnevale-anachrion@87189ff`)
+### A-12. Minor — services-layer robustness collection — ◑ Partially fixed (`carnevale-anachrion@995c5c3`)
 
 - ✅ `api_exception.dart:24` — the `errors`-value parse now coerces a non-list value (bare string or any scalar) into a single-element list instead of blindly casting to `List`, so an unexpected error shape can't turn the app-wide error path itself into a `TypeError`. Covered by a scalar-value case in `auth_service_test.dart` (`parseAuthError` shares this parser).
 - ✅ `auth_service.dart:116, 185` — `res.data!.user` is now a null-guarded `res.data?.user` that throws an `AuthException` when the body is missing, so a body-less 2xx keeps the documented error contract instead of surfacing a raw null-check crash past the `on DioException` handler.
@@ -460,7 +460,7 @@ The structural problem: **the only version signal in the system is the image `in
 
 **Fix applied:** added a **download-mode setting** — `onDemand` (default), `always`, `wifiOnly` — persisted in `SettingsService` with a picker in Settings. `main.dart` now calls `maybeAutoSync()`, which bulk-downloads on launch only for `always`/`wifiOnly` (the latter gated on Wi-Fi via `connectivity_plus`); the default `onDemand` does no launch prefetch. Instead, `provider()` caches each face to disk the first time it's viewed (deduped), so browsing builds the cache with no upfront hit. The Settings "Sync Cards" button (a deliberate action) shows the pending size from the manifest byte sizes (e.g. "Sync Cards (128 · ~210 MB)"). Concurrency/backoff for the bulk run were left as-is (sequential, resume-on-relaunch) — the consent gate is what the finding was really about.
 
-### S-6. Minor — card image cache robustness collection — ◑ Partially fixed (`carnevale-anachrion@371926a`, `@f016a91`, `@87189ff`)
+### S-6. Minor — card image cache robustness collection — ◑ Partially fixed (`carnevale-anachrion@371926a`, `@f016a91`, `@995c5c3`)
 
 - ✅ `card_image_service.dart:84-95` — `loadManifest` now clears `_faces` at the start of a full (unfiltered) load, so cards deleted/renamed on the backend drop out of the index and `_pruneOrphans` deletes their stale files (the "delete old images when new ones arrive" requirement).
 - ✅ `card_image_service.dart:60-61` — the cache moved from `getApplicationSupportDirectory` to `getApplicationCacheDirectory` (excluded from iOS backups by default), with a one-time cleanup deleting the old support-dir copy on upgrade.
