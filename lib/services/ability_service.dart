@@ -1,7 +1,9 @@
+import 'package:built_value/serializer.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:dio/dio.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
+import 'catalog_cache.dart';
 
 /// A glossary ability (character or weapon special rule) resolved against a profile, pairing the
 /// label as printed on the card (e.g. "Acrobatic (2)") with its rulebook description.
@@ -35,19 +37,46 @@ class AbilityService {
   /// Strips the "(X)" rating from an ability string, e.g. "Acrobatic (2)" -> "Acrobatic".
   static String baseName(String ability) => ability.replaceAll(_ratingSuffix, '').trim();
 
+  static const _cacheKey = 'catalog_abilities';
+
   Future<void> load() async {
     if (_loaded) return;
     try {
       final res = await _client.abilities.getAbilities();
-      for (final a in res.data ?? const <api.Ability>[]) {
-        final glossary =
-            a.category == api.AbilityCategoryEnum.weapon ? _weapon : _character;
-        glossary[a.name] = a.description;
-      }
+      final abilities = res.data?.toList() ?? const <api.Ability>[];
+      _index(abilities);
       _loaded = true;
+      await CatalogCache.save(_cacheKey, abilities, const FullType(api.Ability));
     } on DioException catch (e) {
+      // Offline: fall back to the last-good glossary so card abilities still resolve (C-6).
+      final restored = await CatalogCache.restore<api.Ability>(
+        _cacheKey,
+        const FullType(api.Ability),
+      );
+      if (restored != null) {
+        _index(restored);
+        _loaded = true;
+        return;
+      }
       throw ApiException.from(e);
     }
+  }
+
+  void _index(Iterable<api.Ability> abilities) {
+    _character.clear();
+    _weapon.clear();
+    for (final a in abilities) {
+      final glossary =
+          a.category == api.AbilityCategoryEnum.weapon ? _weapon : _character;
+      glossary[a.name] = a.description;
+    }
+  }
+
+  /// Drops the cached glossary so the next [load] refetches (S-3).
+  void reset() {
+    _loaded = false;
+    _character.clear();
+    _weapon.clear();
   }
 
   List<ResolvedAbility> _resolve(Iterable<String> labels, Map<String, String> glossary) => labels
