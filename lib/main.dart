@@ -21,9 +21,12 @@ void main() async {
   await authService.load();
   // Card images load off the critical path: init() fetches the manifest over the network, so
   // awaiting it here would let a captive-portal / black-hole network hang on the splash screen
-  // before the first frame. Kick init() -> sync() off unawaited instead; faces stream in once
-  // their local copy lands, and provider() falls back to network URLs until then. No-op on web.
-  unawaited(CardImageService().init().then((_) => CardImageService().sync()));
+  // before the first frame. Kick init() -> maybeAutoSync() off unawaited instead. maybeAutoSync
+  // bulk-downloads only when the user's download-mode setting allows it (default: on demand, i.e.
+  // not here — faces then cache lazily as they're viewed). No-op on web.
+  unawaited(
+    CardImageService().init().then((_) => CardImageService().maybeAutoSync()),
+  );
   runApp(const CarnevaleApp());
 }
 
