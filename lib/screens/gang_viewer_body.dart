@@ -172,19 +172,26 @@ class _ReadOnlyGangBody extends StatelessWidget {
         ),
       );
     }
-    final hiredProfiles = entries
+    // Keep each hired card-reference entry paired with its profile, in roster order, so a tapped
+    // tile can be located by *entry* id. Matching on the profile alone sent every duplicate of a
+    // model to the first copy's card (A-11).
+    final hired = entries
         .where(
           (e) =>
               e.entryType ==
               api.ListEntryEntryTypeEnum.catalogColonColonCardReference,
         )
         .map(
-          (e) => profiles
-              .where((p) => p.cardReferenceIds.contains(e.entryId))
-              .firstOrNull,
+          (e) => (
+            entry: e,
+            profile: profiles
+                .where((p) => p.cardReferenceIds.contains(e.entryId))
+                .firstOrNull,
+          ),
         )
-        .whereType<api.Profile>()
+        .where((pair) => pair.profile != null)
         .toList();
+    final hiredProfiles = hired.map((pair) => pair.profile!).toList();
     // Ordering (and the death animation that reorders) lives in _GangEntryList, which is given the
     // roster as-is so it can tell a *fresh* casualty from one that was already down.
     return _GangEntryList(
@@ -211,9 +218,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
             : factionColor;
         VoidCallback? onTap;
         if (profile != null) {
-          final hiredIndex = hiredProfiles.indexWhere(
-            (p) => p.cardReferenceId == profile.cardReferenceId,
-          );
+          final hiredIndex = hired.indexWhere((pair) => pair.entry.id == entry.id);
           onTap = () => Navigator.push(
             context,
             MaterialPageRoute(
