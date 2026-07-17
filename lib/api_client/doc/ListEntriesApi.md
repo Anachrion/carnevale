@@ -12,7 +12,7 @@ Method | HTTP request | Description
 [**createListEntry**](ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [**deleteListEntry**](ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [**setListEntryIllustration**](ListEntriesApi.md#setlistentryillustration) | **PATCH** /list_entries/{id}/illustration | Switch which illustration (card reference) a model is hired as
-[**setListEntrySpells**](ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline) a Mage model knows
+[**setListEntrySpells**](ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline(s)) a Mage model knows, per pool
 [**updateListEntryPosition**](ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 
 
@@ -162,9 +162,9 @@ Name | Type | Description  | Notes
 # **setListEntrySpells**
 > BuiltList setListEntrySpells(id, setEntrySpellsInput)
 
-Set the spells (and Discipline) a Mage model knows
+Set the spells (and Discipline(s)) a Mage model knows, per pool
 
-Replaces the model's committed Discipline and full set of known spells (rulebook p24). Only Mage models may know spells; the selection still saves if it breaks the rules, but the returned list will report selection_valid: false with the reason. Returns 404 if the entry's list doesn't belong to the current user. 
+Replaces the model's committed Discipline(s) and known spells, one pool at a time (rulebook p24, generalized for CARNEVALEB-47's exceptions — most models have exactly one pool). Only Mage models may know spells; an illegal selection still saves, but the returned list will report selection_valid: false with the reason. Also reachable for a model in an active game's roster (not just the reusable gang list) up until that game's owning player has confirmed their Agendas, at which point it 422s — spells lock in together with Agendas at the start of the game. Returns 404 if the entry's list doesn't belong to the current user. 
 
 ### Example
 ```dart

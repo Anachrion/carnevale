@@ -16,7 +16,7 @@ part 'draw_agenda_input.g.dart';
 @BuiltValue()
 abstract class DrawAgendaInput implements Built<DrawAgendaInput, DrawAgendaInputBuilder> {
   @BuiltValueField(wireName: r'origin')
-  DrawAgendaInputOriginEnum? get origin;
+  DrawAgendaInputOriginEnum get origin;
   // enum originEnum {  special_rule,  command_point,  };
 
   DrawAgendaInput._();
@@ -42,13 +42,11 @@ class _$DrawAgendaInputSerializer implements PrimitiveSerializer<DrawAgendaInput
     DrawAgendaInput object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
-    if (object.origin != null) {
-      yield r'origin';
-      yield serializers.serialize(
-        object.origin,
-        specifiedType: const FullType(DrawAgendaInputOriginEnum),
-      );
-    }
+    yield r'origin';
+    yield serializers.serialize(
+      object.origin,
+      specifiedType: const FullType(DrawAgendaInputOriginEnum),
+    );
   }
 
   @override

@@ -9,6 +9,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     this.onEditCounters,
     this.onEditStats,
     this.onToggleActivated,
+    this.onToggleSpellCast,
     this.onSummon,
     this.onDismissSummon,
   });
@@ -29,6 +30,11 @@ class _ReadOnlyGangBody extends StatelessWidget {
   /// When set, model tiles get a tappable bolt that marks the model as having activated this turn.
   /// Own models only — an opponent's activated models still darken, they just can't be toggled.
   final void Function(api.ListEntry entry)? onToggleActivated;
+
+  /// When set, a Mage's known/granted spells render as pure-toggle chips (mark cast) plus one
+  /// detail button, instead of the read-only tappable-for-detail chips. Own models only — the
+  /// opponent's spells stay read-only, same reasoning as onToggleActivated above.
+  final void Function(api.ListEntry entry, KnownSpell spell)? onToggleSpellCast;
 
   /// When set, a Summon button is offered above the gang — for the rare models whose special rules
   /// conjure new models mid-battle. Own gang only.
@@ -244,6 +250,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
           onToggleActivated: onToggleActivated != null && entry.state != null
               ? () => onToggleActivated!(entry)
               : null,
+          onToggleSpellCast: onToggleSpellCast != null && entry.state != null
+              ? (spell) => onToggleSpellCast!(entry, spell)
+              : null,
           // Only summoned models can be removed mid-game; the hired roster is frozen.
           onDismiss: onDismissSummon != null && entry.summoned
               ? () => onDismissSummon!(entry)
@@ -439,6 +448,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     this.onEditCounters,
     this.onEditStats,
     this.onToggleActivated,
+    this.onToggleSpellCast,
     this.onDismiss,
   });
 
@@ -448,6 +458,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   final VoidCallback? onEditCounters;
   final VoidCallback? onEditStats;
   final VoidCallback? onToggleActivated;
+  final void Function(KnownSpell spell)? onToggleSpellCast;
 
   /// Removes this model from the gang. Only ever set on a summoned model of your own.
   final VoidCallback? onDismiss;
@@ -604,8 +615,25 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                   ],
                 ),
               ],
-              if (_spellChips.isNotEmpty) ...[
+              if (_knownSpells.isNotEmpty) ...[
                 const SizedBox(height: 10),
+                if (onToggleSpellCast != null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'KNOWN SPELLS',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      SpellDetailButton(spells: _knownSpells),
+                    ],
+                  ),
+                if (onToggleSpellCast != null) const SizedBox(height: 6),
                 Wrap(spacing: 6, runSpacing: 6, children: _spellChips),
               ],
             ],
@@ -615,8 +643,18 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     );
   }
 
-  // Known spells for a Mage model (Cantrip first), tappable for details. Empty for everything else.
-  List<Widget> get _spellChips => entry.mage ? spellChipsFor(entry) : const [];
+  // Known/granted spells for a Mage model. Empty for everything else.
+  List<KnownSpell> get _knownSpells => entry.mage ? knownSpellsFor(entry) : const [];
+
+  // Own live model: a pure-toggle chip per spell (mark cast), with one detail button above them.
+  // Everything else (opponent's models, or no live state yet): the read-only, tap-for-detail chip.
+  List<Widget> get _spellChips {
+    final toggle = onToggleSpellCast;
+    if (toggle == null) return spellChipsFor(entry);
+    return _knownSpells
+        .map((s) => SpellToggleChip(spell: s, onToggle: () => toggle(s)))
+        .toList();
+  }
 
   // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
   // entirely, so a clean model shows no counter icons at all. Editing happens through the +

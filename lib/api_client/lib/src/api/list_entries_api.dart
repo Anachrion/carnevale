@@ -325,8 +325,8 @@ class ListEntriesApi {
     );
   }
 
-  /// Set the spells (and Discipline) a Mage model knows
-  /// Replaces the model&#39;s committed Discipline and full set of known spells (rulebook p24). Only Mage models may know spells; the selection still saves if it breaks the rules, but the returned list will report selection_valid: false with the reason. Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user. 
+  /// Set the spells (and Discipline(s)) a Mage model knows, per pool
+  /// Replaces the model&#39;s committed Discipline(s) and known spells, one pool at a time (rulebook p24, generalized for CARNEVALEB-47&#39;s exceptions — most models have exactly one pool). Only Mage models may know spells; an illegal selection still saves, but the returned list will report selection_valid: false with the reason. Also reachable for a model in an active game&#39;s roster (not just the reusable gang list) up until that game&#39;s owning player has confirmed their Agendas, at which point it 422s — spells lock in together with Agendas at the start of the game. Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user. 
   ///
   /// Parameters:
   /// * [id] 

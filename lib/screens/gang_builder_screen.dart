@@ -8,6 +8,7 @@ import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
+import '../widgets/apprenticeship_dialog.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
 import '../widgets/faction_rule.dart';
@@ -17,12 +18,11 @@ import '../widgets/points_bar.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
+import '../widgets/spell_picker_dialog.dart';
 import '../widgets/status_views.dart';
-import '../widgets/themed_dialog_card.dart';
 import 'card_viewer_screen.dart';
 
 part 'gang_builder_tiles.dart';
-part 'gang_builder_spell_picker.dart';
 
 enum _Tab { list, hire }
 
@@ -308,17 +308,46 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
 
   Future<void> _editSpells(api.ListEntry entry) async {
     if (_busy) return;
-    final result = await showDialog<_SpellSelection>(
-      context: context,
-      builder: (_) => _SpellPickerDialog(entry: entry, allSpells: _spells),
+    final result = await showSpellPickerDialog(
+      context,
+      entry: entry,
+      allSpells: _spells,
+      siblingEntries: _gang.entries.toList(),
     );
     if (result == null || !mounted) return;
     setState(() => _busy = true);
     await guard(context, () async {
       final updated = await GangService().setEntrySpells(
         entry.id,
-        result.discipline,
-        result.spellIds,
+        poolSelections: result.poolSelections,
+        mentorChanged: result.mentorChanged,
+        mentoredByEntryId: result.mentoredByEntryId,
+      );
+      if (!mounted) return;
+      setState(() => _gang = updated);
+    });
+    if (mounted) setState(() => _busy = false);
+  }
+
+  // Apprentice Doctor's Apprenticeship: picks (or clears) the mentor only. Always sends an empty
+  // pool_selections — matching what changing/clearing the mentor inside the full spell picker
+  // already does — since a new (or no) mentor invalidates whatever Disciplines were mirrored from
+  // the old one, there's nothing valid left to preserve.
+  Future<void> _editApprenticeship(api.ListEntry entry) async {
+    if (_busy) return;
+    final result = await showApprenticeshipDialog(
+      context,
+      entry: entry,
+      siblingEntries: _gang.entries.toList(),
+    );
+    if (result == null || !mounted) return;
+    setState(() => _busy = true);
+    await guard(context, () async {
+      final updated = await GangService().setEntrySpells(
+        entry.id,
+        poolSelections: const [],
+        mentorChanged: true,
+        mentoredByEntryId: result.mentorEntryId,
       );
       if (!mounted) return;
       setState(() => _gang = updated);
@@ -760,6 +789,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
               onRemove: () => _removeEntry(entry),
               onTap: onTap,
               onEditSpells: entry.mage ? () => _editSpells(entry) : null,
+              onEditApprenticeship: entry.pools.any((p) => p.mentorDerived)
+                  ? () => _editApprenticeship(entry)
+                  : null,
             ),
           ),
         );

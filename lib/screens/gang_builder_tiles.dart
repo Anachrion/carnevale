@@ -51,6 +51,7 @@ class _EntryTile extends StatefulWidget {
     this.role,
     this.onTap,
     this.onEditSpells,
+    this.onEditApprenticeship,
   });
 
   final api.ListEntry entry;
@@ -66,6 +67,10 @@ class _EntryTile extends StatefulWidget {
   final VoidCallback? onTap;
   // Non-null only for Mage models; opens the spell picker for this model (rulebook p24).
   final VoidCallback? onEditSpells;
+  // Non-null only for a model with a mentor_derived pool (Apprentice Doctor); opens the mentor
+  // picker. Her own "Spells" button only appears once a mentor has actually been chosen — there's
+  // nothing to pick a spell from before that.
+  final VoidCallback? onEditApprenticeship;
 
   @override
   State<_EntryTile> createState() => _EntryTileState();
@@ -211,7 +216,8 @@ class _EntryTileState extends State<_EntryTile>
                           ),
                         ],
                       ),
-                      if (widget.onEditSpells != null) _buildSpellRow(),
+                      if (widget.onEditSpells != null || widget.onEditApprenticeship != null)
+                        _buildSpellRow(),
                     ],
                   ),
                 ),
@@ -225,7 +231,20 @@ class _EntryTileState extends State<_EntryTile>
 
   Widget _buildSpellRow() {
     final entry = widget.entry;
-    final chips = spellChipsFor(entry);
+    final isApprentice = widget.onEditApprenticeship != null;
+    final hasMentor = entry.mentoredByEntryId != null;
+    final chips = spellSummaryChipsFor(entry);
+    // Every chip is a shortcut into the same dialog the Spells button opens — a chip only ever
+    // renders once there's something picked/granted to show, which (Apprentice Doctor included)
+    // is exactly when that dialog is reachable at all.
+    final tappableChips = chips
+        .map(
+          (chip) => GestureDetector(
+            onTap: widget.busy ? null : widget.onEditSpells,
+            child: chip,
+          ),
+        )
+        .toList();
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Wrap(
@@ -233,12 +252,15 @@ class _EntryTileState extends State<_EntryTile>
         runSpacing: 6,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          _spellsButton(),
-          if (chips.isEmpty)
+          if (isApprentice) _apprenticeshipButton(),
+          // Nothing to pick spells from until a mentor is actually chosen — the button only
+          // appears once Apprenticeship has something to hand her.
+          if (widget.onEditSpells != null && (!isApprentice || hasMentor)) _spellsButton(),
+          if (tappableChips.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                'No spells',
+                isApprentice && !hasMentor ? 'No mentor chosen' : 'No spells',
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.white.withValues(alpha: 0.6),
@@ -247,7 +269,7 @@ class _EntryTileState extends State<_EntryTile>
               ),
             )
           else
-            ...chips,
+            ...tappableChips,
         ],
       ),
     );
@@ -256,36 +278,43 @@ class _EntryTileState extends State<_EntryTile>
   Widget _spellsButton() {
     return GestureDetector(
       onTap: widget.busy ? null : widget.onEditSpells,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.18),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.35),
-            width: 0.5,
+      child: _pillButton(icon: Icons.auto_fix_high, label: 'Spells'),
+    );
+  }
+
+  Widget _apprenticeshipButton() {
+    return GestureDetector(
+      onTap: widget.busy ? null : widget.onEditApprenticeship,
+      child: _pillButton(icon: Icons.school_outlined, label: 'Apprenticeship'),
+    );
+  }
+
+  Widget _pillButton({required IconData icon, required String label}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.35),
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: Colors.white.withValues(alpha: 0.9)),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: GoogleFonts.cinzel(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.auto_fix_high,
-              size: 12,
-              color: Colors.white.withValues(alpha: 0.9),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              'Spells',
-              style: GoogleFonts.cinzel(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

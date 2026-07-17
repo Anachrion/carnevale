@@ -6,108 +6,18 @@ part of 'set_entry_spells_input_entry.dart';
 // BuiltValueGenerator
 // **************************************************************************
 
-const SetEntrySpellsInputEntryDisciplineEnum
-_$setEntrySpellsInputEntryDisciplineEnum_bloodRites =
-    const SetEntrySpellsInputEntryDisciplineEnum._('bloodRites');
-const SetEntrySpellsInputEntryDisciplineEnum
-_$setEntrySpellsInputEntryDisciplineEnum_divinity =
-    const SetEntrySpellsInputEntryDisciplineEnum._('divinity');
-const SetEntrySpellsInputEntryDisciplineEnum
-_$setEntrySpellsInputEntryDisciplineEnum_fateweaving =
-    const SetEntrySpellsInputEntryDisciplineEnum._('fateweaving');
-const SetEntrySpellsInputEntryDisciplineEnum
-_$setEntrySpellsInputEntryDisciplineEnum_runesOfSovereignty =
-    const SetEntrySpellsInputEntryDisciplineEnum._('runesOfSovereignty');
-const SetEntrySpellsInputEntryDisciplineEnum
-_$setEntrySpellsInputEntryDisciplineEnum_wildMagic =
-    const SetEntrySpellsInputEntryDisciplineEnum._('wildMagic');
-
-SetEntrySpellsInputEntryDisciplineEnum
-_$setEntrySpellsInputEntryDisciplineEnumValueOf(String name) {
-  switch (name) {
-    case 'bloodRites':
-      return _$setEntrySpellsInputEntryDisciplineEnum_bloodRites;
-    case 'divinity':
-      return _$setEntrySpellsInputEntryDisciplineEnum_divinity;
-    case 'fateweaving':
-      return _$setEntrySpellsInputEntryDisciplineEnum_fateweaving;
-    case 'runesOfSovereignty':
-      return _$setEntrySpellsInputEntryDisciplineEnum_runesOfSovereignty;
-    case 'wildMagic':
-      return _$setEntrySpellsInputEntryDisciplineEnum_wildMagic;
-    default:
-      throw ArgumentError(name);
-  }
-}
-
-final BuiltSet<SetEntrySpellsInputEntryDisciplineEnum>
-_$setEntrySpellsInputEntryDisciplineEnumValues =
-    BuiltSet<SetEntrySpellsInputEntryDisciplineEnum>(
-      const <SetEntrySpellsInputEntryDisciplineEnum>[
-        _$setEntrySpellsInputEntryDisciplineEnum_bloodRites,
-        _$setEntrySpellsInputEntryDisciplineEnum_divinity,
-        _$setEntrySpellsInputEntryDisciplineEnum_fateweaving,
-        _$setEntrySpellsInputEntryDisciplineEnum_runesOfSovereignty,
-        _$setEntrySpellsInputEntryDisciplineEnum_wildMagic,
-      ],
-    );
-
-Serializer<SetEntrySpellsInputEntryDisciplineEnum>
-_$setEntrySpellsInputEntryDisciplineEnumSerializer =
-    _$SetEntrySpellsInputEntryDisciplineEnumSerializer();
-
-class _$SetEntrySpellsInputEntryDisciplineEnumSerializer
-    implements PrimitiveSerializer<SetEntrySpellsInputEntryDisciplineEnum> {
-  static const Map<String, Object> _toWire = const <String, Object>{
-    'bloodRites': 'blood_rites',
-    'divinity': 'divinity',
-    'fateweaving': 'fateweaving',
-    'runesOfSovereignty': 'runes_of_sovereignty',
-    'wildMagic': 'wild_magic',
-  };
-  static const Map<Object, String> _fromWire = const <Object, String>{
-    'blood_rites': 'bloodRites',
-    'divinity': 'divinity',
-    'fateweaving': 'fateweaving',
-    'runes_of_sovereignty': 'runesOfSovereignty',
-    'wild_magic': 'wildMagic',
-  };
-
-  @override
-  final Iterable<Type> types = const <Type>[
-    SetEntrySpellsInputEntryDisciplineEnum,
-  ];
-  @override
-  final String wireName = 'SetEntrySpellsInputEntryDisciplineEnum';
-
-  @override
-  Object serialize(
-    Serializers serializers,
-    SetEntrySpellsInputEntryDisciplineEnum object, {
-    FullType specifiedType = FullType.unspecified,
-  }) => _toWire[object.name] ?? object.name;
-
-  @override
-  SetEntrySpellsInputEntryDisciplineEnum deserialize(
-    Serializers serializers,
-    Object serialized, {
-    FullType specifiedType = FullType.unspecified,
-  }) => SetEntrySpellsInputEntryDisciplineEnum.valueOf(
-    _fromWire[serialized] ?? (serialized is String ? serialized : ''),
-  );
-}
-
 class _$SetEntrySpellsInputEntry extends SetEntrySpellsInputEntry {
   @override
-  final SetEntrySpellsInputEntryDisciplineEnum? discipline;
+  final int? mentoredByEntryId;
   @override
-  final BuiltList<int>? spellIds;
+  final BuiltList<SetEntrySpellsInputEntryPoolSelectionsInner>? poolSelections;
 
   factory _$SetEntrySpellsInputEntry([
     void Function(SetEntrySpellsInputEntryBuilder)? updates,
   ]) => (SetEntrySpellsInputEntryBuilder()..update(updates))._build();
 
-  _$SetEntrySpellsInputEntry._({this.discipline, this.spellIds}) : super._();
+  _$SetEntrySpellsInputEntry._({this.mentoredByEntryId, this.poolSelections})
+    : super._();
   @override
   SetEntrySpellsInputEntry rebuild(
     void Function(SetEntrySpellsInputEntryBuilder) updates,
@@ -121,15 +31,15 @@ class _$SetEntrySpellsInputEntry extends SetEntrySpellsInputEntry {
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     return other is SetEntrySpellsInputEntry &&
-        discipline == other.discipline &&
-        spellIds == other.spellIds;
+        mentoredByEntryId == other.mentoredByEntryId &&
+        poolSelections == other.poolSelections;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
-    _$hash = $jc(_$hash, discipline.hashCode);
-    _$hash = $jc(_$hash, spellIds.hashCode);
+    _$hash = $jc(_$hash, mentoredByEntryId.hashCode);
+    _$hash = $jc(_$hash, poolSelections.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -137,8 +47,8 @@ class _$SetEntrySpellsInputEntry extends SetEntrySpellsInputEntry {
   @override
   String toString() {
     return (newBuiltValueToStringHelper(r'SetEntrySpellsInputEntry')
-          ..add('discipline', discipline)
-          ..add('spellIds', spellIds))
+          ..add('mentoredByEntryId', mentoredByEntryId)
+          ..add('poolSelections', poolSelections))
         .toString();
   }
 }
@@ -148,14 +58,18 @@ class SetEntrySpellsInputEntryBuilder
         Builder<SetEntrySpellsInputEntry, SetEntrySpellsInputEntryBuilder> {
   _$SetEntrySpellsInputEntry? _$v;
 
-  SetEntrySpellsInputEntryDisciplineEnum? _discipline;
-  SetEntrySpellsInputEntryDisciplineEnum? get discipline => _$this._discipline;
-  set discipline(SetEntrySpellsInputEntryDisciplineEnum? discipline) =>
-      _$this._discipline = discipline;
+  int? _mentoredByEntryId;
+  int? get mentoredByEntryId => _$this._mentoredByEntryId;
+  set mentoredByEntryId(int? mentoredByEntryId) =>
+      _$this._mentoredByEntryId = mentoredByEntryId;
 
-  ListBuilder<int>? _spellIds;
-  ListBuilder<int> get spellIds => _$this._spellIds ??= ListBuilder<int>();
-  set spellIds(ListBuilder<int>? spellIds) => _$this._spellIds = spellIds;
+  ListBuilder<SetEntrySpellsInputEntryPoolSelectionsInner>? _poolSelections;
+  ListBuilder<SetEntrySpellsInputEntryPoolSelectionsInner> get poolSelections =>
+      _$this._poolSelections ??=
+          ListBuilder<SetEntrySpellsInputEntryPoolSelectionsInner>();
+  set poolSelections(
+    ListBuilder<SetEntrySpellsInputEntryPoolSelectionsInner>? poolSelections,
+  ) => _$this._poolSelections = poolSelections;
 
   SetEntrySpellsInputEntryBuilder() {
     SetEntrySpellsInputEntry._defaults(this);
@@ -164,8 +78,8 @@ class SetEntrySpellsInputEntryBuilder
   SetEntrySpellsInputEntryBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
-      _discipline = $v.discipline;
-      _spellIds = $v.spellIds?.toBuilder();
+      _mentoredByEntryId = $v.mentoredByEntryId;
+      _poolSelections = $v.poolSelections?.toBuilder();
       _$v = null;
     }
     return this;
@@ -190,14 +104,14 @@ class SetEntrySpellsInputEntryBuilder
       _$result =
           _$v ??
           _$SetEntrySpellsInputEntry._(
-            discipline: discipline,
-            spellIds: _spellIds?.build(),
+            mentoredByEntryId: mentoredByEntryId,
+            poolSelections: _poolSelections?.build(),
           );
     } catch (_) {
       late String _$failedField;
       try {
-        _$failedField = 'spellIds';
-        _spellIds?.build();
+        _$failedField = 'poolSelections';
+        _poolSelections?.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
           r'SetEntrySpellsInputEntry',

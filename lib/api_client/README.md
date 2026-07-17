@@ -91,11 +91,12 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**unarchiveGame**](doc/GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [*GamesApi*](doc/GamesApi.md) | [**unfinishGame**](doc/GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [*GamesApi*](doc/GamesApi.md) | [**updateCounters**](doc/GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
+[*GamesApi*](doc/GamesApi.md) | [**updateSpellCast**](doc/GamesApi.md#updatespellcast) | **PATCH** /games/{id}/entries/{list_entry_id}/spell_casts | Mark (or unmark) one known/granted spell as cast, on one of the current player&#39;s own models
 [*GamesApi*](doc/GamesApi.md) | [**updateStats**](doc/GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntryIllustration**](doc/ListEntriesApi.md#setlistentryillustration) | **PATCH** /list_entries/{id}/illustration | Switch which illustration (card reference) a model is hired as
-[*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntrySpells**](doc/ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline) a Mage model knows
+[*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntrySpells**](doc/ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline(s)) a Mage model knows, per pool
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 [*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list owned by the current user
 [*ListsApi*](doc/ListsApi.md) | [**deleteList**](doc/ListsApi.md#deletelist) | **DELETE** /lists/{id} | Delete a list
@@ -109,7 +110,8 @@ Class | Method | HTTP request | Description
 [*SessionApi*](doc/SessionApi.md) | [**createCableTicket**](doc/SessionApi.md#createcableticket) | **POST** /cable_tickets | Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
 [*SessionApi*](doc/SessionApi.md) | [**forgotPassword**](doc/SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [*SessionApi*](doc/SessionApi.md) | [**login**](doc/SessionApi.md#login) | **POST** /login | Log in and receive a JWT
-[*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
+[*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT and all refresh tokens
+[*SessionApi*](doc/SessionApi.md) | [**refreshToken**](doc/SessionApi.md#refreshtoken) | **POST** /token | Exchange a refresh token for a fresh JWT
 [*SessionApi*](doc/SessionApi.md) | [**resetPassword**](doc/SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [*SessionApi*](doc/SessionApi.md) | [**signup**](doc/SessionApi.md#signup) | **POST** /signup | Register a new user
 [*SessionApi*](doc/SessionApi.md) | [**updateAccount**](doc/SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
@@ -145,6 +147,7 @@ Class | Method | HTTP request | Description
  - [GamePlayer](doc/GamePlayer.md)
  - [GangSummary](doc/GangSummary.md)
  - [GetCardsManifest200Response](doc/GetCardsManifest200Response.md)
+ - [GrantedSpell](doc/GrantedSpell.md)
  - [JoinGameInput](doc/JoinGameInput.md)
  - [ListEntry](doc/ListEntry.md)
  - [ListInput](doc/ListInput.md)
@@ -152,7 +155,9 @@ Class | Method | HTTP request | Description
  - [LoginInput](doc/LoginInput.md)
  - [LoginInputUser](doc/LoginInputUser.md)
  - [ModelList](doc/ModelList.md)
+ - [PoolSpell](doc/PoolSpell.md)
  - [Profile](doc/Profile.md)
+ - [RefreshInput](doc/RefreshInput.md)
  - [RegistrationInput](doc/RegistrationInput.md)
  - [RegistrationInputUser](doc/RegistrationInputUser.md)
  - [ResetPasswordInput](doc/ResetPasswordInput.md)
@@ -165,13 +170,18 @@ Class | Method | HTTP request | Description
  - [SessionUser](doc/SessionUser.md)
  - [SetEntrySpellsInput](doc/SetEntrySpellsInput.md)
  - [SetEntrySpellsInputEntry](doc/SetEntrySpellsInputEntry.md)
+ - [SetEntrySpellsInputEntryPoolSelectionsInner](doc/SetEntrySpellsInputEntryPoolSelectionsInner.md)
  - [SpecialRule](doc/SpecialRule.md)
  - [Spell](doc/Spell.md)
+ - [SpellPool](doc/SpellPool.md)
+ - [SpellRuleRef](doc/SpellRuleRef.md)
  - [SummonModelRequest](doc/SummonModelRequest.md)
  - [UpdateAccountInput](doc/UpdateAccountInput.md)
  - [UpdateAccountInputUser](doc/UpdateAccountInputUser.md)
  - [UpdateCountersInput](doc/UpdateCountersInput.md)
  - [UpdateCountersInputCounters](doc/UpdateCountersInputCounters.md)
+ - [UpdateSpellCastInput](doc/UpdateSpellCastInput.md)
+ - [UpdateSpellCastInputSpellCast](doc/UpdateSpellCastInputSpellCast.md)
  - [UpdateStatsInput](doc/UpdateStatsInput.md)
  - [UpdateStatsInputStats](doc/UpdateStatsInputStats.md)
  - [ValidationErrors](doc/ValidationErrors.md)

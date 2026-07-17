@@ -106,12 +106,13 @@ api.ListEntry fakeListEntry({
     ..entryType = entryType
     ..entryId = entryId
     ..name = name
+    ..keywords = ListBuilder<String>()
     ..cost = cost
     ..summoned = summoned
     ..mage = false
-    ..spellSlots = 0
-    ..disciplines = ListBuilder<String>()
-    ..spells = ListBuilder<api.Spell>()
+    ..distinctDisciplinePerCopy = false
+    ..pools = ListBuilder<api.SpellPool>()
+    ..grantedSpells = ListBuilder<api.GrantedSpell>()
     // Only models in a live game have a state; a gang-builder entry leaves it null.
     ..state = state?.toBuilder(),
 );

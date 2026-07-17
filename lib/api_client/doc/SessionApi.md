@@ -12,7 +12,8 @@ Method | HTTP request | Description
 [**createCableTicket**](SessionApi.md#createcableticket) | **POST** /cable_tickets | Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
 [**forgotPassword**](SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [**login**](SessionApi.md#login) | **POST** /login | Log in and receive a JWT
-[**logout**](SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT
+[**logout**](SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT and all refresh tokens
+[**refreshToken**](SessionApi.md#refreshtoken) | **POST** /token | Exchange a refresh token for a fresh JWT
 [**resetPassword**](SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [**signup**](SessionApi.md#signup) | **POST** /signup | Register a new user
 [**updateAccount**](SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
@@ -110,7 +111,7 @@ void (empty response body)
 
 Log in and receive a JWT
 
-On success, the JWT is returned in the `Authorization` response header as `Bearer <token>`. Send it back on subsequent requests to authenticate.
+On success, a short-lived JWT is returned in the `Authorization` response header as `Bearer <token>` (send it back on subsequent requests to authenticate), and a long-lived `refresh_token` is returned in the body for renewing the JWT via POST /token once it expires. 
 
 ### Example
 ```dart
@@ -155,7 +156,9 @@ Name | Type | Description  | Notes
 # **logout**
 > logout()
 
-Revoke the current JWT
+Revoke the current JWT and all refresh tokens
+
+Denylists the current JWT and revokes every refresh token the user holds (signs out everywhere).
 
 ### Example
 ```dart
@@ -189,6 +192,53 @@ void (empty response body)
 
  - **Content-Type**: Not defined
  - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **refreshToken**
+> Session refreshToken(refreshInput)
+
+Exchange a refresh token for a fresh JWT
+
+Trades a valid refresh token for a new short-lived JWT (returned in the `Authorization` response header) and a rotated `refresh_token` (returned in the body). Does NOT require a live JWT — this is how a client renews once its JWT has expired. The presented refresh token is invalidated; use the one returned here for the next refresh. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getSessionApi();
+final RefreshInput refreshInput = ; // RefreshInput | 
+
+try {
+    final response = api.refreshToken(refreshInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling SessionApi->refreshToken: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **refreshInput** | [**RefreshInput**](RefreshInput.md)|  | 
+
+### Return type
+
+[**Session**](Session.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

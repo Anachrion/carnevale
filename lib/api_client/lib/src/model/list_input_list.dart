@@ -17,7 +17,7 @@ part 'list_input_list.g.dart';
 @BuiltValue()
 abstract class ListInputList implements Built<ListInputList, ListInputListBuilder> {
   @BuiltValueField(wireName: r'name')
-  String? get name;
+  String get name;
 
   @BuiltValueField(wireName: r'faction')
   String get faction;
@@ -49,13 +49,11 @@ class _$ListInputListSerializer implements PrimitiveSerializer<ListInputList> {
     ListInputList object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
-    if (object.name != null) {
-      yield r'name';
-      yield serializers.serialize(
-        object.name,
-        specifiedType: const FullType.nullable(String),
-      );
-    }
+    yield r'name';
+    yield serializers.serialize(
+      object.name,
+      specifiedType: const FullType(String),
+    );
     yield r'faction';
     yield serializers.serialize(
       object.faction,
@@ -94,9 +92,8 @@ class _$ListInputListSerializer implements PrimitiveSerializer<ListInputList> {
         case r'name':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
-          if (valueDes == null) continue;
+            specifiedType: const FullType(String),
+          ) as String;
           result.name = valueDes;
           break;
         case r'faction':

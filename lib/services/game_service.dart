@@ -334,6 +334,30 @@ class GameService extends ChangeNotifier {
     return res.data!;
   });
 
+  /// Marks (or unmarks) one known/granted spell as cast, on one of the current player's own
+  /// models. `key` comes verbatim from the PoolSpell/GrantedSpell being toggled (see
+  /// KnownSpell.key) — `cast` is the desired state rather than a blind toggle. Returns the
+  /// model's full updated state (HP/WP/CP/counters); the spell's own new `cast` flag isn't in
+  /// that payload (it lives on ListEntry.pools/grantedSpells, not EntryState), so the caller
+  /// applies the flip to its own local copy instead of waiting for a re-fetch.
+  Future<api.EntryState> updateSpellCast(
+    int gameId,
+    int listEntryId, {
+    required String key,
+    required bool cast,
+  }) => _guard(() async {
+    final res = await _client.games.updateSpellCast(
+      id: gameId,
+      listEntryId: listEntryId,
+      updateSpellCastInput: api.UpdateSpellCastInput(
+        (b) => b
+          ..spellCast.key = key
+          ..spellCast.cast = cast,
+      ),
+    );
+    return res.data!;
+  });
+
   /// Fetches an initial snapshot and opens a live ActionCable subscription for
   /// [gameId], keeping [currentGame] in sync until [stopWatching] is called.
   ///

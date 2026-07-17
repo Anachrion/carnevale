@@ -8,7 +8,7 @@ void main() {
   testWidgets('SpellChip shows the spell name and its discipline label on tap', (
     tester,
   ) async {
-    final spell = fakeSpell(name: 'Blood Boil');
+    final spell = KnownSpell.fromCatalogSpell(fakeSpell(name: 'Blood Boil'));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -22,7 +22,7 @@ void main() {
     await tester.tap(find.byType(SpellChip));
     await tester.pump();
 
-    // The detail dialog renders the discipline via disciplineLabel(disciplineSlug(spell.discipline)).
+    // The detail dialog renders the discipline via KnownSpell.disciplineName.
     expect(find.textContaining('Blood Rites'), findsOneWidget);
   });
 }

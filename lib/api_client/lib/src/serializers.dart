@@ -41,6 +41,7 @@ import 'package:carnevale_api/src/model/game.dart';
 import 'package:carnevale_api/src/model/game_player.dart';
 import 'package:carnevale_api/src/model/gang_summary.dart';
 import 'package:carnevale_api/src/model/get_cards_manifest200_response.dart';
+import 'package:carnevale_api/src/model/granted_spell.dart';
 import 'package:carnevale_api/src/model/join_game_input.dart';
 import 'package:carnevale_api/src/model/list_entry.dart';
 import 'package:carnevale_api/src/model/list_input.dart';
@@ -48,7 +49,9 @@ import 'package:carnevale_api/src/model/list_input_list.dart';
 import 'package:carnevale_api/src/model/login_input.dart';
 import 'package:carnevale_api/src/model/login_input_user.dart';
 import 'package:carnevale_api/src/model/model_list.dart';
+import 'package:carnevale_api/src/model/pool_spell.dart';
 import 'package:carnevale_api/src/model/profile.dart';
+import 'package:carnevale_api/src/model/refresh_input.dart';
 import 'package:carnevale_api/src/model/registration_input.dart';
 import 'package:carnevale_api/src/model/registration_input_user.dart';
 import 'package:carnevale_api/src/model/reset_password_input.dart';
@@ -61,13 +64,18 @@ import 'package:carnevale_api/src/model/session.dart';
 import 'package:carnevale_api/src/model/session_user.dart';
 import 'package:carnevale_api/src/model/set_entry_spells_input.dart';
 import 'package:carnevale_api/src/model/set_entry_spells_input_entry.dart';
+import 'package:carnevale_api/src/model/set_entry_spells_input_entry_pool_selections_inner.dart';
 import 'package:carnevale_api/src/model/special_rule.dart';
 import 'package:carnevale_api/src/model/spell.dart';
+import 'package:carnevale_api/src/model/spell_pool.dart';
+import 'package:carnevale_api/src/model/spell_rule_ref.dart';
 import 'package:carnevale_api/src/model/summon_model_request.dart';
 import 'package:carnevale_api/src/model/update_account_input.dart';
 import 'package:carnevale_api/src/model/update_account_input_user.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
 import 'package:carnevale_api/src/model/update_counters_input_counters.dart';
+import 'package:carnevale_api/src/model/update_spell_cast_input.dart';
+import 'package:carnevale_api/src/model/update_spell_cast_input_spell_cast.dart';
 import 'package:carnevale_api/src/model/update_stats_input.dart';
 import 'package:carnevale_api/src/model/update_stats_input_stats.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
@@ -103,6 +111,7 @@ part 'serializers.g.dart';
   GamePlayer,
   GangSummary,
   GetCardsManifest200Response,
+  GrantedSpell,
   JoinGameInput,
   ListEntry,
   ListInput,
@@ -110,7 +119,9 @@ part 'serializers.g.dart';
   LoginInput,
   LoginInputUser,
   ModelList,
+  PoolSpell,
   Profile,
+  RefreshInput,
   RegistrationInput,
   RegistrationInputUser,
   ResetPasswordInput,
@@ -123,13 +134,18 @@ part 'serializers.g.dart';
   SessionUser,
   SetEntrySpellsInput,
   SetEntrySpellsInputEntry,
+  SetEntrySpellsInputEntryPoolSelectionsInner,
   SpecialRule,
   Spell,
+  SpellPool,
+  SpellRuleRef,
   SummonModelRequest,
   UpdateAccountInput,
   UpdateAccountInputUser,
   UpdateCountersInput,
   UpdateCountersInputCounters,
+  UpdateSpellCastInput,
+  UpdateSpellCastInputSpellCast,
   UpdateStatsInput,
   UpdateStatsInputStats,
   ValidationErrors,

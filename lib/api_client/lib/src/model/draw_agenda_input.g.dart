@@ -66,12 +66,12 @@ class _$DrawAgendaInputOriginEnumSerializer
 
 class _$DrawAgendaInput extends DrawAgendaInput {
   @override
-  final DrawAgendaInputOriginEnum? origin;
+  final DrawAgendaInputOriginEnum origin;
 
   factory _$DrawAgendaInput([void Function(DrawAgendaInputBuilder)? updates]) =>
       (DrawAgendaInputBuilder()..update(updates))._build();
 
-  _$DrawAgendaInput._({this.origin}) : super._();
+  _$DrawAgendaInput._({required this.origin}) : super._();
   @override
   DrawAgendaInput rebuild(void Function(DrawAgendaInputBuilder) updates) =>
       (toBuilder()..update(updates)).build();
@@ -136,7 +136,15 @@ class DrawAgendaInputBuilder
   DrawAgendaInput build() => _build();
 
   _$DrawAgendaInput _build() {
-    final _$result = _$v ?? _$DrawAgendaInput._(origin: origin);
+    final _$result =
+        _$v ??
+        _$DrawAgendaInput._(
+          origin: BuiltValueNullFieldError.checkNotNull(
+            origin,
+            r'DrawAgendaInput',
+            'origin',
+          ),
+        );
     replace(_$result);
     return _$result;
   }

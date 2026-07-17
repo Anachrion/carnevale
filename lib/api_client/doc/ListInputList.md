@@ -8,7 +8,7 @@ import 'package:carnevale_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **String** |  | [optional] 
+**name** | **String** |  | 
 **faction** | **String** |  | 
 **points** | **int** |  | [optional] [default to 100]
 

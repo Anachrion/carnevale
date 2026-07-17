@@ -56,10 +56,6 @@ class SpellsApi {
             'name': 'ApiKeyAuth',
             'keyName': 'X-Api-Key',
             'where': 'header',
-          },{
-            'type': 'http',
-            'scheme': 'bearer',
-            'name': 'bearerAuth',
           },
         ],
         ...?extra,

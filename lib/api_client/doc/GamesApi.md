@@ -32,6 +32,7 @@ Method | HTTP request | Description
 [**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [**unfinishGame**](GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [**updateCounters**](GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
+[**updateSpellCast**](GamesApi.md#updatespellcast) | **PATCH** /games/{id}/entries/{list_entry_id}/spell_casts | Mark (or unmark) one known/granted spell as cast, on one of the current player&#39;s own models
 [**updateStats**](GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
 
 
@@ -446,7 +447,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **int**|  | 
- **drawAgendaInput** | [**DrawAgendaInput**](DrawAgendaInput.md)|  | [optional] 
+ **drawAgendaInput** | [**DrawAgendaInput**](DrawAgendaInput.md)|  | 
 
 ### Return type
 
@@ -560,7 +561,7 @@ Name | Type | Description  | Notes
 
 Get a game's full current state
 
-Returns 404 if the game doesn't exist or the current user isn't a participant. Agendas are only ever populated for the requesting player's own game_player entry.
+Returns 404 if the game doesn't exist or the current user isn't a participant. The opponent's agendas are populated too, except under the scenario's `secret` agenda rule, where the opponent's hand is hidden (see the GamePlayer.agendas description).
 
 ### Example
 ```dart
@@ -1115,6 +1116,57 @@ Name | Type | Description  | Notes
  **id** | **int**|  | 
  **listEntryId** | **int**|  | 
  **updateCountersInput** | [**UpdateCountersInput**](UpdateCountersInput.md)|  | 
+
+### Return type
+
+[**EntryState**](EntryState.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateSpellCast**
+> EntryState updateSpellCast(id, listEntryId, updateSpellCastInput)
+
+Mark (or unmark) one known/granted spell as cast, on one of the current player's own models
+
+Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. `cast` is the desired state rather than a blind toggle, so a retried request from a flaky connection can't accidentally flip it back. Stamped against the requesting player's own turn cursor: for a pool/grant with resets_each_round true (almost every one), the mark clears automatically once that player advances to a new turn; for the rare resets_each_round: false case (Adventuring Noble's Arcane Totem pool), it persists for the rest of the game but stays manually toggleable, so a misclick is always correctable. The change is broadcast to both players as a `game_state` event (re-fetch the player list to see each spell's updated `cast` flag). 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int listEntryId = 56; // int | 
+final UpdateSpellCastInput updateSpellCastInput = ; // UpdateSpellCastInput | 
+
+try {
+    final response = api.updateSpellCast(id, listEntryId, updateSpellCastInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->updateSpellCast: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **listEntryId** | **int**|  | 
+ **updateSpellCastInput** | [**UpdateSpellCastInput**](UpdateSpellCastInput.md)|  | 
 
 ### Return type
 
