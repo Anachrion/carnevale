@@ -46,3 +46,11 @@ python3 scripts/two_player_login.py
 ```
 
 Pass `--url` if your dev server runs on a different port.
+
+## License
+
+The **source code** in this repository is licensed under the [Apache License 2.0](LICENSE).
+
+This app bundles faction symbols, iconography, and other content that is the intellectual property of **TT Combat** ("Carnevale"). That content is **not** covered by the Apache License — it is included with TT Combat's permission and remains © TT Combat, all rights reserved. See [NOTICE](NOTICE) for the full carve-out. If you reuse this code, you are responsible for removing that content or obtaining your own permission from TT Combat.
+
+This is an unofficial, community-driven project and is not affiliated with TT Combat.
