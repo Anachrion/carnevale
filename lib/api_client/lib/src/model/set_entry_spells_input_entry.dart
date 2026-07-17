@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:built_collection/built_collection.dart';
+import 'package:carnevale_api/src/model/set_entry_spells_input_entry_pool_selections_inner.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -12,18 +13,17 @@ part 'set_entry_spells_input_entry.g.dart';
 /// SetEntrySpellsInputEntry
 ///
 /// Properties:
-/// * [discipline] - The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
-/// * [spellIds] - The exact set of known spell ids. Replaces any previous selection.
+/// * [mentoredByEntryId] - Apprentice Doctor's Apprenticeship only: id of another ListEntry in the same list to copy Mage disciplines/slot_count from (see ListEntry.mentored_by_entry_id), or null to clear it. Omit entirely to leave the current mentor untouched — unlike pool_selections, this field is not wholesale-replaced on every call. 
+/// * [poolSelections] - One entry per pool (almost always one pool; a two-pool model like Seamstress or Doctor of the Firmament needs one entry per pool). Replaces this model's *entire* spell selection wholesale across every pool — a pool omitted here loses its selection, it isn't left untouched — so always submit every pool the model has, not just the one that changed. 
 @BuiltValue()
 abstract class SetEntrySpellsInputEntry implements Built<SetEntrySpellsInputEntry, SetEntrySpellsInputEntryBuilder> {
-  /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
-  @BuiltValueField(wireName: r'discipline')
-  SetEntrySpellsInputEntryDisciplineEnum? get discipline;
-  // enum disciplineEnum {  blood_rites,  divinity,  fateweaving,  runes_of_sovereignty,  wild_magic,  };
+  /// Apprentice Doctor's Apprenticeship only: id of another ListEntry in the same list to copy Mage disciplines/slot_count from (see ListEntry.mentored_by_entry_id), or null to clear it. Omit entirely to leave the current mentor untouched — unlike pool_selections, this field is not wholesale-replaced on every call. 
+  @BuiltValueField(wireName: r'mentored_by_entry_id')
+  int? get mentoredByEntryId;
 
-  /// The exact set of known spell ids. Replaces any previous selection.
-  @BuiltValueField(wireName: r'spell_ids')
-  BuiltList<int>? get spellIds;
+  /// One entry per pool (almost always one pool; a two-pool model like Seamstress or Doctor of the Firmament needs one entry per pool). Replaces this model's *entire* spell selection wholesale across every pool — a pool omitted here loses its selection, it isn't left untouched — so always submit every pool the model has, not just the one that changed. 
+  @BuiltValueField(wireName: r'pool_selections')
+  BuiltList<SetEntrySpellsInputEntryPoolSelectionsInner>? get poolSelections;
 
   SetEntrySpellsInputEntry._();
 
@@ -48,18 +48,18 @@ class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEnt
     SetEntrySpellsInputEntry object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
-    if (object.discipline != null) {
-      yield r'discipline';
+    if (object.mentoredByEntryId != null) {
+      yield r'mentored_by_entry_id';
       yield serializers.serialize(
-        object.discipline,
-        specifiedType: const FullType.nullable(SetEntrySpellsInputEntryDisciplineEnum),
+        object.mentoredByEntryId,
+        specifiedType: const FullType.nullable(int),
       );
     }
-    if (object.spellIds != null) {
-      yield r'spell_ids';
+    if (object.poolSelections != null) {
+      yield r'pool_selections';
       yield serializers.serialize(
-        object.spellIds,
-        specifiedType: const FullType(BuiltList, [FullType(int)]),
+        object.poolSelections,
+        specifiedType: const FullType(BuiltList, [FullType(SetEntrySpellsInputEntryPoolSelectionsInner)]),
       );
     }
   }
@@ -85,20 +85,20 @@ class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEnt
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
-        case r'discipline':
+        case r'mentored_by_entry_id':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType.nullable(SetEntrySpellsInputEntryDisciplineEnum),
-          ) as SetEntrySpellsInputEntryDisciplineEnum?;
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
           if (valueDes == null) continue;
-          result.discipline = valueDes;
+          result.mentoredByEntryId = valueDes;
           break;
-        case r'spell_ids':
+        case r'pool_selections':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(BuiltList, [FullType(int)]),
-          ) as BuiltList<int>;
-          result.spellIds.replace(valueDes);
+            specifiedType: const FullType(BuiltList, [FullType(SetEntrySpellsInputEntryPoolSelectionsInner)]),
+          ) as BuiltList<SetEntrySpellsInputEntryPoolSelectionsInner>;
+          result.poolSelections.replace(valueDes);
           break;
         default:
           unhandled.add(key);
@@ -127,31 +127,5 @@ class _$SetEntrySpellsInputEntrySerializer implements PrimitiveSerializer<SetEnt
     );
     return result.build();
   }
-}
-
-class SetEntrySpellsInputEntryDisciplineEnum extends EnumClass {
-
-  /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
-  @BuiltValueEnumConst(wireName: r'blood_rites')
-  static const SetEntrySpellsInputEntryDisciplineEnum bloodRites = _$setEntrySpellsInputEntryDisciplineEnum_bloodRites;
-  /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
-  @BuiltValueEnumConst(wireName: r'divinity')
-  static const SetEntrySpellsInputEntryDisciplineEnum divinity = _$setEntrySpellsInputEntryDisciplineEnum_divinity;
-  /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
-  @BuiltValueEnumConst(wireName: r'fateweaving')
-  static const SetEntrySpellsInputEntryDisciplineEnum fateweaving = _$setEntrySpellsInputEntryDisciplineEnum_fateweaving;
-  /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
-  @BuiltValueEnumConst(wireName: r'runes_of_sovereignty')
-  static const SetEntrySpellsInputEntryDisciplineEnum runesOfSovereignty = _$setEntrySpellsInputEntryDisciplineEnum_runesOfSovereignty;
-  /// The Discipline the model commits to; all known spells must belong to it. Null clears the selection.
-  @BuiltValueEnumConst(wireName: r'wild_magic')
-  static const SetEntrySpellsInputEntryDisciplineEnum wildMagic = _$setEntrySpellsInputEntryDisciplineEnum_wildMagic;
-
-  static Serializer<SetEntrySpellsInputEntryDisciplineEnum> get serializer => _$setEntrySpellsInputEntryDisciplineEnumSerializer;
-
-  const SetEntrySpellsInputEntryDisciplineEnum._(String name): super(name);
-
-  static BuiltSet<SetEntrySpellsInputEntryDisciplineEnum> get values => _$setEntrySpellsInputEntryDisciplineEnumValues;
-  static SetEntrySpellsInputEntryDisciplineEnum valueOf(String name) => _$setEntrySpellsInputEntryDisciplineEnumValueOf(name);
 }
 

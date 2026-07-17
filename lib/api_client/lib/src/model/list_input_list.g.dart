@@ -8,7 +8,7 @@ part of 'list_input_list.dart';
 
 class _$ListInputList extends ListInputList {
   @override
-  final String? name;
+  final String name;
   @override
   final String faction;
   @override
@@ -17,7 +17,7 @@ class _$ListInputList extends ListInputList {
   factory _$ListInputList([void Function(ListInputListBuilder)? updates]) =>
       (ListInputListBuilder()..update(updates))._build();
 
-  _$ListInputList._({this.name, required this.faction, this.points})
+  _$ListInputList._({required this.name, required this.faction, this.points})
     : super._();
   @override
   ListInputList rebuild(void Function(ListInputListBuilder) updates) =>
@@ -103,7 +103,11 @@ class ListInputListBuilder
     final _$result =
         _$v ??
         _$ListInputList._(
-          name: name,
+          name: BuiltValueNullFieldError.checkNotNull(
+            name,
+            r'ListInputList',
+            'name',
+          ),
           faction: BuiltValueNullFieldError.checkNotNull(
             faction,
             r'ListInputList',

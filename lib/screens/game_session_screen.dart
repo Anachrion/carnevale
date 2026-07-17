@@ -13,6 +13,8 @@ import '../widgets/app_toast.dart';
 import '../widgets/create_gang_sheet.dart';
 import '../widgets/gang_tile.dart';
 import '../widgets/glass_panel.dart';
+import '../widgets/spell_chips.dart';
+import '../widgets/spell_picker_dialog.dart';
 import '../widgets/status_views.dart';
 import 'account_screen.dart';
 import 'gang_builder_screen.dart';
@@ -48,6 +50,11 @@ class _GameSessionScreenState extends State<GameSessionScreen>
   bool _discardedExpanded = false;
   String? _error;
   Future<List<AvailableGang>>? _availableGangsFuture;
+  // The player's own in-game gang snapshot and the full spell catalog, for the "Your Spells"
+  // section of the agenda_draw phase. Fetched lazily (this screen has no other use for either) and
+  // re-pointed at the PATCH response directly after an edit, same as _availableGangsFuture above.
+  Future<api.ModelList>? _myListFuture;
+  Future<List<api.Spell>>? _allSpellsFuture;
   // Last status we saw, so we can fire the one-off deployment popup exactly on the agenda_draw ->
   // in_progress transition (both players confirmed) rather than every time an already-live game
   // loads. Client-local only — a reload won't replay it, which is fine for an at-the-table prompt.
@@ -664,20 +671,185 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     final secret = game.scenario.agendaRules.contains(
       api.ScenarioAgendaRulesEnum.secret,
     );
-    // The opening hand is dealt server-side the instant the game enters agenda_draw, arriving in
-    // the same state broadcast that flips the status — so agendas are normally already present.
-    // This empty state only shows in the brief window before that broadcast lands.
-    if (me.agendas.isEmpty) {
-      return _PhaseCard(
-        title: 'Dealing your Agendas',
-        subtitle: secret
-            ? 'Kept secret from your opponent until achieved (Secret scenario).'
-            : 'Your opponent can see these — this scenario is not Secret.',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildYourSpellsSection(context, game, me),
+        // The opening hand is dealt server-side the instant the game enters agenda_draw, arriving
+        // in the same state broadcast that flips the status — so agendas are normally already
+        // present. This empty state only shows in the brief window before that broadcast lands.
+        if (me.agendas.isEmpty)
+          _PhaseCard(
+            title: 'Dealing your Agendas',
+            subtitle: secret
+                ? 'Kept secret from your opponent until achieved (Secret scenario).'
+                : 'Your opponent can see these — this scenario is not Secret.',
+            children: [
+              Center(
+                child: CircularProgressIndicator(color: context.accentColor),
+              ),
+            ],
+          )
+        else
+          _buildYourAgendasCard(context, game, me),
+      ],
+    );
+  }
+
+  // ── Your Spells ──────────────────────────────────────────────────────────
+
+  Widget _buildYourSpellsSection(
+    BuildContext context,
+    api.Game game,
+    api.GamePlayer me,
+  ) {
+    _myListFuture ??= _service.playerList(game.id, me.id);
+    _allSpellsFuture ??= _gangService.loadSpells();
+    return FutureBuilder<List<api.Spell>>(
+      future: _allSpellsFuture,
+      builder: (context, spellsSnap) {
+        final allSpells = spellsSnap.data;
+        // Loading, or failed — the spells step is a courtesy above Agendas, not a hard gate, so a
+        // fetch hiccup here just hides the section rather than blocking the whole phase.
+        if (allSpells == null) return const SizedBox.shrink();
+        return FutureBuilder<api.ModelList>(
+          future: _myListFuture,
+          builder: (context, gangSnap) {
+            final gang = gangSnap.data;
+            if (gang == null) return const SizedBox.shrink();
+            final mages = gang.entries.where((e) => e.mage).toList();
+            if (mages.isEmpty) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _PhaseCard(
+                title: 'Your Spells',
+                subtitle:
+                    'Review each Mage\'s spells before confirming — Ready locks these in together with your Agendas.',
+                children: [
+                  for (final entry in mages)
+                    _mageSpellRow(context, game, me, gang, allSpells, entry),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _mageSpellRow(
+    BuildContext context,
+    api.Game game,
+    api.GamePlayer me,
+    api.ModelList gang,
+    List<api.Spell> allSpells,
+    api.ListEntry entry,
+  ) {
+    final needsMentor = entry.pools.any(
+      (p) => p.mentorDerived && entry.mentoredByEntryId == null,
+    );
+    final knownCount = entry.pools.fold<int>(
+      0,
+      (sum, p) => sum + p.spells.length,
+    );
+    final slotTotal = entry.pools.fold<int>(
+      0,
+      (sum, p) => sum + (p.unlimited ? 0 : p.slotCount),
+    );
+    final disciplines = entry.pools
+        .expand((p) => p.chosenDisciplines)
+        .toSet();
+    final summary = needsMentor
+        ? 'No mentor chosen yet'
+        : [
+            if (disciplines.isNotEmpty)
+              disciplines.map(disciplineLabel).join(' + '),
+            '$knownCount/$slotTotal spells',
+          ].join(' · ');
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: context.cardBgColor.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.2)),
+      ),
+      child: Row(
         children: [
-          Center(child: CircularProgressIndicator(color: context.accentColor)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.name,
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: context.textColor,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  summary,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: needsMentor
+                        ? Colors.redAccent
+                        : context.subtleTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Locking is enforced server-side too (the same PATCH the dialog would send gets
+          // rejected once Agendas are confirmed) — hiding the button here is a courtesy so the
+          // player isn't invited into a dialog that can no longer save.
+          if (!me.agendasConfirmed)
+            OutlinedButton(
+              onPressed: _busy
+                  ? null
+                  : () => _editGameSpells(game, entry, gang, allSpells),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.accentColor,
+                side: BorderSide(color: context.accentColor),
+                visualDensity: VisualDensity.compact,
+              ),
+              child: Text(needsMentor ? 'Set up' : 'Edit'),
+            ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _editGameSpells(
+    api.Game game,
+    api.ListEntry entry,
+    api.ModelList gang,
+    List<api.Spell> allSpells,
+  ) async {
+    final result = await showSpellPickerDialog(
+      context,
+      entry: entry,
+      allSpells: allSpells,
+      siblingEntries: gang.entries.toList(),
+    );
+    if (result == null || !mounted) return;
+    await _run(() async {
+      final updated = await _gangService.setEntrySpells(
+        entry.id,
+        poolSelections: result.poolSelections,
+        mentorChanged: result.mentorChanged,
+        mentoredByEntryId: result.mentoredByEntryId,
       );
-    }
+      if (mounted) setState(() => _myListFuture = Future.value(updated));
+    });
+  }
+
+  Widget _buildYourAgendasCard(
+    BuildContext context,
+    api.Game game,
+    api.GamePlayer me,
+  ) {
     // Agendas mulliganed away stay on screen (crossed out, title only) so both players keep a
     // record of what was agreed unachievable.
     final discarded = me.agendaHistory
@@ -695,7 +867,12 @@ class _GameSessionScreenState extends State<GameSessionScreen>
         const SizedBox(height: 8),
         // The hand is dealt automatically; the player reads (and optionally mulligans) it, then
         // confirms. Once both players confirm, the game goes straight live.
-        if (!me.agendasConfirmed)
+        if (!me.agendasConfirmed) ...[
+          Text(
+            'Confirming locks in your Agendas and your Spells together for the rest of the game.',
+            style: TextStyle(fontSize: 11.5, color: context.subtleTextColor),
+          ),
+          const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
             child: _ActionButton(
@@ -703,8 +880,8 @@ class _GameSessionScreenState extends State<GameSessionScreen>
               onTap: () => _run(() => _service.confirmAgendas(game.id)),
               busy: _busy,
             ),
-          )
-        else ...[
+          ),
+        ] else ...[
           Text(
             'Waiting for the opponent to be ready...',
             style: TextStyle(color: context.subtleTextColor),

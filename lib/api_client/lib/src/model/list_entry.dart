@@ -4,8 +4,9 @@
 
 // ignore_for_file: unused_element
 import 'package:carnevale_api/src/model/entry_state.dart';
+import 'package:carnevale_api/src/model/granted_spell.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:carnevale_api/src/model/spell.dart';
+import 'package:carnevale_api/src/model/spell_pool.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -20,18 +21,18 @@ part 'list_entry.g.dart';
 /// * [entryId] 
 /// * [name] 
 /// * [profileName] - The underlying profile's name without the card-reference letter suffix (e.g. \"Beggar\" rather than \"Beggar (A)\"). Use this to label a hired model and number duplicates client-side. Null for Equipment entries. 
+/// * [keywords] - The underlying profile's printed keywords (e.g. [\"Hero\", \"Doctor\"]) — used client-side to filter Apprentice Doctor's Apprenticeship mentor candidates (\"a character with both the Doctor and Hero keywords\"). Empty for Equipment. 
 /// * [identifier] - Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
 /// * [cardFront] - Front face filename of the chosen card reference (served from /cards). Null for Equipment.
 /// * [cardBack] - Back face filename of the chosen card reference (served from /cards). Null for Equipment.
 /// * [cost] 
 /// * [summoned] - Conjured onto the board mid-game by a special rule, rather than hired during gang building. A summoned model tracks HP/counters/activation like any other, but costs the gang nothing and is exempt from the gang-building rules (ducat limit, faction consistency, unique/Leader/ratio), so a legal summon can't push a gang over its limit or flip it to invalid. It is also the only kind of model that can be removed mid-game. 
 /// * [state] - Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
-/// * [mage] - Whether this model is a Mage and can therefore be given spells. Always false for Equipment.
-/// * [spellSlots] - Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
-/// * [disciplines] - Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
-/// * [spellDiscipline] - The Discipline this model has committed to, or null if none picked yet.
-/// * [cantrip] - The free Cantrip the model always knows for its committed Discipline; null when no Discipline is picked. Not counted against spell_slots.
-/// * [spells] - The non-free spells this model currently knows.
+/// * [mage] - Whether this model is a Mage and can therefore be given spells. Always false for Equipment; non-Mage models carry empty pools/granted_spells.
+/// * [mentoredByEntryId] - Apprentice Doctor's Apprenticeship: the id of another ListEntry in the same list whose resolved Mage pool this model's mentor_derived pool borrows its disciplines/slot_count from. Null for every other profile, and null until a mentor is chosen. Set it via PATCH /list_entries/{id}/spells (SetEntrySpellsInput.entry.mentored_by_entry_id). 
+/// * [distinctDisciplinePerCopy] - Romani's Tarot: when true, every other ListEntry of the same profile in this list must commit its first pool to a different Discipline from this one's — enforced server-side (ListValidationService), exposed here only so the picker can grey out a sibling's already-chosen Discipline with an inline reason. False for every other profile. 
+/// * [pools] - This model's spell-selection pools (rulebook p24), in profile order. Empty for non-Mage models. Most profiles have exactly one; a few (Seamstress, Tarot Reader) have two, and one (Doctor of the Firmament) spans multiple Disciplines at once via a single pool's `of`. 
+/// * [grantedSpells] - Spells this model always knows regardless of pool picks (e.g. Galilean Priest's Waves of Force, Blood Crone's five Cantrips) — read-only, never edited through the spells endpoint, and don't count against any pool's slot_count. 
 @BuiltValue()
 abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -53,6 +54,10 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   /// The underlying profile's name without the card-reference letter suffix (e.g. \"Beggar\" rather than \"Beggar (A)\"). Use this to label a hired model and number duplicates client-side. Null for Equipment entries. 
   @BuiltValueField(wireName: r'profile_name')
   String? get profileName;
+
+  /// The underlying profile's printed keywords (e.g. [\"Hero\", \"Doctor\"]) — used client-side to filter Apprentice Doctor's Apprenticeship mentor candidates (\"a character with both the Doctor and Hero keywords\"). Empty for Equipment. 
+  @BuiltValueField(wireName: r'keywords')
+  BuiltList<String> get keywords;
 
   /// Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
   @BuiltValueField(wireName: r'identifier')
@@ -77,29 +82,25 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   @BuiltValueField(wireName: r'state')
   EntryState? get state;
 
-  /// Whether this model is a Mage and can therefore be given spells. Always false for Equipment.
+  /// Whether this model is a Mage and can therefore be given spells. Always false for Equipment; non-Mage models carry empty pools/granted_spells.
   @BuiltValueField(wireName: r'mage')
   bool get mage;
 
-  /// Maximum number of non-Cantrip spells the model may know (Mage X + Expert Sorcerer X). 0 for non-Mages.
-  @BuiltValueField(wireName: r'spell_slots')
-  int get spellSlots;
+  /// Apprentice Doctor's Apprenticeship: the id of another ListEntry in the same list whose resolved Mage pool this model's mentor_derived pool borrows its disciplines/slot_count from. Null for every other profile, and null until a mentor is chosen. Set it via PATCH /list_entries/{id}/spells (SetEntrySpellsInput.entry.mentored_by_entry_id). 
+  @BuiltValueField(wireName: r'mentored_by_entry_id')
+  int? get mentoredByEntryId;
 
-  /// Discipline slugs the model may pick spells from, e.g. [\"blood_rites\", \"divinity\"].
-  @BuiltValueField(wireName: r'disciplines')
-  BuiltList<String> get disciplines;
+  /// Romani's Tarot: when true, every other ListEntry of the same profile in this list must commit its first pool to a different Discipline from this one's — enforced server-side (ListValidationService), exposed here only so the picker can grey out a sibling's already-chosen Discipline with an inline reason. False for every other profile. 
+  @BuiltValueField(wireName: r'distinct_discipline_per_copy')
+  bool get distinctDisciplinePerCopy;
 
-  /// The Discipline this model has committed to, or null if none picked yet.
-  @BuiltValueField(wireName: r'spell_discipline')
-  String? get spellDiscipline;
+  /// This model's spell-selection pools (rulebook p24), in profile order. Empty for non-Mage models. Most profiles have exactly one; a few (Seamstress, Tarot Reader) have two, and one (Doctor of the Firmament) spans multiple Disciplines at once via a single pool's `of`. 
+  @BuiltValueField(wireName: r'pools')
+  BuiltList<SpellPool> get pools;
 
-  /// The free Cantrip the model always knows for its committed Discipline; null when no Discipline is picked. Not counted against spell_slots.
-  @BuiltValueField(wireName: r'cantrip')
-  Spell? get cantrip;
-
-  /// The non-free spells this model currently knows.
-  @BuiltValueField(wireName: r'spells')
-  BuiltList<Spell> get spells;
+  /// Spells this model always knows regardless of pool picks (e.g. Galilean Priest's Waves of Force, Blood Crone's five Cantrips) — read-only, never edited through the spells endpoint, and don't count against any pool's slot_count. 
+  @BuiltValueField(wireName: r'granted_spells')
+  BuiltList<GrantedSpell> get grantedSpells;
 
   ListEntry._();
 
@@ -156,6 +157,11 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
         specifiedType: const FullType.nullable(String),
       );
     }
+    yield r'keywords';
+    yield serializers.serialize(
+      object.keywords,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
     if (object.identifier != null) {
       yield r'identifier';
       yield serializers.serialize(
@@ -199,34 +205,27 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
       object.mage,
       specifiedType: const FullType(bool),
     );
-    yield r'spell_slots';
-    yield serializers.serialize(
-      object.spellSlots,
-      specifiedType: const FullType(int),
-    );
-    yield r'disciplines';
-    yield serializers.serialize(
-      object.disciplines,
-      specifiedType: const FullType(BuiltList, [FullType(String)]),
-    );
-    if (object.spellDiscipline != null) {
-      yield r'spell_discipline';
+    if (object.mentoredByEntryId != null) {
+      yield r'mentored_by_entry_id';
       yield serializers.serialize(
-        object.spellDiscipline,
-        specifiedType: const FullType.nullable(String),
+        object.mentoredByEntryId,
+        specifiedType: const FullType.nullable(int),
       );
     }
-    if (object.cantrip != null) {
-      yield r'cantrip';
-      yield serializers.serialize(
-        object.cantrip,
-        specifiedType: const FullType.nullable(Spell),
-      );
-    }
-    yield r'spells';
+    yield r'distinct_discipline_per_copy';
     yield serializers.serialize(
-      object.spells,
-      specifiedType: const FullType(BuiltList, [FullType(Spell)]),
+      object.distinctDisciplinePerCopy,
+      specifiedType: const FullType(bool),
+    );
+    yield r'pools';
+    yield serializers.serialize(
+      object.pools,
+      specifiedType: const FullType(BuiltList, [FullType(SpellPool)]),
+    );
+    yield r'granted_spells';
+    yield serializers.serialize(
+      object.grantedSpells,
+      specifiedType: const FullType(BuiltList, [FullType(GrantedSpell)]),
     );
   }
 
@@ -294,6 +293,13 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
           if (valueDes == null) continue;
           result.profileName = valueDes;
           break;
+        case r'keywords':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.keywords.replace(valueDes);
+          break;
         case r'identifier':
           final valueDes = serializers.deserialize(
             value,
@@ -347,42 +353,34 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
           ) as bool;
           result.mage = valueDes;
           break;
-        case r'spell_slots':
+        case r'mentored_by_entry_id':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(int),
-          ) as int;
-          result.spellSlots = valueDes;
-          break;
-        case r'disciplines':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
-          result.disciplines.replace(valueDes);
-          break;
-        case r'spell_discipline':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(String),
-          ) as String?;
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
           if (valueDes == null) continue;
-          result.spellDiscipline = valueDes;
+          result.mentoredByEntryId = valueDes;
           break;
-        case r'cantrip':
+        case r'distinct_discipline_per_copy':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType.nullable(Spell),
-          ) as Spell?;
-          if (valueDes == null) continue;
-          result.cantrip.replace(valueDes);
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.distinctDisciplinePerCopy = valueDes;
           break;
-        case r'spells':
+        case r'pools':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(BuiltList, [FullType(Spell)]),
-          ) as BuiltList<Spell>;
-          result.spells.replace(valueDes);
+            specifiedType: const FullType(BuiltList, [FullType(SpellPool)]),
+          ) as BuiltList<SpellPool>;
+          result.pools.replace(valueDes);
+          break;
+        case r'granted_spells':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(GrantedSpell)]),
+          ) as BuiltList<GrantedSpell>;
+          result.grantedSpells.replace(valueDes);
           break;
         default:
           unhandled.add(key);

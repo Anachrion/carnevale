@@ -360,6 +360,79 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  // Marks (or unmarks) one known/granted spell as cast. Applied locally right away from the
+  // *request's own* desired value rather than the server's response — unlike counters/stats, the
+  // PATCH's response is just the model's HP/WP/CP/counters (EntryState), not the spell's own new
+  // `cast` flag (that lives on ListEntry.pools/grantedSpells) — so there's nothing to reconcile
+  // against; the client already knows exactly what it just asked for.
+  Future<void> _toggleSpellCast(api.ListEntry entry, KnownSpell spell) async {
+    final key = spell.key;
+    if (key == null) return;
+    final newCast = !spell.cast;
+    try {
+      await GameService().updateSpellCast(
+        widget.gameId,
+        entry.id,
+        key: key,
+        cast: newCast,
+      );
+      if (!mounted) return;
+      _applySpellCast(entry.id, key, newCast);
+    } catch (_) {
+      if (mounted) {
+        showAppToast(context, 'Could not update that spell. Please try again.');
+      }
+    }
+  }
+
+  void _applySpellCast(int listEntryId, String key, bool cast) {
+    final data = _data;
+    if (data == null) return;
+    _mutationSeq++;
+    final gang = data.gang;
+    setState(() {
+      _data = _GangTabData(
+        gang: gang.rebuild(
+          (b) => b.entries.replace(
+            gang.entries.map(
+              (e) => e.id == listEntryId ? _withSpellCast(e, key, cast) : e,
+            ),
+          ),
+        ),
+        profiles: data.profiles,
+        equipment: data.equipment,
+      );
+    });
+  }
+
+  api.ListEntry _withSpellCast(api.ListEntry entry, String key, bool cast) {
+    return entry.rebuild(
+      (b) => b
+        ..pools.replace(
+          entry.pools.map(
+            (pool) => pool.rebuild(
+              (pb) => pb
+                ..cantrips.replace(
+                  pool.cantrips.map(
+                    (s) => s.key == key ? s.rebuild((sb) => sb.cast = cast) : s,
+                  ),
+                )
+                ..spells.replace(
+                  pool.spells.map(
+                    (s) => s.key == key ? s.rebuild((sb) => sb.cast = cast) : s,
+                  ),
+                ),
+            ),
+          ),
+        )
+        ..grantedSpells.replace(
+          entry.grantedSpells.map(
+            (g) => g.key == key ? g.rebuild((gb) => gb.cast = cast) : g,
+          ),
+        ),
+    );
+  }
+
   /// Replaces the whole gang after a summon or dismissal — unlike a counter/stat edit, the roster
   /// itself changed, so there is no single entry to patch in.
   void _applyGang(api.ModelList gang) {
@@ -426,6 +499,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       onEditCounters: widget.editable ? _editCounters : null,
       onEditStats: widget.editable ? _editStats : null,
       onToggleActivated: widget.editable ? _toggleActivated : null,
+      onToggleSpellCast: widget.editable ? _toggleSpellCast : null,
       onSummon: widget.editable ? _summon : null,
       onDismissSummon: widget.editable ? _dismissSummon : null,
     );

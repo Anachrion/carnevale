@@ -23,6 +23,7 @@ import 'package:carnevale_api/src/model/role_input.dart';
 import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/summon_model_request.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
+import 'package:carnevale_api/src/model/update_spell_cast_input.dart';
 import 'package:carnevale_api/src/model/update_stats_input.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
@@ -757,7 +758,7 @@ class GamesApi {
   /// Throws [DioException] if API call or serialization fails
   Future<Response<DrawAgendasResponse>> drawAgendas({ 
     required int id,
-    DrawAgendaInput? drawAgendaInput,
+    required DrawAgendaInput drawAgendaInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -794,7 +795,7 @@ class GamesApi {
 
     try {
       const _type = FullType(DrawAgendaInput);
-      _bodyData = drawAgendaInput == null ? null : _serializers.serialize(drawAgendaInput, specifiedType: _type);
+      _bodyData = _serializers.serialize(drawAgendaInput, specifiedType: _type);
 
     } catch(error, stackTrace) {
       throw DioException(
@@ -1021,7 +1022,7 @@ class GamesApi {
   }
 
   /// Get a game&#39;s full current state
-  /// Returns 404 if the game doesn&#39;t exist or the current user isn&#39;t a participant. Agendas are only ever populated for the requesting player&#39;s own game_player entry.
+  /// Returns 404 if the game doesn&#39;t exist or the current user isn&#39;t a participant. The opponent&#39;s agendas are populated too, except under the scenario&#39;s &#x60;secret&#x60; agenda rule, where the opponent&#39;s hand is hidden (see the GamePlayer.agendas description).
   ///
   /// Parameters:
   /// * [id] 
@@ -2118,6 +2119,116 @@ class GamesApi {
     try {
       const _type = FullType(UpdateCountersInput);
       _bodyData = _serializers.serialize(updateCountersInput, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    EntryState? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(EntryState),
+      ) as EntryState;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<EntryState>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Mark (or unmark) one known/granted spell as cast, on one of the current player&#39;s own models
+  /// Only available while the game is in_progress, and only for entries in the requesting player&#39;s own gang — the opponent&#39;s models 404. &#x60;cast&#x60; is the desired state rather than a blind toggle, so a retried request from a flaky connection can&#39;t accidentally flip it back. Stamped against the requesting player&#39;s own turn cursor: for a pool/grant with resets_each_round true (almost every one), the mark clears automatically once that player advances to a new turn; for the rare resets_each_round: false case (Adventuring Noble&#39;s Arcane Totem pool), it persists for the rest of the game but stays manually toggleable, so a misclick is always correctable. The change is broadcast to both players as a &#x60;game_state&#x60; event (re-fetch the player list to see each spell&#39;s updated &#x60;cast&#x60; flag). 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [listEntryId] 
+  /// * [updateSpellCastInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [EntryState] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<EntryState>> updateSpellCast({ 
+    required int id,
+    required int listEntryId,
+    required UpdateSpellCastInput updateSpellCastInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/entries/{list_entry_id}/spell_casts'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString()).replaceAll('{' r'list_entry_id' '}', encodeQueryParameter(_serializers, listEntryId, const FullType(int)).toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UpdateSpellCastInput);
+      _bodyData = _serializers.serialize(updateSpellCastInput, specifiedType: _type);
 
     } catch(error, stackTrace) {
       throw DioException(

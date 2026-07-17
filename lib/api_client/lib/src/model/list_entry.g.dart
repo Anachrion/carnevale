@@ -80,6 +80,8 @@ class _$ListEntry extends ListEntry {
   @override
   final String? profileName;
   @override
+  final BuiltList<String> keywords;
+  @override
   final String? identifier;
   @override
   final String? cardFront;
@@ -94,15 +96,13 @@ class _$ListEntry extends ListEntry {
   @override
   final bool mage;
   @override
-  final int spellSlots;
+  final int? mentoredByEntryId;
   @override
-  final BuiltList<String> disciplines;
+  final bool distinctDisciplinePerCopy;
   @override
-  final String? spellDiscipline;
+  final BuiltList<SpellPool> pools;
   @override
-  final Spell? cantrip;
-  @override
-  final BuiltList<Spell> spells;
+  final BuiltList<GrantedSpell> grantedSpells;
 
   factory _$ListEntry([void Function(ListEntryBuilder)? updates]) =>
       (ListEntryBuilder()..update(updates))._build();
@@ -114,6 +114,7 @@ class _$ListEntry extends ListEntry {
     required this.entryId,
     required this.name,
     this.profileName,
+    required this.keywords,
     this.identifier,
     this.cardFront,
     this.cardBack,
@@ -121,11 +122,10 @@ class _$ListEntry extends ListEntry {
     required this.summoned,
     this.state,
     required this.mage,
-    required this.spellSlots,
-    required this.disciplines,
-    this.spellDiscipline,
-    this.cantrip,
-    required this.spells,
+    this.mentoredByEntryId,
+    required this.distinctDisciplinePerCopy,
+    required this.pools,
+    required this.grantedSpells,
   }) : super._();
   @override
   ListEntry rebuild(void Function(ListEntryBuilder) updates) =>
@@ -144,6 +144,7 @@ class _$ListEntry extends ListEntry {
         entryId == other.entryId &&
         name == other.name &&
         profileName == other.profileName &&
+        keywords == other.keywords &&
         identifier == other.identifier &&
         cardFront == other.cardFront &&
         cardBack == other.cardBack &&
@@ -151,11 +152,10 @@ class _$ListEntry extends ListEntry {
         summoned == other.summoned &&
         state == other.state &&
         mage == other.mage &&
-        spellSlots == other.spellSlots &&
-        disciplines == other.disciplines &&
-        spellDiscipline == other.spellDiscipline &&
-        cantrip == other.cantrip &&
-        spells == other.spells;
+        mentoredByEntryId == other.mentoredByEntryId &&
+        distinctDisciplinePerCopy == other.distinctDisciplinePerCopy &&
+        pools == other.pools &&
+        grantedSpells == other.grantedSpells;
   }
 
   @override
@@ -167,6 +167,7 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, entryId.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, profileName.hashCode);
+    _$hash = $jc(_$hash, keywords.hashCode);
     _$hash = $jc(_$hash, identifier.hashCode);
     _$hash = $jc(_$hash, cardFront.hashCode);
     _$hash = $jc(_$hash, cardBack.hashCode);
@@ -174,11 +175,10 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, summoned.hashCode);
     _$hash = $jc(_$hash, state.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
-    _$hash = $jc(_$hash, spellSlots.hashCode);
-    _$hash = $jc(_$hash, disciplines.hashCode);
-    _$hash = $jc(_$hash, spellDiscipline.hashCode);
-    _$hash = $jc(_$hash, cantrip.hashCode);
-    _$hash = $jc(_$hash, spells.hashCode);
+    _$hash = $jc(_$hash, mentoredByEntryId.hashCode);
+    _$hash = $jc(_$hash, distinctDisciplinePerCopy.hashCode);
+    _$hash = $jc(_$hash, pools.hashCode);
+    _$hash = $jc(_$hash, grantedSpells.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -192,6 +192,7 @@ class _$ListEntry extends ListEntry {
           ..add('entryId', entryId)
           ..add('name', name)
           ..add('profileName', profileName)
+          ..add('keywords', keywords)
           ..add('identifier', identifier)
           ..add('cardFront', cardFront)
           ..add('cardBack', cardBack)
@@ -199,11 +200,10 @@ class _$ListEntry extends ListEntry {
           ..add('summoned', summoned)
           ..add('state', state)
           ..add('mage', mage)
-          ..add('spellSlots', spellSlots)
-          ..add('disciplines', disciplines)
-          ..add('spellDiscipline', spellDiscipline)
-          ..add('cantrip', cantrip)
-          ..add('spells', spells))
+          ..add('mentoredByEntryId', mentoredByEntryId)
+          ..add('distinctDisciplinePerCopy', distinctDisciplinePerCopy)
+          ..add('pools', pools)
+          ..add('grantedSpells', grantedSpells))
         .toString();
   }
 }
@@ -236,6 +236,11 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   String? get profileName => _$this._profileName;
   set profileName(String? profileName) => _$this._profileName = profileName;
 
+  ListBuilder<String>? _keywords;
+  ListBuilder<String> get keywords =>
+      _$this._keywords ??= ListBuilder<String>();
+  set keywords(ListBuilder<String>? keywords) => _$this._keywords = keywords;
+
   String? _identifier;
   String? get identifier => _$this._identifier;
   set identifier(String? identifier) => _$this._identifier = identifier;
@@ -264,28 +269,26 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   bool? get mage => _$this._mage;
   set mage(bool? mage) => _$this._mage = mage;
 
-  int? _spellSlots;
-  int? get spellSlots => _$this._spellSlots;
-  set spellSlots(int? spellSlots) => _$this._spellSlots = spellSlots;
+  int? _mentoredByEntryId;
+  int? get mentoredByEntryId => _$this._mentoredByEntryId;
+  set mentoredByEntryId(int? mentoredByEntryId) =>
+      _$this._mentoredByEntryId = mentoredByEntryId;
 
-  ListBuilder<String>? _disciplines;
-  ListBuilder<String> get disciplines =>
-      _$this._disciplines ??= ListBuilder<String>();
-  set disciplines(ListBuilder<String>? disciplines) =>
-      _$this._disciplines = disciplines;
+  bool? _distinctDisciplinePerCopy;
+  bool? get distinctDisciplinePerCopy => _$this._distinctDisciplinePerCopy;
+  set distinctDisciplinePerCopy(bool? distinctDisciplinePerCopy) =>
+      _$this._distinctDisciplinePerCopy = distinctDisciplinePerCopy;
 
-  String? _spellDiscipline;
-  String? get spellDiscipline => _$this._spellDiscipline;
-  set spellDiscipline(String? spellDiscipline) =>
-      _$this._spellDiscipline = spellDiscipline;
+  ListBuilder<SpellPool>? _pools;
+  ListBuilder<SpellPool> get pools =>
+      _$this._pools ??= ListBuilder<SpellPool>();
+  set pools(ListBuilder<SpellPool>? pools) => _$this._pools = pools;
 
-  SpellBuilder? _cantrip;
-  SpellBuilder get cantrip => _$this._cantrip ??= SpellBuilder();
-  set cantrip(SpellBuilder? cantrip) => _$this._cantrip = cantrip;
-
-  ListBuilder<Spell>? _spells;
-  ListBuilder<Spell> get spells => _$this._spells ??= ListBuilder<Spell>();
-  set spells(ListBuilder<Spell>? spells) => _$this._spells = spells;
+  ListBuilder<GrantedSpell>? _grantedSpells;
+  ListBuilder<GrantedSpell> get grantedSpells =>
+      _$this._grantedSpells ??= ListBuilder<GrantedSpell>();
+  set grantedSpells(ListBuilder<GrantedSpell>? grantedSpells) =>
+      _$this._grantedSpells = grantedSpells;
 
   ListEntryBuilder() {
     ListEntry._defaults(this);
@@ -300,6 +303,7 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _entryId = $v.entryId;
       _name = $v.name;
       _profileName = $v.profileName;
+      _keywords = $v.keywords.toBuilder();
       _identifier = $v.identifier;
       _cardFront = $v.cardFront;
       _cardBack = $v.cardBack;
@@ -307,11 +311,10 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _summoned = $v.summoned;
       _state = $v.state?.toBuilder();
       _mage = $v.mage;
-      _spellSlots = $v.spellSlots;
-      _disciplines = $v.disciplines.toBuilder();
-      _spellDiscipline = $v.spellDiscipline;
-      _cantrip = $v.cantrip?.toBuilder();
-      _spells = $v.spells.toBuilder();
+      _mentoredByEntryId = $v.mentoredByEntryId;
+      _distinctDisciplinePerCopy = $v.distinctDisciplinePerCopy;
+      _pools = $v.pools.toBuilder();
+      _grantedSpells = $v.grantedSpells.toBuilder();
       _$v = null;
     }
     return this;
@@ -358,6 +361,7 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               'name',
             ),
             profileName: profileName,
+            keywords: keywords.build(),
             identifier: identifier,
             cardFront: cardFront,
             cardBack: cardBack,
@@ -377,29 +381,28 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               r'ListEntry',
               'mage',
             ),
-            spellSlots: BuiltValueNullFieldError.checkNotNull(
-              spellSlots,
+            mentoredByEntryId: mentoredByEntryId,
+            distinctDisciplinePerCopy: BuiltValueNullFieldError.checkNotNull(
+              distinctDisciplinePerCopy,
               r'ListEntry',
-              'spellSlots',
+              'distinctDisciplinePerCopy',
             ),
-            disciplines: disciplines.build(),
-            spellDiscipline: spellDiscipline,
-            cantrip: _cantrip?.build(),
-            spells: spells.build(),
+            pools: pools.build(),
+            grantedSpells: grantedSpells.build(),
           );
     } catch (_) {
       late String _$failedField;
       try {
+        _$failedField = 'keywords';
+        keywords.build();
+
         _$failedField = 'state';
         _state?.build();
 
-        _$failedField = 'disciplines';
-        disciplines.build();
-
-        _$failedField = 'cantrip';
-        _cantrip?.build();
-        _$failedField = 'spells';
-        spells.build();
+        _$failedField = 'pools';
+        pools.build();
+        _$failedField = 'grantedSpells';
+        grantedSpells.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
           r'ListEntry',

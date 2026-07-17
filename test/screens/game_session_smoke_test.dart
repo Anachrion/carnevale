@@ -1,3 +1,4 @@
+import 'package:built_value/serializer.dart';
 import 'package:carnevale/screens/game_session_screen.dart';
 import 'package:carnevale/services/auth_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
@@ -45,6 +46,15 @@ void main() {
       );
       final adapter = installFakeApi();
       adapter.stub('POST', '/cable_tickets', {'ticket': 'test-ticket'});
+      // The agenda_draw phase also fetches the player's own gang + the spell catalog for the
+      // "Your Spells" section; a Mage-less gang keeps that section collapsed (SizedBox.shrink)
+      // without pulling extra widgets into these agenda-focused assertions.
+      adapter.stub(
+        'GET',
+        '/spells',
+        listBody<api.Spell>([], const FullType(api.Spell)),
+      );
+      adapter.stub('GET', '/games/1/players/1/list', modelListBody(fakeModelList()));
 
       final agendas = [fakeAgenda(id: 7, name: 'Cut Them Down')];
       final discarded = [
@@ -95,6 +105,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('Watery Grave'), findsOneWidget);
 
+      // Let the "Your Spells" section's own fetches (spells catalog + player list) settle before
+      // unmounting, so Dio's per-request timer is cancelled rather than left pending (B-timer).
+      await tester.pump(const Duration(milliseconds: 50));
+
       // Unmount so the second mount re-fetches (the const widget would otherwise reuse state).
       await tester.pumpWidget(const SizedBox());
 
@@ -129,6 +143,7 @@ void main() {
         findsOneWidget,
       );
 
+      await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpWidget(const SizedBox());
     },
   );
@@ -141,6 +156,15 @@ void main() {
       );
       final adapter = installFakeApi();
       adapter.stub('POST', '/cable_tickets', {'ticket': 'test-ticket'});
+      // The agenda_draw phase also fetches the player's own gang + the spell catalog for the
+      // "Your Spells" section; a Mage-less gang keeps that section collapsed (SizedBox.shrink)
+      // without pulling extra widgets into these agenda-focused assertions.
+      adapter.stub(
+        'GET',
+        '/spells',
+        listBody<api.Spell>([], const FullType(api.Spell)),
+      );
+      adapter.stub('GET', '/games/1/players/1/list', modelListBody(fakeModelList()));
 
       // In agenda_draw but the auto-dealt hand hasn't landed yet (empty agendas): the screen shows
       // a loading placeholder rather than a Draw button — there's no draw action to offer anymore.
@@ -167,6 +191,7 @@ void main() {
       expect(find.text('Draw'), findsNothing);
       expect(find.text('Ready'), findsNothing);
 
+      await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpWidget(const SizedBox());
     },
   );

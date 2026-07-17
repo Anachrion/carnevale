@@ -13,10 +13,15 @@ part 'session.g.dart';
 ///
 /// Properties:
 /// * [user] 
+/// * [refreshToken] - Long-lived, single-use credential used to obtain a fresh JWT once the short-lived one expires (see POST /token). Store it securely; it is only ever returned here and on refresh, and is rotated on every use. 
 @BuiltValue()
 abstract class Session implements Built<Session, SessionBuilder> {
   @BuiltValueField(wireName: r'user')
   SessionUser get user;
+
+  /// Long-lived, single-use credential used to obtain a fresh JWT once the short-lived one expires (see POST /token). Store it securely; it is only ever returned here and on refresh, and is rotated on every use. 
+  @BuiltValueField(wireName: r'refresh_token')
+  String get refreshToken;
 
   Session._();
 
@@ -45,6 +50,11 @@ class _$SessionSerializer implements PrimitiveSerializer<Session> {
     yield serializers.serialize(
       object.user,
       specifiedType: const FullType(SessionUser),
+    );
+    yield r'refresh_token';
+    yield serializers.serialize(
+      object.refreshToken,
+      specifiedType: const FullType(String),
     );
   }
 
@@ -75,6 +85,13 @@ class _$SessionSerializer implements PrimitiveSerializer<Session> {
             specifiedType: const FullType(SessionUser),
           ) as SessionUser;
           result.user.replace(valueDes);
+          break;
+        case r'refresh_token':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.refreshToken = valueDes;
           break;
         default:
           unhandled.add(key);

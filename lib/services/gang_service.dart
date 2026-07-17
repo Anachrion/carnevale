@@ -1,6 +1,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:dio/dio.dart';
+import '../models/spell_selection.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
 
@@ -88,20 +89,36 @@ class GangService {
         return res.data!;
       });
 
-  /// Replaces a Mage model's committed Discipline and full set of known spells (rulebook p24).
+  /// Replaces a Mage model's spell selection, one pool at a time (rulebook p24) — every one of the
+  /// entry's pools must be included in [poolSelections] (an omitted pool loses its picks). Only
+  /// pass [mentorChanged]/[mentoredByEntryId] for a model with a mentor_derived pool (Apprentice
+  /// Doctor's Apprenticeship); omitting the field server-side leaves the current mentor untouched.
   Future<api.ModelList> setEntrySpells(
-    int entryId,
-    String? discipline,
-    List<int> spellIds,
-  ) => _guard(() async {
+    int entryId, {
+    required List<PoolSelectionResult> poolSelections,
+    bool mentorChanged = false,
+    int? mentoredByEntryId,
+  }) => _guard(() async {
     final res = await _client.listEntries.setListEntrySpells(
       id: entryId,
       setEntrySpellsInput: api.SetEntrySpellsInput(
         (b) => b
           ..entry = api.SetEntrySpellsInputEntry(
-            (eb) => eb
-              ..discipline = _disciplineEnum(discipline)
-              ..spellIds = ListBuilder<int>(spellIds),
+            (eb) {
+              if (mentorChanged) eb.mentoredByEntryId = mentoredByEntryId;
+              eb.poolSelections = ListBuilder<api.SetEntrySpellsInputEntryPoolSelectionsInner>(
+                poolSelections.map(
+                  (p) => api.SetEntrySpellsInputEntryPoolSelectionsInner(
+                    (pb) => pb
+                      ..poolId = p.poolId
+                      ..disciplines = ListBuilder<api.SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum>(
+                        p.disciplines.map(_poolSelectionDisciplineEnum),
+                      )
+                      ..spellIds = ListBuilder<int>(p.spellIds),
+                  ),
+                ),
+              );
+            },
           ).toBuilder(),
       ),
     );
@@ -130,11 +147,10 @@ class GangService {
     return res.data?.toList() ?? [];
   });
 
-  api.SetEntrySpellsInputEntryDisciplineEnum? _disciplineEnum(String? slug) =>
-      slug == null
-      ? null
-      : api.standardSerializers.deserializeWith(
-          api.SetEntrySpellsInputEntryDisciplineEnum.serializer,
-          slug,
-        );
+  api.SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum
+  _poolSelectionDisciplineEnum(String slug) =>
+      api.standardSerializers.deserializeWith(
+        api.SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum.serializer,
+        slug,
+      )!;
 }

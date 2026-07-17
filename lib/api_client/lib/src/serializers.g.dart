@@ -44,6 +44,8 @@ Serializers _$serializers =
           ..add(GameViewerVisibilityEnum.serializer)
           ..add(GangSummary.serializer)
           ..add(GetCardsManifest200Response.serializer)
+          ..add(GrantedSpell.serializer)
+          ..add(GrantedSpellDisciplineEnum.serializer)
           ..add(JoinGameInput.serializer)
           ..add(ListEntry.serializer)
           ..add(ListEntryEntryTypeEnum.serializer)
@@ -52,7 +54,10 @@ Serializers _$serializers =
           ..add(LoginInput.serializer)
           ..add(LoginInputUser.serializer)
           ..add(ModelList.serializer)
+          ..add(PoolSpell.serializer)
+          ..add(PoolSpellDisciplineEnum.serializer)
           ..add(Profile.serializer)
+          ..add(RefreshInput.serializer)
           ..add(RegistrationInput.serializer)
           ..add(RegistrationInputUser.serializer)
           ..add(ResetPasswordInput.serializer)
@@ -67,15 +72,23 @@ Serializers _$serializers =
           ..add(SessionUser.serializer)
           ..add(SetEntrySpellsInput.serializer)
           ..add(SetEntrySpellsInputEntry.serializer)
-          ..add(SetEntrySpellsInputEntryDisciplineEnum.serializer)
+          ..add(SetEntrySpellsInputEntryPoolSelectionsInner.serializer)
+          ..add(
+            SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum
+                .serializer,
+          )
           ..add(SpecialRule.serializer)
           ..add(Spell.serializer)
           ..add(SpellDisciplineEnum.serializer)
+          ..add(SpellPool.serializer)
+          ..add(SpellRuleRef.serializer)
           ..add(SummonModelRequest.serializer)
           ..add(UpdateAccountInput.serializer)
           ..add(UpdateAccountInputUser.serializer)
           ..add(UpdateCountersInput.serializer)
           ..add(UpdateCountersInputCounters.serializer)
+          ..add(UpdateSpellCastInput.serializer)
+          ..add(UpdateSpellCastInputSpellCast.serializer)
           ..add(UpdateStatsInput.serializer)
           ..add(UpdateStatsInputStats.serializer)
           ..add(ValidationErrors.serializer)
@@ -103,6 +116,27 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(GamePlayer)]),
             () => ListBuilder<GamePlayer>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(SetEntrySpellsInputEntryPoolSelectionsInner),
+            ]),
+            () => ListBuilder<SetEntrySpellsInputEntryPoolSelectionsInner>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(
+                SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum,
+              ),
+            ]),
+            () =>
+                ListBuilder<
+                  SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum
+                >(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(int)]),
+            () => ListBuilder<int>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),
@@ -139,8 +173,28 @@ Serializers _$serializers =
             () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
-            const FullType(BuiltList, const [const FullType(Spell)]),
-            () => ListBuilder<Spell>(),
+            const FullType(BuiltList, const [const FullType(SpellPool)]),
+            () => ListBuilder<SpellPool>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(GrantedSpell)]),
+            () => ListBuilder<GrantedSpell>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(PoolSpell)]),
+            () => ListBuilder<PoolSpell>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(PoolSpell)]),
+            () => ListBuilder<PoolSpell>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),
@@ -165,10 +219,6 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(CardReference)]),
             () => ListBuilder<CardReference>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, const [const FullType(int)]),
-            () => ListBuilder<int>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltMap, const [

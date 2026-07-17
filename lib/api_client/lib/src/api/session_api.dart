@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:carnevale_api/src/model/create_cable_ticket201_response.dart';
 import 'package:carnevale_api/src/model/forgot_password_input.dart';
 import 'package:carnevale_api/src/model/login_input.dart';
+import 'package:carnevale_api/src/model/refresh_input.dart';
 import 'package:carnevale_api/src/model/registration_input.dart';
 import 'package:carnevale_api/src/model/reset_password_input.dart';
 import 'package:carnevale_api/src/model/session.dart';
@@ -184,7 +185,7 @@ class SessionApi {
   }
 
   /// Log in and receive a JWT
-  /// On success, the JWT is returned in the &#x60;Authorization&#x60; response header as &#x60;Bearer &lt;token&gt;&#x60;. Send it back on subsequent requests to authenticate.
+  /// On success, a short-lived JWT is returned in the &#x60;Authorization&#x60; response header as &#x60;Bearer &lt;token&gt;&#x60; (send it back on subsequent requests to authenticate), and a long-lived &#x60;refresh_token&#x60; is returned in the body for renewing the JWT via POST /token once it expires. 
   ///
   /// Parameters:
   /// * [loginInput] 
@@ -285,8 +286,8 @@ class SessionApi {
     );
   }
 
-  /// Revoke the current JWT
-  /// 
+  /// Revoke the current JWT and all refresh tokens
+  /// Denylists the current JWT and revokes every refresh token the user holds (signs out everywhere).
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -339,6 +340,108 @@ class SessionApi {
     );
 
     return _response;
+  }
+
+  /// Exchange a refresh token for a fresh JWT
+  /// Trades a valid refresh token for a new short-lived JWT (returned in the &#x60;Authorization&#x60; response header) and a rotated &#x60;refresh_token&#x60; (returned in the body). Does NOT require a live JWT — this is how a client renews once its JWT has expired. The presented refresh token is invalidated; use the one returned here for the next refresh. 
+  ///
+  /// Parameters:
+  /// * [refreshInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Session] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Session>> refreshToken({ 
+    required RefreshInput refreshInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/token';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(RefreshInput);
+      _bodyData = _serializers.serialize(refreshInput, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Session? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(Session),
+      ) as Session;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Session>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Set a new password using a reset token
