@@ -97,6 +97,7 @@ api.ListEntry fakeListEntry({
   int entryId = 10,
   String name = 'Capodecina',
   int cost = 20,
+  List<String> keywords = const [],
   api.EntryState? state,
   bool summoned = false,
 }) => api.ListEntry(
@@ -106,7 +107,7 @@ api.ListEntry fakeListEntry({
     ..entryType = entryType
     ..entryId = entryId
     ..name = name
-    ..keywords = ListBuilder<String>()
+    ..keywords = ListBuilder<String>(keywords)
     ..cost = cost
     ..summoned = summoned
     ..mage = false
