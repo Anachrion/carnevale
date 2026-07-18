@@ -188,7 +188,9 @@ void showSpellDetailDialog(BuildContext context, KnownSpell spell) {
           Text(
             [
               if (spell.disciplineName != null) spell.disciplineName!,
-              if (spell.cost != null) 'WP ${spell.cost}',
+              // A Cantrip's cost is always 0 — the "Cantrip" tag above already says so, no need
+              // to also state "WP 0" here.
+              if (!spell.cantrip && spell.cost != null) 'WP ${spell.cost}',
               if (spell.difficulty != null) 'Difficulty ${spell.difficulty}',
             ].join('  ·  '),
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
@@ -437,7 +439,9 @@ void showKnownSpellsDialog(BuildContext context, List<KnownSpell> spells) {
                                 Text(
                                   [
                                     if (spell.disciplineName != null) spell.disciplineName!,
-                                    if (spell.cost != null) 'WP ${spell.cost}',
+                                    // The star icon above already marks a Cantrip; its cost is
+                                    // always 0, not worth stating.
+                                    if (!spell.cantrip && spell.cost != null) 'WP ${spell.cost}',
                                     if (!spell.resetsEachRound) 'once/game',
                                   ].join(' · '),
                                   style: TextStyle(fontSize: 10, color: context.subtleTextColor),

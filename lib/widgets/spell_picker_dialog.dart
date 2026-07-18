@@ -485,7 +485,6 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
             spell: KnownSpell.fromCatalogSpell(cantripSpell),
             checked: cantripKnown,
             enabled: false,
-            trailingLabel: cantripKnown ? 'always known' : 'granted once a spell is picked',
             onTap: null,
           ),
         if (showPicks)
@@ -829,7 +828,15 @@ class _SpellRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (trailingLabel != null)
+                      if (spell.cantrip)
+                        // A Cantrip's cost is always 0 (not worth stating) and its rules — free,
+                        // known once its Discipline is picked — are the rulebook's, not ours to
+                        // spell out here; just its Difficulty is worth a glance.
+                        Text(
+                          'Cantrip · Diff ${spell.difficulty}',
+                          style: TextStyle(fontSize: 10, color: context.subtleTextColor),
+                        )
+                      else if (trailingLabel != null)
                         Text(
                           trailingLabel!,
                           style: TextStyle(
