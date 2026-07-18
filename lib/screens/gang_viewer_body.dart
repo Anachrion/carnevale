@@ -631,24 +631,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
               ],
               if (_knownSpells.isNotEmpty) ...[
                 const SizedBox(height: 10),
-                if (onToggleSpellCast != null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'KNOWN SPELLS',
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      SpellDetailButton(spells: _knownSpells),
-                    ],
-                  ),
-                if (onToggleSpellCast != null) const SizedBox(height: 6),
-                Wrap(spacing: 6, runSpacing: 6, children: _spellChips),
+                SpellsButton(spells: _knownSpells, onToggle: onToggleSpellCast),
               ],
             ],
           ),
@@ -659,16 +642,6 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 
   // Known/granted spells for a Mage model. Empty for everything else.
   List<KnownSpell> get _knownSpells => entry.mage ? knownSpellsFor(entry) : const [];
-
-  // Own live model: a pure-toggle chip per spell (mark cast), with one detail button above them.
-  // Everything else (opponent's models, or no live state yet): the read-only, tap-for-detail chip.
-  List<Widget> get _spellChips {
-    final toggle = onToggleSpellCast;
-    if (toggle == null) return spellChipsFor(entry);
-    return _knownSpells
-        .map((s) => SpellToggleChip(spell: s, onToggle: () => toggle(s)))
-        .toList();
-  }
 
   // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
   // entirely, so a clean model shows no counter icons at all. Editing happens through the +
