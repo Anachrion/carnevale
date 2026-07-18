@@ -449,17 +449,24 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     if (_busy) return;
     if (newIndex > oldIndex) newIndex--;
     if (newIndex == oldIndex) return;
-    final entry = _gang.entries[oldIndex];
+    // The drag indices count the non-leader models only (the Leader is a pinned header, not part of
+    // the reorderable list). Rebuild that sub-order, keep the Leader — if any — at the top, and
+    // translate the target back into a full-list position for the backend (the Leader holds
+    // position 1, so a non-leader's first slot is position 2).
+    final rest = _gang.entries.toList();
+    final leaderIndex = rest.indexWhere((e) => e.keywords.contains('Leader'));
+    final leader = leaderIndex >= 0 ? rest.removeAt(leaderIndex) : null;
+    final entry = rest.removeAt(oldIndex);
+    rest.insert(newIndex, entry);
+    final reordered = [if (leader != null) leader, ...rest];
+    final position = (leader != null ? 1 : 0) + newIndex + 1;
     final previous = _gang; // snapshot so a failed reorder can be rolled back (A-6)
-    final reordered = List<api.ListEntry>.from(_gang.entries)
-      ..removeAt(oldIndex)
-      ..insert(newIndex, entry);
     setState(() {
       _gang = _gang.rebuild((b) => b..entries.replace(reordered));
       _busy = true;
     });
     final ok = await guard(context, () async {
-      final updated = await GangService().reorderEntry(entry.id, newIndex + 1);
+      final updated = await GangService().reorderEntry(entry.id, position);
       if (!mounted) return;
       setState(() => _gang = updated);
     });
@@ -724,90 +731,109 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         entryDisplayName[c.entry.id] = c.profile.name;
       }
     }
+    // Builds one hired-entry tile. Shared by the pinned Leader header and the reorderable body so
+    // both render identically. `last` drops the trailing gap on the final visible tile.
+    Widget buildEntryTile(api.ListEntry entry, {required bool last}) {
+      final profileIdx =
+          entry.entryType ==
+              api.ListEntryEntryTypeEnum.catalogColonColonCardReference
+          ? _profiles.indexWhere(
+              (p) => p.cardReferenceIds.contains(entry.entryId),
+            )
+          : -1;
+      final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
+      final equipmentItem =
+          entry.entryType ==
+              api.ListEntryEntryTypeEnum.catalogColonColonEquipment
+          ? _equipment.where((e) => e.id == entry.entryId).firstOrNull
+          : null;
+      final entryColor =
+          entry.entryType ==
+              api.ListEntryEntryTypeEnum.catalogColonColonEquipment
+          ? AppPalette.equipment
+          : profile?.faction == 'gifted'
+          ? (AppPalette.factionColors['gifted'] ?? factionColor)
+          : factionColor;
+      final role = profile == null
+          ? null
+          : profile.keywords.contains('Leader')
+          ? 'leader'
+          : profile.keywords.contains('Hero')
+          ? 'hero'
+          : null;
+      VoidCallback? onTap;
+      if (profile != null) {
+        // Open on this exact entry (matched by entry id, so two copies of one profile that were
+        // hired with different illustrations open on their own card, not the first occurrence).
+        final hiredIndex = hiredCards.indexWhere((c) => c.entry.id == entry.id);
+        onTap = () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CardViewerScreen(
+              profiles: hiredProfiles,
+              initialIndex: hiredIndex < 0 ? 0 : hiredIndex,
+              // Each card opens on the illustration its entry was hired as; switching in the
+              // viewer repoints that entry and persists it.
+              selectedReferenceIds: hiredCards
+                  .map((c) => c.entry.entryId)
+                  .toList(),
+              onIllustrationChanged: (index, refId) =>
+                  _onEntryIllustrationChanged(hiredCards[index].entry, refId),
+            ),
+          ),
+        );
+      } else if (equipmentItem != null) {
+        onTap = () => showEquipmentDetailDialog(context, equipmentItem);
+      }
+      final tileName = profile != null
+          ? (entryDisplayName[entry.id] ?? profile.name)
+          : (equipmentItem?.name ?? entry.name);
+      return Padding(
+        padding: EdgeInsets.only(bottom: last ? 0 : 8),
+        child: _EntryTile(
+          entry: entry,
+          name: tileName,
+          factionColor: entryColor,
+          role: role,
+          busy: _busy,
+          onRemove: () => _removeEntry(entry),
+          onTap: onTap,
+          onEditSpells: entry.mage ? () => _editSpells(entry) : null,
+          onEditApprenticeship: entry.pools.any((p) => p.mentorDerived)
+              ? () => _editApprenticeship(entry)
+              : null,
+        ),
+      );
+    }
+
+    // The Leader is pinned to the top as a non-reorderable header; only the other models sit in the
+    // reorderable list. Keeping the Leader out of the reorderable area entirely means nothing can be
+    // dragged above it at all — there's no illegal drop to clamp or roll back.
+    final leaderIndex = entries.indexWhere((e) => e.keywords.contains('Leader'));
+    final leaderEntry = leaderIndex >= 0 ? entries[leaderIndex] : null;
+    final reorderable = [
+      for (final e in entries)
+        if (e.id != leaderEntry?.id) e,
+    ];
+
     return ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+      header: leaderEntry == null
+          ? null
+          : buildEntryTile(leaderEntry, last: reorderable.isEmpty),
       onReorder: _reorderEntry,
       proxyDecorator: (child, _, __) => child,
       buildDefaultDragHandles: false,
-      itemCount: entries.length,
+      itemCount: reorderable.length,
       itemBuilder: (_, i) {
-        final entry = entries[i];
-        final profileIdx =
-            entry.entryType ==
-                api.ListEntryEntryTypeEnum.catalogColonColonCardReference
-            ? _profiles.indexWhere(
-                (p) => p.cardReferenceIds.contains(entry.entryId),
-              )
-            : -1;
-        final profile = profileIdx != -1 ? _profiles[profileIdx] : null;
-        final equipmentItem =
-            entry.entryType ==
-                api.ListEntryEntryTypeEnum.catalogColonColonEquipment
-            ? _equipment.where((e) => e.id == entry.entryId).firstOrNull
-            : null;
-        final entryColor =
-            entry.entryType ==
-                api.ListEntryEntryTypeEnum.catalogColonColonEquipment
-            ? AppPalette.equipment
-            : profile?.faction == 'gifted'
-            ? (AppPalette.factionColors['gifted'] ?? factionColor)
-            : factionColor;
-        final role = profile == null
-            ? null
-            : profile.keywords.contains('Leader')
-            ? 'leader'
-            : profile.keywords.contains('Hero')
-            ? 'hero'
-            : null;
-        VoidCallback? onTap;
-        if (profile != null) {
-          // Open on this exact entry (matched by entry id, so two copies of one profile that were
-          // hired with different illustrations open on their own card, not the first occurrence).
-          final hiredIndex = hiredCards.indexWhere((c) => c.entry.id == entry.id);
-          onTap = () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CardViewerScreen(
-                profiles: hiredProfiles,
-                initialIndex: hiredIndex < 0 ? 0 : hiredIndex,
-                // Each card opens on the illustration its entry was hired as; switching in the
-                // viewer repoints that entry and persists it.
-                selectedReferenceIds: hiredCards
-                    .map((c) => c.entry.entryId)
-                    .toList(),
-                onIllustrationChanged: (index, refId) =>
-                    _onEntryIllustrationChanged(hiredCards[index].entry, refId),
-              ),
-            ),
-          );
-        } else if (equipmentItem != null) {
-          onTap = () => showEquipmentDetailDialog(context, equipmentItem);
-        }
-        final tileName = profile != null
-            ? (entryDisplayName[entry.id] ?? profile.name)
-            : (equipmentItem?.name ?? entry.name);
+        final entry = reorderable[i];
         // Delayed (long-press) rather than immediate: an immediate listener claims horizontal drags
         // too, which stole the swipe that switches to the Hire tab whenever the list had entries.
         // Long-press-then-drag reorders; a quick horizontal swipe now reaches the tab PageView.
         return ReorderableDelayedDragStartListener(
           key: ValueKey(entry.id),
           index: i,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: i < entries.length - 1 ? 8 : 0),
-            child: _EntryTile(
-              entry: entry,
-              name: tileName,
-              factionColor: entryColor,
-              role: role,
-              busy: _busy,
-              onRemove: () => _removeEntry(entry),
-              onTap: onTap,
-              onEditSpells: entry.mage ? () => _editSpells(entry) : null,
-              onEditApprenticeship: entry.pools.any((p) => p.mentorDerived)
-                  ? () => _editApprenticeship(entry)
-                  : null,
-            ),
-          ),
+          child: buildEntryTile(entry, last: i == reorderable.length - 1),
         );
       },
     );
