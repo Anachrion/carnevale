@@ -148,130 +148,42 @@ List<KnownSpell> knownSpellsFor(api.ListEntry entry) => [
   ...entry.grantedSpells.map(KnownSpell.fromGrantedSpell),
 ];
 
-/// Popup showing a spell's Discipline, Will Point cost, Difficulty and effect. Opened by tapping
-/// a [SpellChip] (or the in-game detail button), and shared by the gang builder and the roster.
-void showSpellDetailDialog(BuildContext context, KnownSpell spell) {
-  showDialog(
-    context: context,
-    builder: (context) => ThemedDialogCard(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  spell.name,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: context.textColor,
-                  ),
-                ),
-              ),
-              if (spell.cantrip) ...[
-                const SizedBox(width: 12),
-                Text(
-                  'Cantrip',
-                  style: GoogleFonts.cinzel(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.accentColor,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            [
-              if (spell.disciplineName != null) spell.disciplineName!,
-              // A Cantrip's cost is always 0 — the "Cantrip" tag above already says so, no need
-              // to also state "WP 0" here.
-              if (!spell.cantrip && spell.cost != null) 'WP ${spell.cost}',
-              if (spell.difficulty != null) 'Difficulty ${spell.difficulty}',
-            ].join('  ·  '),
-            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 12),
-          Divider(
-            color: context.subtleTextColor.withValues(alpha: 0.3),
-            thickness: 0.5,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            spell.description,
-            style: TextStyle(fontSize: 13, color: context.textColor, height: 1.5),
-          ),
-          if (spell.rule != null) ...[
-            const SizedBox(height: 10),
-            Text(
-              spell.rule!.name,
-              style: GoogleFonts.cinzel(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
-                color: context.accentColor,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              spell.rule!.description,
-              style: TextStyle(fontSize: 11.5, color: context.subtleTextColor, height: 1.4),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
-}
+/// A compact pill naming a model's spells, tappable to open [showKnownSpellsDialog] — everything
+/// used to live as one toggle/read-only chip per spell plus a separate "i" detail button, but that
+/// turned into a wall of pills for a model with a lot of spells (Blood Crone, Adventuring Noble).
+/// Pass [onToggle] for your own live model (each row's checkbox then marks that spell cast); leave
+/// it null for an opponent's model, where the dialog is read-only.
+class SpellsButton extends StatelessWidget {
+  const SpellsButton({super.key, required this.spells, this.onToggle});
 
-/// A compact pill showing a known spell's name (Cantrips are marked with a star). Tapping it opens
-/// [showSpellDetailDialog]. Rendered on the light-on-dark faction gradient of a model tile.
-class SpellChip extends StatelessWidget {
-  const SpellChip({super.key, required this.spell});
-
-  final KnownSpell spell;
+  final List<KnownSpell> spells;
+  final ValueChanged<KnownSpell>? onToggle;
 
   @override
   Widget build(BuildContext context) {
+    final cast = spells.where((s) => s.cast).length;
     return GestureDetector(
-      onTap: () => showSpellDetailDialog(context, spell),
+      onTap: () => showKnownSpellsDialog(context, spells, onToggle: onToggle),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: Colors.white.withValues(alpha: 0.14),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.28), width: 0.5),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.32), width: 0.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (spell.cantrip) ...[
-              Icon(Icons.star, size: 10, color: Colors.white.withValues(alpha: 0.75)),
-              const SizedBox(width: 4),
-            ],
+            Icon(Icons.auto_fix_high, size: 13, color: Colors.white.withValues(alpha: 0.85)),
+            const SizedBox(width: 6),
             Text(
-              spell.name,
+              'Spells · $cast/${spells.length} cast',
               style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.92),
               ),
             ),
-            if (spell.granted) ...[
-              const SizedBox(width: 4),
-              Text(
-                'granted',
-                style: TextStyle(
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.3,
-                  color: Colors.white.withValues(alpha: 0.55),
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -279,120 +191,44 @@ class SpellChip extends StatelessWidget {
   }
 }
 
-/// The known/granted-spell chips for a model, tappable for details. Returns an empty list when
-/// the model knows nothing, so callers can decide on a fallback.
-List<Widget> spellChipsFor(api.ListEntry entry) =>
-    knownSpellsFor(entry).map((s) => SpellChip(spell: s)).toList();
-
-/// A pure toggle: the whole chip is the tap target for marking [spell] cast, dimming via opacity
-/// only — no text swap, so nothing reflows and there's no small hit target to miss. Used in-game,
-/// own models only; reading a spell's description lives in [showKnownSpellsDialog] instead (one
-/// button per model, not per chip — splitting "cast" and "read" onto the same small chip caused
-/// misclicks in testing). A `resetsEachRound: false` spell (Adventuring Noble's Arcane Totem) gets
-/// a dashed outline so its "stays cast all game" behaviour reads at a glance.
-class SpellToggleChip extends StatelessWidget {
-  const SpellToggleChip({super.key, required this.spell, required this.onToggle});
-
-  final KnownSpell spell;
-  final VoidCallback onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onToggle,
-      child: Opacity(
-        opacity: spell.cast ? 0.55 : 1,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-          decoration: BoxDecoration(
-            color: spell.cast
-                ? Colors.white.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.32),
-              width: 0.5,
-              style: spell.resetsEachRound ? BorderStyle.solid : BorderStyle.none,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (spell.cantrip) ...[
-                Icon(Icons.star, size: 9, color: Colors.white.withValues(alpha: 0.75)),
-                const SizedBox(width: 4),
-              ],
-              Text(
-                spell.name,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.92),
-                ),
-              ),
-              if (!spell.resetsEachRound) ...[
-                const SizedBox(width: 5),
-                Text(
-                  'ONCE/GAME',
-                  style: TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
-                    color: Colors.white.withValues(alpha: 0.65),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Small round "ⓘ" button, one per model, opening [showKnownSpellsDialog] — the single place to
-/// read every spell a model knows/was granted, decoupled from the toggle chips above it.
-class SpellDetailButton extends StatelessWidget {
-  const SpellDetailButton({super.key, required this.spells});
-
-  final List<KnownSpell> spells;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'View spell details',
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () => showKnownSpellsDialog(context, spells),
-        child: Container(
-          width: 22,
-          height: 22,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.black.withValues(alpha: 0.18),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 0.5),
-          ),
-          child: Text(
-            'i',
-            style: GoogleFonts.cinzel(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Read-only popup listing every spell in [spells] with its full detail — the in-game counterpart
-/// to [showSpellDetailDialog], but for the whole model at once rather than one chip at a time.
-void showKnownSpellsDialog(BuildContext context, List<KnownSpell> spells) {
+/// Every spell in [spells] with its full detail, one row each. Read-only when [onToggle] is null
+/// (an opponent's model, or the gang-builder/roster's plain reference view); for your own live
+/// model, each row's checkbox marks that spell cast. The checked state shown here is this dialog's
+/// own local copy — [onToggle] is what actually persists it (see [GangViewerBody]'s
+/// onToggleSpellCast) — so the dialog stays responsive to taps immediately without needing to be
+/// wired into the tile's own rebuilds while it's open.
+void showKnownSpellsDialog(
+  BuildContext context,
+  List<KnownSpell> spells, {
+  ValueChanged<KnownSpell>? onToggle,
+}) {
   showDialog(
     context: context,
-    builder: (context) => ThemedDialogCard(
+    builder: (context) => _KnownSpellsDialog(spells: spells, onToggle: onToggle),
+  );
+}
+
+class _KnownSpellsDialog extends StatefulWidget {
+  const _KnownSpellsDialog({required this.spells, this.onToggle});
+
+  final List<KnownSpell> spells;
+  final ValueChanged<KnownSpell>? onToggle;
+
+  @override
+  State<_KnownSpellsDialog> createState() => _KnownSpellsDialogState();
+}
+
+class _KnownSpellsDialogState extends State<_KnownSpellsDialog> {
+  late final Set<String> _cast = {
+    for (final s in widget.spells)
+      if (s.key != null && s.cast) s.key!,
+  };
+
+  bool _isCast(KnownSpell spell) => spell.key == null ? spell.cast : _cast.contains(spell.key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ThemedDialogCard(
       padding: const EdgeInsets.all(20),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 380),
@@ -414,53 +250,9 @@ void showKnownSpellsDialog(BuildContext context, List<KnownSpell> spells) {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (final spell in spells) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                if (spell.cantrip) ...[
-                                  Icon(Icons.star, size: 11, color: context.accentColor),
-                                  const SizedBox(width: 5),
-                                ],
-                                Expanded(
-                                  child: Text(
-                                    spell.name,
-                                    style: GoogleFonts.cinzel(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: context.textColor,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  [
-                                    if (spell.disciplineName != null) spell.disciplineName!,
-                                    // The star icon above already marks a Cantrip; its cost is
-                                    // always 0, not worth stating.
-                                    if (!spell.cantrip && spell.cost != null) 'WP ${spell.cost}',
-                                    if (!spell.resetsEachRound) 'once/game',
-                                  ].join(' · '),
-                                  style: TextStyle(fontSize: 10, color: context.subtleTextColor),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              spell.description,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                color: context.subtleTextColor,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (spell != spells.last)
+                    for (final spell in widget.spells) ...[
+                      _row(spell),
+                      if (spell != widget.spells.last)
                         Divider(
                           height: 1,
                           color: context.subtleTextColor.withValues(alpha: 0.15),
@@ -473,14 +265,88 @@ void showKnownSpellsDialog(BuildContext context, List<KnownSpell> spells) {
           ],
         ),
       ),
-    ),
-  );
+    );
+  }
+
+  Widget _row(KnownSpell spell) {
+    final cast = _isCast(spell);
+    final onToggle = widget.onToggle;
+    final canToggle = onToggle != null && spell.key != null;
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: canToggle
+          ? () {
+              setState(() => cast ? _cast.remove(spell.key) : _cast.add(spell.key!));
+              onToggle(spell);
+            }
+          : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              cast ? Icons.check_circle : Icons.circle_outlined,
+              size: 18,
+              color: cast
+                  ? context.accentColor
+                  : context.subtleTextColor.withValues(alpha: canToggle ? 0.6 : 0.3),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (spell.cantrip) ...[
+                        Icon(Icons.star, size: 11, color: context.accentColor),
+                        const SizedBox(width: 5),
+                      ],
+                      Expanded(
+                        child: Text(
+                          spell.name,
+                          style: GoogleFonts.cinzel(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: context.textColor,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        [
+                          // The star above already marks a Cantrip; its cost is always 0.
+                          if (!spell.cantrip && spell.cost != null) 'WP ${spell.cost}',
+                          if (spell.difficulty != null) 'Diff ${spell.difficulty}',
+                          if (!spell.resetsEachRound) 'once/game',
+                        ].join(' · '),
+                        style: TextStyle(fontSize: 10, color: context.subtleTextColor),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    spell.description,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: context.subtleTextColor,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// A compact, per-model summary for the gang-builder tile: one chip per pool naming its committed
 /// Discipline(s) and how many spells were picked from it, plus one chip per distinct granted-spell
 /// rule (grouped, so Blood Crone's five granted Cantrips collapse to a single "All cantrips" chip
-/// instead of every individual spell name). Deliberately not the same as [spellChipsFor]/
+/// instead of every individual spell name). Deliberately not the same as [SpellsButton]/
 /// [knownSpellsFor] — a model with a lot of known spells (Blood Crone, Adventuring Noble) turned
 /// the full per-spell chip list into a wall of pills that dominated the tile; here the point is a
 /// glanceable "what did I pick" summary, with the full detail one tap away in the spell picker.
