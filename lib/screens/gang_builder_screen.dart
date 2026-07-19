@@ -835,9 +835,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       final isLeader = p.keywords.contains('Leader');
       final count = _entryCount(p);
       final alreadyHiredUnique = isUnique && count > 0;
-      // Hide "add" only for a hard Leader once a hard Leader is already fielded — a flex Leader keeps
-      // its button (it will demote), and any Leader stays addable when only a flex Leader is present.
-      final leaderSlotTaken = isLeader && !p.flexibleLeader && hasHardLeader && count == 0;
+      // Hide "add" for a hard Leader once a hard Leader is already fielded — including this same one,
+      // so a non-Unique Leader (King For a Day, Ostrich King?!) can't be hired twice. A flex Leader
+      // keeps its button (it will demote), and any Leader stays addable when only a flex Leader is
+      // present. The "remove" button is unaffected, so the hired Leader can still be taken back out.
+      final leaderSlotTaken = isLeader && !p.flexibleLeader && hasHardLeader;
       return _HireCardTile(
         key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,
