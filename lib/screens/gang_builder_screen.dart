@@ -823,8 +823,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         ? <api.Profile>[]
         : profiles.where((p) => p.faction == 'gifted').toList();
 
-    final hasLeader = _profiles.any(
-      (p) => p.keywords.contains('Leader') && _entryCount(p) > 0,
+    // Only a "hard" Leader locks out other Leaders. A flex Leader (The Duke, Prince of Thieves,
+    // Sopracomito, La Signora) demotes to a plain Hero when another Leader is present, so it neither
+    // occupies the slot immovably nor blocks a real Leader from being added alongside it.
+    final hasHardLeader = _profiles.any(
+      (p) => p.keywords.contains('Leader') && !p.flexibleLeader && _entryCount(p) > 0,
     );
 
     Widget buildTile(api.Profile p) {
@@ -832,7 +835,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       final isLeader = p.keywords.contains('Leader');
       final count = _entryCount(p);
       final alreadyHiredUnique = isUnique && count > 0;
-      final leaderSlotTaken = isLeader && hasLeader && count == 0;
+      // Hide "add" only for a hard Leader once a hard Leader is already fielded — a flex Leader keeps
+      // its button (it will demote), and any Leader stays addable when only a flex Leader is present.
+      final leaderSlotTaken = isLeader && !p.flexibleLeader && hasHardLeader && count == 0;
       return _HireCardTile(
         key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,
