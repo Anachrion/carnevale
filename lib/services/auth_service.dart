@@ -21,6 +21,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'api_client.dart';
 import 'api_exception.dart';
+import 'gang_service.dart';
 
 class AuthUser {
   const AuthUser({
@@ -270,6 +271,8 @@ class AuthService extends ChangeNotifier {
   Future<void> _clear() async {
     _client.authToken = null;
     _currentUser = null;
+    // The gangs index cache is per-user; drop it so the next account never sees the last one's list.
+    GangService().resetGangsCache();
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _refreshTokenKey);
     await _storage.delete(key: _userKey);

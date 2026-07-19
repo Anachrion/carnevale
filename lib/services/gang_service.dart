@@ -35,10 +35,27 @@ class GangService {
     }
   }
 
+  // The last-loaded gangs for this session, so the index can show them instantly on every visit
+  // instead of refetching each time. Unlike the catalog caches this is per-user, so it's cleared on
+  // logout (AuthService#_clear). Kept coherent with local edits via [cacheGangs].
+  List<api.ModelList>? _gangsCache;
+
+  /// The cached gangs, or null if none loaded yet this session (defensive copy).
+  List<api.ModelList>? get cachedGangs =>
+      _gangsCache == null ? null : List.of(_gangsCache!);
+
   Future<List<api.ModelList>> loadAll() => _guard(() async {
     final res = await _client.lists.getLists();
-    return res.data?.toList() ?? [];
+    _gangsCache = res.data?.toList() ?? [];
+    return List.of(_gangsCache!);
   });
+
+  /// Updates the cached index to match an edit the screen already applied locally (a gang edited in
+  /// the builder, or a create/delete), so navigating away and back reflects it without a refetch.
+  void cacheGangs(List<api.ModelList> gangs) => _gangsCache = List.of(gangs);
+
+  /// Clears the cached gangs — the index is per-user, so this runs on logout / session end.
+  void resetGangsCache() => _gangsCache = null;
 
   Future<api.ModelList> loadOne(int id) => _guard(() async {
     final res = await _client.lists.getList(id: id);
