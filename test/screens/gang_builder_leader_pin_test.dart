@@ -51,6 +51,33 @@ void main() {
     expect(keys, contains(const ValueKey(3)));
   });
 
+  testWidgets('pins the hard Leader, not a flex Leader that appears first', (tester) async {
+    final gang = fakeModelList(
+      entries: [
+        // A flex Leader listed first, but a hard Leader is present, so it's demoted to a plain Hero:
+        // it should be draggable, not the pinned header.
+        fakeListEntry(
+          id: 1,
+          position: 1,
+          name: 'The Duke',
+          keywords: const ['Leader', 'Hero'],
+          flexibleLeader: true,
+        ),
+        fakeListEntry(id: 2, position: 2, name: 'Capodecina', keywords: const ['Leader']),
+        fakeListEntry(id: 3, position: 3, name: 'Bravoes', keywords: const ['Henchman']),
+      ],
+    );
+
+    await pumpListTab(tester, gang);
+
+    final keys = draggableKeys(tester);
+    // The hard Leader (Capodecina, id 2) is the pinned header → not draggable.
+    expect(keys, isNot(contains(const ValueKey(2))));
+    // The demoted flex Leader (id 1) and the henchman (id 3) reorder freely.
+    expect(keys, contains(const ValueKey(1)));
+    expect(keys, contains(const ValueKey(3)));
+  });
+
   testWidgets('a leaderless gang leaves every model draggable', (tester) async {
     final gang = fakeModelList(
       faction: 'gifted',
