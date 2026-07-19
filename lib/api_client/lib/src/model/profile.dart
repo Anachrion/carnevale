@@ -30,8 +30,9 @@ part 'profile.g.dart';
 /// * [commandPoints] 
 /// * [size] 
 /// * [abilities] 
-/// * [keywords] 
-/// * [version] 
+/// * [keywords]
+/// * [flexibleLeader] - Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora), and may therefore be added to a gang that already has a Leader.
+/// * [version]
 /// * [mage] - Whether the profile has at least one spell pool and can be given spells (rulebook p24).
 /// * [spellSlots] - Summary total of non-Cantrip spells across every spell pool — informational only (the catalog browse view). 0 for non-Mages and for a profile whose only pool is `unlimited`. Real per-pool limits are enforced when hiring; see ListEntry.pools for the detail a gang builder needs. 
 /// * [disciplines] - Union of every pool's eligible Discipline slugs, e.g. [\"blood_rites\", \"divinity\"] — informational only, same caveat as spell_slots. Empty for a mentor_derived pool (Apprentice Doctor), which has no static Discipline list of its own. 
@@ -87,6 +88,10 @@ abstract class Profile implements Built<Profile, ProfileBuilder> {
 
   @BuiltValueField(wireName: r'keywords')
   BuiltList<String> get keywords;
+
+  /// Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora), and may therefore be added to a gang that already has a Leader.
+  @BuiltValueField(wireName: r'flexible_leader')
+  bool get flexibleLeader;
 
   @BuiltValueField(wireName: r'version')
   String get version;
@@ -214,6 +219,11 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
     yield serializers.serialize(
       object.keywords,
       specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
+    yield r'flexible_leader';
+    yield serializers.serialize(
+      object.flexibleLeader,
+      specifiedType: const FullType(bool),
     );
     yield r'version';
     yield serializers.serialize(
@@ -384,6 +394,13 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
             specifiedType: const FullType(BuiltList, [FullType(String)]),
           ) as BuiltList<String>;
           result.keywords.replace(valueDes);
+          break;
+        case r'flexible_leader':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.flexibleLeader = valueDes;
           break;
         case r'version':
           final valueDes = serializers.deserialize(

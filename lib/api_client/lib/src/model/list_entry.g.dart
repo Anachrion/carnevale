@@ -82,6 +82,8 @@ class _$ListEntry extends ListEntry {
   @override
   final BuiltList<String> keywords;
   @override
+  final bool flexibleLeader;
+  @override
   final String? identifier;
   @override
   final String? cardFront;
@@ -115,6 +117,7 @@ class _$ListEntry extends ListEntry {
     required this.name,
     this.profileName,
     required this.keywords,
+    required this.flexibleLeader,
     this.identifier,
     this.cardFront,
     this.cardBack,
@@ -145,6 +148,7 @@ class _$ListEntry extends ListEntry {
         name == other.name &&
         profileName == other.profileName &&
         keywords == other.keywords &&
+        flexibleLeader == other.flexibleLeader &&
         identifier == other.identifier &&
         cardFront == other.cardFront &&
         cardBack == other.cardBack &&
@@ -168,6 +172,7 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, profileName.hashCode);
     _$hash = $jc(_$hash, keywords.hashCode);
+    _$hash = $jc(_$hash, flexibleLeader.hashCode);
     _$hash = $jc(_$hash, identifier.hashCode);
     _$hash = $jc(_$hash, cardFront.hashCode);
     _$hash = $jc(_$hash, cardBack.hashCode);
@@ -193,6 +198,7 @@ class _$ListEntry extends ListEntry {
           ..add('name', name)
           ..add('profileName', profileName)
           ..add('keywords', keywords)
+          ..add('flexibleLeader', flexibleLeader)
           ..add('identifier', identifier)
           ..add('cardFront', cardFront)
           ..add('cardBack', cardBack)
@@ -240,6 +246,11 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   ListBuilder<String> get keywords =>
       _$this._keywords ??= ListBuilder<String>();
   set keywords(ListBuilder<String>? keywords) => _$this._keywords = keywords;
+
+  bool? _flexibleLeader;
+  bool? get flexibleLeader => _$this._flexibleLeader;
+  set flexibleLeader(bool? flexibleLeader) =>
+      _$this._flexibleLeader = flexibleLeader;
 
   String? _identifier;
   String? get identifier => _$this._identifier;
@@ -304,6 +315,7 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _name = $v.name;
       _profileName = $v.profileName;
       _keywords = $v.keywords.toBuilder();
+      _flexibleLeader = $v.flexibleLeader;
       _identifier = $v.identifier;
       _cardFront = $v.cardFront;
       _cardBack = $v.cardBack;
@@ -362,6 +374,11 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
             ),
             profileName: profileName,
             keywords: keywords.build(),
+            flexibleLeader: BuiltValueNullFieldError.checkNotNull(
+              flexibleLeader,
+              r'ListEntry',
+              'flexibleLeader',
+            ),
             identifier: identifier,
             cardFront: cardFront,
             cardBack: cardBack,
