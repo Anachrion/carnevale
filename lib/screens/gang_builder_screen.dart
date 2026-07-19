@@ -483,6 +483,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           ..entryId = refId
           ..name = p.name
           ..keywords = ListBuilder<String>(p.keywords)
+          ..flexibleLeader = p.flexibleLeader
           ..cost = p.ducats
           ..summoned = false
           ..mage = p.mage
@@ -499,6 +500,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       ..entryId = e.id
       ..name = e.name
       ..keywords = ListBuilder<String>()
+      ..flexibleLeader = false
       ..cost = e.cost
       ..summoned = false
       ..mage = false
