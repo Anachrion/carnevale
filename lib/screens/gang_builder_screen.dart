@@ -227,13 +227,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   }
 
   /// Back from the Hire tab returns to the List tab rather than leaving the builder; from the List
-  /// tab it pops the screen (back to the gangs index). Shared by the header button and, via
-  /// [PopScope], the OS back gesture.
+  /// tab it pops the screen (back to the gangs index), handing back the current gang so the index can
+  /// patch that one row in place instead of refetching every gang. Shared by the header button and,
+  /// via [PopScope], the OS back gesture.
   void _handleBack() {
     if (_tab != _Tab.list) {
       _selectTab(_Tab.list);
     } else {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(_gang);
     }
   }
 
@@ -668,11 +669,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     final factionColor =
         AppPalette.factionColors[_gang.faction] ?? context.accentColor;
     return PopScope(
-      // On the Hire tab, swallow the pop and drop back to List instead; on List, let it pop the
-      // screen. canPop mirrors this so the OS back gesture is intercepted only when it should be.
-      canPop: _tab == _Tab.list,
+      // Always intercept the gesture so we pop manually and can hand the current gang back to the
+      // index: on the Hire tab drop to List instead of leaving; on List, pop with `_gang` (via
+      // _handleBack) so the index patches that row rather than refetching every gang.
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _tab != _Tab.list) _selectTab(_Tab.list);
+        if (!didPop) _handleBack();
       },
       child: Scaffold(
         backgroundColor: AppPalette.background,

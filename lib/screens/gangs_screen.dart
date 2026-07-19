@@ -50,10 +50,20 @@ class _GangsScreenState extends State<GangsScreen> {
   void initState() {
     super.initState();
     authService.addListener(_onAuthChanged);
-    if (authService.isLoggedIn) {
-      _load();
-    } else {
+    if (!authService.isLoggedIn) {
       _loading = false;
+      return;
+    }
+    // Show the last-known gangs instantly if we have them (navigating away and back shouldn't blank
+    // to a spinner), then refresh in the background. Only the marginal cross-device edit case is
+    // briefly stale. With no cache yet (first visit this session), fall back to a blocking load.
+    final cached = _service.cachedGangs;
+    if (cached != null) {
+      _gangs = cached;
+      _loading = false;
+      _refresh();
+    } else {
+      _load();
     }
   }
 
@@ -97,11 +107,29 @@ class _GangsScreenState extends State<GangsScreen> {
     }
   }
 
+  /// Refreshes the list in the background while the cached gangs stay on screen — no spinner, and a
+  /// failure is silent since we already have something to show.
+  Future<void> _refresh() async {
+    try {
+      final gangs = await _service.loadAll();
+      if (!mounted) return;
+      setState(() {
+        _gangs = gangs;
+        _error = null;
+      });
+    } catch (e) {
+      debugPrint('GangsScreen background refresh failed: $e');
+    }
+  }
+
   Future<void> _deleteGang(int id) async {
     // Was fire-and-forget with no error handling: an offline delete failed silently, leaving the
     // gang on screen with no explanation (A-9). Guard it, and only reload when it actually deleted.
     final ok = await guard(context, () => _service.delete(id));
-    if (ok && mounted) await _load();
+    if (ok && mounted) {
+      setState(() => _gangs.removeWhere((g) => g.id == id));
+      _service.cacheGangs(_gangs);
+    }
   }
 
   void _showCreateDialog() async {
@@ -115,11 +143,11 @@ class _GangsScreenState extends State<GangsScreen> {
       ),
     );
     if (gang != null && mounted) {
-      await Navigator.push(
+      final updated = await Navigator.push<api.ModelList>(
         context,
         MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: gang)),
       );
-      await _load();
+      if (mounted) _upsertGang(updated ?? gang);
     }
   }
 
@@ -228,11 +256,27 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 
   Future<void> _editGang(api.ModelList gang) async {
-    await Navigator.push(
+    final updated = await Navigator.push<api.ModelList>(
       context,
       MaterialPageRoute(builder: (_) => GangBuilderScreen(gang: gang)),
     );
-    await _load();
+    if (updated != null && mounted) _upsertGang(updated);
+  }
+
+  /// Patches the index from the up-to-date gang the builder hands back on the way out — replacing
+  /// that one row in place (or appending a new gang). The other gangs can't change while you're
+  /// inside one, and the builder already knows the edited gang's state (cost included), so there's
+  /// nothing to refetch and no spinner on return.
+  void _upsertGang(api.ModelList gang) {
+    setState(() {
+      final i = _gangs.indexWhere((g) => g.id == gang.id);
+      if (i >= 0) {
+        _gangs[i] = gang;
+      } else {
+        _gangs.add(gang);
+      }
+    });
+    _service.cacheGangs(_gangs);
   }
 
   /// Edit/Delete row revealed inside the tile once it's expanded. Each button
