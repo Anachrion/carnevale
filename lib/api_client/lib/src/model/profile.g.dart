@@ -40,6 +40,8 @@ class _$Profile extends Profile {
   @override
   final BuiltList<String> keywords;
   @override
+  final bool flexibleLeader;
+  @override
   final String version;
   @override
   final bool mage;
@@ -74,6 +76,7 @@ class _$Profile extends Profile {
     required this.size,
     required this.abilities,
     required this.keywords,
+    required this.flexibleLeader,
     required this.version,
     required this.mage,
     required this.spellSlots,
@@ -109,6 +112,7 @@ class _$Profile extends Profile {
         size == other.size &&
         abilities == other.abilities &&
         keywords == other.keywords &&
+        flexibleLeader == other.flexibleLeader &&
         version == other.version &&
         mage == other.mage &&
         spellSlots == other.spellSlots &&
@@ -137,6 +141,7 @@ class _$Profile extends Profile {
     _$hash = $jc(_$hash, size.hashCode);
     _$hash = $jc(_$hash, abilities.hashCode);
     _$hash = $jc(_$hash, keywords.hashCode);
+    _$hash = $jc(_$hash, flexibleLeader.hashCode);
     _$hash = $jc(_$hash, version.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
     _$hash = $jc(_$hash, spellSlots.hashCode);
@@ -167,6 +172,7 @@ class _$Profile extends Profile {
           ..add('size', size)
           ..add('abilities', abilities)
           ..add('keywords', keywords)
+          ..add('flexibleLeader', flexibleLeader)
           ..add('version', version)
           ..add('mage', mage)
           ..add('spellSlots', spellSlots)
@@ -249,6 +255,11 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
       _$this._keywords ??= ListBuilder<String>();
   set keywords(ListBuilder<String>? keywords) => _$this._keywords = keywords;
 
+  bool? _flexibleLeader;
+  bool? get flexibleLeader => _$this._flexibleLeader;
+  set flexibleLeader(bool? flexibleLeader) =>
+      _$this._flexibleLeader = flexibleLeader;
+
   String? _version;
   String? get version => _$this._version;
   set version(String? version) => _$this._version = version;
@@ -306,6 +317,7 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
       _size = $v.size;
       _abilities = $v.abilities.toBuilder();
       _keywords = $v.keywords.toBuilder();
+      _flexibleLeader = $v.flexibleLeader;
       _version = $v.version;
       _mage = $v.mage;
       _spellSlots = $v.spellSlots;
@@ -405,6 +417,11 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
             ),
             abilities: abilities.build(),
             keywords: keywords.build(),
+            flexibleLeader: BuiltValueNullFieldError.checkNotNull(
+              flexibleLeader,
+              r'Profile',
+              'flexibleLeader',
+            ),
             version: BuiltValueNullFieldError.checkNotNull(
               version,
               r'Profile',

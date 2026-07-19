@@ -1,4 +1,4 @@
-package com.example.carnevale
+package app.carnevale.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
