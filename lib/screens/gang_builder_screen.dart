@@ -422,11 +422,32 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       ..totalCost = _entriesCost(entries),
   );
 
-  // The Leader stays pinned to the top; everything else appends in hire order (see Phase 1). Mirrors
-  // the backend so the optimistic order matches what the server will return.
+  // Index of the gang's *effective* Leader — the hard Leader if any is fielded, else a lone flex
+  // Leader (The Duke et al., which demote to a plain Hero alongside another Leader). This is the one
+  // pinned to the top; a demoted flex Leader is just a Hero and sits in the reorderable list. Mirrors
+  // the backend's effective_leader_entry. Returns -1 when the gang holds no Leader.
+  int _effectiveLeaderIndex(List<api.ListEntry> entries) {
+    var firstLeader = -1;
+    for (var i = 0; i < entries.length; i++) {
+      if (!entries[i].keywords.contains('Leader')) continue;
+      if (!entries[i].flexibleLeader) return i; // a hard Leader is always the effective one
+      firstLeader = firstLeader == -1 ? i : firstLeader;
+    }
+    return firstLeader; // a lone flex Leader, or -1
+  }
+
+  // Whether a freshly-hired entry becomes the gang's effective Leader (and so leads): a hard Leader
+  // always does; a flex Leader only when no other Leader is present. Everything else appends in hire
+  // order. Mirrors the backend so the optimistic order matches what the server will return.
+  bool _leadsGang(api.ListEntry entry, List<api.ListEntry> existing) {
+    if (!entry.keywords.contains('Leader')) return false;
+    if (!entry.flexibleLeader) return true;
+    return !existing.any((e) => e.keywords.contains('Leader'));
+  }
+
   api.ModelList _added(api.ListEntry entry) {
     final entries = _gang.entries.toList();
-    if (entry.keywords.contains('Leader')) {
+    if (_leadsGang(entry, entries)) {
       entries.insert(0, entry);
     } else {
       entries.add(entry);
@@ -647,7 +668,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     // translate the target back into a full-list position for the backend (the Leader holds
     // position 1, so a non-leader's first slot is position 2).
     final rest = _gang.entries.toList();
-    final leaderIndex = rest.indexWhere((e) => e.keywords.contains('Leader'));
+    final leaderIndex = _effectiveLeaderIndex(rest);
     final leader = leaderIndex >= 0 ? rest.removeAt(leaderIndex) : null;
     final entry = rest.removeAt(oldIndex);
     rest.insert(newIndex, entry);
@@ -1003,7 +1024,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     // The Leader is pinned to the top as a non-reorderable header; only the other models sit in the
     // reorderable list. Keeping the Leader out of the reorderable area entirely means nothing can be
     // dragged above it at all — there's no illegal drop to clamp or roll back.
-    final leaderIndex = entries.indexWhere((e) => e.keywords.contains('Leader'));
+    final leaderIndex = _effectiveLeaderIndex(entries.toList());
     final leaderEntry = leaderIndex >= 0 ? entries[leaderIndex] : null;
     final reorderable = [
       for (final e in entries)
