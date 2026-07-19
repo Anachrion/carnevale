@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import '../app_colors.dart';
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
@@ -21,7 +22,9 @@ import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/profile_service.dart';
+import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
+import '../widgets/app_toast.dart';
 import '../widgets/apprenticeship_dialog.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
@@ -42,6 +45,33 @@ enum _Tab { list, hire }
 
 enum _HireSort { role, name, cost }
 
+/// One queued server mutation for the builder's optimistic sync. The UI applies the change to
+/// `_gang` immediately and pushes one of these; the queue drains serially in the background so the
+/// user never waits on a round-trip. A network blip retries; only a genuine rejection (a server
+/// 4xx) reverts the optimistic change and toasts.
+class _PendingOp {
+  _PendingOp({
+    required this.run,
+    required this.revert,
+    required this.describe,
+    this.onCreated,
+  });
+
+  /// Fires the server call and returns the authoritative gang. Any temp id it targets is resolved
+  /// to the real one at call time — an earlier create in this FIFO queue has already mapped it.
+  final Future<api.ModelList> Function() run;
+
+  /// Undoes this op's optimistic change; runs only when the server genuinely rejects the op.
+  final VoidCallback revert;
+
+  /// Short label for the failure toast (e.g. "add Bravoes").
+  final String describe;
+
+  /// For a create: records the server-assigned id for the temp entry, so a later remove/reorder of
+  /// the just-added model can target the real row.
+  final void Function(api.ModelList updated)? onCreated;
+}
+
 class GangBuilderScreen extends StatefulWidget {
   const GangBuilderScreen({super.key, required this.gang});
   final api.ModelList gang;
@@ -57,8 +87,20 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   List<api.Equipment> _equipment = [];
   List<api.Spell> _spells = [];
   bool _loading = true;
-  bool _busy = false;
   String? _error;
+
+  // Optimistic sync (F-P5): add/remove/reorder apply to `_gang` at once and push a _PendingOp onto
+  // this FIFO queue, which drains one op at a time in the background — the UI never blocks on a
+  // round-trip, so there's no spinner storm and no wait. `_syncing` guards single-flight; temp ids
+  // (negative, from `_nextTempId`) stand in for optimistically-created rows until the server assigns
+  // a real id, recorded in `_idMap` so a later edit of a just-added model can target the real row.
+  final List<_PendingOp> _syncQueue = [];
+  bool _syncing = false;
+  int _nextTempId = -1;
+  final Map<int, int> _idMap = {};
+  // Guards the dialog-driven edits (spells / apprenticeship / illustration), which replace the whole
+  // gang from the server and so must not overlap each other or run mid-sync.
+  bool _editing = false;
   _Tab _tab = _Tab.list;
   // Created lazily on first build (after loading), so if the user tapped a tab while the list was
   // still loading, the PageView opens on that tab instead of desyncing from `_tab` (A-10).
@@ -283,7 +325,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       final results = await Future.wait([
         ProfileService().search('', factions: {_gang.faction, 'gifted'}),
         EquipmentService().getAll(),
-        GangService().loadSpells(),
+        SpellService().getAll(),
       ]);
       if (!mounted) return;
       setState(() {
@@ -304,13 +346,157 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     }
   }
 
+  // ── Optimistic sync queue ──────────────────────────────────────────────────────────────────
+
+  int _realId(int id) => _idMap[id] ?? id;
+
+  void _enqueue(_PendingOp op) {
+    _syncQueue.add(op);
+    _drainQueue();
+  }
+
+  Future<void> _drainQueue() async {
+    if (_syncing || _syncQueue.isEmpty) return;
+    _syncing = true;
+    final op = _syncQueue.first;
+    try {
+      final updated = await op.run();
+      _syncQueue.removeAt(0);
+      op.onCreated?.call(updated);
+      // Adopt the server's authoritative gang only once nothing else is queued — otherwise it would
+      // wipe the optimistic entries the still-pending ops just added. Until then the temp entries
+      // render fine and `_idMap` keeps later ops pointed at the right rows.
+      if (_syncQueue.isEmpty && mounted) setState(() => _gang = updated);
+    } on ApiException catch (e) {
+      // A DioException with no HTTP response surfaces as statusCode == null: a network blip, not a
+      // rejection — keep the op at the head and retry rather than roll the user's change back. Only
+      // retry while the screen is open; once it's gone there's no UI to keep consistent, so a failed
+      // op is dropped rather than retried forever.
+      if (e.statusCode == null && mounted) {
+        await Future<void>.delayed(const Duration(seconds: 2));
+        _syncing = false;
+        _drainQueue();
+        return;
+      }
+      // Genuine rejection (e.g. an entry that no longer exists): drop the op, undo its optimistic
+      // change, and say why.
+      _syncQueue.removeAt(0);
+      if (mounted) {
+        op.revert();
+        showAppToast(context, e.message);
+      }
+    } catch (_) {
+      // Unexpected: treat like a transient error and retry while open, else drop it.
+      if (mounted) {
+        await Future<void>.delayed(const Duration(seconds: 2));
+        _syncing = false;
+        _drainQueue();
+        return;
+      }
+      _syncQueue.removeAt(0);
+    }
+    _syncing = false;
+    // Keep draining even after the screen is gone, so mutations already queued when the user
+    // navigated away still reach the server instead of being silently lost (every setState above is
+    // mounted-guarded, so this is safe once unmounted).
+    _drainQueue();
+  }
+
+  /// Waits for the queue to drain, so a dialog-driven edit that replaces the whole gang runs on the
+  /// server-authoritative state rather than clobbering entries a pending op just added.
+  Future<void> _flushSync() async {
+    while (_syncing || _syncQueue.isNotEmpty) {
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+    }
+  }
+
+  // Total ducat cost of the hired (non-summoned) entries — recomputed locally so PointsBar moves the
+  // instant a model is added or removed, mirroring the server's own #total_cost.
+  int _entriesCost(Iterable<api.ListEntry> entries) =>
+      entries.where((e) => !e.summoned).fold(0, (sum, e) => sum + e.cost);
+
+  api.ModelList _gangWith(List<api.ListEntry> entries) => _gang.rebuild(
+    (b) => b
+      ..entries.replace(entries)
+      ..totalCost = _entriesCost(entries),
+  );
+
+  // The Leader stays pinned to the top; everything else appends in hire order (see Phase 1). Mirrors
+  // the backend so the optimistic order matches what the server will return.
+  api.ModelList _added(api.ListEntry entry) {
+    final entries = _gang.entries.toList();
+    if (entry.keywords.contains('Leader')) {
+      entries.insert(0, entry);
+    } else {
+      entries.add(entry);
+    }
+    return _gangWith(entries);
+  }
+
+  api.ModelList _removed(int id) =>
+      _gangWith(_gang.entries.where((e) => e.id != id).toList());
+
+  // The server-created row is the newest (highest id) entry matching what we just added.
+  void _mapCreatedId(
+    int tempId,
+    int entryId,
+    api.ListEntryEntryTypeEnum type,
+    api.ModelList updated,
+  ) {
+    final match = updated.entries
+        .where((e) => e.entryType == type && e.entryId == entryId)
+        .fold<int?>(null, (mx, e) => mx == null || e.id > mx ? e.id : mx);
+    if (match != null) _idMap[tempId] = match;
+  }
+
+  // A stand-in entry rendered immediately on hire, before the server assigns a real id. Cost,
+  // keywords and mage-ness come straight from the profile; the detailed spell `pools` stay empty
+  // until the authoritative gang is adopted, which is why the Spells button waits for a real id.
+  api.ListEntry _tempCardEntry(api.Profile p, int refId, int tempId) =>
+      api.ListEntry(
+        (b) => b
+          ..id = tempId
+          ..position = 0
+          ..entryType = api.ListEntryEntryTypeEnum.catalogColonColonCardReference
+          ..entryId = refId
+          ..name = p.name
+          ..keywords = ListBuilder<String>(p.keywords)
+          ..cost = p.ducats
+          ..summoned = false
+          ..mage = p.mage
+          ..distinctDisciplinePerCopy = false
+          ..pools = ListBuilder<api.SpellPool>()
+          ..grantedSpells = ListBuilder<api.GrantedSpell>(),
+      );
+
+  api.ListEntry _tempEquipmentEntry(api.Equipment e, int tempId) => api.ListEntry(
+    (b) => b
+      ..id = tempId
+      ..position = 0
+      ..entryType = api.ListEntryEntryTypeEnum.catalogColonColonEquipment
+      ..entryId = e.id
+      ..name = e.name
+      ..keywords = ListBuilder<String>()
+      ..cost = e.cost
+      ..summoned = false
+      ..mage = false
+      ..distinctDisciplinePerCopy = false
+      ..pools = ListBuilder<api.SpellPool>()
+      ..grantedSpells = ListBuilder<api.GrantedSpell>(),
+  );
+
+  // ── Dialog-driven edits (replace the whole gang; drain the queue first) ──────────────────────
+
   /// Persists an illustration switch made in the card viewer: repoints the entry at the chosen
   /// sibling card reference and refreshes the gang. The viewer owns the displayed art, so this only
-  /// syncs the backend and local state (no _busy gate — it must not block the viewer's own paging).
+  /// syncs the backend and local state. Drains the optimistic queue first so it applies onto the
+  /// server-authoritative gang, not a mid-sync one.
   Future<void> _onEntryIllustrationChanged(
     api.ListEntry entry,
     int cardReferenceId,
   ) async {
+    await _flushSync();
+    if (!mounted) return;
     await guard(context, () async {
       final updated = await GangService().setEntryIllustration(
         entry.id,
@@ -321,7 +507,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   }
 
   Future<void> _editSpells(api.ListEntry entry) async {
-    if (_busy) return;
+    if (_editing) return;
     final result = await showSpellPickerDialog(
       context,
       entry: entry,
@@ -329,7 +515,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       siblingEntries: _gang.entries.toList(),
     );
     if (result == null || !mounted) return;
-    setState(() => _busy = true);
+    _editing = true;
+    await _flushSync();
+    if (!mounted) return;
     await guard(context, () async {
       final updated = await GangService().setEntrySpells(
         entry.id,
@@ -340,7 +528,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       if (!mounted) return;
       setState(() => _gang = updated);
     });
-    if (mounted) setState(() => _busy = false);
+    if (mounted) _editing = false;
   }
 
   // Apprentice Doctor's Apprenticeship: picks (or clears) the mentor only. Always sends an empty
@@ -348,14 +536,16 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   // already does — since a new (or no) mentor invalidates whatever Disciplines were mirrored from
   // the old one, there's nothing valid left to preserve.
   Future<void> _editApprenticeship(api.ListEntry entry) async {
-    if (_busy) return;
+    if (_editing) return;
     final result = await showApprenticeshipDialog(
       context,
       entry: entry,
       siblingEntries: _gang.entries.toList(),
     );
     if (result == null || !mounted) return;
-    setState(() => _busy = true);
+    _editing = true;
+    await _flushSync();
+    if (!mounted) return;
     await guard(context, () async {
       final updated = await GangService().setEntrySpells(
         entry.id,
@@ -366,7 +556,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       if (!mounted) return;
       setState(() => _gang = updated);
     });
-    if (mounted) setState(() => _busy = false);
+    if (mounted) _editing = false;
   }
 
   int _entryCount(api.Profile p) => _gang.entries
@@ -391,62 +581,64 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     }
   }
 
-  Future<void> _add(api.Profile p) async {
-    if (_busy) return;
+  void _add(api.Profile p) {
     final refId = p.cardReferenceId;
     if (refId == null) return; // no printed card → nothing to hire
-    setState(() => _busy = true);
-    await guard(context, () async {
-      final updated = await GangService().addEntry(
-        _gang.id,
-        refId,
-        'CardReference',
-      );
-      if (!mounted) return;
-      setState(() => _gang = updated);
-    });
-    if (mounted) setState(() => _busy = false);
+    final tempId = _nextTempId--;
+    setState(() => _gang = _added(_tempCardEntry(p, refId, tempId)));
+    _enqueue(
+      _PendingOp(
+        describe: 'add ${p.name}',
+        run: () => GangService().addEntry(_gang.id, refId, 'CardReference'),
+        onCreated: (u) => _mapCreatedId(
+          tempId,
+          refId,
+          api.ListEntryEntryTypeEnum.catalogColonColonCardReference,
+          u,
+        ),
+        revert: () => setState(() => _gang = _removed(_realId(tempId))),
+      ),
+    );
   }
 
-  Future<void> _addEquipment(api.Equipment e) async {
-    if (_busy) return;
-    setState(() => _busy = true);
-    await guard(context, () async {
-      final updated = await GangService().addEntry(_gang.id, e.id, 'Equipment');
-      if (!mounted) return;
-      setState(() => _gang = updated);
-    });
-    if (mounted) setState(() => _busy = false);
+  void _addEquipment(api.Equipment e) {
+    final tempId = _nextTempId--;
+    setState(() => _gang = _added(_tempEquipmentEntry(e, tempId)));
+    _enqueue(
+      _PendingOp(
+        describe: 'add ${e.name}',
+        run: () => GangService().addEntry(_gang.id, e.id, 'Equipment'),
+        onCreated: (u) => _mapCreatedId(
+          tempId,
+          e.id,
+          api.ListEntryEntryTypeEnum.catalogColonColonEquipment,
+          u,
+        ),
+        revert: () => setState(() => _gang = _removed(_realId(tempId))),
+      ),
+    );
   }
 
-  Future<void> _remove(api.Profile p) async {
+  void _remove(api.Profile p) {
     final entry = _entryFor(p);
-    if (entry == null || _busy) return;
-    setState(() => _busy = true);
-    await guard(context, () async {
-      final updated = await GangService().removeEntry(entry.id);
-      if (!mounted) return;
-      setState(() => _gang = updated);
-    });
-    if (mounted) setState(() => _busy = false);
+    if (entry != null) _removeEntry(entry);
   }
 
-  /// Removes a list entry, returning whether it succeeded so the tile can reverse its exit
-  /// animation on failure instead of vanishing into a ghost that still counts toward ducats (A-7).
-  Future<bool> _removeEntry(api.ListEntry entry) async {
-    if (_busy) return false;
-    setState(() => _busy = true);
-    final ok = await guard(context, () async {
-      final updated = await GangService().removeEntry(entry.id);
-      if (!mounted) return;
-      setState(() => _gang = updated);
-    });
-    if (mounted) setState(() => _busy = false);
-    return ok;
+  /// Removes a list entry optimistically: it's dropped from `_gang` at once and the delete syncs in
+  /// the background. A genuine rejection re-inserts it (and toasts); the Leader-first order and cost
+  /// self-correct when the authoritative gang is next adopted.
+  void _removeEntry(api.ListEntry entry) {
+    setState(() => _gang = _removed(entry.id));
+    _enqueue(
+      _PendingOp(
+        describe: 'remove ${entry.name}',
+        run: () => GangService().removeEntry(_realId(entry.id)),
+        revert: () => setState(() => _gang = _added(entry)),
+      ),
+    );
   }
 
-  Future<void> _reorderEntry(int oldIndex, int newIndex) async {
-    if (_busy) return;
+  void _reorderEntry(int oldIndex, int newIndex) {
     if (newIndex > oldIndex) newIndex--;
     if (newIndex == oldIndex) return;
     // The drag indices count the non-leader models only (the Leader is a pinned header, not part of
@@ -460,20 +652,15 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     rest.insert(newIndex, entry);
     final reordered = [if (leader != null) leader, ...rest];
     final position = (leader != null ? 1 : 0) + newIndex + 1;
-    final previous = _gang; // snapshot so a failed reorder can be rolled back (A-6)
-    setState(() {
-      _gang = _gang.rebuild((b) => b..entries.replace(reordered));
-      _busy = true;
-    });
-    final ok = await guard(context, () async {
-      final updated = await GangService().reorderEntry(entry.id, position);
-      if (!mounted) return;
-      setState(() => _gang = updated);
-    });
-    // The reorder was applied optimistically; if the server rejected it, restore the prior order
-    // so the UI doesn't keep showing an order the backend never accepted.
-    if (!ok && mounted) setState(() => _gang = previous);
-    if (mounted) setState(() => _busy = false);
+    final previous = _gang.entries.toList(); // restore this order on a genuine rejection
+    setState(() => _gang = _gangWith(reordered));
+    _enqueue(
+      _PendingOp(
+        describe: 'reorder ${entry.name}',
+        run: () => GangService().reorderEntry(_realId(entry.id), position),
+        revert: () => setState(() => _gang = _gangWith(previous)),
+      ),
+    );
   }
 
   @override
@@ -795,11 +982,16 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           name: tileName,
           factionColor: entryColor,
           role: role,
-          busy: _busy,
           onRemove: () => _removeEntry(entry),
           onTap: onTap,
-          onEditSpells: entry.mage ? () => _editSpells(entry) : null,
-          onEditApprenticeship: entry.pools.any((p) => p.mentorDerived)
+          // Spell/mentor edits need the server-side pool detail, which only lands once the entry has
+          // a real id (a just-added model syncs a beat later); guard on that so the buttons don't
+          // open a picker with nothing in it.
+          onEditSpells: entry.mage && entry.id > 0
+              ? () => _editSpells(entry)
+              : null,
+          onEditApprenticeship:
+              entry.id > 0 && entry.pools.any((p) => p.mentorDerived)
               ? () => _editApprenticeship(entry)
               : null,
         ),
@@ -866,7 +1058,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         isUnique: isUnique,
         factionColor: factionColor,
         canAdd: !alreadyHiredUnique && !leaderSlotTaken,
-        busy: _busy,
+        busy: false,
         onOpen: () => _openHireCard(p),
         onAdd: () => _add(p),
         onRemove: () => _remove(p),
@@ -968,7 +1160,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                         equipment: e,
                         count: count,
                         canAdd: canAdd,
-                        busy: _busy,
+                        busy: false,
                         onAdd: () => _addEquipment(e),
                         onTap: () => showEquipmentDetailDialog(context, e),
                       );

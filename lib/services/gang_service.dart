@@ -156,11 +156,6 @@ class GangService {
         return res.data!;
       });
 
-  Future<List<api.Spell>> loadSpells() => _guard(() async {
-    final res = await _client.spells.getSpells();
-    return res.data?.toList() ?? [];
-  });
-
   api.SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum
   _poolSelectionDisciplineEnum(String slug) =>
       api.standardSerializers.deserializeWith(

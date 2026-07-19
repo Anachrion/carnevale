@@ -22,6 +22,7 @@ import '../models/game.dart';
 import '../services/api_exception.dart';
 import '../services/game_service.dart';
 import '../services/gang_service.dart';
+import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/create_gang_sheet.dart';
@@ -718,7 +719,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     api.GamePlayer me,
   ) {
     _myListFuture ??= _service.playerList(game.id, me.id);
-    _allSpellsFuture ??= _gangService.loadSpells();
+    _allSpellsFuture ??= SpellService().getAll();
     return FutureBuilder<List<api.Spell>>(
       future: _allSpellsFuture,
       builder: (context, spellsSnap) {
