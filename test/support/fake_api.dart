@@ -198,6 +198,7 @@ api.Profile fakeProfile({
   int ducats = 20,
   List<String> keywords = const ['Leader'],
   bool flexibleLeader = false,
+  int? flexibleLeaderWith,
   List<String> abilities = const [],
   List<api.Weapon> weapons = const [],
   List<api.SpecialRule> specialRules = const [],
@@ -208,6 +209,7 @@ api.Profile fakeProfile({
     ..name = name
     ..faction = faction
     ..flexibleLeader = flexibleLeader
+    ..flexibleLeaderWith = flexibleLeaderWith
     ..ducats = ducats
     ..movement = 4
     ..attack = 3

@@ -1070,6 +1070,24 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     final hasHardLeader = _profiles.any(
       (p) => p.keywords.contains('Leader') && !p.flexibleLeader && _entryCount(p) > 0,
     );
+    // A *conditional* flex Leader (La Signora) currently leading: she's in the gang, but the specific
+    // partner she demotes alongside (Il Capitano) isn't, so she keeps the Leader keyword. While she
+    // leads, the only hard Leader still recruitable is that partner — any other would leave two
+    // Leaders. `flexibleLeaderWith` is that partner's profile id; null for the demote-alongside-any
+    // flex Leaders and hard Leaders.
+    int? leadingConditionalPartnerId;
+    for (final p in _profiles) {
+      if (p.keywords.contains('Leader') &&
+          p.flexibleLeader &&
+          p.flexibleLeaderWith != null &&
+          _entryCount(p) > 0 &&
+          !_profiles.any(
+            (q) => q.id == p.flexibleLeaderWith && _entryCount(q) > 0,
+          )) {
+        leadingConditionalPartnerId = p.flexibleLeaderWith;
+        break;
+      }
+    }
 
     Widget buildTile(api.Profile p) {
       final isUnique = p.keywords.contains('Unique');
@@ -1079,8 +1097,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       // Hide "add" for a hard Leader once a hard Leader is already fielded — including this same one,
       // so a non-Unique Leader (King For a Day, Ostrich King?!) can't be hired twice. A flex Leader
       // keeps its button (it will demote), and any Leader stays addable when only a flex Leader is
-      // present. The "remove" button is unaffected, so the hired Leader can still be taken back out.
-      final leaderSlotTaken = isLeader && !p.flexibleLeader && hasHardLeader;
+      // present. And while a conditional flex Leader leads, only her partner may be added among hard
+      // Leaders. The "remove" button is unaffected, so the hired Leader can still be taken back out.
+      final leaderSlotTaken = isLeader &&
+          !p.flexibleLeader &&
+          (hasHardLeader ||
+              (leadingConditionalPartnerId != null &&
+                  p.id != leadingConditionalPartnerId));
       return _HireCardTile(
         key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,
