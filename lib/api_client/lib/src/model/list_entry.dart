@@ -21,7 +21,8 @@ part 'list_entry.g.dart';
 /// * [entryId] 
 /// * [name] 
 /// * [profileName] - The underlying profile's name without the card-reference letter suffix (e.g. \"Beggar\" rather than \"Beggar (A)\"). Use this to label a hired model and number duplicates client-side. Null for Equipment entries. 
-/// * [keywords] - The underlying profile's printed keywords (e.g. [\"Hero\", \"Doctor\"]) — used client-side to filter Apprentice Doctor's Apprenticeship mentor candidates (\"a character with both the Doctor and Hero keywords\"). Empty for Equipment. 
+/// * [keywords] - The underlying profile's printed keywords (e.g. [\"Hero\", \"Doctor\"]) — used client-side to filter Apprentice Doctor's Apprenticeship mentor candidates (\"a character with both the Doctor and Hero keywords\"). Empty for Equipment.
+/// * [flexibleLeader] - Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora). False for non-flex Leaders and Equipment.
 /// * [identifier] - Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
 /// * [cardFront] - Front face filename of the chosen card reference (served from /cards). Null for Equipment.
 /// * [cardBack] - Back face filename of the chosen card reference (served from /cards). Null for Equipment.
@@ -58,6 +59,10 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   /// The underlying profile's printed keywords (e.g. [\"Hero\", \"Doctor\"]) — used client-side to filter Apprentice Doctor's Apprenticeship mentor candidates (\"a character with both the Doctor and Hero keywords\"). Empty for Equipment. 
   @BuiltValueField(wireName: r'keywords')
   BuiltList<String> get keywords;
+
+  /// Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora). False for non-flex Leaders and Equipment.
+  @BuiltValueField(wireName: r'flexible_leader')
+  bool get flexibleLeader;
 
   /// Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
   @BuiltValueField(wireName: r'identifier')
@@ -161,6 +166,11 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
     yield serializers.serialize(
       object.keywords,
       specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
+    yield r'flexible_leader';
+    yield serializers.serialize(
+      object.flexibleLeader,
+      specifiedType: const FullType(bool),
     );
     if (object.identifier != null) {
       yield r'identifier';
@@ -299,6 +309,13 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
             specifiedType: const FullType(BuiltList, [FullType(String)]),
           ) as BuiltList<String>;
           result.keywords.replace(valueDes);
+          break;
+        case r'flexible_leader':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.flexibleLeader = valueDes;
           break;
         case r'identifier':
           final valueDes = serializers.deserialize(
