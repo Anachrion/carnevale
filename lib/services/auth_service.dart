@@ -21,6 +21,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'api_client.dart';
 import 'api_exception.dart';
+import 'game_service.dart';
 import 'gang_service.dart';
 
 class AuthUser {
@@ -271,8 +272,10 @@ class AuthService extends ChangeNotifier {
   Future<void> _clear() async {
     _client.authToken = null;
     _currentUser = null;
-    // The gangs index cache is per-user; drop it so the next account never sees the last one's list.
+    // The gangs and games index caches are per-user; drop them so the next account never sees the
+    // last one's lists.
     GangService().resetGangsCache();
+    GameService().resetGamesCache();
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _refreshTokenKey);
     await _storage.delete(key: _userKey);

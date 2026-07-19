@@ -85,11 +85,37 @@ class GameService extends ChangeNotifier {
     return res.data?.toList() ?? [];
   });
 
+  // The last-loaded games per visibility, so the games index can show them instantly on every visit
+  // instead of refetching each time. Per-user (like the gangs cache), so cleared on logout
+  // (AuthService#_clear). The index background-refreshes over these, so brief staleness self-heals.
+  List<api.Game>? _activeGamesCache;
+  List<api.Game>? _archivedGamesCache;
+
+  /// The cached games for a visibility, or null if none loaded yet this session (defensive copy).
+  List<api.Game>? cachedGames({String visibility = 'active'}) {
+    final cache = visibility == 'archived'
+        ? _archivedGamesCache
+        : _activeGamesCache;
+    return cache == null ? null : List.of(cache);
+  }
+
   Future<List<api.Game>> loadMyGames({String visibility = 'active'}) =>
       _guard(() async {
         final res = await _client.games.getGames(visibility: visibility);
-        return res.data?.toList() ?? [];
+        final games = res.data?.toList() ?? [];
+        if (visibility == 'archived') {
+          _archivedGamesCache = games;
+        } else {
+          _activeGamesCache = games;
+        }
+        return games;
       });
+
+  /// Clears the cached games — the index is per-user, so this runs on logout / session end.
+  void resetGamesCache() {
+    _activeGamesCache = null;
+    _archivedGamesCache = null;
+  }
 
   Future<api.Game> archiveGame(int gameId) => _guard(() async {
     final res = await _client.games.archiveGame(id: gameId);
