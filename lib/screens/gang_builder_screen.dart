@@ -917,7 +917,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     return PageView(
       controller: _pageController,
       onPageChanged: (i) => setState(() => _tab = _Tab.values[i]),
-      children: [_buildListTab(factionColor), _buildHireTab(factionColor)],
+      children: [
+        _KeepAlivePage(child: _buildListTab(factionColor)),
+        _KeepAlivePage(child: _buildHireTab(factionColor)),
+      ],
     );
   }
 
