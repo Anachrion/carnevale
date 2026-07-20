@@ -54,14 +54,15 @@ void main() {
   testWidgets('pins the hard Leader, not a flex Leader that appears first', (tester) async {
     final gang = fakeModelList(
       entries: [
-        // A flex Leader listed first, but a hard Leader is present, so it's demoted to a plain Hero:
-        // it should be draggable, not the pinned header.
+        // A flex Leader listed first, but a hard Leader is present, so the server demoted it to a
+        // plain Hero: it should be draggable, not the pinned header.
         fakeListEntry(
           id: 1,
           position: 1,
           name: 'The Duke',
           keywords: const ['Leader', 'Hero'],
           flexibleLeader: true,
+          demotedLeader: true,
         ),
         fakeListEntry(id: 2, position: 2, name: 'Capodecina', keywords: const ['Leader']),
         fakeListEntry(id: 3, position: 3, name: 'Bravoes', keywords: const ['Henchman']),
@@ -76,6 +77,41 @@ void main() {
     // The demoted flex Leader (id 1) and the henchman (id 3) reorder freely.
     expect(keys, contains(const ValueKey(1)));
     expect(keys, contains(const ValueKey(3)));
+  });
+
+  testWidgets('a demoted, promotable flex Leader shows Hero and a promote button', (tester) async {
+    final gang = fakeModelList(
+      entries: [
+        // Two unconditional flex Leaders, no forced one: the topmost leads, the other is a demoted,
+        // promotable Hero.
+        fakeListEntry(
+          id: 1,
+          position: 1,
+          name: 'The Duke',
+          keywords: const ['Leader', 'Hero'],
+          flexibleLeader: true,
+        ),
+        fakeListEntry(
+          id: 2,
+          position: 2,
+          name: 'Prince of Thieves',
+          keywords: const ['Leader', 'Hero'],
+          flexibleLeader: true,
+          demotedLeader: true,
+          promotableLeader: true,
+        ),
+      ],
+    );
+
+    await pumpListTab(tester, gang);
+
+    final keys = draggableKeys(tester);
+    // The Duke leads → header (not draggable); the demoted Prince is in the reorderable list.
+    expect(keys, isNot(contains(const ValueKey(1))));
+    expect(keys, contains(const ValueKey(2)));
+    // The demoted flex Leader reads as a Hero and offers the promote action.
+    expect(find.text('hero'), findsOneWidget);
+    expect(find.text('Promote leader'), findsOneWidget);
   });
 
   testWidgets('a leaderless gang leaves every model draggable', (tester) async {

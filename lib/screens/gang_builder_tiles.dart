@@ -65,6 +65,7 @@ class _EntryTile extends StatefulWidget {
     this.onTap,
     this.onEditSpells,
     this.onEditApprenticeship,
+    this.onPromote,
   });
 
   final api.ListEntry entry;
@@ -84,6 +85,9 @@ class _EntryTile extends StatefulWidget {
   // picker. Her own "Spells" button only appears once a mentor has actually been chosen — there's
   // nothing to pick a spell from before that.
   final VoidCallback? onEditApprenticeship;
+  // Non-null only for a demoted flex Leader the player may crown instead (ambiguous multi-flex case);
+  // promotes it to the gang's Leader, demoting whoever holds the slot.
+  final VoidCallback? onPromote;
 
   @override
   State<_EntryTile> createState() => _EntryTileState();
@@ -228,6 +232,7 @@ class _EntryTileState extends State<_EntryTile>
                       ),
                       if (widget.onEditSpells != null || widget.onEditApprenticeship != null)
                         _buildSpellRow(),
+                      if (widget.onPromote != null) _buildPromoteRow(),
                     ],
                   ),
                 ),
@@ -281,6 +286,20 @@ class _EntryTileState extends State<_EntryTile>
           else
             ...tappableChips,
         ],
+      ),
+    );
+  }
+
+  // Shown on a demoted flex Leader the player may crown instead (two+ flex Leaders, no forced one).
+  Widget _buildPromoteRow() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: GestureDetector(
+          onTap: widget.onPromote,
+          child: _pillButton(icon: Icons.military_tech, label: 'Promote leader'),
+        ),
       ),
     );
   }

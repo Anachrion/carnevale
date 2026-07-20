@@ -84,6 +84,10 @@ class _$ListEntry extends ListEntry {
   @override
   final bool flexibleLeader;
   @override
+  final bool demotedLeader;
+  @override
+  final bool promotableLeader;
+  @override
   final String? identifier;
   @override
   final String? cardFront;
@@ -118,6 +122,8 @@ class _$ListEntry extends ListEntry {
     this.profileName,
     required this.keywords,
     required this.flexibleLeader,
+    required this.demotedLeader,
+    required this.promotableLeader,
     this.identifier,
     this.cardFront,
     this.cardBack,
@@ -149,6 +155,8 @@ class _$ListEntry extends ListEntry {
         profileName == other.profileName &&
         keywords == other.keywords &&
         flexibleLeader == other.flexibleLeader &&
+        demotedLeader == other.demotedLeader &&
+        promotableLeader == other.promotableLeader &&
         identifier == other.identifier &&
         cardFront == other.cardFront &&
         cardBack == other.cardBack &&
@@ -173,6 +181,8 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, profileName.hashCode);
     _$hash = $jc(_$hash, keywords.hashCode);
     _$hash = $jc(_$hash, flexibleLeader.hashCode);
+    _$hash = $jc(_$hash, demotedLeader.hashCode);
+    _$hash = $jc(_$hash, promotableLeader.hashCode);
     _$hash = $jc(_$hash, identifier.hashCode);
     _$hash = $jc(_$hash, cardFront.hashCode);
     _$hash = $jc(_$hash, cardBack.hashCode);
@@ -199,6 +209,8 @@ class _$ListEntry extends ListEntry {
           ..add('profileName', profileName)
           ..add('keywords', keywords)
           ..add('flexibleLeader', flexibleLeader)
+          ..add('demotedLeader', demotedLeader)
+          ..add('promotableLeader', promotableLeader)
           ..add('identifier', identifier)
           ..add('cardFront', cardFront)
           ..add('cardBack', cardBack)
@@ -251,6 +263,16 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   bool? get flexibleLeader => _$this._flexibleLeader;
   set flexibleLeader(bool? flexibleLeader) =>
       _$this._flexibleLeader = flexibleLeader;
+
+  bool? _demotedLeader;
+  bool? get demotedLeader => _$this._demotedLeader;
+  set demotedLeader(bool? demotedLeader) =>
+      _$this._demotedLeader = demotedLeader;
+
+  bool? _promotableLeader;
+  bool? get promotableLeader => _$this._promotableLeader;
+  set promotableLeader(bool? promotableLeader) =>
+      _$this._promotableLeader = promotableLeader;
 
   String? _identifier;
   String? get identifier => _$this._identifier;
@@ -316,6 +338,8 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _profileName = $v.profileName;
       _keywords = $v.keywords.toBuilder();
       _flexibleLeader = $v.flexibleLeader;
+      _demotedLeader = $v.demotedLeader;
+      _promotableLeader = $v.promotableLeader;
       _identifier = $v.identifier;
       _cardFront = $v.cardFront;
       _cardBack = $v.cardBack;
@@ -378,6 +402,16 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               flexibleLeader,
               r'ListEntry',
               'flexibleLeader',
+            ),
+            demotedLeader: BuiltValueNullFieldError.checkNotNull(
+              demotedLeader,
+              r'ListEntry',
+              'demotedLeader',
+            ),
+            promotableLeader: BuiltValueNullFieldError.checkNotNull(
+              promotableLeader,
+              r'ListEntry',
+              'promotableLeader',
             ),
             identifier: identifier,
             cardFront: cardFront,

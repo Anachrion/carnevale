@@ -422,19 +422,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       ..totalCost = _entriesCost(entries),
   );
 
-  // Index of the gang's *effective* Leader — the hard Leader if any is fielded, else a lone flex
-  // Leader (The Duke et al., which demote to a plain Hero alongside another Leader). This is the one
-  // pinned to the top; a demoted flex Leader is just a Hero and sits in the reorderable list. Mirrors
-  // the backend's effective_leader_entry. Returns -1 when the gang holds no Leader.
-  int _effectiveLeaderIndex(List<api.ListEntry> entries) {
-    var firstLeader = -1;
-    for (var i = 0; i < entries.length; i++) {
-      if (!entries[i].keywords.contains('Leader')) continue;
-      if (!entries[i].flexibleLeader) return i; // a hard Leader is always the effective one
-      firstLeader = firstLeader == -1 ? i : firstLeader;
-    }
-    return firstLeader; // a lone flex Leader, or -1
-  }
+  // Index of the gang's *effective* Leader — the one entry that keeps the Leader keyword after the
+  // server resolves flex-Leader demotion (`demotedLeader`). This is the one pinned to the top; a
+  // demoted flex Leader is just a Hero and sits in the reorderable list. Returns -1 when the gang
+  // holds no Leader.
+  int _effectiveLeaderIndex(List<api.ListEntry> entries) => entries.indexWhere(
+    (e) => e.keywords.contains('Leader') && !e.demotedLeader,
+  );
 
   // Whether a freshly-hired entry becomes the gang's effective Leader (and so leads): a hard Leader
   // always does; a flex Leader only when no other Leader is present. Everything else appends in hire
@@ -484,6 +478,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           ..name = p.name
           ..keywords = ListBuilder<String>(p.keywords)
           ..flexibleLeader = p.flexibleLeader
+          // Demotion is resolved server-side; a freshly-added entry starts undemoted and the
+          // authoritative gang (adopted a beat later) fills in the real state.
+          ..demotedLeader = false
+          ..promotableLeader = false
           ..cost = p.ducats
           ..summoned = false
           ..mage = p.mage
@@ -501,6 +499,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       ..name = e.name
       ..keywords = ListBuilder<String>()
       ..flexibleLeader = false
+      ..demotedLeader = false
+      ..promotableLeader = false
       ..cost = e.cost
       ..summoned = false
       ..mage = false
@@ -682,6 +682,45 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       _PendingOp(
         describe: 'reorder ${entry.name}',
         run: () => GangService().reorderEntry(_realId(entry.id), position),
+        revert: () => setState(() => _gang = _gangWith(previous)),
+      ),
+    );
+  }
+
+  // Promotes a demoted flex Leader (The Duke / Prince of Thieves in the ambiguous case) to the top,
+  // making it the effective Leader and demoting the one that held the slot. Optimistically swaps the
+  // demotion flags and moves it up; the server confirms on adopt. Reuses the reorder endpoint — the
+  // backend lets a promotable entry take position 1.
+  void _promote(api.ListEntry entry) {
+    final previous = _gang.entries.toList();
+    final oldLeaderId = previous
+        .firstWhere(
+          (e) => e.keywords.contains('Leader') && !e.demotedLeader,
+          orElse: () => entry,
+        )
+        .id;
+    final swapped = previous.map((e) {
+      if (e.id == entry.id) {
+        return e.rebuild((b) => b
+          ..demotedLeader = false
+          ..promotableLeader = false);
+      }
+      if (e.id == oldLeaderId) {
+        return e.rebuild((b) => b
+          ..demotedLeader = true
+          ..promotableLeader = true);
+      }
+      return e;
+    }).toList();
+    final promoted = swapped.firstWhere((e) => e.id == entry.id);
+    swapped
+      ..remove(promoted)
+      ..insert(0, promoted);
+    setState(() => _gang = _gangWith(swapped));
+    _enqueue(
+      _PendingOp(
+        describe: 'promote ${entry.name}',
+        run: () => GangService().reorderEntry(_realId(entry.id), 1),
         revert: () => setState(() => _gang = _gangWith(previous)),
       ),
     );
@@ -966,11 +1005,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           : profile?.faction == 'gifted'
           ? (AppPalette.factionColors['gifted'] ?? factionColor)
           : factionColor;
-      final role = profile == null
-          ? null
-          : profile.keywords.contains('Leader')
+      // A demoted flex Leader has lost the Leader keyword, so it reads as a Hero even though its
+      // profile still prints Leader.
+      final role = entry.demotedLeader
+          ? 'hero'
+          : entry.keywords.contains('Leader')
           ? 'leader'
-          : profile.keywords.contains('Hero')
+          : entry.keywords.contains('Hero')
           ? 'hero'
           : null;
       VoidCallback? onTap;
@@ -1018,6 +1059,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           onEditApprenticeship:
               entry.id > 0 && entry.pools.any((p) => p.mentorDerived)
               ? () => _editApprenticeship(entry)
+              : null,
+          // A demoted flex Leader the player may crown instead (ambiguous multi-flex case).
+          onPromote: entry.promotableLeader && entry.id > 0
+              ? () => _promote(entry)
               : null,
         ),
       );
@@ -1101,11 +1146,25 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       // keeps its button (it will demote), and any Leader stays addable when only a flex Leader is
       // present. And while a conditional flex Leader leads, only her partner may be added among hard
       // Leaders. The "remove" button is unaffected, so the hired Leader can still be taken back out.
-      final leaderSlotTaken = isLeader &&
+      final hardLeaderTaken = isLeader &&
           !p.flexibleLeader &&
           (hasHardLeader ||
               (leadingConditionalPartnerId != null &&
                   p.id != leadingConditionalPartnerId));
+      // A conditional flex Leader (La Signora) can't join a gang that already holds a hard Leader who
+      // isn't her partner — she wouldn't demote for him, leaving two Leaders.
+      final conditionalFlexBlocked =
+          isLeader &&
+          p.flexibleLeader &&
+          p.flexibleLeaderWith != null &&
+          _profiles.any(
+            (q) =>
+                q.keywords.contains('Leader') &&
+                !q.flexibleLeader &&
+                q.id != p.flexibleLeaderWith &&
+                _entryCount(q) > 0,
+          );
+      final leaderSlotTaken = hardLeaderTaken || conditionalFlexBlocked;
       return _HireCardTile(
         key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,
