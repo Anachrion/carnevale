@@ -1183,22 +1183,27 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       children: [
         _buildHireControls(),
         // The suggestions float over the hire list rather than sitting in the column, so opening
-        // them doesn't shove the list down. Same arrangement as the Cards screen.
+        // them doesn't shove the list down. Same arrangement as the Cards screen. Tapping anywhere
+        // in here (but not the search field itself, or this would immediately undo its own focus)
+        // drops keyboard focus, hiding the suggestions with it; tapping back into the field brings
+        // both straight back.
         Expanded(
-          child: Stack(
-            children: [
-              _buildHireList(factionProfiles, giftedProfiles, buildTile),
-              if (hasSuggestions)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                    child: buildSuggestions(),
+          child: dismissSearchFocusOnTapOutside(
+            child: Stack(
+              children: [
+                _buildHireList(factionProfiles, giftedProfiles, buildTile),
+                if (hasSuggestions)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: buildSuggestions(),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
