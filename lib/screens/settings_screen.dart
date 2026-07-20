@@ -24,6 +24,7 @@ import '../services/card_image_service.dart';
 import '../services/equipment_service.dart';
 import '../services/profile_service.dart';
 import '../services/settings_service.dart';
+import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
@@ -501,6 +502,7 @@ class _CardImageSyncState extends State<_CardImageSync> {
     ProfileService().reset();
     AbilityService().reset();
     EquipmentService().reset();
+    SpellService().reset();
     // Fire-and-forget: the service owns the work and publishes progress on syncStatus. `refresh`
     // re-pulls the manifest first; only missing/outdated faces download, so this resumes rather
     // than restarting an interrupted sync.

@@ -60,12 +60,12 @@ class _EntryTile extends StatefulWidget {
     required this.entry,
     required this.name,
     required this.factionColor,
-    required this.busy,
     required this.onRemove,
     this.role,
     this.onTap,
     this.onEditSpells,
     this.onEditApprenticeship,
+    this.onPromote,
   });
 
   final api.ListEntry entry;
@@ -74,10 +74,10 @@ class _EntryTile extends StatefulWidget {
   final String name;
   final Color factionColor;
   final String? role;
-  final bool busy;
-  // Returns whether the removal actually happened, so the exit animation can be reversed when the
-  // server rejects it (offline / race) instead of leaving an invisible entry behind (A-7).
-  final Future<bool> Function() onRemove;
+  // Fire-and-forget: the removal applies optimistically in the parent (the entry leaves `_gang` at
+  // once and the delete syncs in the background), so the tile just plays its exit animation and
+  // calls this — a genuine rejection re-inserts the entry upstream rather than reversing here.
+  final VoidCallback onRemove;
   final VoidCallback? onTap;
   // Non-null only for Mage models; opens the spell picker for this model (rulebook p24).
   final VoidCallback? onEditSpells;
@@ -85,6 +85,9 @@ class _EntryTile extends StatefulWidget {
   // picker. Her own "Spells" button only appears once a mentor has actually been chosen — there's
   // nothing to pick a spell from before that.
   final VoidCallback? onEditApprenticeship;
+  // Non-null only for a demoted flex Leader the player may crown instead (ambiguous multi-flex case);
+  // promotes it to the gang's Leader, demoting whoever holds the slot.
+  final VoidCallback? onPromote;
 
   @override
   State<_EntryTile> createState() => _EntryTileState();
@@ -131,13 +134,10 @@ class _EntryTileState extends State<_EntryTile>
   }
 
   Future<void> _handleRemove() async {
-    // Don't animate a removal that can't proceed (another mutation is in flight).
-    if (widget.busy) return;
+    // Play the exit animation, then drop the entry: the parent removes it from `_gang` immediately
+    // and syncs the delete in the background, so there's nothing to wait on or reverse here.
     await _ctrl.forward();
-    final removed = await widget.onRemove();
-    // On success the parent drops this entry from the gang and the tile is gone; on failure the
-    // entry is still there, so slide it back in and let the toast (raised by the parent) explain.
-    if (!removed && mounted) _ctrl.reverse();
+    widget.onRemove();
   }
 
   @override
@@ -209,7 +209,7 @@ class _EntryTileState extends State<_EntryTile>
                           ),
                           const SizedBox(width: 8),
                           GestureDetector(
-                            onTap: widget.busy ? null : _handleRemove,
+                            onTap: _handleRemove,
                             child: Container(
                               width: 28,
                               height: 28,
@@ -232,6 +232,7 @@ class _EntryTileState extends State<_EntryTile>
                       ),
                       if (widget.onEditSpells != null || widget.onEditApprenticeship != null)
                         _buildSpellRow(),
+                      if (widget.onPromote != null) _buildPromoteRow(),
                     ],
                   ),
                 ),
@@ -254,7 +255,7 @@ class _EntryTileState extends State<_EntryTile>
     final tappableChips = chips
         .map(
           (chip) => GestureDetector(
-            onTap: widget.busy ? null : widget.onEditSpells,
+            onTap: widget.onEditSpells,
             child: chip,
           ),
         )
@@ -289,16 +290,30 @@ class _EntryTileState extends State<_EntryTile>
     );
   }
 
+  // Shown on a demoted flex Leader the player may crown instead (two+ flex Leaders, no forced one).
+  Widget _buildPromoteRow() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: GestureDetector(
+          onTap: widget.onPromote,
+          child: _pillButton(icon: Icons.military_tech, label: 'Promote leader'),
+        ),
+      ),
+    );
+  }
+
   Widget _spellsButton() {
     return GestureDetector(
-      onTap: widget.busy ? null : widget.onEditSpells,
+      onTap: widget.onEditSpells,
       child: _pillButton(icon: Icons.auto_fix_high, label: 'Spells'),
     );
   }
 
   Widget _apprenticeshipButton() {
     return GestureDetector(
-      onTap: widget.busy ? null : widget.onEditApprenticeship,
+      onTap: widget.onEditApprenticeship,
       child: _pillButton(icon: Icons.school_outlined, label: 'Apprenticeship'),
     );
   }

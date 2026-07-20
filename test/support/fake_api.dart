@@ -97,6 +97,10 @@ api.ListEntry fakeListEntry({
   int entryId = 10,
   String name = 'Capodecina',
   int cost = 20,
+  List<String> keywords = const [],
+  bool flexibleLeader = false,
+  bool demotedLeader = false,
+  bool promotableLeader = false,
   api.EntryState? state,
   bool summoned = false,
 }) => api.ListEntry(
@@ -106,7 +110,10 @@ api.ListEntry fakeListEntry({
     ..entryType = entryType
     ..entryId = entryId
     ..name = name
-    ..keywords = ListBuilder<String>()
+    ..keywords = ListBuilder<String>(keywords)
+    ..flexibleLeader = flexibleLeader
+    ..demotedLeader = demotedLeader
+    ..promotableLeader = promotableLeader
     ..cost = cost
     ..summoned = summoned
     ..mage = false
@@ -194,6 +201,8 @@ api.Profile fakeProfile({
   String faction = 'guild',
   int ducats = 20,
   List<String> keywords = const ['Leader'],
+  bool flexibleLeader = false,
+  int? flexibleLeaderWith,
   List<String> abilities = const [],
   List<api.Weapon> weapons = const [],
   List<api.SpecialRule> specialRules = const [],
@@ -203,6 +212,8 @@ api.Profile fakeProfile({
     ..id = id
     ..name = name
     ..faction = faction
+    ..flexibleLeader = flexibleLeader
+    ..flexibleLeaderWith = flexibleLeaderWith
     ..ducats = ducats
     ..movement = 4
     ..attack = 3
