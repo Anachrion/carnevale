@@ -68,4 +68,55 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'Swiping to another card keeps showing the same side (front/back)',
+    (tester) async {
+      final profiles = [
+        fakeProfile(
+          name: 'Capodecina',
+          cardReferences: [
+            fakeCardReference(
+              cardFront: 'p1_front.png',
+              cardBack: 'p1_back.png',
+            ),
+          ],
+        ),
+        fakeProfile(
+          id: 2,
+          name: 'Bombardier',
+          cardReferences: [
+            fakeCardReference(
+              cardFront: 'p2_front.png',
+              cardBack: 'p2_back.png',
+            ),
+          ],
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
+      );
+      await tester.pump();
+
+      Finder shown(String path) => find.byWidgetPredicate(
+        (w) => w.runtimeType.toString() == '_CardImage' && (w as dynamic).path == path,
+      );
+
+      expect(shown('p1_front.png'), findsOneWidget);
+      expect(shown('p1_back.png'), findsNothing);
+
+      // Flip to the back of card 1.
+      await tester.tap(find.byType(PageView));
+      await tester.pumpAndSettle();
+      expect(shown('p1_back.png'), findsOneWidget);
+      expect(shown('p1_front.png'), findsNothing);
+
+      // Swipe up to navigate to card 2 — should still show its back, not reset to front.
+      await tester.drag(find.byType(PageView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(shown('p2_back.png'), findsOneWidget);
+      expect(shown('p2_front.png'), findsNothing);
+    },
+  );
 }
