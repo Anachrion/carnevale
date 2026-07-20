@@ -379,11 +379,13 @@ api.CardReference fakeCardReference({
   int id = 10,
   String identifier = 'guild-capodecina',
   String profileName = 'Capodecina',
+  String cardFront = 'front.png',
+  String cardBack = 'back.png',
 }) => api.CardReference(
   (b) => b
     ..id = id
     ..identifier = identifier
     ..name = profileName
-    ..cardFront = 'front.png'
-    ..cardBack = 'back.png',
+    ..cardFront = cardFront
+    ..cardBack = cardBack,
 );
