@@ -121,15 +121,17 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> logIn({required String email, required String password}) async {
+  Future<void> logIn({required String login, required String password}) async {
     try {
       // Called through the raw Dio rather than the generated client so the response body's
       // `refresh_token` (a field the generated Session model doesn't carry) is readable alongside
       // the JWT header — the same raw-endpoint approach used for cable tickets.
+      // The backend still reads this under the `email` key (Devise's authentication_keys is
+      // unchanged) but now accepts either the account's email or its username as the value.
       final res = await _client.dio.post<Map<String, dynamic>>(
         '/login',
         data: {
-          'user': {'email': email, 'password': password},
+          'user': {'email': login, 'password': password},
         },
       );
       final token = _bearer(res.headers.value('authorization'));
@@ -156,7 +158,8 @@ class AuthService extends ChangeNotifier {
       throw AuthException(
         parseAuthError(
           e,
-          fallback: 'Invalid email or password, or account not yet confirmed.',
+          fallback:
+              'Invalid email/username or password, or account not yet confirmed.',
         ),
       );
     }

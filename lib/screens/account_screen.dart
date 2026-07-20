@@ -212,7 +212,7 @@ class _AuthFormState extends State<_AuthForm> {
         );
       } else {
         await authService.logIn(
-          email: _emailController.text.trim(),
+          login: _emailController.text.trim(),
           password: _passwordController.text,
         );
       }
@@ -233,10 +233,14 @@ class _AuthFormState extends State<_AuthForm> {
   }
 
   void _showForgotPasswordDialog(BuildContext context) {
+    // The login field now also accepts a username, which isn't a valid reset-password target —
+    // only carry it over as a prefill when it actually looks like an email.
+    final typed = _emailController.text.trim();
     showDialog(
       context: context,
-      builder: (_) =>
-          _ForgotPasswordDialog(initialEmail: _emailController.text.trim()),
+      builder: (_) => _ForgotPasswordDialog(
+        initialEmail: typed.contains('@') ? typed : '',
+      ),
     );
   }
 
@@ -277,17 +281,22 @@ class _AuthFormState extends State<_AuthForm> {
             TextFormField(
               controller: _emailController,
               focusNode: _emailFocus,
-              keyboardType: TextInputType.emailAddress,
+              keyboardType: _isSignUp
+                  ? TextInputType.emailAddress
+                  : TextInputType.text,
               textInputAction: TextInputAction.next,
               onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
               style: GoogleFonts.notoSans(
                 color: context.textColor,
                 fontSize: 15,
               ),
-              decoration: goldInputDecoration(context, label: 'Email'),
+              decoration: goldInputDecoration(
+                context,
+                label: _isSignUp ? 'Email' : 'Email or Username',
+              ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
-                if (!v.contains('@')) return 'Enter a valid email';
+                if (_isSignUp && !v.contains('@')) return 'Enter a valid email';
                 return null;
               },
             ),

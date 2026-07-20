@@ -195,20 +195,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _UsernameEditor(
+                            key: ValueKey(user.username),
+                            initialUsername: user.username,
+                          ),
+                          const SizedBox(height: 12),
                           _SettingRow(
-                            label: 'Signed in as ',
+                            label: 'Email',
                             child: Text(
                               user.email,
                               style: GoogleFonts.cinzel(
                                 color: context.textColor,
                                 fontWeight: FontWeight.w600,
+                                fontSize: 15,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          _UsernameEditor(
-                            key: ValueKey(user.username),
-                            initialUsername: user.username,
                           ),
                           const SizedBox(height: 12),
                           _AccountButton(
@@ -647,50 +648,45 @@ class _UsernameEditorState extends State<_UsernameEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SettingRow(
-          label: 'Username',
+          label: 'Signed in as ',
           child: SizedBox(
             width: 170,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    onChanged: (_) => setState(() {}),
-                    onSubmitted: (_) => _save(),
-                    textAlign: TextAlign.right,
-                    style: GoogleFonts.cinzel(
-                      color: context.textColor,
-                      fontSize: 14,
-                    ),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      border: InputBorder.none,
+                  child: SizedBox(
+                    height: 22,
+                    child: TextField(
+                      controller: _controller,
+                      onChanged: (_) => setState(() {}),
+                      onSubmitted: (_) => _save(),
+                      textAlign: TextAlign.right,
+                      textAlignVertical: TextAlignVertical.center,
+                      style: GoogleFonts.cinzel(
+                        color: context.textColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                      decoration: const InputDecoration(
+                        isCollapsed: true,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
-                _saving
-                    ? SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.accentColor,
-                        ),
-                      )
-                    : IconButton(
-                        icon: Icon(
-                          Icons.check,
-                          size: 20,
-                          color: _changed
-                              ? context.accentColor
-                              : context.subtleTextColor.withValues(alpha: 0.3),
-                        ),
-                        onPressed: _changed ? _save : null,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
+                if (_saving) ...[
+                  const SizedBox(width: 6),
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: context.accentColor,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
