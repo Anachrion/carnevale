@@ -196,7 +196,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _SettingRow(
-                            label: 'Signed in as',
+                            label: 'Signed in as ',
                             child: Text(
                               user.email,
                               style: GoogleFonts.cinzel(
