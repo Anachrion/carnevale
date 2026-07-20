@@ -595,39 +595,41 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
 
   @override
   Widget build(BuildContext context) {
+    // Tapping anywhere in the dialog that isn't itself a focusable/tappable control drops
+    // keyboard focus, hiding the suggestions panel with it — a real tap directly on the search
+    // field or Cancel still wins its own gesture. Tapping back into the field brings both
+    // straight back.
     return ThemedDialogCard(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Summon a model',
-            style: GoogleFonts.cinzel(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
+      child: dismissSearchFocusOnTapOutside(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Summon a model',
+              style: GoogleFonts.cinzel(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Any model may be summoned, from any faction. It costs no ducats.',
-            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 12),
-          buildSearchField(hintText: 'Search names, abilities, rules...'),
-          if (pickedFacets.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Any model may be summoned, from any faction. It costs no ducats.',
+              style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+            ),
+            const SizedBox(height: 12),
+            buildSearchField(hintText: 'Search names, abilities, rules...'),
+            if (pickedFacets.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              buildFacetChips(),
+            ],
             const SizedBox(height: 8),
-            buildFacetChips(),
-          ],
-          const SizedBox(height: 8),
-          // Fixed height, not Expanded: the dialog's Column is mainAxisSize.min, so it has no bounded
-          // height to divide up. The suggestions float over the results rather than pushing them
-          // down, as they do everywhere else the catalog search appears. Tapping anywhere in here
-          // drops keyboard focus, hiding the suggestions with it; tapping back into the field
-          // brings both straight back.
-          SizedBox(
-            height: 300,
-            child: dismissSearchFocusOnTapOutside(
+            // Fixed height, not Expanded: the dialog's Column is mainAxisSize.min, so it has no
+            // bounded height to divide up. The suggestions float over the results rather than
+            // pushing them down, as they do everywhere else the catalog search appears.
+            SizedBox(
+              height: 300,
               child: Stack(
                 children: [
                   _buildResults(context),
@@ -641,21 +643,21 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
                 ],
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.cinzel(
-                  fontWeight: FontWeight.w700,
-                  color: context.accentColor,
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: context.accentColor,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
