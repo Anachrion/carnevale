@@ -34,6 +34,8 @@ import 'package:carnevale_api/src/model/entry_position_input.dart';
 import 'package:carnevale_api/src/model/entry_position_input_entry.dart';
 import 'package:carnevale_api/src/model/entry_stat_value.dart';
 import 'package:carnevale_api/src/model/entry_state.dart';
+import 'package:carnevale_api/src/model/entry_upgrade_input.dart';
+import 'package:carnevale_api/src/model/entry_upgrade_input_entry.dart';
 import 'package:carnevale_api/src/model/equipment.dart';
 import 'package:carnevale_api/src/model/forgot_password_input.dart';
 import 'package:carnevale_api/src/model/forgot_password_input_user.dart';
@@ -104,6 +106,8 @@ part 'serializers.g.dart';
   EntryPositionInputEntry,
   EntryStatValue,
   EntryState,
+  EntryUpgradeInput,
+  EntryUpgradeInputEntry,
   Equipment,
   ForgotPasswordInput,
   ForgotPasswordInputUser,

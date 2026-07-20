@@ -21,13 +21,19 @@ part 'list_entry.g.dart';
 /// * [entryId] 
 /// * [name] 
 /// * [profileName] - The underlying profile's name without the card-reference letter suffix (e.g. \"Beggar\" rather than \"Beggar (A)\"). Use this to label a hired model and number duplicates client-side. Null for Equipment entries. 
-/// * [keywords] - The underlying profile's printed keywords (e.g. [\"Hero\", \"Doctor\"]) — used client-side to filter Apprentice Doctor's Apprenticeship mentor candidates (\"a character with both the Doctor and Hero keywords\"). Empty for Equipment.
-/// * [flexibleLeader] - Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora). False for non-flex Leaders and Equipment.
+/// * [keywords] - The underlying profile's printed keywords (e.g. [\"Hero\", \"Doctor\"]) — used client-side to filter Apprentice Doctor's Apprenticeship mentor candidates (\"a character with both the Doctor and Hero keywords\"). Empty for Equipment. 
+/// * [flexibleLeader] - Whether this model is a \"flex\" Leader — one that drops its Leader keyword and becomes a plain Hero when the gang already contains another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora). The gang builder uses it to keep offering a Leader model's \"add\" button once a Leader is present; server-side enforcement is ListValidationService. False for Equipment and for every non-flex Leader. 
+/// * [demotedLeader] - Whether this flex Leader has been demoted to a plain Hero by the gang's composition (it prints Leader but has lost it). The client shows the Hero keyword and never pins it as the gang's Leader. False for the effective Leader and for non-Leaders. 
+/// * [promotableLeader] - Whether this demoted flex Leader could be promoted to Leader instead — only in the ambiguous case of several unconditional flex Leaders and no forced Leader, where the player chooses. The client shows a \"promote\" action that moves it to the top. 
 /// * [identifier] - Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
 /// * [cardFront] - Front face filename of the chosen card reference (served from /cards). Null for Equipment.
 /// * [cardBack] - Back face filename of the chosen card reference (served from /cards). Null for Equipment.
 /// * [cost] 
 /// * [summoned] - Conjured onto the board mid-game by a special rule, rather than hired during gang building. A summoned model tracks HP/counters/activation like any other, but costs the gang nothing and is exempt from the gang-building rules (ducat limit, faction consistency, unique/Leader/ratio), so a legal summon can't push a gang over its limit or flip it to invalid. It is also the only kind of model that can be removed mid-game. 
+/// * [companionOfEntryId] - Id of the entry that automatically brought this one in — the Emissary of Mother Hydra that owns this Tentacle (CARNEVALEB-23). Null for a normally hired model. A companion is read-only in the builder: it can't be reordered or removed on its own, only alongside the model that brought it. 
+/// * [upgradeSelected] - Whether this model's optional paid upgrade has been bought — the Emissary's +12 Ducats for a second set of Tentacles. Its Ducat cost is already included in `cost`. Toggle via PATCH /list_entries/{id}/upgrade. 
+/// * [upgradeAvailable] - Whether this model offers an optional paid upgrade at all. The client shows the upgrade toggle only when true. False for models with no upgrade and for Equipment. 
+/// * [upgradeDucats] - The Ducat cost of this model's optional upgrade (0 when none is offered).
 /// * [state] - Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
 /// * [mage] - Whether this model is a Mage and can therefore be given spells. Always false for Equipment; non-Mage models carry empty pools/granted_spells.
 /// * [mentoredByEntryId] - Apprentice Doctor's Apprenticeship: the id of another ListEntry in the same list whose resolved Mage pool this model's mentor_derived pool borrows its disciplines/slot_count from. Null for every other profile, and null until a mentor is chosen. Set it via PATCH /list_entries/{id}/spells (SetEntrySpellsInput.entry.mentored_by_entry_id). 
@@ -60,15 +66,15 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   @BuiltValueField(wireName: r'keywords')
   BuiltList<String> get keywords;
 
-  /// Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora). False for non-flex Leaders and Equipment.
+  /// Whether this model is a \"flex\" Leader — one that drops its Leader keyword and becomes a plain Hero when the gang already contains another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora). The gang builder uses it to keep offering a Leader model's \"add\" button once a Leader is present; server-side enforcement is ListValidationService. False for Equipment and for every non-flex Leader. 
   @BuiltValueField(wireName: r'flexible_leader')
   bool get flexibleLeader;
 
-  /// Whether this flex Leader has been demoted to a plain Hero by the gang's composition (prints Leader but lost it). The client shows Hero and never pins it as the Leader.
+  /// Whether this flex Leader has been demoted to a plain Hero by the gang's composition (it prints Leader but has lost it). The client shows the Hero keyword and never pins it as the gang's Leader. False for the effective Leader and for non-Leaders. 
   @BuiltValueField(wireName: r'demoted_leader')
   bool get demotedLeader;
 
-  /// Whether this demoted flex Leader could be promoted to Leader instead (ambiguous multi-flex case); the client shows a promote action.
+  /// Whether this demoted flex Leader could be promoted to Leader instead — only in the ambiguous case of several unconditional flex Leaders and no forced Leader, where the player chooses. The client shows a \"promote\" action that moves it to the top. 
   @BuiltValueField(wireName: r'promotable_leader')
   bool get promotableLeader;
 
@@ -90,6 +96,22 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   /// Conjured onto the board mid-game by a special rule, rather than hired during gang building. A summoned model tracks HP/counters/activation like any other, but costs the gang nothing and is exempt from the gang-building rules (ducat limit, faction consistency, unique/Leader/ratio), so a legal summon can't push a gang over its limit or flip it to invalid. It is also the only kind of model that can be removed mid-game. 
   @BuiltValueField(wireName: r'summoned')
   bool get summoned;
+
+  /// Id of the entry that automatically brought this one in — the Emissary of Mother Hydra that owns this Tentacle (CARNEVALEB-23). Null for a normally hired model. A companion is read-only in the builder: it can't be reordered or removed on its own, only alongside the model that brought it. 
+  @BuiltValueField(wireName: r'companion_of_entry_id')
+  int? get companionOfEntryId;
+
+  /// Whether this model's optional paid upgrade has been bought — the Emissary's +12 Ducats for a second set of Tentacles. Its Ducat cost is already included in `cost`. Toggle via PATCH /list_entries/{id}/upgrade. 
+  @BuiltValueField(wireName: r'upgrade_selected')
+  bool get upgradeSelected;
+
+  /// Whether this model offers an optional paid upgrade at all. The client shows the upgrade toggle only when true. False for models with no upgrade and for Equipment. 
+  @BuiltValueField(wireName: r'upgrade_available')
+  bool get upgradeAvailable;
+
+  /// The Ducat cost of this model's optional upgrade (0 when none is offered).
+  @BuiltValueField(wireName: r'upgrade_ducats')
+  int get upgradeDucats;
 
   /// Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
   @BuiltValueField(wireName: r'state')
@@ -220,6 +242,28 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
     yield serializers.serialize(
       object.summoned,
       specifiedType: const FullType(bool),
+    );
+    if (object.companionOfEntryId != null) {
+      yield r'companion_of_entry_id';
+      yield serializers.serialize(
+        object.companionOfEntryId,
+        specifiedType: const FullType.nullable(int),
+      );
+    }
+    yield r'upgrade_selected';
+    yield serializers.serialize(
+      object.upgradeSelected,
+      specifiedType: const FullType(bool),
+    );
+    yield r'upgrade_available';
+    yield serializers.serialize(
+      object.upgradeAvailable,
+      specifiedType: const FullType(bool),
+    );
+    yield r'upgrade_ducats';
+    yield serializers.serialize(
+      object.upgradeDucats,
+      specifiedType: const FullType(int),
     );
     if (object.state != null) {
       yield r'state';
@@ -386,6 +430,35 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.summoned = valueDes;
+          break;
+        case r'companion_of_entry_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          if (valueDes == null) continue;
+          result.companionOfEntryId = valueDes;
+          break;
+        case r'upgrade_selected':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.upgradeSelected = valueDes;
+          break;
+        case r'upgrade_available':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.upgradeAvailable = valueDes;
+          break;
+        case r'upgrade_ducats':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.upgradeDucats = valueDes;
           break;
         case r'state':
           final valueDes = serializers.deserialize(

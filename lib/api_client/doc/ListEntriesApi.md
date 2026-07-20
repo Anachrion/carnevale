@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**deleteListEntry**](ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [**setListEntryIllustration**](ListEntriesApi.md#setlistentryillustration) | **PATCH** /list_entries/{id}/illustration | Switch which illustration (card reference) a model is hired as
 [**setListEntrySpells**](ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline(s)) a Mage model knows, per pool
+[**setListEntryUpgrade**](ListEntriesApi.md#setlistentryupgrade) | **PATCH** /list_entries/{id}/upgrade | Toggle a model&#39;s optional paid companion upgrade
 [**updateListEntryPosition**](ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 
 
@@ -192,6 +193,55 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **int**|  | 
  **setEntrySpellsInput** | [**SetEntrySpellsInput**](SetEntrySpellsInput.md)|  | 
+
+### Return type
+
+[**BuiltList**](BuiltList.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setListEntryUpgrade**
+> BuiltList setListEntryUpgrade(id, entryUpgradeInput)
+
+Toggle a model's optional paid companion upgrade
+
+Buys or drops a model's optional paid upgrade — the Emissary of Mother Hydra's +12 Ducats for a second set of Tentacles (8 instead of 4) — and reconciles its auto-included companion entries to match. The upgrade's Ducat cost is added to the entry's cost. Returns 404 if the entry's list doesn't belong to the current user. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getListEntriesApi();
+final int id = 56; // int | 
+final EntryUpgradeInput entryUpgradeInput = ; // EntryUpgradeInput | 
+
+try {
+    final response = api.setListEntryUpgrade(id, entryUpgradeInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ListEntriesApi->setListEntryUpgrade: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **entryUpgradeInput** | [**EntryUpgradeInput**](EntryUpgradeInput.md)|  | 
 
 ### Return type
 

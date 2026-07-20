@@ -540,8 +540,11 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
   @override
   Set<String> get searchFactions => const {};
 
+  // Non-recruitable models (the Emissary's Tentacles) can't be summoned either — they only arrive
+  // with the model that brings them (CARNEVALEB-23) — so they're dropped from the pool.
   @override
-  void onSearchChanged() => _results = _service.matching(searchQuery);
+  void onSearchChanged() =>
+      _results = _service.matching(searchQuery).where((p) => p.recruitable).toList();
 
   @override
   void initState() {

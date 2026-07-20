@@ -158,7 +158,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     // over abilities/weapons/special rules and ANDed facet chips — not just a name substring. The
     // faction constraint in `searchQuery` reproduces the loaded set, so this never widens the pool
     // beyond what the gang can actually hire.
-    final filtered = ProfileService().matching(searchQuery);
+    // Drop models that can't be hired directly (the Emissary of Mother Hydra's Tentacles) — they
+    // only ever reach a gang automatically, brought in by another model (CARNEVALEB-23). They stay
+    // browsable in the Cards catalog; this only hides them from the Hire tab.
+    final filtered = ProfileService()
+        .matching(searchQuery)
+        .where((p) => p.recruitable)
+        .toList();
     int roleRank(api.Profile p) {
       if (p.keywords.contains('Leader')) return 0;
       if (p.keywords.contains('Hero')) return 1;
@@ -449,8 +455,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     return _gangWith(entries);
   }
 
-  api.ModelList _removed(int id) =>
-      _gangWith(_gang.entries.where((e) => e.id != id).toList());
+  // Drops the entry and, with it, any companions it brought (an Emissary takes its Tentacles) — so
+  // removing a parent clears its companions in the same frame rather than waiting for the server's
+  // cascade to come back (CARNEVALEB-23).
+  api.ModelList _removed(int id) => _gangWith(
+    _gang.entries
+        .where((e) => e.id != id && e.companionOfEntryId != id)
+        .toList(),
+  );
 
   // The server-created row is the newest (highest id) entry matching what we just added.
   void _mapCreatedId(
@@ -484,6 +496,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           ..promotableLeader = false
           ..cost = p.ducats
           ..summoned = false
+          // Companion/upgrade state is resolved server-side; a freshly-added model starts with no
+          // upgrade and the authoritative gang (adopted a beat later) fills in the real values —
+          // including the Emissary's upgrade toggle. companionOfEntryId stays null (nullable).
+          ..upgradeSelected = false
+          ..upgradeAvailable = false
+          ..upgradeDucats = 0
           ..mage = p.mage
           ..distinctDisciplinePerCopy = false
           ..pools = ListBuilder<api.SpellPool>()
@@ -503,6 +521,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       ..promotableLeader = false
       ..cost = e.cost
       ..summoned = false
+      ..upgradeSelected = false
+      ..upgradeAvailable = false
+      ..upgradeDucats = 0
       ..mage = false
       ..distinctDisciplinePerCopy = false
       ..pools = ListBuilder<api.SpellPool>()
@@ -525,6 +546,22 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       final updated = await GangService().setEntryIllustration(
         entry.id,
         cardReferenceId,
+      );
+      if (mounted) setState(() => _gang = updated);
+    });
+  }
+
+  // Buys or drops the Emissary's optional +12-Ducat upgrade (CARNEVALEB-23). The backend reconciles
+  // the auto-included Tentacle entries to match and returns the whole updated gang, so this just
+  // swaps it in — like the illustration change, and after the sync queue has drained so it lands on
+  // server-authoritative state.
+  Future<void> _toggleUpgrade(api.ListEntry entry) async {
+    await _flushSync();
+    if (!mounted) return;
+    await guard(context, () async {
+      final updated = await GangService().setEntryUpgrade(
+        entry.id,
+        !entry.upgradeSelected,
       );
       if (mounted) setState(() => _gang = updated);
     });
@@ -652,12 +689,15 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   /// the background. A genuine rejection re-inserts it (and toasts); the Leader-first order and cost
   /// self-correct when the authoritative gang is next adopted.
   void _removeEntry(api.ListEntry entry) {
+    // Snapshot the whole gang so a genuine rejection restores it exactly — including any companions
+    // that were cascaded out alongside this entry (see _removed).
+    final previous = _gang.entries.toList();
     setState(() => _gang = _removed(entry.id));
     _enqueue(
       _PendingOp(
         describe: 'remove ${entry.name}',
         run: () => GangService().removeEntry(_realId(entry.id)),
-        revert: () => setState(() => _gang = _added(entry)),
+        revert: () => setState(() => _gang = _gangWith(previous)),
       ),
     );
   }
@@ -1059,6 +1099,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           factionColor: entryColor,
           role: role,
           onRemove: () => _removeEntry(entry),
+          // A companion (a Tentacle) is read-only — it leaves only with the model that brought it.
+          isCompanion: entry.companionOfEntryId != null,
+          // A model that offers an optional paid upgrade (the Emissary) gets a toggle; guard on a real
+          // id so a just-hired model syncs before the toggle can fire.
+          onToggleUpgrade: entry.upgradeAvailable && entry.id > 0
+              ? () => _toggleUpgrade(entry)
+              : null,
           onTap: onTap,
           // Spell/mentor edits need the server-side pool detail, which only lands once the entry has
           // a real id (a just-added model syncs a beat later); guard on that so the buttons don't
@@ -1102,6 +1149,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         // Delayed (long-press) rather than immediate: an immediate listener claims horizontal drags
         // too, which stole the swipe that switches to the Hire tab whenever the list had entries.
         // Long-press-then-drag reorders; a quick horizontal swipe now reaches the tab PageView.
+        // Companions (Tentacles) are draggable like any other model — they just can't be removed on
+        // their own (see _EntryTile.isCompanion).
         return ReorderableDelayedDragStartListener(
           key: ValueKey(entry.id),
           index: i,

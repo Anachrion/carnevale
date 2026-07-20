@@ -14,6 +14,7 @@ import 'package:carnevale_api/src/model/entry_illustration_input.dart';
 import 'package:carnevale_api/src/model/entry_input.dart';
 import 'package:carnevale_api/src/model/model_list.dart';
 import 'package:carnevale_api/src/model/entry_position_input.dart';
+import 'package:carnevale_api/src/model/entry_upgrade_input.dart';
 import 'package:carnevale_api/src/model/set_entry_spells_input.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
@@ -380,6 +381,114 @@ class ListEntriesApi {
     try {
       const _type = FullType(SetEntrySpellsInput);
       _bodyData = _serializers.serialize(setEntrySpellsInput, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ModelList? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(ModelList),
+      ) as ModelList;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ModelList>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Toggle a model&#39;s optional paid companion upgrade
+  /// Buys or drops a model&#39;s optional paid upgrade — the Emissary of Mother Hydra&#39;s +12 Ducats for a second set of Tentacles (8 instead of 4) — and reconciles its auto-included companion entries to match. The upgrade&#39;s Ducat cost is added to the entry&#39;s cost. Returns 404 if the entry&#39;s list doesn&#39;t belong to the current user. 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [entryUpgradeInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [BuiltList] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ModelList>> setListEntryUpgrade({ 
+    required int id,
+    required EntryUpgradeInput entryUpgradeInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/list_entries/{id}/upgrade'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(EntryUpgradeInput);
+      _bodyData = _serializers.serialize(entryUpgradeInput, specifiedType: _type);
 
     } catch(error, stackTrace) {
       throw DioException(
