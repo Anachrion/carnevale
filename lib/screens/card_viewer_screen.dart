@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/ability_service.dart';
 import '../services/card_image_service.dart';
@@ -313,7 +314,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                   child: Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      tooltip: 'Switch illustration',
+                      tooltip: AppLocalizations.of(context).cardSwitchIllustration,
                       icon: const Icon(
                         Icons.collections,
                         color: Colors.white,
@@ -340,7 +341,10 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                     children: [
                       Flexible(
                         child: Text(
-                          '${_currentIndex + 1} / ${widget.profiles.length}  •  tap/←→ flip  •  swipe ↑↓ navigate',
+                          AppLocalizations.of(context).cardViewerHint(
+                            _currentIndex + 1,
+                            widget.profiles.length,
+                          ),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.35),
                             fontSize: 12,
@@ -350,7 +354,7 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                       TextButton.icon(
                         onPressed: _showAbilities,
                         icon: const Icon(Icons.info_outline, size: 20),
-                        label: const Text('Abilities'),
+                        label: Text(AppLocalizations.of(context).cardAbilities),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
@@ -419,7 +423,7 @@ class _AbilitiesSheetState extends State<_AbilitiesSheet> {
                   padding: const EdgeInsets.all(32),
                   child: Center(
                     child: Text(
-                      'Could not load abilities.',
+                      AppLocalizations.of(context).cardAbilitiesLoadFailed,
                       style: TextStyle(color: context.subtleTextColor),
                     ),
                   ),
@@ -456,19 +460,19 @@ class _AbilitiesSheetState extends State<_AbilitiesSheet> {
                   const SizedBox(height: 20),
                   if (character.isEmpty && weapon.isEmpty)
                     Text(
-                      'This character has no special abilities.',
+                      AppLocalizations.of(context).cardNoAbilities,
                       style: TextStyle(
                         color: context.subtleTextColor,
                         fontSize: 14,
                       ),
                     ),
                   if (character.isNotEmpty) ...[
-                    const _SectionTitle('Character Abilities'),
+                    _SectionTitle(AppLocalizations.of(context).cardCharacterAbilities),
                     ...character.map((a) => _AbilityEntry(ability: a)),
                   ],
                   if (weapon.isNotEmpty) ...[
                     if (character.isNotEmpty) const SizedBox(height: 8),
-                    const _SectionTitle('Weapon Abilities'),
+                    _SectionTitle(AppLocalizations.of(context).cardWeaponAbilities),
                     ...weapon.map((a) => _AbilityEntry(ability: a)),
                   ],
                 ],

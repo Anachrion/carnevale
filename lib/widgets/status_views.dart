@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 
 /// The shared full-body status placeholders (F-P2-3): the gold spinner, the "could not reach
 /// server" retry block, and the logged-out prompt — previously copy-pasted verbatim across the
@@ -32,28 +33,32 @@ class LoadingView extends StatelessWidget {
 }
 
 /// A wifi-off icon, a message and a "Retry" button. [message] defaults to the common
-/// server-unreachable copy; pass a specific error string to override it.
+/// server-unreachable copy (localized); pass a specific error string to override it.
 class ErrorRetryView extends StatelessWidget {
   const ErrorRetryView({
     super.key,
     required this.onRetry,
-    this.message = 'Could not reach server',
+    this.message,
   });
 
   final VoidCallback onRetry;
-  final String message;
+  // Nullable so the default can be localized in build — a const default can't call
+  // AppLocalizations.of(context).
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.wifi_off, size: 40, color: context.subtleTextColor),
           const SizedBox(height: 12),
-          Text(message, style: TextStyle(color: context.subtleTextColor)),
+          Text(message ?? l10n.errorCouldNotReachServer,
+              style: TextStyle(color: context.subtleTextColor)),
           const SizedBox(height: 8),
-          TextButton(onPressed: onRetry, child: const Text('Retry')),
+          TextButton(onPressed: onRetry, child: Text(l10n.actionRetry)),
         ],
       ),
     );
@@ -93,7 +98,7 @@ class LoggedOutView extends StatelessWidget {
                 backgroundColor: context.accentColor,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Log In'),
+              child: Text(AppLocalizations.of(context).actionLogIn),
             ),
           ],
         ),

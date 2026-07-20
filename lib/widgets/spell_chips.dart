@@ -16,6 +16,7 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import 'themed_dialog_card.dart';
 
 const Map<String, String> disciplineLabels = {
@@ -177,7 +178,7 @@ class SpellsButton extends StatelessWidget {
             Icon(Icons.auto_fix_high, size: 13, color: Colors.white.withValues(alpha: 0.85)),
             const SizedBox(width: 6),
             Text(
-              'Spells · $cast/${spells.length} cast',
+              AppLocalizations.of(context).spellsButtonLabel(cast, spells.length),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -237,7 +238,7 @@ class _KnownSpellsDialogState extends State<_KnownSpellsDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Known spells',
+              AppLocalizations.of(context).spellsKnownTitle,
               style: GoogleFonts.cinzel(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
@@ -350,7 +351,7 @@ class _KnownSpellsDialogState extends State<_KnownSpellsDialog> {
 /// [knownSpellsFor] — a model with a lot of known spells (Blood Crone, Adventuring Noble) turned
 /// the full per-spell chip list into a wall of pills that dominated the tile; here the point is a
 /// glanceable "what did I pick" summary, with the full detail one tap away in the spell picker.
-List<Widget> spellSummaryChipsFor(api.ListEntry entry) {
+List<Widget> spellSummaryChipsFor(AppLocalizations l10n, api.ListEntry entry) {
   final chips = <Widget>[];
 
   for (final pool in entry.pools) {
@@ -377,7 +378,7 @@ List<Widget> spellSummaryChipsFor(api.ListEntry entry) {
   }
   for (final items in groups.values) {
     if (items.length > 1 && items.every((g) => g.cantrip)) {
-      chips.add(const _SummaryChip('All cantrips', granted: true));
+      chips.add(_SummaryChip(l10n.spellAllCantrips, granted: true));
     } else {
       for (final g in items) {
         chips.add(_SummaryChip(g.name, granted: true));

@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/api_exception.dart';
 import 'app_toast.dart';
 
@@ -36,7 +37,7 @@ Future<bool> guard(BuildContext context, Future<void> Function() action) async {
     return false;
   } catch (_) {
     if (context.mounted) {
-      showAppToast(context, 'Something went wrong. Please try again.');
+      showAppToast(context, AppLocalizations.of(context).errorGeneric);
     }
     return false;
   }

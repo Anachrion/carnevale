@@ -18,6 +18,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../services/rules_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/status_views.dart';
@@ -191,7 +192,7 @@ class _RulesDocumentScreenState extends State<RulesDocumentScreen> {
           if (_searcher != null)
             IconButton(
               icon: Icon(Icons.search, color: context.accentColor),
-              tooltip: 'Search',
+              tooltip: AppLocalizations.of(context).tooltipSearch,
               onPressed: _toggleSearch,
             ),
         ],
@@ -208,7 +209,7 @@ class _RulesDocumentScreenState extends State<RulesDocumentScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back, color: context.textColor),
-            tooltip: 'Close search',
+            tooltip: AppLocalizations.of(context).tooltipCloseSearch,
             onPressed: _toggleSearch,
           ),
           Expanded(
@@ -222,24 +223,24 @@ class _RulesDocumentScreenState extends State<RulesDocumentScreen> {
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
-                hintText: 'Search this document',
+                hintText: AppLocalizations.of(context).rulesSearchHint,
                 hintStyle: TextStyle(color: context.subtleTextColor),
               ),
             ),
           ),
-          _MatchCounter(label: _matchLabel(), color: context.subtleTextColor),
+          _MatchCounter(label: _matchLabel(context), color: context.subtleTextColor),
           IconButton(
             icon: const Icon(Icons.keyboard_arrow_up),
             color: context.accentColor,
             disabledColor: context.subtleTextColor.withValues(alpha: 0.4),
-            tooltip: 'Previous match',
+            tooltip: AppLocalizations.of(context).tooltipPreviousMatch,
             onPressed: hasMatches ? () => searcher?.goToPrevMatch() : null,
           ),
           IconButton(
             icon: const Icon(Icons.keyboard_arrow_down),
             color: context.accentColor,
             disabledColor: context.subtleTextColor.withValues(alpha: 0.4),
-            tooltip: 'Next match',
+            tooltip: AppLocalizations.of(context).tooltipNextMatch,
             onPressed: hasMatches ? () => searcher?.goToNextMatch() : null,
           ),
         ],
@@ -249,11 +250,11 @@ class _RulesDocumentScreenState extends State<RulesDocumentScreen> {
 
   /// "3 / 17" once matches are in, an ellipsis while a long document is still being scanned, "None"
   /// when the query genuinely matches nothing, and blank before anything is typed.
-  String _matchLabel() {
+  String _matchLabel(BuildContext context) {
     final searcher = _searcher;
     if (searcher == null || _searchField.text.isEmpty) return '';
     final total = searcher.matches.length;
-    if (total == 0) return searcher.isSearching ? '…' : 'None';
+    if (total == 0) return searcher.isSearching ? '…' : AppLocalizations.of(context).rulesMatchNone;
     final current = (searcher.currentIndex ?? 0) + 1;
     return '$current / $total${searcher.isSearching ? '…' : ''}';
   }
@@ -263,7 +264,7 @@ class _RulesDocumentScreenState extends State<RulesDocumentScreen> {
     if (_error != null) {
       return ErrorRetryView(
         onRetry: _open,
-        message: 'Could not download ${widget.doc.title}',
+        message: AppLocalizations.of(context).rulesDownloadFailed(widget.doc.title),
       );
     }
 
@@ -292,7 +293,7 @@ class _RulesDocumentScreenState extends State<RulesDocumentScreen> {
       loadingBannerBuilder: (_, _, _) => const LoadingView(),
       errorBannerBuilder: (_, _, _, _) => ErrorRetryView(
         onRetry: _open,
-        message: 'Could not open ${widget.doc.title}',
+        message: AppLocalizations.of(context).rulesOpenFailed(widget.doc.title),
       ),
     );
 
@@ -399,7 +400,7 @@ class _DownloadingView extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Downloading — ${(value * 100).round()}%',
+                  AppLocalizations.of(context).rulesDownloadingPercent((value * 100).round()),
                   style: TextStyle(color: context.subtleTextColor),
                 ),
               ],

@@ -47,3 +47,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# gen-l10n untranslated-messages report (regenerated each build; not source)
+lib/l10n/untranslated.txt

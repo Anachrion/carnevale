@@ -18,6 +18,7 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
@@ -152,11 +153,11 @@ class _GangsScreenState extends State<GangsScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return ScreenHeader(
-      title: 'Gangs',
+      title: AppLocalizations.of(context).navGangs,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
       trailing: authService.isLoggedIn && !_loading && _error == null
           ? Text(
-              '${_gangs.length} gang${_gangs.length == 1 ? '' : 's'}',
+              AppLocalizations.of(context).gangCount(_gangs.length),
               style: TextStyle(fontSize: 12, color: context.subtleTextColor),
             )
           : null,
@@ -165,7 +166,7 @@ class _GangsScreenState extends State<GangsScreen> {
 
   Widget _buildLoggedOut() {
     return LoggedOutView(
-      message: 'Log in to build and manage your gangs',
+      message: AppLocalizations.of(context).gangsLoginPrompt,
       onLogin: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const AccountScreen()),
@@ -238,6 +239,7 @@ class _GangsScreenState extends State<GangsScreen> {
   /// Edit/Delete row revealed inside the tile once it's expanded. Each button
   /// has its own tap handler, so it acts without also toggling the expansion.
   Widget _tileActions(api.ModelList gang) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Row(
@@ -252,7 +254,7 @@ class _GangsScreenState extends State<GangsScreen> {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             label: Text(
-              'Edit',
+              l10n.actionEdit,
               style: GoogleFonts.cinzel(
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
@@ -268,7 +270,7 @@ class _GangsScreenState extends State<GangsScreen> {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             label: Text(
-              'Delete',
+              l10n.actionDelete,
               style: GoogleFonts.cinzel(
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
@@ -281,25 +283,26 @@ class _GangsScreenState extends State<GangsScreen> {
   }
 
   void _confirmDelete(api.ModelList gang) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text(
-          'Delete Gang',
+          l10n.gangDeleteTitle,
           style: GoogleFonts.cinzel(color: context.textColor),
         ),
-        content: Text('Delete "${gang.name ?? ''}"?'),
+        content: Text(l10n.deleteGangConfirm(gang.name ?? '')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               unawaited(_deleteGang(gang.id));
             },
-            child: Text('Delete', style: TextStyle(color: context.dangerColor)),
+            child: Text(l10n.actionDelete, style: TextStyle(color: context.dangerColor)),
           ),
         ],
       ),
@@ -318,7 +321,7 @@ class _GangsScreenState extends State<GangsScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No gangs yet',
+            AppLocalizations.of(context).gangsEmptyTitle,
             style: GoogleFonts.cinzel(
               fontSize: 16,
               color: context.subtleTextColor,
@@ -326,7 +329,7 @@ class _GangsScreenState extends State<GangsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap + to create your first gang',
+            AppLocalizations.of(context).gangsEmptySubtitle,
             style: TextStyle(
               fontSize: 13,
               color: context.subtleTextColor.withValues(alpha: 0.7),
@@ -386,7 +389,7 @@ class _GangRosterPreview extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Text(
-                'No models hired yet.',
+                AppLocalizations.of(context).gangsRosterNoModels,
                 style: TextStyle(fontSize: 13, color: context.subtleTextColor),
               ),
             )

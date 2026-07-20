@@ -15,6 +15,7 @@
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_background.dart';
@@ -78,7 +79,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return ScreenHeader(
-      title: 'Account',
+      title: AppLocalizations.of(context).accountTitle,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
     );
   }
@@ -100,7 +101,7 @@ class _LoggedInPanelState extends State<_LoggedInPanel> {
     await authService.logOut();
     if (!mounted) return;
     setState(() => _loggingOut = false);
-    showAppToast(context, 'Logged out');
+    showAppToast(context, AppLocalizations.of(context).toastLoggedOut);
   }
 
   @override
@@ -145,7 +146,7 @@ class _LoggedInPanelState extends State<_LoggedInPanel> {
                         strokeWidth: 2,
                       ),
                     )
-                  : const Text('Log Out'),
+                  : Text(AppLocalizations.of(context).actionLogOut),
             ),
           ),
         ],
@@ -217,9 +218,10 @@ class _AuthFormState extends State<_AuthForm> {
         );
       }
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       showAppToast(
         context,
-        _isSignUp ? 'Account created!' : 'Logged in successfully!',
+        _isSignUp ? l10n.toastAccountCreated : l10n.toastLoggedIn,
       );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -242,6 +244,7 @@ class _AuthFormState extends State<_AuthForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GlassPanel(
       child: Form(
         key: _formKey,
@@ -249,7 +252,7 @@ class _AuthFormState extends State<_AuthForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _isSignUp ? 'Sign Up' : 'Log In',
+              _isSignUp ? l10n.actionSignUp : l10n.actionLogIn,
               style: GoogleFonts.cinzel(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -268,9 +271,9 @@ class _AuthFormState extends State<_AuthForm> {
                   color: context.textColor,
                   fontSize: 15,
                 ),
-                decoration: goldInputDecoration(context, label: 'Username'),
+                decoration: goldInputDecoration(context, label: l10n.fieldUsername),
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    (v == null || v.trim().isEmpty) ? l10n.validationRequired : null,
               ),
               const SizedBox(height: 16),
             ],
@@ -284,10 +287,10 @@ class _AuthFormState extends State<_AuthForm> {
                 color: context.textColor,
                 fontSize: 15,
               ),
-              decoration: goldInputDecoration(context, label: 'Email'),
+              decoration: goldInputDecoration(context, label: l10n.fieldEmail),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Required';
-                if (!v.contains('@')) return 'Enter a valid email';
+                if (v == null || v.trim().isEmpty) return l10n.validationRequired;
+                if (!v.contains('@')) return l10n.validationEmailInvalid;
                 return null;
               },
             ),
@@ -306,10 +309,10 @@ class _AuthFormState extends State<_AuthForm> {
                 color: context.textColor,
                 fontSize: 15,
               ),
-              decoration: goldInputDecoration(context, label: 'Password'),
+              decoration: goldInputDecoration(context, label: l10n.fieldPassword),
               validator: (v) {
-                if (v == null || v.isEmpty) return 'Required';
-                if (_isSignUp && v.length < 6) return 'At least 6 characters';
+                if (v == null || v.isEmpty) return l10n.validationRequired;
+                if (_isSignUp && v.length < 6) return l10n.validationPasswordTooShort;
                 return null;
               },
             ),
@@ -320,7 +323,7 @@ class _AuthFormState extends State<_AuthForm> {
                 child: GestureDetector(
                   onTap: () => _showForgotPasswordDialog(context),
                   child: Text(
-                    'Forgot password?',
+                    l10n.authForgotPassword,
                     style: GoogleFonts.notoSans(
                       fontSize: 13,
                       color: context.accentColor,
@@ -344,11 +347,11 @@ class _AuthFormState extends State<_AuthForm> {
                 ),
                 decoration: goldInputDecoration(
                   context,
-                  label: 'Confirm Password',
+                  label: l10n.fieldConfirmPassword,
                 ),
                 validator: (v) {
                   if (v != _passwordController.text)
-                    return 'Passwords do not match';
+                    return l10n.validationPasswordMismatch;
                   return null;
                 },
               ),
@@ -383,7 +386,7 @@ class _AuthFormState extends State<_AuthForm> {
                           strokeWidth: 2,
                         ),
                       )
-                    : Text(_isSignUp ? 'Sign Up' : 'Log In'),
+                    : Text(_isSignUp ? l10n.actionSignUp : l10n.actionLogIn),
               ),
             ),
             const SizedBox(height: 16),
@@ -399,11 +402,11 @@ class _AuthFormState extends State<_AuthForm> {
                     children: [
                       TextSpan(
                         text: _isSignUp
-                            ? 'Already have an account? '
-                            : "Don't have an account yet? ",
+                            ? l10n.authHaveAccount
+                            : l10n.authNoAccount,
                       ),
                       TextSpan(
-                        text: _isSignUp ? 'Log In' : 'Sign Up',
+                        text: _isSignUp ? l10n.actionLogIn : l10n.actionSignUp,
                         style: TextStyle(
                           color: context.accentColor,
                           fontWeight: FontWeight.w700,
@@ -453,7 +456,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       await authService.forgotPassword(_emailController.text.trim());
       if (!mounted) return;
       Navigator.of(context).pop();
-      showAppToast(context, 'Password reset email sent!');
+      showAppToast(context, AppLocalizations.of(context).toastResetEmailSent);
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } finally {
@@ -463,9 +466,10 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       title: Text(
-        'Reset Password',
+        l10n.authResetPassword,
         style: GoogleFonts.cinzel(color: context.textColor),
       ),
       content: Form(
@@ -475,7 +479,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Enter your email and we'll send you a link to reset your password.",
+              l10n.authResetPasswordBlurb,
               style: GoogleFonts.notoSans(
                 fontSize: 13,
                 color: context.subtleTextColor,
@@ -493,7 +497,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                 fontSize: 15,
               ),
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: l10n.fieldEmail,
                 labelStyle: GoogleFonts.notoSans(
                   color: context.subtleTextColor,
                   fontSize: 13,
@@ -511,8 +515,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                 ),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Required';
-                if (!v.contains('@')) return 'Enter a valid email';
+                if (v == null || v.trim().isEmpty) return l10n.validationRequired;
+                if (!v.contains('@')) return l10n.validationEmailInvalid;
                 return null;
               },
             ),
@@ -529,7 +533,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       actions: [
         TextButton(
           onPressed: _sending ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.actionCancel),
         ),
         TextButton(
           onPressed: _sending ? null : _send,
@@ -540,7 +544,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Text(
-                  'Send',
+                  l10n.actionSend,
                   style: TextStyle(
                     color: context.accentColor,
                     fontWeight: FontWeight.w700,

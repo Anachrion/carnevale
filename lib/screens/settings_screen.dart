@@ -17,6 +17,7 @@ import '../app_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/ability_service.dart';
 import '../services/auth_service.dart';
@@ -62,14 +63,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await authService.logOut();
     if (!mounted) return;
     setState(() => _loggingOut = false);
-    showAppToast(context, 'Logged out');
+    showAppToast(context, AppLocalizations.of(context).toastLoggedOut);
   }
 
   Future<void> _sendResetEmail(String email) async {
     setState(() => _sendingReset = true);
     try {
       await authService.forgotPassword(email);
-      if (mounted) showAppToast(context, 'Password reset email sent!');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastResetEmailSent);
     } on AuthException catch (e) {
       if (mounted) showAppToast(context, e.message);
     } finally {
@@ -79,6 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppPalette.background,
@@ -93,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                 children: [
                   Text(
-                    'APPEARANCE',
+                    l10n.settingsAppearance,
                     style: GoogleFonts.cinzel(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -103,7 +105,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 10),
                   _SettingRow(
-                    label: 'Theme',
+                    label: l10n.settingsLanguage,
+                    child: _OptionPicker<Locale?>(
+                      value: settingsService.locale,
+                      // null = follow the device; the two supported languages after it.
+                      options: const [null, Locale('en'), Locale('fr')],
+                      labelBuilder: (loc) => _localeLabel(l10n, loc),
+                      onChanged: settingsService.setLocale,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _SettingRow(
+                    label: l10n.settingsThemeMode,
                     child: _OptionPicker<ThemeMode>(
                       value: settingsService.themeMode,
                       options: const [
@@ -111,17 +124,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ThemeMode.light,
                         ThemeMode.dark,
                       ],
-                      labelBuilder: _themeModeLabel,
+                      labelBuilder: (m) => _themeModeLabel(l10n, m),
                       onChanged: settingsService.setThemeMode,
                     ),
                   ),
                   const SizedBox(height: 12),
                   _SettingRow(
-                    label: 'Card flip',
+                    label: l10n.settingsCardFlip,
                     child: _OptionPicker<CardFlipStyle>(
                       value: settingsService.cardFlipStyle,
                       options: const [CardFlipStyle.flip, CardFlipStyle.swipe],
-                      labelBuilder: _cardFlipStyleLabel,
+                      labelBuilder: (s) => _cardFlipStyleLabel(l10n, s),
                       onChanged: settingsService.setCardFlipStyle,
                     ),
                   ),
@@ -130,7 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   if (!kIsWeb) ...[
                     const SizedBox(height: 28),
                     Text(
-                      'CARD IMAGES',
+                      l10n.settingsCardImages,
                       style: GoogleFonts.cinzel(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -140,7 +153,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 10),
                     _SettingRow(
-                      label: 'Download',
+                      label: l10n.settingsDownload,
                       child: _OptionPicker<CardDownloadMode>(
                         value: settingsService.cardDownloadMode,
                         options: const [
@@ -148,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           CardDownloadMode.always,
                           CardDownloadMode.wifiOnly,
                         ],
-                        labelBuilder: _cardDownloadModeLabel,
+                        labelBuilder: (m) => _cardDownloadModeLabel(l10n, m),
                         onChanged: settingsService.setCardDownloadMode,
                       ),
                     ),
@@ -157,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                   const SizedBox(height: 28),
                   Text(
-                    'ACCOUNT',
+                    l10n.settingsAccount,
                     style: GoogleFonts.cinzel(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -172,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       final user = authService.currentUser;
                       if (user == null) {
                         return _SettingRow(
-                          label: 'Not logged in',
+                          label: l10n.settingsNotLoggedIn,
                           child: TextButton(
                             onPressed: () => Navigator.push(
                               context,
@@ -181,7 +194,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             child: Text(
-                              'Log In',
+                              l10n.actionLogIn,
                               style: GoogleFonts.cinzel(
                                 color: context.accentColor,
                                 fontWeight: FontWeight.w700,
@@ -195,7 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _SettingRow(
-                            label: 'Signed in as',
+                            label: l10n.settingsSignedInAs,
                             child: Text(
                               user.email,
                               style: GoogleFonts.cinzel(
@@ -212,7 +225,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 12),
                           _AccountButton(
                             icon: Icons.vpn_key_outlined,
-                            label: 'Reset Password',
+                            label: l10n.authResetPassword,
                             color: AppPalette.toggleBlue,
                             onPressed: _sendingReset
                                 ? null
@@ -222,7 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 12),
                           _AccountButton(
                             icon: Icons.logout,
-                            label: 'Log Out',
+                            label: l10n.actionLogOut,
                             color: logoutColor,
                             tintColor: AppPalette.red,
                             onPressed: _loggingOut ? null : _logOut,
@@ -243,27 +256,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return ScreenHeader(
-      title: 'Settings',
+      title: AppLocalizations.of(context).settingsTitle,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
     );
   }
 }
 
-String _themeModeLabel(ThemeMode m) => switch (m) {
-  ThemeMode.system => 'Follow System',
-  ThemeMode.light => 'Light',
-  ThemeMode.dark => 'Dark',
+// Label helpers now take the localizations object rather than reading hardcoded English. Language
+// names are shown as endonyms (each in its own language), which is the convention and needs no ARB
+// key; only the "system default" option is translated.
+String _localeLabel(AppLocalizations l10n, Locale? locale) => switch (locale?.languageCode) {
+  'en' => 'English',
+  'fr' => 'Français',
+  _ => l10n.settingsLanguageSystem,
 };
 
-String _cardFlipStyleLabel(CardFlipStyle s) => switch (s) {
-  CardFlipStyle.flip => 'Flip',
-  CardFlipStyle.swipe => 'Swipe',
+String _themeModeLabel(AppLocalizations l10n, ThemeMode m) => switch (m) {
+  ThemeMode.system => l10n.settingsThemeSystem,
+  ThemeMode.light => l10n.settingsThemeLight,
+  ThemeMode.dark => l10n.settingsThemeDark,
 };
 
-String _cardDownloadModeLabel(CardDownloadMode m) => switch (m) {
-  CardDownloadMode.onDemand => 'On demand',
-  CardDownloadMode.always => 'Always',
-  CardDownloadMode.wifiOnly => 'Wi-Fi only',
+String _cardFlipStyleLabel(AppLocalizations l10n, CardFlipStyle s) => switch (s) {
+  CardFlipStyle.flip => l10n.settingsCardFlipFlip,
+  CardFlipStyle.swipe => l10n.settingsCardFlipSwipe,
+};
+
+String _cardDownloadModeLabel(AppLocalizations l10n, CardDownloadMode m) => switch (m) {
+  CardDownloadMode.onDemand => l10n.settingsDownloadOnDemand,
+  CardDownloadMode.always => l10n.settingsDownloadAlways,
+  CardDownloadMode.wifiOnly => l10n.settingsDownloadWifiOnly,
 };
 
 /// " · ~12 MB" style suffix for a download-size hint, or "" when the manifest reported no sizes.
@@ -509,13 +531,14 @@ class _CardImageSyncState extends State<_CardImageSync> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GlassPanel(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Download any card images that are missing or out of date on this device.',
+            l10n.settingsSyncBlurb,
             style: GoogleFonts.cinzel(
               fontSize: 12,
               color: context.subtleTextColor,
@@ -539,8 +562,8 @@ class _CardImageSyncState extends State<_CardImageSync> {
                   showAppToast(
                     context,
                     total == 0
-                        ? 'All cards are already up to date'
-                        : 'Synced $total card image${total == 1 ? '' : 's'}',
+                        ? l10n.settingsSyncUpToDate
+                        : l10n.settingsSyncedCount(total),
                   );
                 });
               }
@@ -548,8 +571,9 @@ class _CardImageSyncState extends State<_CardImageSync> {
               // a surprise (S-5). Zero pending = nothing to fetch; the label just reads "Sync Cards".
               final pending = CardImageService().pendingDownload();
               final label = pending.count == 0
-                  ? 'Sync Cards'
-                  : 'Sync Cards (${pending.count}${_formatBytes(pending.bytes)})';
+                  ? l10n.settingsSyncCards
+                  : l10n.settingsSyncCardsWithCount(
+                      '${pending.count}${_formatBytes(pending.bytes)}');
               return _AccountButton(
                 icon: Icons.cloud_download_outlined,
                 label: label,
@@ -573,6 +597,7 @@ class _SyncProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = context.accentColor;
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -587,7 +612,7 @@ class _SyncProgress extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          total > 0 ? 'Downloading $done / $total' : 'Checking for updates…',
+          total > 0 ? l10n.settingsSyncDownloading(done, total) : l10n.settingsSyncChecking,
           style: GoogleFonts.cinzel(
             fontSize: 12,
             color: context.subtleTextColor,
@@ -631,7 +656,7 @@ class _UsernameEditorState extends State<_UsernameEditor> {
     });
     try {
       await authService.updateUsername(_controller.text.trim());
-      if (mounted) showAppToast(context, 'Username updated!');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastUsernameUpdated);
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } finally {
@@ -645,7 +670,7 @@ class _UsernameEditorState extends State<_UsernameEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SettingRow(
-          label: 'Username',
+          label: AppLocalizations.of(context).fieldUsername,
           child: SizedBox(
             width: 170,
             child: Row(
