@@ -55,6 +55,29 @@ class _TabButton extends StatelessWidget {
   }
 }
 
+// Keeps a PageView child mounted while swiped off-screen, so its ScrollPosition (and any other
+// per-subtree state) survives switching to the other tab and back.
+class _KeepAlivePage extends StatefulWidget {
+  const _KeepAlivePage({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+}
+
 class _EntryTile extends StatefulWidget {
   const _EntryTile({
     required this.entry,
