@@ -740,23 +740,30 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       },
       child: Scaffold(
         backgroundColor: AppPalette.background,
-        body: AppBackground(
-          child: Column(
-            children: [
-              _buildHeader(context, factionColor),
-              PointsBar(
-                used: _gang.totalCost,
-                limit: _gang.points,
-                factionColor: factionColor,
-                editable: true,
-              ),
-              if (_gang.entries.isNotEmpty && !_gang.selectionValid)
-                _buildValidityPanel(),
-              const SizedBox(height: 12),
-              _buildTabBar(factionColor),
-              const SizedBox(height: 8),
-              Expanded(child: _buildTabContent(factionColor)),
-            ],
+        // Tapping anywhere in the body that isn't itself a focusable/tappable control (including
+        // the header, points bar and tab bar above the search field) drops keyboard focus,
+        // hiding the suggestions panel with it — a real tap directly on the search field or any
+        // other control still wins its own gesture, so this doesn't interfere with typing or
+        // normal navigation. Tapping back into the field brings both straight back.
+        body: dismissSearchFocusOnTapOutside(
+          child: AppBackground(
+            child: Column(
+              children: [
+                _buildHeader(context, factionColor),
+                PointsBar(
+                  used: _gang.totalCost,
+                  limit: _gang.points,
+                  factionColor: factionColor,
+                  editable: true,
+                ),
+                if (_gang.entries.isNotEmpty && !_gang.selectionValid)
+                  _buildValidityPanel(),
+                const SizedBox(height: 12),
+                _buildTabBar(factionColor),
+                const SizedBox(height: 8),
+                Expanded(child: _buildTabContent(factionColor)),
+              ],
+            ),
           ),
         ),
       ),
@@ -1183,27 +1190,22 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       children: [
         _buildHireControls(),
         // The suggestions float over the hire list rather than sitting in the column, so opening
-        // them doesn't shove the list down. Same arrangement as the Cards screen. Tapping anywhere
-        // in here (but not the search field itself, or this would immediately undo its own focus)
-        // drops keyboard focus, hiding the suggestions with it; tapping back into the field brings
-        // both straight back.
+        // them doesn't shove the list down. Same arrangement as the Cards screen.
         Expanded(
-          child: dismissSearchFocusOnTapOutside(
-            child: Stack(
-              children: [
-                _buildHireList(factionProfiles, giftedProfiles, buildTile),
-                if (hasSuggestions)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                      child: buildSuggestions(),
-                    ),
+          child: Stack(
+            children: [
+              _buildHireList(factionProfiles, giftedProfiles, buildTile),
+              if (hasSuggestions)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: buildSuggestions(),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ],

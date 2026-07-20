@@ -131,59 +131,54 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
       key: _scaffoldKey,
       backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.cards),
-      body: AppBackground(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: buildSearchField(),
-            ),
-            // Tapping anywhere below the search field (but not the field itself, or the wrapper
-            // would immediately undo its own focus) drops keyboard focus, hiding the suggestions
-            // panel with it; tapping back into the field brings both straight back.
-            Expanded(
-              child: dismissSearchFocusOnTapOutside(
-                child: Column(
+      // Tapping anywhere in the body that isn't itself a focusable/tappable control (including
+      // the header and the margins around the search field) drops keyboard focus, hiding the
+      // suggestions panel with it — a real tap directly on the search field or any other control
+      // still wins its own gesture, so this doesn't interfere with typing or navigation. Tapping
+      // back into the field brings both straight back.
+      body: dismissSearchFocusOnTapOutside(
+        child: AppBackground(
+          child: Column(
+            children: [
+              _buildHeader(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: buildSearchField(),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                child: buildFacetChips(),
+              ),
+              // The suggestions float over the filters and the card list rather than sitting in
+              // the column, so opening them doesn't shove the page down. Stacking them inside the
+              // area below the search box (not over the whole screen) keeps them hit-testable,
+              // and lets the panel's backdrop filter blur the cards showing through it.
+              Expanded(
+                child: Stack(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                      child: buildFacetChips(),
+                    Column(
+                      children: [
+                        _buildFactionFilter(),
+                        _buildSortChips(),
+                        const SizedBox(height: 8),
+                        Expanded(child: _buildList()),
+                      ],
                     ),
-                    // The suggestions float over the filters and the card list rather than sitting
-                    // in the column, so opening them doesn't shove the page down. Stacking them
-                    // inside the area below the search box (not over the whole screen) keeps them
-                    // hit-testable, and lets the panel's backdrop filter blur the cards showing
-                    // through it.
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          Column(
-                            children: [
-                              _buildFactionFilter(),
-                              _buildSortChips(),
-                              const SizedBox(height: 8),
-                              Expanded(child: _buildList()),
-                            ],
-                          ),
-                          if (hasSuggestions)
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                                child: buildSuggestions(),
-                              ),
-                            ),
-                        ],
+                    if (hasSuggestions)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: buildSuggestions(),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
