@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../models/profile_query.dart';
 import '../services/profile_service.dart';
 import 'glass_panel.dart';
@@ -151,8 +152,9 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
   }
 
   Widget buildSearchField({
-    String hintText = 'Search names, abilities, rules...',
+    String? hintText,
   }) {
+    hintText ??= AppLocalizations.of(context).summonSearchHint;
     return GlassPanel(
       padding: EdgeInsets.zero,
       // canRequestFocus: false — this node only listens for keys on their way up from the field,

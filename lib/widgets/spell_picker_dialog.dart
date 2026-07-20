@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../models/spell_selection.dart';
 import 'spell_chips.dart';
 import 'themed_dialog_card.dart';
@@ -233,7 +234,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel', style: TextStyle(color: context.subtleTextColor)),
+                  child: Text(AppLocalizations.of(context).actionCancel, style: TextStyle(color: context.subtleTextColor)),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
@@ -242,7 +243,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: _save,
-                  child: const Text('Save'),
+                  child: Text(AppLocalizations.of(context).actionSave),
                 ),
               ],
             ),
@@ -472,7 +473,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(
-              'Deselect a spell in another Discipline to pick here instead.',
+              AppLocalizations.of(context).spellDeselectHint,
               style: TextStyle(
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
@@ -525,7 +526,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
     final known = [...pool.cantrips, ...pool.spells];
     return _collapsibleSection(
       sectionKey: 'pool-${pool.id}',
-      title: pool.rule?.name ?? 'Spell pool',
+      title: pool.rule?.name ?? AppLocalizations.of(context).spellPoolTitle,
       collapsedSummary:
           '${pool.eligibleDisciplines.map(disciplineLabel).join(' + ')} · ${known.length} known',
       children: [
@@ -538,7 +539,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
             spell: KnownSpell.fromPoolSpell(s, resetsEachRound: pool.resetsEachRound),
             checked: true,
             enabled: false,
-            trailingLabel: 'always known',
+            trailingLabel: AppLocalizations.of(context).spellAlwaysKnown,
             onTap: null,
           ),
         ),
@@ -555,11 +556,12 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
     final mentorInfo = _mentorInfo();
     final st = _pools[pool.id]!;
 
+    final l10n = AppLocalizations.of(context);
     if (mentor == null) {
       return _collapsibleSection(
         sectionKey: 'pool-${pool.id}',
-        title: 'Spell pool',
-        collapsedSummary: 'No mentor chosen — set one up via Apprenticeship first',
+        title: l10n.spellPoolTitle,
+        collapsedSummary: l10n.spellNoMentorSetup,
         locked: true,
         children: const [],
       );
@@ -567,13 +569,13 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
 
     return _collapsibleSection(
       sectionKey: 'pool-${pool.id}',
-      title: 'Spell pool',
-      collapsedSummary: _poolSummary(st, mentorInfo.slotCount),
+      title: l10n.spellPoolTitle,
+      collapsedSummary: _poolSummary(context, st, mentorInfo.slotCount),
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
-            'Mentor: ${mentor.name}',
+            l10n.spellMentorLabel(mentor.name),
             style: TextStyle(
               fontSize: 11,
               fontStyle: FontStyle.italic,
@@ -600,9 +602,9 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
     final st = _pools[pool.id]!;
     return _collapsibleSection(
       sectionKey: 'pool-${pool.id}',
-      title: pool.rule?.name ?? 'Spell pool',
-      badge: of > 1 ? 'up to $of Disciplines at once' : null,
-      collapsedSummary: _poolSummary(st, slotCount),
+      title: pool.rule?.name ?? AppLocalizations.of(context).spellPoolTitle,
+      badge: of > 1 ? AppLocalizations.of(context).spellUpToDisciplines(of) : null,
+      collapsedSummary: _poolSummary(context, st, slotCount),
       children: [
         if (pool.rule != null) _ruleCallout(pool.rule!),
         ..._standardPoolBody(pool, of: of, eligible: eligible, slotCount: slotCount),
@@ -610,11 +612,14 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
     );
   }
 
-  String _poolSummary(_PoolEditState st, int slotCount) {
+  String _poolSummary(BuildContext context, _PoolEditState st, int slotCount) {
+    final l10n = AppLocalizations.of(context);
     final disciplines = st.disciplines.isEmpty
-        ? 'No Discipline chosen'
+        ? l10n.spellNoDisciplineChosen
         : st.disciplines.map(disciplineLabel).join(' + ');
-    return slotCount > 0 ? '$disciplines · ${st.spellIds.length}/$slotCount spells' : disciplines;
+    return slotCount > 0
+        ? '$disciplines · ${l10n.spellsSlashCount(st.spellIds.length, slotCount)}'
+        : disciplines;
   }
 
   List<Widget> _standardPoolBody(
@@ -624,6 +629,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
     required int slotCount,
   }) {
     final st = _pools[pool.id]!;
+    final l10n = AppLocalizations.of(context);
     // Only one Discipline eligible: nothing to choose, it's implicitly committed.
     if (eligible.length <= 1) {
       final discipline = eligible.isEmpty ? null : eligible.first;
@@ -633,11 +639,11 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
       return [
         Text(
           slotCount > 0
-              ? '${st.spellIds.length}/$slotCount spells known'
+              ? '${l10n.spellsKnownCountLong(st.spellIds.length, slotCount)}'
                     '${discipline != null ? ' · ${disciplineLabel(discipline)}' : ''}'
               : discipline != null
-              ? '${disciplineLabel(discipline)} · Cantrip only'
-              : 'Cantrip only',
+              ? '${disciplineLabel(discipline)} · ${l10n.spellCantripOnly}'
+              : l10n.spellCantripOnly,
           style: TextStyle(fontSize: 11, color: context.subtleTextColor),
         ),
         const SizedBox(height: 8),
@@ -651,10 +657,10 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
       return [
         Text(
           slotCount > 0
-              ? '${st.spellIds.length}/$slotCount spells known'
+              ? l10n.spellsKnownCountLong(st.spellIds.length, slotCount)
               : active != null
-              ? '${disciplineLabel(active)} · Cantrip only'
-              : 'Cantrip only',
+              ? '${disciplineLabel(active)} · ${l10n.spellCantripOnly}'
+              : l10n.spellCantripOnly,
           style: TextStyle(fontSize: 11, color: context.subtleTextColor),
         ),
         const SizedBox(height: 8),
@@ -669,8 +675,8 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
             padding: const EdgeInsets.only(top: 6),
             child: Text(
               pool.distinctFromOtherPools
-                  ? 'Must be a different Discipline from this model\'s other pool.'
-                  : 'Already chosen by another copy of this model in the gang.',
+                  ? l10n.spellDistinctPool
+                  : l10n.spellDistinctCopy,
               style: TextStyle(
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
@@ -687,7 +693,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
     final active = _activeTab[pool.id] ?? eligible.first;
     return [
       Text(
-        '${st.spellIds.length}/$slotCount spells known · ${st.disciplines.length}/$of Disciplines chosen',
+        l10n.spellsAndDisciplines(st.spellIds.length, slotCount, st.disciplines.length, of),
         style: TextStyle(fontSize: 11, color: context.subtleTextColor),
       ),
       const SizedBox(height: 8),
@@ -758,10 +764,11 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
       for (final g in grants)
         if (g.rule != null) g.rule!.name: g.rule!,
     };
+    final l10n = AppLocalizations.of(context);
     return _collapsibleSection(
       sectionKey: 'granted',
-      title: 'Granted',
-      collapsedSummary: '${grants.length} spell${grants.length == 1 ? '' : 's'}',
+      title: l10n.spellGranted,
+      collapsedSummary: l10n.spellsPlural(grants.length),
       children: [
         for (final rule in rules.values) _ruleCallout(rule),
         ...grants.map(
@@ -769,7 +776,7 @@ class _SpellPickerDialogState extends State<SpellPickerDialog> {
             spell: KnownSpell.fromGrantedSpell(g),
             checked: true,
             enabled: false,
-            trailingLabel: 'granted',
+            trailingLabel: l10n.spellGrantedLower,
             onTap: null,
           ),
         ),

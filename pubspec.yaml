@@ -30,6 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # UI string localization: ARB files under lib/l10n are code-generated into AppLocalizations by
+  # Flutter's built-in gen-l10n (see l10n.yaml + `generate: true` below). intl backs the ICU
+  # plural/placeholder syntax the generated code uses.
+  intl: any
 
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.3.0
@@ -66,6 +72,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  # Generate lib/l10n/app_localizations.dart from the ARB files on every build (config in l10n.yaml).
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -16,6 +16,7 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../l10n/app_localizations.dart';
 import '../services/api_exception.dart';
 import 'app_input.dart';
 import 'app_toast.dart';
@@ -85,22 +86,23 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
     } catch (_) {
       if (mounted) {
         setState(() => _saving = false);
-        showAppToast(context, 'Something went wrong. Please try again.');
+        showAppToast(context, AppLocalizations.of(context).errorGeneric);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BottomSheetSurface(
       scrollable: true,
-      title: 'New Gang',
+      title: l10n.gangCreateTitle,
       children: [
         TextField(
           controller: _nameController,
           autofocus: true,
           style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
-          decoration: goldInputDecoration(context, label: 'Gang name'),
+          decoration: goldInputDecoration(context, label: l10n.gangNameLabel),
           onSubmitted: (_) => _submit(),
         ),
         const SizedBox(height: 16),
@@ -108,11 +110,11 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
           controller: _pointsController,
           keyboardType: TextInputType.number,
           style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
-          decoration: goldInputDecoration(context, label: 'Point limit'),
+          decoration: goldInputDecoration(context, label: l10n.gangPointLimit),
         ),
         const SizedBox(height: 24),
         Text(
-          'Faction',
+          l10n.gangFactionLabel,
           style: TextStyle(
             fontSize: 12,
             color: context.subtleTextColor,
@@ -188,7 +190,7 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
                     ),
                   )
                 : Text(
-                    'Create Gang',
+                    l10n.gangCreateButton,
                     style: GoogleFonts.cinzel(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,

@@ -247,7 +247,7 @@ class _EntryTileState extends State<_EntryTile>
     final entry = widget.entry;
     final isApprentice = widget.onEditApprenticeship != null;
     final hasMentor = entry.mentoredByEntryId != null;
-    final chips = spellSummaryChipsFor(entry);
+    final chips = spellSummaryChipsFor(AppLocalizations.of(context), entry);
     // Every chip is a shortcut into the same dialog the Spells button opens — a chip only ever
     // renders once there's something picked/granted to show, which (Apprentice Doctor included)
     // is exactly when that dialog is reachable at all.
@@ -274,7 +274,9 @@ class _EntryTileState extends State<_EntryTile>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                isApprentice && !hasMentor ? 'No mentor chosen' : 'No spells',
+                isApprentice && !hasMentor
+                    ? AppLocalizations.of(context).gangNoMentorChosen
+                    : AppLocalizations.of(context).gangNoSpells,
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.white.withValues(alpha: 0.6),
@@ -292,14 +294,14 @@ class _EntryTileState extends State<_EntryTile>
   Widget _spellsButton() {
     return GestureDetector(
       onTap: widget.busy ? null : widget.onEditSpells,
-      child: _pillButton(icon: Icons.auto_fix_high, label: 'Spells'),
+      child: _pillButton(icon: Icons.auto_fix_high, label: AppLocalizations.of(context).labelSpells),
     );
   }
 
   Widget _apprenticeshipButton() {
     return GestureDetector(
       onTap: widget.busy ? null : widget.onEditApprenticeship,
-      child: _pillButton(icon: Icons.school_outlined, label: 'Apprenticeship'),
+      child: _pillButton(icon: Icons.school_outlined, label: AppLocalizations.of(context).labelApprenticeship),
     );
   }
 
@@ -405,8 +407,8 @@ class _HireCardTile extends StatelessWidget {
                               const SizedBox(width: 6),
                               Text(
                                 profile.keywords.contains('Leader')
-                                    ? 'leader'
-                                    : 'hero',
+                                    ? AppLocalizations.of(context).gangRoleLeader
+                                    : AppLocalizations.of(context).gangRoleHero,
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.white.withValues(alpha: 0.65),
@@ -429,7 +431,7 @@ class _HireCardTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            isUnique ? 'Hired' : '×$count',
+                            isUnique ? AppLocalizations.of(context).gangHired : '×$count',
                             style: TextStyle(
                               fontSize: 10,
                               color: Colors.white.withValues(alpha: 0.9),

@@ -1,0 +1,15 @@
+# Configuration for Flutter's built-in gen-l10n tool. Runs automatically on build because
+# pubspec.yaml sets `flutter: generate: true`; run manually with `flutter gen-l10n`.
+#
+# Source ARB files live in lib/l10n/ (app_en.arb is the template that defines the keys and
+# @metadata; app_fr.arb supplies the French translations). The generated Dart lands next to them
+# as app_localizations.dart, exposing `AppLocalizations.of(context)`.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+# Emit getters for every template key even if a translation is missing in another locale, falling
+# back to the template (English) string rather than failing the build — lets translations land
+# incrementally as the string sweep proceeds.
+untranslated-messages-file: lib/l10n/untranslated.txt
+nullable-getter: false

@@ -15,6 +15,7 @@
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_background.dart';
@@ -62,7 +63,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         passwordConfirmation: _passwordConfirmationController.text,
       );
       if (!mounted) return;
-      showAppToast(context, 'Password reset! Please log in.');
+      showAppToast(context, AppLocalizations.of(context).toastPasswordReset);
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const AccountScreen()),
         (route) => false,
@@ -76,6 +77,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppPalette.background,
       body: AppBackground(
@@ -83,7 +85,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
           children: [
             Text(
-              'Reset Password',
+              l10n.authResetPassword,
               style: GoogleFonts.cinzel(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
@@ -99,7 +101,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Choose a new password for your account.',
+                      l10n.resetPasswordBlurb,
                       style: GoogleFonts.notoSans(
                         fontSize: 13,
                         color: context.subtleTextColor,
@@ -119,11 +121,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       ),
                       decoration: goldInputDecoration(
                         context,
-                        label: 'New Password',
+                        label: l10n.fieldNewPassword,
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Required';
-                        if (v.length < 6) return 'At least 6 characters';
+                        if (v == null || v.isEmpty) return l10n.validationRequired;
+                        if (v.length < 6) return l10n.validationPasswordTooShort;
                         return null;
                       },
                     ),
@@ -140,11 +142,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       ),
                       decoration: goldInputDecoration(
                         context,
-                        label: 'Confirm New Password',
+                        label: l10n.fieldConfirmNewPassword,
                       ),
                       validator: (v) {
                         if (v != _passwordController.text)
-                          return 'Passwords do not match';
+                          return l10n.validationPasswordMismatch;
                         return null;
                       },
                     ),
@@ -181,7 +183,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Reset Password'),
+                            : Text(l10n.authResetPassword),
                       ),
                     ),
                   ],

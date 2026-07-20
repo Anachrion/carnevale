@@ -16,6 +16,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 
 /// The glass "N / limit ducats" panel with a progress bar beneath. Shared by
 /// the gang builder ([editable]: shows how many ducats remain and turns red
@@ -46,6 +47,7 @@ class PointsBar extends StatelessWidget {
         ? context.dangerColor
         : (editable ? context.accentColor : factionColor);
     final remaining = limit - used;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -76,7 +78,7 @@ class PointsBar extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      ' / $limit ducats',
+                      l10n.pointsBarSlashLimit(limit),
                       style: GoogleFonts.cinzel(
                         fontSize: editable ? 14 : 13,
                         color: context.subtleTextColor,
@@ -85,7 +87,7 @@ class PointsBar extends StatelessWidget {
                     if (editable) ...[
                       const Spacer(),
                       Text(
-                        isOver ? '−${-remaining} left' : '$remaining left',
+                        isOver ? l10n.pointsBarOverBy(-remaining) : l10n.pointsBarLeft(remaining),
                         style: TextStyle(
                           fontSize: 12,
                           color: isOver

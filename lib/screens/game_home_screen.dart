@@ -15,6 +15,7 @@
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../services/game_service.dart';
@@ -122,30 +123,30 @@ class _GameHomeScreenState extends State<GameHomeScreen>
   Future<void> _archiveGame(int gameId) async {
     try {
       await _service.archiveGame(gameId);
-      if (mounted) showAppToast(context, 'Game archived');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameArchived);
       await _load();
     } catch (e) {
-      if (mounted) showAppToast(context, 'Could not archive this game');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameArchiveFailed);
     }
   }
 
   Future<void> _unarchiveGame(int gameId) async {
     try {
       await _service.unarchiveGame(gameId);
-      if (mounted) showAppToast(context, 'Game restored');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameRestored);
       await _load();
     } catch (e) {
-      if (mounted) showAppToast(context, 'Could not restore this game');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameRestoreFailed);
     }
   }
 
   Future<void> _deleteGame(int gameId) async {
     try {
       await _service.deleteGame(gameId);
-      if (mounted) showAppToast(context, 'Game deleted');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameDeleted);
       await _load();
     } catch (e) {
-      if (mounted) showAppToast(context, 'Could not delete this game');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameDeleteFailed);
     }
   }
 
@@ -220,7 +221,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
 
   Widget _buildHeader(BuildContext context) {
     return ScreenHeader(
-      title: 'Games',
+      title: AppLocalizations.of(context).navGames,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
     );
   }
@@ -244,9 +245,9 @@ class _GameHomeScreenState extends State<GameHomeScreen>
           fontSize: 13,
           letterSpacing: 1,
         ),
-        tabs: const [
-          Tab(text: 'Active'),
-          Tab(text: 'Archived'),
+        tabs: [
+          Tab(text: AppLocalizations.of(context).gamesTabActive),
+          Tab(text: AppLocalizations.of(context).gamesTabArchived),
         ],
       ),
     );
@@ -254,7 +255,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
 
   Widget _buildLoggedOut() {
     return LoggedOutView(
-      message: 'Log in to create or join a game',
+      message: AppLocalizations.of(context).gamesLoginPrompt,
       onLogin: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const AccountScreen()),
@@ -268,6 +269,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     if (_error != null) {
       return ErrorRetryView(onRetry: _load);
     }
+    final l10n = AppLocalizations.of(context);
     return TabBarView(
       controller: _tabController,
       children: [
@@ -275,15 +277,15 @@ class _GameHomeScreenState extends State<GameHomeScreen>
           games: _activeGames,
           isArchivedTab: false,
           emptyIcon: Icons.sports_esports_outlined,
-          emptyTitle: 'No games yet',
-          emptySubtitle: 'Create a game or join one with a code',
+          emptyTitle: l10n.gamesEmptyActiveTitle,
+          emptySubtitle: l10n.gamesEmptyActiveSubtitle,
         ),
         _buildGameList(
           games: _archivedGames,
           isArchivedTab: true,
           emptyIcon: Icons.archive_outlined,
-          emptyTitle: 'No archived games',
-          emptySubtitle: 'Games you archive will show up here',
+          emptyTitle: l10n.gamesEmptyArchivedTitle,
+          emptySubtitle: l10n.gamesEmptyArchivedSubtitle,
         ),
       ],
     );
@@ -399,7 +401,10 @@ class _GameTileState extends State<_GameTile> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${_statusLabel[0].toUpperCase()}${_statusLabel.substring(1)} · Code ${_game.joinCode}',
+                          AppLocalizations.of(context).gameStatusCodeLine(
+                            '${_statusLabel[0].toUpperCase()}${_statusLabel.substring(1)}',
+                            _game.joinCode,
+                          ),
                           style: TextStyle(
                             fontSize: 12,
                             color: context.subtleTextColor,
@@ -436,6 +441,7 @@ class _GameTileState extends State<_GameTile> {
   }
 
   Widget _buildDetails(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final players = _game.players;
     final p1 = players.firstOrNull;
     final p2 = players.length > 1 ? players[1] : null;
@@ -466,7 +472,10 @@ class _GameTileState extends State<_GameTile> {
           ],
           const SizedBox(height: 6),
           Text(
-            '${p1?.username ?? '—'} vs ${p2?.username ?? 'waiting for an opponent'}',
+            l10n.gameVersus(
+              p1?.username ?? '—',
+              p2?.username ?? l10n.gameWaitingForOpponentInline,
+            ),
             style: GoogleFonts.cinzel(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -478,7 +487,7 @@ class _GameTileState extends State<_GameTile> {
           if (p2 != null) _buildPlayerListLine(context, p2),
           const SizedBox(height: 8),
           Text(
-            '${_game.ducatLimit} ducats',
+            l10n.ducatsAmount(_game.ducatLimit),
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
           const SizedBox(height: 14),
@@ -489,7 +498,7 @@ class _GameTileState extends State<_GameTile> {
                 onPressed: () => _confirmDelete(context),
                 icon: const Icon(Icons.delete_outline),
                 color: context.dangerColor,
-                tooltip: 'Delete game',
+                tooltip: l10n.tooltipDeleteGame,
               ),
               const SizedBox(width: 4),
               IconButton(
@@ -500,7 +509,7 @@ class _GameTileState extends State<_GameTile> {
                       : Icons.archive_outlined,
                 ),
                 color: context.subtleTextColor,
-                tooltip: widget.isArchived ? 'Restore game' : 'Archive game',
+                tooltip: widget.isArchived ? l10n.tooltipRestoreGame : l10n.tooltipArchiveGame,
               ),
               const SizedBox(width: 4),
               IconButton(
@@ -508,7 +517,7 @@ class _GameTileState extends State<_GameTile> {
                 icon: const Icon(Icons.play_circle_fill),
                 color: context.accentColor,
                 iconSize: 28,
-                tooltip: 'Open game',
+                tooltip: l10n.tooltipOpenGame,
               ),
             ],
           ),
@@ -531,7 +540,7 @@ class _GameTileState extends State<_GameTile> {
         border: Border.all(color: context.accentColor.withValues(alpha: 0.4)),
       ),
       child: Text(
-        _agendaRuleLabel(rule),
+        _agendaRuleLabel(AppLocalizations.of(context), rule),
         style: GoogleFonts.cinzel(
           fontSize: 10,
           fontWeight: FontWeight.w600,
@@ -542,38 +551,37 @@ class _GameTileState extends State<_GameTile> {
     );
   }
 
-  static String _agendaRuleLabel(api.ScenarioAgendaRulesEnum rule) =>
+  static String _agendaRuleLabel(AppLocalizations l10n, api.ScenarioAgendaRulesEnum rule) =>
       switch (rule) {
-        api.ScenarioAgendaRulesEnum.cycle => 'Cycle',
-        api.ScenarioAgendaRulesEnum.secondary => 'Secondary',
-        api.ScenarioAgendaRulesEnum.double_ => 'Double',
-        api.ScenarioAgendaRulesEnum.secret => 'Secret',
-        api.ScenarioAgendaRulesEnum.total => 'Total',
+        api.ScenarioAgendaRulesEnum.cycle => l10n.agendaRuleCycle,
+        api.ScenarioAgendaRulesEnum.secondary => l10n.agendaRuleSecondary,
+        api.ScenarioAgendaRulesEnum.double_ => l10n.agendaRuleDouble,
+        api.ScenarioAgendaRulesEnum.secret => l10n.agendaRuleSecret,
+        api.ScenarioAgendaRulesEnum.total => l10n.agendaRuleTotal,
         _ => rule.name,
       };
 
   void _confirmDelete(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text(
-          'Delete Game',
+          l10n.gameDeleteTitle,
           style: GoogleFonts.cinzel(color: context.textColor),
         ),
-        content: const Text(
-          'Delete this game? You won\'t be able to see it again, even if your opponent still can.',
-        ),
+        content: Text(l10n.gameDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               widget.onDelete();
             },
-            child: Text('Delete', style: TextStyle(color: context.dangerColor)),
+            child: Text(l10n.actionDelete, style: TextStyle(color: context.dangerColor)),
           ),
         ],
       ),
@@ -581,11 +589,12 @@ class _GameTileState extends State<_GameTile> {
   }
 
   Widget _buildPlayerListLine(BuildContext context, api.GamePlayer p) {
+    final l10n = AppLocalizations.of(context);
     final listName = p.list?.name ?? p.list?.faction;
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Text(
-        '${p.username}: ${listName ?? 'No gang selected yet'}',
+        l10n.gamePlayerListLine(p.username, listName ?? l10n.gameNoGangSelected),
         style: TextStyle(fontSize: 12, color: context.subtleTextColor),
       ),
     );
@@ -606,7 +615,7 @@ class _GameActionSheet extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: () => Navigator.of(context).pop(_GameAction.create),
             icon: const Icon(Icons.add, size: 18),
-            label: const Text('Create Game'),
+            label: Text(AppLocalizations.of(context).actionCreateGame),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.accentColor,
               foregroundColor: Colors.white,
@@ -624,7 +633,7 @@ class _GameActionSheet extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: () => Navigator.of(context).pop(_GameAction.join),
             icon: const Icon(Icons.meeting_room_outlined, size: 18),
-            label: const Text('Join Game'),
+            label: Text(AppLocalizations.of(context).actionJoinGame),
             style: OutlinedButton.styleFrom(
               foregroundColor: context.accentColor,
               side: BorderSide(color: context.accentColor),
@@ -685,7 +694,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Could not load scenarios';
+        _error = AppLocalizations.of(context).gameLoadScenariosFailed;
         _loading = false;
       });
     }
@@ -720,9 +729,10 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BottomSheetSurface(
       scrollable: true,
-      title: 'New Game',
+      title: l10n.gameNewTitle,
       children: [
         if (_loading)
           Center(
@@ -735,7 +745,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
           Text(_error!, style: TextStyle(color: context.dangerColor))
         else ...[
           Text(
-            'Scenario',
+            l10n.gameScenarioLabel,
             style: TextStyle(
               fontSize: 12,
               color: context.subtleTextColor,
@@ -756,7 +766,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
             style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
             decoration: goldInputDecoration(
               context,
-              label: 'Game name (optional)',
+              label: l10n.gameNameOptional,
               hint: _selected?.name,
             ),
           ),
@@ -765,7 +775,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
             controller: _ducatController,
             keyboardType: TextInputType.number,
             style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
-            decoration: goldInputDecoration(context, label: 'Ducat limit'),
+            decoration: goldInputDecoration(context, label: l10n.gameDucatLimit),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -773,7 +783,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
             style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
             decoration: goldInputDecoration(
               context,
-              label: 'Board size (optional override)',
+              label: l10n.gameBoardSizeOverride,
             ),
           ),
           const SizedBox(height: 24),
@@ -800,7 +810,7 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
                       ),
                     )
                   : Text(
-                      'Create Game',
+                      l10n.actionCreateGame,
                       style: GoogleFonts.cinzel(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
@@ -858,7 +868,13 @@ class _ScenarioTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${scenario.ducats} ducats · ${scenario.duration}${scenario.asymmetric ? ' · Attacker/Defender' : ''}',
+                      AppLocalizations.of(context).gameScenarioMeta(
+                            scenario.ducats,
+                            scenario.duration,
+                          ) +
+                          (scenario.asymmetric
+                              ? ' · ${AppLocalizations.of(context).attackerDefender}'
+                              : ''),
                       style: TextStyle(
                         fontSize: 11,
                         color: context.subtleTextColor,
@@ -912,7 +928,7 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
       if (mounted) {
         setState(() {
           _saving = false;
-          _error = 'Could not join — check the code and try again.';
+          _error = AppLocalizations.of(context).gameJoinFailed;
         });
       }
     }
@@ -920,8 +936,9 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BottomSheetSurface(
-      title: 'Join Game',
+      title: l10n.actionJoinGame,
       children: [
         TextField(
           controller: _codeController,
@@ -933,7 +950,7 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
             letterSpacing: 4,
           ),
           textAlign: TextAlign.center,
-          decoration: goldInputDecoration(context, label: 'Join code'),
+          decoration: goldInputDecoration(context, label: l10n.gameJoinCode),
           onSubmitted: (_) => _submit(),
         ),
         if (_error != null) ...[
@@ -967,7 +984,7 @@ class _JoinGameSheetState extends State<_JoinGameSheet> {
                     ),
                   )
                 : Text(
-                    'Join',
+                    l10n.actionJoin,
                     style: GoogleFonts.cinzel(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
