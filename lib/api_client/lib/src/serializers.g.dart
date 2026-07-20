@@ -34,6 +34,8 @@ Serializers _$serializers =
           ..add(EntryPositionInputEntry.serializer)
           ..add(EntryStatValue.serializer)
           ..add(EntryState.serializer)
+          ..add(EntryUpgradeInput.serializer)
+          ..add(EntryUpgradeInputEntry.serializer)
           ..add(Equipment.serializer)
           ..add(ForgotPasswordInput.serializer)
           ..add(ForgotPasswordInputUser.serializer)

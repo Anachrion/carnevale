@@ -173,6 +173,23 @@ class GangService {
         return res.data!;
       });
 
+  /// Buys or drops a model's optional paid upgrade — the Emissary of Mother Hydra's +12 Ducats for a
+  /// second set of Tentacles (CARNEVALEB-23). The backend reconciles the model's auto-included
+  /// companion entries to match and returns the whole updated list, so the caller just swaps it in.
+  Future<api.ModelList> setEntryUpgrade(int entryId, bool selected) =>
+      _guard(() async {
+        final res = await _client.listEntries.setListEntryUpgrade(
+          id: entryId,
+          entryUpgradeInput: api.EntryUpgradeInput(
+            (b) => b
+              ..entry = api.EntryUpgradeInputEntry(
+                (eb) => eb..upgradeSelected = selected,
+              ).toBuilder(),
+          ),
+        );
+        return res.data!;
+      });
+
   api.SetEntrySpellsInputEntryPoolSelectionsInnerDisciplinesEnum
   _poolSelectionDisciplineEnum(String slug) =>
       api.standardSerializers.deserializeWith(

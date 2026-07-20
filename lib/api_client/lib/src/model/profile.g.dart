@@ -42,6 +42,8 @@ class _$Profile extends Profile {
   @override
   final bool flexibleLeader;
   @override
+  final bool recruitable;
+  @override
   final int? flexibleLeaderWith;
   @override
   final String version;
@@ -79,6 +81,7 @@ class _$Profile extends Profile {
     required this.abilities,
     required this.keywords,
     required this.flexibleLeader,
+    required this.recruitable,
     this.flexibleLeaderWith,
     required this.version,
     required this.mage,
@@ -116,6 +119,7 @@ class _$Profile extends Profile {
         abilities == other.abilities &&
         keywords == other.keywords &&
         flexibleLeader == other.flexibleLeader &&
+        recruitable == other.recruitable &&
         flexibleLeaderWith == other.flexibleLeaderWith &&
         version == other.version &&
         mage == other.mage &&
@@ -146,6 +150,7 @@ class _$Profile extends Profile {
     _$hash = $jc(_$hash, abilities.hashCode);
     _$hash = $jc(_$hash, keywords.hashCode);
     _$hash = $jc(_$hash, flexibleLeader.hashCode);
+    _$hash = $jc(_$hash, recruitable.hashCode);
     _$hash = $jc(_$hash, flexibleLeaderWith.hashCode);
     _$hash = $jc(_$hash, version.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
@@ -178,6 +183,7 @@ class _$Profile extends Profile {
           ..add('abilities', abilities)
           ..add('keywords', keywords)
           ..add('flexibleLeader', flexibleLeader)
+          ..add('recruitable', recruitable)
           ..add('flexibleLeaderWith', flexibleLeaderWith)
           ..add('version', version)
           ..add('mage', mage)
@@ -266,6 +272,10 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
   set flexibleLeader(bool? flexibleLeader) =>
       _$this._flexibleLeader = flexibleLeader;
 
+  bool? _recruitable;
+  bool? get recruitable => _$this._recruitable;
+  set recruitable(bool? recruitable) => _$this._recruitable = recruitable;
+
   int? _flexibleLeaderWith;
   int? get flexibleLeaderWith => _$this._flexibleLeaderWith;
   set flexibleLeaderWith(int? flexibleLeaderWith) =>
@@ -329,6 +339,7 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
       _abilities = $v.abilities.toBuilder();
       _keywords = $v.keywords.toBuilder();
       _flexibleLeader = $v.flexibleLeader;
+      _recruitable = $v.recruitable;
       _flexibleLeaderWith = $v.flexibleLeaderWith;
       _version = $v.version;
       _mage = $v.mage;
@@ -433,6 +444,11 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
               flexibleLeader,
               r'Profile',
               'flexibleLeader',
+            ),
+            recruitable: BuiltValueNullFieldError.checkNotNull(
+              recruitable,
+              r'Profile',
+              'recruitable',
             ),
             flexibleLeaderWith: flexibleLeaderWith,
             version: BuiltValueNullFieldError.checkNotNull(

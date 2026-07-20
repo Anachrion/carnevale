@@ -42,6 +42,8 @@ export 'package:carnevale_api/src/model/entry_position_input.dart';
 export 'package:carnevale_api/src/model/entry_position_input_entry.dart';
 export 'package:carnevale_api/src/model/entry_stat_value.dart';
 export 'package:carnevale_api/src/model/entry_state.dart';
+export 'package:carnevale_api/src/model/entry_upgrade_input.dart';
+export 'package:carnevale_api/src/model/entry_upgrade_input_entry.dart';
 export 'package:carnevale_api/src/model/equipment.dart';
 export 'package:carnevale_api/src/model/forgot_password_input.dart';
 export 'package:carnevale_api/src/model/forgot_password_input_user.dart';

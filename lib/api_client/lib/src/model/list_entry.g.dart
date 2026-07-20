@@ -98,6 +98,14 @@ class _$ListEntry extends ListEntry {
   @override
   final bool summoned;
   @override
+  final int? companionOfEntryId;
+  @override
+  final bool upgradeSelected;
+  @override
+  final bool upgradeAvailable;
+  @override
+  final int upgradeDucats;
+  @override
   final EntryState? state;
   @override
   final bool mage;
@@ -129,6 +137,10 @@ class _$ListEntry extends ListEntry {
     this.cardBack,
     required this.cost,
     required this.summoned,
+    this.companionOfEntryId,
+    required this.upgradeSelected,
+    required this.upgradeAvailable,
+    required this.upgradeDucats,
     this.state,
     required this.mage,
     this.mentoredByEntryId,
@@ -162,6 +174,10 @@ class _$ListEntry extends ListEntry {
         cardBack == other.cardBack &&
         cost == other.cost &&
         summoned == other.summoned &&
+        companionOfEntryId == other.companionOfEntryId &&
+        upgradeSelected == other.upgradeSelected &&
+        upgradeAvailable == other.upgradeAvailable &&
+        upgradeDucats == other.upgradeDucats &&
         state == other.state &&
         mage == other.mage &&
         mentoredByEntryId == other.mentoredByEntryId &&
@@ -188,6 +204,10 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, cardBack.hashCode);
     _$hash = $jc(_$hash, cost.hashCode);
     _$hash = $jc(_$hash, summoned.hashCode);
+    _$hash = $jc(_$hash, companionOfEntryId.hashCode);
+    _$hash = $jc(_$hash, upgradeSelected.hashCode);
+    _$hash = $jc(_$hash, upgradeAvailable.hashCode);
+    _$hash = $jc(_$hash, upgradeDucats.hashCode);
     _$hash = $jc(_$hash, state.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
     _$hash = $jc(_$hash, mentoredByEntryId.hashCode);
@@ -216,6 +236,10 @@ class _$ListEntry extends ListEntry {
           ..add('cardBack', cardBack)
           ..add('cost', cost)
           ..add('summoned', summoned)
+          ..add('companionOfEntryId', companionOfEntryId)
+          ..add('upgradeSelected', upgradeSelected)
+          ..add('upgradeAvailable', upgradeAvailable)
+          ..add('upgradeDucats', upgradeDucats)
           ..add('state', state)
           ..add('mage', mage)
           ..add('mentoredByEntryId', mentoredByEntryId)
@@ -294,6 +318,26 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   bool? get summoned => _$this._summoned;
   set summoned(bool? summoned) => _$this._summoned = summoned;
 
+  int? _companionOfEntryId;
+  int? get companionOfEntryId => _$this._companionOfEntryId;
+  set companionOfEntryId(int? companionOfEntryId) =>
+      _$this._companionOfEntryId = companionOfEntryId;
+
+  bool? _upgradeSelected;
+  bool? get upgradeSelected => _$this._upgradeSelected;
+  set upgradeSelected(bool? upgradeSelected) =>
+      _$this._upgradeSelected = upgradeSelected;
+
+  bool? _upgradeAvailable;
+  bool? get upgradeAvailable => _$this._upgradeAvailable;
+  set upgradeAvailable(bool? upgradeAvailable) =>
+      _$this._upgradeAvailable = upgradeAvailable;
+
+  int? _upgradeDucats;
+  int? get upgradeDucats => _$this._upgradeDucats;
+  set upgradeDucats(int? upgradeDucats) =>
+      _$this._upgradeDucats = upgradeDucats;
+
   EntryStateBuilder? _state;
   EntryStateBuilder get state => _$this._state ??= EntryStateBuilder();
   set state(EntryStateBuilder? state) => _$this._state = state;
@@ -345,6 +389,10 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _cardBack = $v.cardBack;
       _cost = $v.cost;
       _summoned = $v.summoned;
+      _companionOfEntryId = $v.companionOfEntryId;
+      _upgradeSelected = $v.upgradeSelected;
+      _upgradeAvailable = $v.upgradeAvailable;
+      _upgradeDucats = $v.upgradeDucats;
       _state = $v.state?.toBuilder();
       _mage = $v.mage;
       _mentoredByEntryId = $v.mentoredByEntryId;
@@ -425,6 +473,22 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               summoned,
               r'ListEntry',
               'summoned',
+            ),
+            companionOfEntryId: companionOfEntryId,
+            upgradeSelected: BuiltValueNullFieldError.checkNotNull(
+              upgradeSelected,
+              r'ListEntry',
+              'upgradeSelected',
+            ),
+            upgradeAvailable: BuiltValueNullFieldError.checkNotNull(
+              upgradeAvailable,
+              r'ListEntry',
+              'upgradeAvailable',
+            ),
+            upgradeDucats: BuiltValueNullFieldError.checkNotNull(
+              upgradeDucats,
+              r'ListEntry',
+              'upgradeDucats',
             ),
             state: _state?.build(),
             mage: BuiltValueNullFieldError.checkNotNull(
