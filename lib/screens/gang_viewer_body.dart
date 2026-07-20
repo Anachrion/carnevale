@@ -212,6 +212,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
         .where((pair) => pair.profile != null)
         .toList();
     final hiredProfiles = hired.map((pair) => pair.profile!).toList();
+    // Parallel to hiredProfiles: which illustration each entry was actually hired as, so the
+    // viewer opens A/B-pair models on the art the player picked rather than the profile's first.
+    final hiredReferenceIds = hired.map((pair) => pair.entry.entryId).toList();
     // Ordering (and the death animation that reorders) lives in _GangEntryList, which is given the
     // roster as-is so it can tell a *fresh* casualty from one that was already down.
     return _GangEntryList(
@@ -245,6 +248,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
               builder: (_) => CardViewerScreen(
                 profiles: hiredProfiles,
                 initialIndex: hiredIndex,
+                selectedReferenceIds: hiredReferenceIds,
               ),
             ),
           );
