@@ -23,6 +23,8 @@ doc/EntryPositionInput.md
 doc/EntryPositionInputEntry.md
 doc/EntryStatValue.md
 doc/EntryState.md
+doc/EntryUpgradeInput.md
+doc/EntryUpgradeInputEntry.md
 doc/Equipment.md
 doc/EquipmentApi.md
 doc/ForgotPasswordInput.md
@@ -119,6 +121,8 @@ lib/src/model/entry_position_input.dart
 lib/src/model/entry_position_input_entry.dart
 lib/src/model/entry_stat_value.dart
 lib/src/model/entry_state.dart
+lib/src/model/entry_upgrade_input.dart
+lib/src/model/entry_upgrade_input_entry.dart
 lib/src/model/equipment.dart
 lib/src/model/forgot_password_input.dart
 lib/src/model/forgot_password_input_user.dart
@@ -167,3 +171,5 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
+test/entry_upgrade_input_entry_test.dart
+test/entry_upgrade_input_test.dart
