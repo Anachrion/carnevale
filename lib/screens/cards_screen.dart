@@ -139,36 +139,48 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: buildSearchField(),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-              child: buildFacetChips(),
-            ),
-            // The suggestions float over the filters and the card list rather than sitting in the
-            // column, so opening them doesn't shove the page down. Stacking them inside the area
-            // below the search box (not over the whole screen) keeps them hit-testable, and lets
-            // the panel's backdrop filter blur the cards showing through it.
+            // Tapping anywhere below the search field (but not the field itself, or the wrapper
+            // would immediately undo its own focus) drops keyboard focus, hiding the suggestions
+            // panel with it; tapping back into the field brings both straight back.
             Expanded(
-              child: Stack(
-                children: [
-                  Column(
-                    children: [
-                      _buildFactionFilter(),
-                      _buildSortChips(),
-                      const SizedBox(height: 8),
-                      Expanded(child: _buildList()),
-                    ],
-                  ),
-                  if (hasSuggestions)
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        child: buildSuggestions(),
+              child: dismissSearchFocusOnTapOutside(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                      child: buildFacetChips(),
+                    ),
+                    // The suggestions float over the filters and the card list rather than sitting
+                    // in the column, so opening them doesn't shove the page down. Stacking them
+                    // inside the area below the search box (not over the whole screen) keeps them
+                    // hit-testable, and lets the panel's backdrop filter blur the cards showing
+                    // through it.
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Column(
+                            children: [
+                              _buildFactionFilter(),
+                              _buildSortChips(),
+                              const SizedBox(height: 8),
+                              Expanded(child: _buildList()),
+                            ],
+                          ),
+                          if (hasSuggestions)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                                child: buildSuggestions(),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

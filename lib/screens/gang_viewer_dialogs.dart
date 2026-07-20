@@ -622,20 +622,24 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
           const SizedBox(height: 8),
           // Fixed height, not Expanded: the dialog's Column is mainAxisSize.min, so it has no bounded
           // height to divide up. The suggestions float over the results rather than pushing them
-          // down, as they do everywhere else the catalog search appears.
+          // down, as they do everywhere else the catalog search appears. Tapping anywhere in here
+          // drops keyboard focus, hiding the suggestions with it; tapping back into the field
+          // brings both straight back.
           SizedBox(
             height: 300,
-            child: Stack(
-              children: [
-                _buildResults(context),
-                if (hasSuggestions)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: buildSuggestions(),
-                  ),
-              ],
+            child: dismissSearchFocusOnTapOutside(
+              child: Stack(
+                children: [
+                  _buildResults(context),
+                  if (hasSuggestions)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: buildSuggestions(),
+                    ),
+                ],
+              ),
             ),
           ),
           Align(

@@ -45,6 +45,11 @@ IconData facetIcon(FacetKind kind) => switch (kind) {
 mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
   final searchController = TextEditingController();
 
+  /// Tracks whether the search field is focused, so the suggestions panel can hide with the
+  /// keyboard (tap outside to dismiss both) without losing the computed suggestions — they're
+  /// only hidden, not cleared, so tapping back into the field brings them straight back.
+  late final FocusNode searchFocusNode = FocusNode()..addListener(() => setState(() {}));
+
   /// Exact filters picked from the autocomplete, ANDed together: Leader + Brave finds brave leaders.
   final Set<Facet> pickedFacets = {};
 
@@ -70,9 +75,23 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
     facets: pickedFacets,
   );
 
-  bool get hasSuggestions => _suggestions.isNotEmpty;
+  bool get hasSuggestions => _suggestions.isNotEmpty && searchFocusNode.hasFocus;
 
-  void disposeSearch() => searchController.dispose();
+  /// Wraps [child] so tapping anywhere that isn't itself a focusable/tappable control drops focus
+  /// from the search field — dismissing the keyboard, and with it (via [hasSuggestions]) the
+  /// suggestions panel. Refocusing the field brings the same suggestions straight back.
+  Widget dismissSearchFocusOnTapOutside({required Widget child}) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: child,
+    );
+  }
+
+  void disposeSearch() {
+    searchController.dispose();
+    searchFocusNode.dispose();
+  }
 
   /// The single funnel for every filter change. The catalog is already on the device, so this runs
   /// synchronously on each keystroke — no debounce, no round-trip.
@@ -162,6 +181,7 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
         onKeyEvent: _onSearchKey,
         child: TextField(
           controller: searchController,
+          focusNode: searchFocusNode,
           onChanged: (_) => applySearch(),
           style: TextStyle(color: context.textColor, fontSize: 15),
           decoration: InputDecoration(
