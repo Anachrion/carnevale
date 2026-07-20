@@ -42,6 +42,8 @@ class _$Profile extends Profile {
   @override
   final bool flexibleLeader;
   @override
+  final int? flexibleLeaderWith;
+  @override
   final String version;
   @override
   final bool mage;
@@ -77,6 +79,7 @@ class _$Profile extends Profile {
     required this.abilities,
     required this.keywords,
     required this.flexibleLeader,
+    this.flexibleLeaderWith,
     required this.version,
     required this.mage,
     required this.spellSlots,
@@ -113,6 +116,7 @@ class _$Profile extends Profile {
         abilities == other.abilities &&
         keywords == other.keywords &&
         flexibleLeader == other.flexibleLeader &&
+        flexibleLeaderWith == other.flexibleLeaderWith &&
         version == other.version &&
         mage == other.mage &&
         spellSlots == other.spellSlots &&
@@ -142,6 +146,7 @@ class _$Profile extends Profile {
     _$hash = $jc(_$hash, abilities.hashCode);
     _$hash = $jc(_$hash, keywords.hashCode);
     _$hash = $jc(_$hash, flexibleLeader.hashCode);
+    _$hash = $jc(_$hash, flexibleLeaderWith.hashCode);
     _$hash = $jc(_$hash, version.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
     _$hash = $jc(_$hash, spellSlots.hashCode);
@@ -173,6 +178,7 @@ class _$Profile extends Profile {
           ..add('abilities', abilities)
           ..add('keywords', keywords)
           ..add('flexibleLeader', flexibleLeader)
+          ..add('flexibleLeaderWith', flexibleLeaderWith)
           ..add('version', version)
           ..add('mage', mage)
           ..add('spellSlots', spellSlots)
@@ -260,6 +266,11 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
   set flexibleLeader(bool? flexibleLeader) =>
       _$this._flexibleLeader = flexibleLeader;
 
+  int? _flexibleLeaderWith;
+  int? get flexibleLeaderWith => _$this._flexibleLeaderWith;
+  set flexibleLeaderWith(int? flexibleLeaderWith) =>
+      _$this._flexibleLeaderWith = flexibleLeaderWith;
+
   String? _version;
   String? get version => _$this._version;
   set version(String? version) => _$this._version = version;
@@ -318,6 +329,7 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
       _abilities = $v.abilities.toBuilder();
       _keywords = $v.keywords.toBuilder();
       _flexibleLeader = $v.flexibleLeader;
+      _flexibleLeaderWith = $v.flexibleLeaderWith;
       _version = $v.version;
       _mage = $v.mage;
       _spellSlots = $v.spellSlots;
@@ -422,6 +434,7 @@ class ProfileBuilder implements Builder<Profile, ProfileBuilder> {
               r'Profile',
               'flexibleLeader',
             ),
+            flexibleLeaderWith: flexibleLeaderWith,
             version: BuiltValueNullFieldError.checkNotNull(
               version,
               r'Profile',

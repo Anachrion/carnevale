@@ -93,6 +93,10 @@ abstract class Profile implements Built<Profile, ProfileBuilder> {
   @BuiltValueField(wireName: r'flexible_leader')
   bool get flexibleLeader;
 
+  /// The profile id of the specific partner a conditional flex Leader (La Signora) demotes alongside (Il Capitano), or null when it demotes alongside any Leader or isn't a flex Leader.
+  @BuiltValueField(wireName: r'flexible_leader_with')
+  int? get flexibleLeaderWith;
+
   @BuiltValueField(wireName: r'version')
   String get version;
 
@@ -225,6 +229,13 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
       object.flexibleLeader,
       specifiedType: const FullType(bool),
     );
+    if (object.flexibleLeaderWith != null) {
+      yield r'flexible_leader_with';
+      yield serializers.serialize(
+        object.flexibleLeaderWith,
+        specifiedType: const FullType.nullable(int),
+      );
+    }
     yield r'version';
     yield serializers.serialize(
       object.version,
@@ -401,6 +412,13 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.flexibleLeader = valueDes;
+          break;
+        case r'flexible_leader_with':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          result.flexibleLeaderWith = valueDes;
           break;
         case r'version':
           final valueDes = serializers.deserialize(

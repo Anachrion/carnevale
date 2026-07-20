@@ -64,6 +64,14 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   @BuiltValueField(wireName: r'flexible_leader')
   bool get flexibleLeader;
 
+  /// Whether this flex Leader has been demoted to a plain Hero by the gang's composition (prints Leader but lost it). The client shows Hero and never pins it as the Leader.
+  @BuiltValueField(wireName: r'demoted_leader')
+  bool get demotedLeader;
+
+  /// Whether this demoted flex Leader could be promoted to Leader instead (ambiguous multi-flex case); the client shows a promote action.
+  @BuiltValueField(wireName: r'promotable_leader')
+  bool get promotableLeader;
+
   /// Slug of the card reference this model is hired as — the same identifier the cards manifest keys downloaded images by. A profile can have several card references, each with a different illustration; this is the one currently chosen. Null for Equipment entries, which have no card. Change it via PATCH /list_entries/{id}/illustration. 
   @BuiltValueField(wireName: r'identifier')
   String? get identifier;
@@ -170,6 +178,16 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
     yield r'flexible_leader';
     yield serializers.serialize(
       object.flexibleLeader,
+      specifiedType: const FullType(bool),
+    );
+    yield r'demoted_leader';
+    yield serializers.serialize(
+      object.demotedLeader,
+      specifiedType: const FullType(bool),
+    );
+    yield r'promotable_leader';
+    yield serializers.serialize(
+      object.promotableLeader,
       specifiedType: const FullType(bool),
     );
     if (object.identifier != null) {
@@ -316,6 +334,20 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.flexibleLeader = valueDes;
+          break;
+        case r'demoted_leader':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.demotedLeader = valueDes;
+          break;
+        case r'promotable_leader':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.promotableLeader = valueDes;
           break;
         case r'identifier':
           final valueDes = serializers.deserialize(
