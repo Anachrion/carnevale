@@ -99,6 +99,8 @@ api.ListEntry fakeListEntry({
   int cost = 20,
   List<String> keywords = const [],
   bool flexibleLeader = false,
+  bool demotedLeader = false,
+  bool promotableLeader = false,
   api.EntryState? state,
   bool summoned = false,
 }) => api.ListEntry(
@@ -110,6 +112,8 @@ api.ListEntry fakeListEntry({
     ..name = name
     ..keywords = ListBuilder<String>(keywords)
     ..flexibleLeader = flexibleLeader
+    ..demotedLeader = demotedLeader
+    ..promotableLeader = promotableLeader
     ..cost = cost
     ..summoned = summoned
     ..mage = false
