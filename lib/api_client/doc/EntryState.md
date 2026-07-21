@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **underwaterCounters** | **int** |  | 
 **activated** | **bool** | Whether this model has already been activated on its *owner's* current turn (each player has an independent turn cursor). Derived server-side, so it flips back to false on its own when the owning player advances the turn.  | 
 **dead** | **bool** | Whether this model has lost its last life point. Derived from `life_points.current == 0`, not stored separately — so a model is killed by setting its HP to 0 through the usual stats endpoint, and revived by giving it HP back. A dead model stays fully editable.  | 
+**tokens** | [**BuiltList&lt;Token&gt;**](Token.md) | Player-attached tokens (free-form markers) on this model. | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -4,6 +4,8 @@
 
 // ignore_for_file: unused_element
 import 'package:carnevale_api/src/model/entry_stat_value.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:carnevale_api/src/model/token.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -22,6 +24,7 @@ part 'entry_state.g.dart';
 /// * [underwaterCounters] 
 /// * [activated] - Whether this model has already been activated on its *owner's* current turn (each player has an independent turn cursor). Derived server-side, so it flips back to false on its own when the owning player advances the turn. 
 /// * [dead] - Whether this model has lost its last life point. Derived from `life_points.current == 0`, not stored separately — so a model is killed by setting its HP to 0 through the usual stats endpoint, and revived by giving it HP back. A dead model stays fully editable. 
+/// * [tokens] - Player-attached tokens (free-form markers) on this model.
 @BuiltValue()
 abstract class EntryState implements Built<EntryState, EntryStateBuilder> {
   @BuiltValueField(wireName: r'life_points')
@@ -55,6 +58,10 @@ abstract class EntryState implements Built<EntryState, EntryStateBuilder> {
   /// Whether this model has lost its last life point. Derived from `life_points.current == 0`, not stored separately — so a model is killed by setting its HP to 0 through the usual stats endpoint, and revived by giving it HP back. A dead model stays fully editable. 
   @BuiltValueField(wireName: r'dead')
   bool get dead;
+
+  /// Player-attached tokens (free-form markers) on this model.
+  @BuiltValueField(wireName: r'tokens')
+  BuiltList<Token> get tokens;
 
   EntryState._();
 
@@ -128,6 +135,11 @@ class _$EntryStateSerializer implements PrimitiveSerializer<EntryState> {
     yield serializers.serialize(
       object.dead,
       specifiedType: const FullType(bool),
+    );
+    yield r'tokens';
+    yield serializers.serialize(
+      object.tokens,
+      specifiedType: const FullType(BuiltList, [FullType(Token)]),
     );
   }
 
@@ -221,6 +233,13 @@ class _$EntryStateSerializer implements PrimitiveSerializer<EntryState> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.dead = valueDes;
+          break;
+        case r'tokens':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(Token)]),
+          ) as BuiltList<Token>;
+          result.tokens.replace(valueDes);
           break;
         default:
           unhandled.add(key);

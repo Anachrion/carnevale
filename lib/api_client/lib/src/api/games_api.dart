@@ -25,6 +25,7 @@ import 'package:carnevale_api/src/model/summon_model_request.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
 import 'package:carnevale_api/src/model/update_spell_cast_input.dart';
 import 'package:carnevale_api/src/model/update_stats_input.dart';
+import 'package:carnevale_api/src/model/update_token_input.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 
 class GamesApi {
@@ -1500,6 +1501,96 @@ class GamesApi {
     );
   }
 
+  /// Remove a player token from one of the current player&#39;s own models
+  /// Removes the token with this client-generated id. Only available while the game is in_progress, and only for the requesting player&#39;s own models. Broadcast to both players. 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [listEntryId] 
+  /// * [tokenId] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [EntryState] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<EntryState>> removeToken({ 
+    required int id,
+    required int listEntryId,
+    required String tokenId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/entries/{list_entry_id}/tokens/{token_id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString()).replaceAll('{' r'list_entry_id' '}', encodeQueryParameter(_serializers, listEntryId, const FullType(int)).toString()).replaceAll('{' r'token_id' '}', encodeQueryParameter(_serializers, tokenId, const FullType(String)).toString());
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    EntryState? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(EntryState),
+      ) as EntryState;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<EntryState>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Rewind the requesting player&#39;s turn cursor
   /// Moves only the requesting player&#39;s own turn cursor back by one, clamped to turn 1. Used to drop back and record a forgotten past-turn score before advancing forward again. Blocked while the game isn&#39;t &#x60;in_progress&#x60; or the player has ended the game. 
   ///
@@ -1788,6 +1879,7 @@ class GamesApi {
   /// Parameters:
   /// * [id] 
   /// * [summonModelRequest] 
+  /// * [idempotencyKey] - Optional client-generated opaque token that makes this additive create idempotent: a request re-sent after a lost response (e.g. the app's optimistic sync queue retrying a timed-out hire) replays the original result instead of creating a duplicate. Mint one token per logical action and reuse it across that action's retries. Bounded to `[A-Za-z0-9._-]{16,128}`; a value outside that is ignored (the create proceeds non-idempotently). 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -1800,6 +1892,7 @@ class GamesApi {
   Future<Response<ModelList>> summonModel({ 
     required int id,
     required SummonModelRequest summonModelRequest,
+    String? idempotencyKey,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -1811,6 +1904,7 @@ class GamesApi {
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
+        if (idempotencyKey != null) r'Idempotency-Key': idempotencyKey,
         ...?headers,
       },
       extra: <String, dynamic>{
@@ -2339,6 +2433,116 @@ class GamesApi {
     try {
       const _type = FullType(UpdateStatsInput);
       _bodyData = _serializers.serialize(updateStatsInput, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    EntryState? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(EntryState),
+      ) as EntryState;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<EntryState>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Add or update a player token on one of the current player&#39;s own models
+  /// Player tokens are free-form markers (a colour + optional label, optionally toggleable) the player uses to track an in-game effect a rule granted. Only available while the game is in_progress, and only for the requesting player&#39;s own models — the opponent&#39;s 404. Each token is keyed by a client-generated &#x60;id&#x60;: sending the same id again updates that token (edit it / flip its &#x60;active&#x60;) instead of adding a duplicate, so a retried request is safe. Broadcast to both players as a &#x60;game_state&#x60; event. 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [listEntryId] 
+  /// * [updateTokenInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [EntryState] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<EntryState>> updateToken({ 
+    required int id,
+    required int listEntryId,
+    required UpdateTokenInput updateTokenInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/entries/{list_entry_id}/tokens'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString()).replaceAll('{' r'list_entry_id' '}', encodeQueryParameter(_serializers, listEntryId, const FullType(int)).toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UpdateTokenInput);
+      _bodyData = _serializers.serialize(updateTokenInput, specifiedType: _type);
 
     } catch(error, stackTrace) {
       throw DioException(

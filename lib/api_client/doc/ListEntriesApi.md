@@ -18,7 +18,7 @@ Method | HTTP request | Description
 
 
 # **createListEntry**
-> BuiltList createListEntry(entryInput)
+> BuiltList createListEntry(entryInput, idempotencyKey)
 
 Add a card to a list
 
@@ -34,9 +34,10 @@ import 'package:carnevale_api/api.dart';
 
 final api = CarnevaleApi().getListEntriesApi();
 final EntryInput entryInput = ; // EntryInput | 
+final String idempotencyKey = idempotencyKey_example; // String | Optional client-generated opaque token that makes this additive create idempotent: a request re-sent after a lost response (e.g. the app's optimistic sync queue retrying a timed-out hire) replays the original result instead of creating a duplicate. Mint one token per logical action and reuse it across that action's retries. Bounded to `[A-Za-z0-9._-]{16,128}`; a value outside that is ignored (the create proceeds non-idempotently). 
 
 try {
-    final response = api.createListEntry(entryInput);
+    final response = api.createListEntry(entryInput, idempotencyKey);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling ListEntriesApi->createListEntry: $e\n');
@@ -48,6 +49,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **entryInput** | [**EntryInput**](EntryInput.md)|  | 
+ **idempotencyKey** | **String**| Optional client-generated opaque token that makes this additive create idempotent: a request re-sent after a lost response (e.g. the app's optimistic sync queue retrying a timed-out hire) replays the original result instead of creating a duplicate. Mint one token per logical action and reuse it across that action's retries. Bounded to `[A-Za-z0-9._-]{16,128}`; a value outside that is ignored (the create proceeds non-idempotently).  | [optional] 
 
 ### Return type
 
