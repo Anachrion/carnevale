@@ -362,7 +362,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       itemCount: games.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (_, i) => _GameTile(
         game: games[i],
         isArchived: isArchivedTab,

@@ -60,11 +60,12 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
       setState(() => _state = newState);
       widget.onStateChanged(widget.entry.id, newState);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         showAppToast(
           context,
           AppLocalizations.of(context).counterToggleFailed,
         );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

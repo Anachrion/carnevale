@@ -145,8 +145,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         label: l10n.fieldConfirmNewPassword,
                       ),
                       validator: (v) {
-                        if (v != _passwordController.text)
+                        if (v != _passwordController.text) {
                           return l10n.validationPasswordMismatch;
+                        }
                         return null;
                       },
                     ),
