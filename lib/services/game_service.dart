@@ -374,6 +374,46 @@ class GameService extends ChangeNotifier {
     return res.data!;
   });
 
+  /// Adds or updates a player token on one of the current player's own models (CARNEVALEB-16).
+  /// Keyed by [tokenId] (client-generated): re-sending the same id updates that token — an edit, or
+  /// a flip of its `active` state — rather than adding a duplicate, so a retry is safe. Returns the
+  /// model's full updated state; the server also broadcasts a game_state event to both players.
+  Future<api.EntryState> upsertToken(
+    int gameId,
+    int listEntryId, {
+    required String tokenId,
+    required api.TokenColorEnum color,
+    String? text,
+    required bool toggleable,
+    required bool active,
+  }) => _guard(() async {
+    final res = await _client.games.updateToken(
+      id: gameId,
+      listEntryId: listEntryId,
+      updateTokenInput: api.UpdateTokenInput(
+        (b) => b
+          ..token.id = tokenId
+          ..token.color = color
+          ..token.text = text
+          ..token.toggleable = toggleable
+          ..token.active = active,
+      ),
+    );
+    return res.data!;
+  });
+
+  /// Removes the token with [tokenId] from one of the current player's own models. Returns the
+  /// model's full updated state; broadcast to both players.
+  Future<api.EntryState> removeToken(int gameId, int listEntryId, String tokenId) =>
+      _guard(() async {
+        final res = await _client.games.removeToken(
+          id: gameId,
+          listEntryId: listEntryId,
+          tokenId: tokenId,
+        );
+        return res.data!;
+      });
+
   /// Marks (or unmarks) one known/granted spell as cast, on one of the current player's own
   /// models. `key` comes verbatim from the PoolSpell/GrantedSpell being toggled (see
   /// KnownSpell.key) — `cast` is the desired state rather than a blind toggle. Returns the
