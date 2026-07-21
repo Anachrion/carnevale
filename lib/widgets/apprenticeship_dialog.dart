@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import 'themed_dialog_card.dart';
 
 /// The player's edit from the Apprenticeship dialog — just the chosen mentor, since copying an
@@ -68,6 +69,7 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
     final accent = context.accentColor;
     final rule = _rule;
     final candidates = _candidates;
+    final l10n = AppLocalizations.of(context);
     return ThemedDialogCard(
       padding: const EdgeInsets.all(20),
       child: ConstrainedBox(
@@ -90,7 +92,7 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
               const SizedBox(height: 10),
             ],
             Text(
-              'Mentor',
+              l10n.apprMentor,
               style: TextStyle(
                 fontSize: 11,
                 color: context.subtleTextColor,
@@ -101,7 +103,7 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
             const SizedBox(height: 6),
             if (candidates.isEmpty && _mentorEntryId == null)
               Text(
-                'No eligible mentor yet — hire a Hero with the Doctor keyword first.',
+                l10n.apprNoMentor,
                 style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: context.subtleTextColor),
               )
             else
@@ -119,14 +121,14 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
                   ),
                 ),
                 items: [
-                  const DropdownMenuItem(value: null, child: Text('— No mentor selected —')),
+                  DropdownMenuItem(value: null, child: Text(l10n.apprNoMentorSelected)),
                   for (final c in candidates) DropdownMenuItem(value: c.id, child: Text(c.name)),
                 ],
                 onChanged: (id) => setState(() => _mentorEntryId = id),
               ),
             const SizedBox(height: 14),
             Text(
-              'Ability to copy',
+              l10n.apprAbilityToCopy,
               style: TextStyle(
                 fontSize: 11,
                 color: context.subtleTextColor,
@@ -150,7 +152,7 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Mage — copies the mentor\'s spell Disciplines',
+                        l10n.apprMageAbility,
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w600,
@@ -165,7 +167,7 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'Copying a unique skill or weapon profile isn\'t supported yet — Mage is the only ability available here.',
+                l10n.apprCopyNote,
                 style: TextStyle(fontSize: 10.5, color: context.subtleTextColor),
               ),
             ),
@@ -175,7 +177,7 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel', style: TextStyle(color: context.subtleTextColor)),
+                  child: Text(l10n.actionCancel, style: TextStyle(color: context.subtleTextColor)),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
@@ -186,7 +188,7 @@ class _ApprenticeshipDialogState extends State<ApprenticeshipDialog> {
                   onPressed: () => Navigator.of(
                     context,
                   ).pop(ApprenticeshipResult(mentorEntryId: _mentorEntryId)),
-                  child: const Text('Save'),
+                  child: Text(l10n.actionSave),
                 ),
               ],
             ),

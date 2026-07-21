@@ -48,9 +48,16 @@ class SettingsService extends ChangeNotifier {
   static const _themeKey = 'theme_mode';
   static const _cardFlipStyleKey = 'card_flip_style';
   static const _cardDownloadModeKey = 'card_download_mode';
+  static const _localeKey = 'locale';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeMode get themeMode => _themeMode;
+
+  // null = follow the device locale (MaterialApp resolves it against supportedLocales); a non-null
+  // value pins the app to that language regardless of the device. Stored as the language code
+  // ('en', 'fr'); an unrecognised/absent stored value falls back to null (system).
+  Locale? _locale;
+  Locale? get locale => _locale;
 
   CardFlipStyle _cardFlipStyle = CardFlipStyle.flip;
   CardFlipStyle get cardFlipStyle => _cardFlipStyle;
@@ -75,6 +82,10 @@ class SettingsService extends ChangeNotifier {
       'wifi_only' => CardDownloadMode.wifiOnly,
       _ => CardDownloadMode.onDemand,
     };
+    final localeCode = prefs.getString(_localeKey);
+    _locale = (localeCode == null || localeCode.isEmpty)
+        ? null
+        : Locale(localeCode);
     notifyListeners();
   }
 
@@ -107,5 +118,17 @@ class SettingsService extends ChangeNotifier {
       CardDownloadMode.onDemand => 'on_demand',
     };
     await prefs.setString(_cardDownloadModeKey, value);
+  }
+
+  /// Pins the app language, or passes null to follow the device locale.
+  Future<void> setLocale(Locale? locale) async {
+    _locale = locale;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    if (locale == null) {
+      await prefs.remove(_localeKey);
+    } else {
+      await prefs.setString(_localeKey, locale.languageCode);
+    }
   }
 }

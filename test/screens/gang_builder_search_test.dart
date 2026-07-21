@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// The Hire tab runs the same catalog search as the Cards screen — free text over abilities and
 /// rules, plus ANDed facet chips — but pinned to what this gang can actually hire: its own faction
@@ -75,7 +76,7 @@ void main() {
 
     // fakeModelList defaults to the guild faction.
     final gang = fakeModelList(name: 'The Rooks', entries: []);
-    await tester.pumpWidget(MaterialApp(home: GangBuilderScreen(gang: gang)));
+    await tester.pumpWidget(localizedApp(home: GangBuilderScreen(gang: gang)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 

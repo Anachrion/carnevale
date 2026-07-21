@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
@@ -92,7 +93,7 @@ class GameGangsScreen extends StatelessWidget {
           const SizedBox(width: 4),
           Expanded(
             child: Text(
-              'Gangs',
+              AppLocalizations.of(context).navGangs,
               style: GoogleFonts.cinzel(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -394,7 +395,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
         _applyEntryState(entryId, confirmed);
         showAppToast(
           context,
-          "Couldn't save the change — reverted to the last synced value.",
+          AppLocalizations.of(context).statUpdateReverted,
         );
       }
       return confirmed;
@@ -420,7 +421,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       if (mounted) {
         showAppToast(
           context,
-          'Could not update the activation. Please try again.',
+          AppLocalizations.of(context).toastActivationFailed,
         );
       }
     }
@@ -446,7 +447,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       _applySpellCast(entry.id, key, newCast);
     } catch (_) {
       if (mounted) {
-        showAppToast(context, 'Could not update that spell. Please try again.');
+        showAppToast(context, AppLocalizations.of(context).toastSpellUpdateFailed);
       }
     }
   }
@@ -534,7 +535,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       _applyGang(await GameService().dismissSummon(widget.gameId, entry.id));
     } catch (_) {
       if (mounted) {
-        showAppToast(context, 'Could not remove that model. Please try again.');
+        showAppToast(context, AppLocalizations.of(context).toastRemoveModelFailed);
       }
     }
   }
@@ -544,7 +545,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     super.build(context);
     if (_failed) {
       return ErrorRetryView(
-        message: 'Could not load this gang.',
+        message: AppLocalizations.of(context).gangViewerLoadFailed,
         onRetry: () {
           setState(() => _failed = false);
           _load();

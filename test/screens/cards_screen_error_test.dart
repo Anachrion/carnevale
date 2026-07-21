@@ -1,10 +1,10 @@
 import 'package:built_value/serializer.dart';
 import 'package:carnevale/screens/cards_screen.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets('shows a retry view when the catalog fails to load, then recovers', (
@@ -14,7 +14,7 @@ void main() {
     // used to leave the screen spinning forever with an unhandled exception (C-6).
     final adapter = installFakeApi();
 
-    await tester.pumpWidget(const MaterialApp(home: CardsScreen()));
+    await tester.pumpWidget(localizedApp(home: CardsScreen()));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 

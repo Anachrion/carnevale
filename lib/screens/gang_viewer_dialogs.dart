@@ -63,7 +63,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
       if (mounted)
         showAppToast(
           context,
-          'Could not update the counter. Please try again.',
+          AppLocalizations.of(context).counterToggleFailed,
         );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -72,6 +72,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ThemedDialogCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -87,7 +88,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Tap a counter to toggle it.',
+            l10n.counterTapToToggle,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
           const SizedBox(height: 12),
@@ -99,35 +100,35 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
           _counterRow(
             context,
             asset: 'assets/images/counters/stunned.png',
-            label: 'Stunned',
+            label: l10n.counterStunned,
             active: _state.stunned,
             onTap: () => _update(stunned: !_state.stunned),
           ),
           _counterRow(
             context,
             asset: 'assets/images/counters/hidden.png',
-            label: 'Hidden',
+            label: l10n.counterHidden,
             active: _state.hidden,
             onTap: () => _update(hidden: !_state.hidden),
           ),
           _counterRow(
             context,
             asset: 'assets/images/counters/guard.png',
-            label: 'Guarding',
+            label: l10n.counterGuarding,
             active: _state.guarding,
             onTap: () => _update(guarding: !_state.guarding),
           ),
           _counterRow(
             context,
             asset: 'assets/images/counters/carry_objective.png',
-            label: 'Carrying objective',
+            label: l10n.counterCarryingObjective,
             active: _state.carryingObjective,
             onTap: () => _update(carryingObjective: !_state.carryingObjective),
           ),
           _counterRow(
             context,
             asset: 'assets/images/counters/underwater_counter.png',
-            label: 'Underwater',
+            label: l10n.counterUnderwater,
             active: _state.underwaterCounters > 0,
             badge: _state.underwaterCounters > 0
                 ? _state.underwaterCounters
@@ -151,7 +152,7 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Done',
+                AppLocalizations.of(context).actionDone,
                 style: GoogleFonts.cinzel(
                   fontWeight: FontWeight.w700,
                   color: context.accentColor,
@@ -319,21 +320,21 @@ class _StatEditDialogState extends State<_StatEditDialog> {
           const SizedBox(height: 4),
           _statStepperRow(
             context,
-            label: 'Life Points',
+            label: AppLocalizations.of(context).statLifePoints,
             value: _state.lifePoints,
             onChanged: (v) => _onChanged(lifePoints: v),
           ),
           if (_state.willPoints.starting > 0)
             _statStepperRow(
               context,
-              label: 'Will Points',
+              label: AppLocalizations.of(context).statWillPoints,
               value: _state.willPoints,
               onChanged: (v) => _onChanged(willPoints: v),
             ),
           if (_state.commandPoints.starting > 0)
             _statStepperRow(
               context,
-              label: 'Command Points',
+              label: AppLocalizations.of(context).statCommandPoints,
               value: _state.commandPoints,
               onChanged: (v) => _onChanged(commandPoints: v),
             ),
@@ -342,7 +343,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Done',
+                AppLocalizations.of(context).actionDone,
                 style: GoogleFonts.cinzel(
                   fontWeight: FontWeight.w700,
                   color: context.accentColor,
@@ -572,7 +573,7 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
       // A cache-cold offline open used to hang on the spinner forever; show a retry instead (A-11).
       if (!mounted) return;
       setState(() {
-        _error = e is ApiException ? e.message : 'Could not reach server';
+        _error = e is ApiException ? e.message : AppLocalizations.of(context).errorCouldNotReachServer;
         _loading = false;
       });
     }
@@ -591,7 +592,7 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
     } catch (_) {
       if (mounted) {
         setState(() => _busy = false);
-        showAppToast(context, 'Could not summon that model. Please try again.');
+        showAppToast(context, AppLocalizations.of(context).summonFailed);
       }
     }
   }
@@ -609,7 +610,7 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Summon a model',
+              AppLocalizations.of(context).summonTitle,
               style: GoogleFonts.cinzel(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -618,11 +619,13 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
             ),
             const SizedBox(height: 4),
             Text(
-              'Any model may be summoned, from any faction. It costs no ducats.',
+              AppLocalizations.of(context).summonBlurb,
               style: TextStyle(fontSize: 12, color: context.subtleTextColor),
             ),
             const SizedBox(height: 12),
-            buildSearchField(hintText: 'Search names, abilities, rules...'),
+            buildSearchField(
+              hintText: AppLocalizations.of(context).summonSearchHint,
+            ),
             if (pickedFacets.isNotEmpty) ...[
               const SizedBox(height: 8),
               buildFacetChips(),
@@ -651,7 +654,7 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  'Cancel',
+                  AppLocalizations.of(context).actionCancel,
                   style: GoogleFonts.cinzel(
                     fontWeight: FontWeight.w700,
                     color: context.accentColor,
@@ -677,7 +680,7 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
     if (_results.isEmpty) {
       return Center(
         child: Text(
-          'No models found.',
+          AppLocalizations.of(context).summonNoModels,
           style: TextStyle(fontSize: 13, color: context.subtleTextColor),
         ),
       );
@@ -743,13 +746,14 @@ class _ConfirmDismissDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ThemedDialogCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Remove $name?',
+            l10n.dismissTitle(name),
             style: GoogleFonts.cinzel(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -758,7 +762,7 @@ class _ConfirmDismissDialog extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'This summoned model leaves the board. Its wounds and counters go with it.',
+            l10n.dismissBody,
             style: TextStyle(fontSize: 12, color: context.subtleTextColor),
           ),
           const SizedBox(height: 12),
@@ -768,7 +772,7 @@ class _ConfirmDismissDialog extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(
-                  'Cancel',
+                  l10n.actionCancel,
                   style: GoogleFonts.cinzel(
                     fontWeight: FontWeight.w700,
                     color: context.subtleTextColor,
@@ -778,7 +782,7 @@ class _ConfirmDismissDialog extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: Text(
-                  'Remove',
+                  l10n.actionRemove,
                   style: GoogleFonts.cinzel(
                     fontWeight: FontWeight.w700,
                     color: AppPalette.brightRed,

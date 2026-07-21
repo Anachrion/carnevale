@@ -117,7 +117,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
       onPressed: () => showFactionRuleDialog(context, gang.faction),
       icon: Icon(Icons.auto_stories, size: 16, color: context.accentColor),
       label: Text(
-        'Faction Rule',
+        AppLocalizations.of(context).labelFactionRule,
         style: GoogleFonts.cinzel(
           fontSize: 12,
           fontWeight: FontWeight.w700,
@@ -134,7 +134,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
       onPressed: onSummon,
       icon: Icon(Icons.auto_awesome, size: 16, color: context.accentColor),
       label: Text(
-        'Summon',
+        AppLocalizations.of(context).labelSummon,
         style: GoogleFonts.cinzel(
           fontSize: 12,
           fontWeight: FontWeight.w700,
@@ -184,7 +184,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     if (entries.isEmpty) {
       return Center(
         child: Text(
-          'No models hired.',
+          AppLocalizations.of(context).gangViewerNoModels,
           style: GoogleFonts.cinzel(
             fontSize: 14,
             color: context.subtleTextColor,
@@ -614,7 +614,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       spacing: 6,
                       children: [
-                        ..._counterIcons(state),
+                        ..._counterIcons(context, state),
                         // Own model: always offer the toggle. Opponent's: show the bolt only once
                         // they've activated, as a read-only marker to go with the darkened tile.
                         if (onToggleActivated != null)
@@ -650,36 +650,37 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
   // entirely, so a clean model shows no counter icons at all. Editing happens through the +
   // button next to them (own models only), not by tapping the icons themselves.
-  List<Widget> _counterIcons(api.EntryState state) {
+  List<Widget> _counterIcons(BuildContext context, api.EntryState state) {
+    final l10n = AppLocalizations.of(context);
     return [
       if (state.stunned)
         _CounterIcon(
           asset: 'assets/images/counters/stunned.png',
-          label: 'Stunned',
+          label: l10n.counterStunned,
           active: true,
         ),
       if (state.hidden)
         _CounterIcon(
           asset: 'assets/images/counters/hidden.png',
-          label: 'Hidden',
+          label: l10n.counterHidden,
           active: true,
         ),
       if (state.guarding)
         _CounterIcon(
           asset: 'assets/images/counters/guard.png',
-          label: 'Guarding',
+          label: l10n.counterGuarding,
           active: true,
         ),
       if (state.carryingObjective)
         _CounterIcon(
           asset: 'assets/images/counters/carry_objective.png',
-          label: 'Carrying objective',
+          label: l10n.counterCarryingObjective,
           active: true,
         ),
       if (state.underwaterCounters > 0)
         _CounterIcon(
           asset: 'assets/images/counters/underwater_counter.png',
-          label: 'Underwater',
+          label: l10n.counterUnderwater,
           active: true,
           badge: state.underwaterCounters,
         ),
@@ -798,7 +799,9 @@ class _ActivationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: activated ? 'Activated this turn' : 'Mark as activated',
+      message: activated
+          ? AppLocalizations.of(context).tooltipActivatedThisTurn
+          : AppLocalizations.of(context).tooltipMarkActivated,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -835,7 +838,7 @@ class _DismissButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Remove this summoned model',
+      message: AppLocalizations.of(context).tooltipRemoveSummoned,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -865,7 +868,7 @@ class _AddCounterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Edit counters',
+      message: AppLocalizations.of(context).tooltipEditCounters,
       child: GestureDetector(
         onTap: onTap,
         child: Container(

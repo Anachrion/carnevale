@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// Tapping "add" on a hire tile adds the model optimistically. Regression for the build-time crash
 /// where the optimistic temp entry omitted a required field (flexibleLeader) and threw on `.build()`,
@@ -34,7 +35,7 @@ void main() {
     // The optimistic add syncs in the background; hand back a gang so the op resolves cleanly.
     adapter.stub('POST', '/list_entries', modelListBody(gang));
 
-    await tester.pumpWidget(MaterialApp(home: GangBuilderScreen(gang: gang)));
+    await tester.pumpWidget(localizedApp(home: GangBuilderScreen(gang: gang)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 

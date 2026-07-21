@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// The activation marker ("has this model gone this turn?") darkens a model tile's background, so a
 /// player can see at a glance who is still to activate. These drive the real service -> generated
@@ -81,7 +82,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(
+      localizedApp(
         home: GameGangsScreen(
           gameId: 1,
           myPlayerId: myPlayerId,

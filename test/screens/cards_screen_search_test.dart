@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// Drives the search box the way a player does: type, pick a suggestion, watch the list narrow.
 void main() {
@@ -35,7 +36,7 @@ void main() {
         ),
       ], const FullType(api.Profile)),
     );
-    await tester.pumpWidget(const MaterialApp(home: CardsScreen()));
+    await tester.pumpWidget(localizedApp(home: CardsScreen()));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
   }
