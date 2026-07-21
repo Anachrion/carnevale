@@ -18,6 +18,7 @@ import 'package:dio/dio.dart';
 import '../models/spell_selection.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
+import 'idempotency.dart';
 
 class GangService {
   static final GangService _instance = GangService._();
@@ -82,24 +83,32 @@ class GangService {
     await _client.lists.deleteList(id: id);
   });
 
-  Future<api.ModelList> addEntry(int listId, int entryId, String entryType) =>
-      _guard(() async {
-        final typeEnum = entryType == 'Equipment'
-            ? api.EntryInputEntryEntryTypeEnum.catalogColonColonEquipment
-            : api.EntryInputEntryEntryTypeEnum.catalogColonColonCardReference;
-        final res = await _client.listEntries.createListEntry(
-          entryInput: api.EntryInput(
-            (b) => b
-              ..entry = api.EntryInputEntry(
-                (eb) => eb
-                  ..listId = listId
-                  ..entryType = typeEnum
-                  ..entryId = entryId,
-              ).toBuilder(),
-          ),
-        );
-        return res.data!;
-      });
+  /// [requestKey], when set, rides as the Idempotency-Key header so a re-sent hire (the optimistic
+  /// queue retries a lost request) replays the original entry server-side instead of hiring twice.
+  /// Mint it once per op and reuse it across retries — see [newIdempotencyKey].
+  Future<api.ModelList> addEntry(
+    int listId,
+    int entryId,
+    String entryType, {
+    String? requestKey,
+  }) => _guard(() async {
+    final typeEnum = entryType == 'Equipment'
+        ? api.EntryInputEntryEntryTypeEnum.catalogColonColonEquipment
+        : api.EntryInputEntryEntryTypeEnum.catalogColonColonCardReference;
+    final res = await _client.listEntries.createListEntry(
+      entryInput: api.EntryInput(
+        (b) => b
+          ..entry = api.EntryInputEntry(
+            (eb) => eb
+              ..listId = listId
+              ..entryType = typeEnum
+              ..entryId = entryId,
+          ).toBuilder(),
+      ),
+      headers: requestKey == null ? null : {idempotencyKeyHeader: requestKey},
+    );
+    return res.data!;
+  });
 
   Future<api.ModelList> removeEntry(int entryId) => _guard(() async {
     final res = await _client.listEntries.deleteListEntry(id: entryId);
