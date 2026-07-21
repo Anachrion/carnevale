@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// Drives the search box the way a player does: type, pick a suggestion, watch the list narrow.
 void main() {
@@ -35,7 +36,7 @@ void main() {
         ),
       ], const FullType(api.Profile)),
     );
-    await tester.pumpWidget(const MaterialApp(home: CardsScreen()));
+    await tester.pumpWidget(localizedApp(home: CardsScreen()));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
   }
@@ -107,6 +108,36 @@ void main() {
     expect(find.text('Capodecina'), findsOneWidget);
     expect(find.text('Doge'), findsNothing);
   });
+
+  // CARNEVALEB-29: the suggestions panel used to have no touch-reachable way to dismiss it (only
+  // Escape, or picking a suggestion) and could sit over the first result. Tapping outside the
+  // field now drops its focus, hiding the panel with it; tapping back into the field (with the
+  // same text still there) brings the same suggestions straight back, unchanged.
+  testWidgets(
+    'tapping outside the search field hides the suggestions; tapping back in brings them back',
+    (tester) async {
+      await pumpCards(tester);
+
+      await tester.enterText(find.byType(TextField), 'brav');
+      await tester.pump();
+      expect(find.text('ability · 2'), findsOneWidget);
+
+      // Well below the three-row list, inside the results area the suggestions float over —
+      // reliably blank space regardless of exactly how tall the tiles render.
+      await tester.tapAt(const Offset(400, 590));
+      await tester.pump();
+      expect(find.text('ability · 2'), findsNothing);
+      // The typed text (and the filtered list) are untouched — only the panel is hidden.
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'brav',
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(find.text('ability · 2'), findsOneWidget);
+    },
+  );
 
   testWidgets('a keyword and an ability chip combine: brave leaders only', (
     tester,

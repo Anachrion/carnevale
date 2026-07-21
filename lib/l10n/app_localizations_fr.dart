@@ -169,6 +169,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fieldEmail => 'E-mail';
 
   @override
+  String get fieldEmailOrUsername => 'E-mail ou nom d\'utilisateur';
+
+  @override
   String get fieldPassword => 'Mot de passe';
 
   @override
@@ -804,8 +807,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get counterTapToToggle => 'Appuyez sur un marqueur pour l\'activer.';
 
   @override
-  String get statUpdateFailed =>
-      'Impossible de mettre à jour la caractéristique. Veuillez réessayer.';
+  String get statUpdateReverted =>
+      'Échec de l\'enregistrement — retour à la dernière valeur synchronisée.';
 
   @override
   String get statLifePoints => 'Points de vie';

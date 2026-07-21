@@ -1,10 +1,10 @@
 import 'package:built_value/serializer.dart';
 import 'package:carnevale/screens/cards_screen.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets('CardsScreen loads and renders profiles from the API', (
@@ -20,7 +20,7 @@ void main() {
       ], const FullType(api.Profile)),
     );
 
-    await tester.pumpWidget(const MaterialApp(home: CardsScreen()));
+    await tester.pumpWidget(localizedApp(home: CardsScreen()));
     // Let the initial _load() future resolve and the list rebuild.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));

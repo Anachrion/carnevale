@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets('Returning from the card viewer centres the card you ended on', (
@@ -44,7 +45,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(home: GangBuilderScreen(gang: fakeModelList())),
+      localizedApp(home: GangBuilderScreen(gang: fakeModelList())),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));

@@ -392,6 +392,12 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get fieldEmail;
 
+  /// Label of the sign-in identifier field, which accepts either an email or a username (sign-up still asks for an email specifically and uses fieldEmail)
+  ///
+  /// In en, this message translates to:
+  /// **'Email or Username'**
+  String get fieldEmailOrUsername;
+
   /// No description provided for @fieldPassword.
   ///
   /// In en, this message translates to:
@@ -1496,11 +1502,11 @@ abstract class AppLocalizations {
   /// **'Tap a counter to toggle it.'**
   String get counterTapToToggle;
 
-  /// No description provided for @statUpdateFailed.
+  /// Toast shown when a debounced stat write fails and the displayed value rolls back to the last server-confirmed one. Not a retry prompt: the rollback already happened.
   ///
   /// In en, this message translates to:
-  /// **'Could not update the stat. Please try again.'**
-  String get statUpdateFailed;
+  /// **'Couldn\'t save the change — reverted to the last synced value.'**
+  String get statUpdateReverted;
 
   /// No description provided for @statLifePoints.
   ///

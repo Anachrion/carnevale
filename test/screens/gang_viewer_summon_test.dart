@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// Summoning: the rare models whose special rules conjure new models onto the board mid-battle.
 /// The summoned model joins the (otherwise frozen) gang, costs it nothing, and is the only kind of
@@ -63,7 +64,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(
+      localizedApp(
         home: GameGangsScreen(
           gameId: 1,
           myPlayerId: myPlayerId,

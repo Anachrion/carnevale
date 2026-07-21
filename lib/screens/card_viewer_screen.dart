@@ -163,12 +163,13 @@ class _CardViewerScreenState extends State<CardViewerScreen>
     );
   }
 
+  /// Navigating to a new card keeps whichever side was showing (front/back) rather than
+  /// resetting to front, so browsing a stack of backs (or fronts) stays on that side.
   void _onPageChanged(int index) {
-    _flipController.reset();
+    _flipController.value = _showingFront ? 0 : 1;
     widget.onIndexChanged?.call(index);
     setState(() {
       _currentIndex = index;
-      _showingFront = true;
     });
   }
 

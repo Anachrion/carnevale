@@ -84,6 +84,10 @@ class _$ListEntry extends ListEntry {
   @override
   final bool flexibleLeader;
   @override
+  final bool demotedLeader;
+  @override
+  final bool promotableLeader;
+  @override
   final String? identifier;
   @override
   final String? cardFront;
@@ -93,6 +97,14 @@ class _$ListEntry extends ListEntry {
   final int cost;
   @override
   final bool summoned;
+  @override
+  final int? companionOfEntryId;
+  @override
+  final bool upgradeSelected;
+  @override
+  final bool upgradeAvailable;
+  @override
+  final int upgradeDucats;
   @override
   final EntryState? state;
   @override
@@ -118,11 +130,17 @@ class _$ListEntry extends ListEntry {
     this.profileName,
     required this.keywords,
     required this.flexibleLeader,
+    required this.demotedLeader,
+    required this.promotableLeader,
     this.identifier,
     this.cardFront,
     this.cardBack,
     required this.cost,
     required this.summoned,
+    this.companionOfEntryId,
+    required this.upgradeSelected,
+    required this.upgradeAvailable,
+    required this.upgradeDucats,
     this.state,
     required this.mage,
     this.mentoredByEntryId,
@@ -149,11 +167,17 @@ class _$ListEntry extends ListEntry {
         profileName == other.profileName &&
         keywords == other.keywords &&
         flexibleLeader == other.flexibleLeader &&
+        demotedLeader == other.demotedLeader &&
+        promotableLeader == other.promotableLeader &&
         identifier == other.identifier &&
         cardFront == other.cardFront &&
         cardBack == other.cardBack &&
         cost == other.cost &&
         summoned == other.summoned &&
+        companionOfEntryId == other.companionOfEntryId &&
+        upgradeSelected == other.upgradeSelected &&
+        upgradeAvailable == other.upgradeAvailable &&
+        upgradeDucats == other.upgradeDucats &&
         state == other.state &&
         mage == other.mage &&
         mentoredByEntryId == other.mentoredByEntryId &&
@@ -173,11 +197,17 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, profileName.hashCode);
     _$hash = $jc(_$hash, keywords.hashCode);
     _$hash = $jc(_$hash, flexibleLeader.hashCode);
+    _$hash = $jc(_$hash, demotedLeader.hashCode);
+    _$hash = $jc(_$hash, promotableLeader.hashCode);
     _$hash = $jc(_$hash, identifier.hashCode);
     _$hash = $jc(_$hash, cardFront.hashCode);
     _$hash = $jc(_$hash, cardBack.hashCode);
     _$hash = $jc(_$hash, cost.hashCode);
     _$hash = $jc(_$hash, summoned.hashCode);
+    _$hash = $jc(_$hash, companionOfEntryId.hashCode);
+    _$hash = $jc(_$hash, upgradeSelected.hashCode);
+    _$hash = $jc(_$hash, upgradeAvailable.hashCode);
+    _$hash = $jc(_$hash, upgradeDucats.hashCode);
     _$hash = $jc(_$hash, state.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
     _$hash = $jc(_$hash, mentoredByEntryId.hashCode);
@@ -199,11 +229,17 @@ class _$ListEntry extends ListEntry {
           ..add('profileName', profileName)
           ..add('keywords', keywords)
           ..add('flexibleLeader', flexibleLeader)
+          ..add('demotedLeader', demotedLeader)
+          ..add('promotableLeader', promotableLeader)
           ..add('identifier', identifier)
           ..add('cardFront', cardFront)
           ..add('cardBack', cardBack)
           ..add('cost', cost)
           ..add('summoned', summoned)
+          ..add('companionOfEntryId', companionOfEntryId)
+          ..add('upgradeSelected', upgradeSelected)
+          ..add('upgradeAvailable', upgradeAvailable)
+          ..add('upgradeDucats', upgradeDucats)
           ..add('state', state)
           ..add('mage', mage)
           ..add('mentoredByEntryId', mentoredByEntryId)
@@ -252,6 +288,16 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   set flexibleLeader(bool? flexibleLeader) =>
       _$this._flexibleLeader = flexibleLeader;
 
+  bool? _demotedLeader;
+  bool? get demotedLeader => _$this._demotedLeader;
+  set demotedLeader(bool? demotedLeader) =>
+      _$this._demotedLeader = demotedLeader;
+
+  bool? _promotableLeader;
+  bool? get promotableLeader => _$this._promotableLeader;
+  set promotableLeader(bool? promotableLeader) =>
+      _$this._promotableLeader = promotableLeader;
+
   String? _identifier;
   String? get identifier => _$this._identifier;
   set identifier(String? identifier) => _$this._identifier = identifier;
@@ -271,6 +317,26 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   bool? _summoned;
   bool? get summoned => _$this._summoned;
   set summoned(bool? summoned) => _$this._summoned = summoned;
+
+  int? _companionOfEntryId;
+  int? get companionOfEntryId => _$this._companionOfEntryId;
+  set companionOfEntryId(int? companionOfEntryId) =>
+      _$this._companionOfEntryId = companionOfEntryId;
+
+  bool? _upgradeSelected;
+  bool? get upgradeSelected => _$this._upgradeSelected;
+  set upgradeSelected(bool? upgradeSelected) =>
+      _$this._upgradeSelected = upgradeSelected;
+
+  bool? _upgradeAvailable;
+  bool? get upgradeAvailable => _$this._upgradeAvailable;
+  set upgradeAvailable(bool? upgradeAvailable) =>
+      _$this._upgradeAvailable = upgradeAvailable;
+
+  int? _upgradeDucats;
+  int? get upgradeDucats => _$this._upgradeDucats;
+  set upgradeDucats(int? upgradeDucats) =>
+      _$this._upgradeDucats = upgradeDucats;
 
   EntryStateBuilder? _state;
   EntryStateBuilder get state => _$this._state ??= EntryStateBuilder();
@@ -316,11 +382,17 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _profileName = $v.profileName;
       _keywords = $v.keywords.toBuilder();
       _flexibleLeader = $v.flexibleLeader;
+      _demotedLeader = $v.demotedLeader;
+      _promotableLeader = $v.promotableLeader;
       _identifier = $v.identifier;
       _cardFront = $v.cardFront;
       _cardBack = $v.cardBack;
       _cost = $v.cost;
       _summoned = $v.summoned;
+      _companionOfEntryId = $v.companionOfEntryId;
+      _upgradeSelected = $v.upgradeSelected;
+      _upgradeAvailable = $v.upgradeAvailable;
+      _upgradeDucats = $v.upgradeDucats;
       _state = $v.state?.toBuilder();
       _mage = $v.mage;
       _mentoredByEntryId = $v.mentoredByEntryId;
@@ -379,6 +451,16 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               r'ListEntry',
               'flexibleLeader',
             ),
+            demotedLeader: BuiltValueNullFieldError.checkNotNull(
+              demotedLeader,
+              r'ListEntry',
+              'demotedLeader',
+            ),
+            promotableLeader: BuiltValueNullFieldError.checkNotNull(
+              promotableLeader,
+              r'ListEntry',
+              'promotableLeader',
+            ),
             identifier: identifier,
             cardFront: cardFront,
             cardBack: cardBack,
@@ -391,6 +473,22 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               summoned,
               r'ListEntry',
               'summoned',
+            ),
+            companionOfEntryId: companionOfEntryId,
+            upgradeSelected: BuiltValueNullFieldError.checkNotNull(
+              upgradeSelected,
+              r'ListEntry',
+              'upgradeSelected',
+            ),
+            upgradeAvailable: BuiltValueNullFieldError.checkNotNull(
+              upgradeAvailable,
+              r'ListEntry',
+              'upgradeAvailable',
+            ),
+            upgradeDucats: BuiltValueNullFieldError.checkNotNull(
+              upgradeDucats,
+              r'ListEntry',
+              'upgradeDucats',
             ),
             state: _state?.build(),
             mage: BuiltValueNullFieldError.checkNotNull(

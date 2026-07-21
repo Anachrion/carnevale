@@ -55,17 +55,42 @@ class _TabButton extends StatelessWidget {
   }
 }
 
+// Keeps a PageView child mounted while swiped off-screen, so its ScrollPosition (and any other
+// per-subtree state) survives switching to the other tab and back.
+class _KeepAlivePage extends StatefulWidget {
+  const _KeepAlivePage({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+}
+
 class _EntryTile extends StatefulWidget {
   const _EntryTile({
     required this.entry,
     required this.name,
     required this.factionColor,
-    required this.busy,
     required this.onRemove,
     this.role,
     this.onTap,
     this.onEditSpells,
     this.onEditApprenticeship,
+    this.onPromote,
+    this.isCompanion = false,
+    this.onToggleUpgrade,
   });
 
   final api.ListEntry entry;
@@ -74,10 +99,17 @@ class _EntryTile extends StatefulWidget {
   final String name;
   final Color factionColor;
   final String? role;
-  final bool busy;
-  // Returns whether the removal actually happened, so the exit animation can be reversed when the
-  // server rejects it (offline / race) instead of leaving an invisible entry behind (A-7).
-  final Future<bool> Function() onRemove;
+  // Fire-and-forget: the removal applies optimistically in the parent (the entry leaves `_gang` at
+  // once and the delete syncs in the background), so the tile just plays its exit animation and
+  // calls this — a genuine rejection re-inserts the entry upstream rather than reversing here.
+  final VoidCallback onRemove;
+  // An auto-included companion (a Tentacle brought by the Emissary of Mother Hydra, CARNEVALEB-23):
+  // read-only — no remove button, and the parent's list excludes it from the draggable reorder set.
+  // It leaves only when the model that brought it does.
+  final bool isCompanion;
+  // Non-null only for a model that offers an optional paid upgrade (the Emissary): toggles it on/off,
+  // switching between the base and upgraded companion sets. Reflects entry.upgradeSelected.
+  final VoidCallback? onToggleUpgrade;
   final VoidCallback? onTap;
   // Non-null only for Mage models; opens the spell picker for this model (rulebook p24).
   final VoidCallback? onEditSpells;
@@ -85,6 +117,9 @@ class _EntryTile extends StatefulWidget {
   // picker. Her own "Spells" button only appears once a mentor has actually been chosen — there's
   // nothing to pick a spell from before that.
   final VoidCallback? onEditApprenticeship;
+  // Non-null only for a demoted flex Leader the player may crown instead (ambiguous multi-flex case);
+  // promotes it to the gang's Leader, demoting whoever holds the slot.
+  final VoidCallback? onPromote;
 
   @override
   State<_EntryTile> createState() => _EntryTileState();
@@ -131,13 +166,10 @@ class _EntryTileState extends State<_EntryTile>
   }
 
   Future<void> _handleRemove() async {
-    // Don't animate a removal that can't proceed (another mutation is in flight).
-    if (widget.busy) return;
+    // Play the exit animation, then drop the entry: the parent removes it from `_gang` immediately
+    // and syncs the delete in the background, so there's nothing to wait on or reverse here.
     await _ctrl.forward();
-    final removed = await widget.onRemove();
-    // On success the parent drops this entry from the gang and the tile is gone; on failure the
-    // entry is still there, so slide it back in and let the toast (raised by the parent) explain.
-    if (!removed && mounted) _ctrl.reverse();
+    widget.onRemove();
   }
 
   @override
@@ -208,30 +240,50 @@ class _EntryTileState extends State<_EntryTile>
                             ),
                           ),
                           const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: widget.busy ? null : _handleRemove,
-                            child: Container(
+                          // A companion can't be removed on its own — it leaves with the model that
+                          // brought it — so it shows a read-only link badge instead of the remove button.
+                          if (widget.isCompanion)
+                            Container(
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.15),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                  width: 0.5,
-                                ),
+                                color: Colors.white.withValues(alpha: 0.08),
                               ),
                               child: Icon(
-                                Icons.remove,
+                                Icons.link,
                                 size: 14,
-                                color: Colors.white.withValues(alpha: 0.85),
+                                color: Colors.white.withValues(alpha: 0.55),
+                              ),
+                            )
+                          else
+                            GestureDetector(
+                              onTap: _handleRemove,
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.3),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.remove,
+                                  size: 14,
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
+                      if (widget.isCompanion) _buildCompanionLabel(),
+                      if (widget.onToggleUpgrade != null) _buildUpgradeRow(),
                       if (widget.onEditSpells != null || widget.onEditApprenticeship != null)
                         _buildSpellRow(),
+                      if (widget.onPromote != null) _buildPromoteRow(),
                     ],
                   ),
                 ),
@@ -254,7 +306,7 @@ class _EntryTileState extends State<_EntryTile>
     final tappableChips = chips
         .map(
           (chip) => GestureDetector(
-            onTap: widget.busy ? null : widget.onEditSpells,
+            onTap: widget.onEditSpells,
             child: chip,
           ),
         )
@@ -291,16 +343,93 @@ class _EntryTileState extends State<_EntryTile>
     );
   }
 
+  // A quiet caption marking an auto-included companion, so it reads as brought-in rather than hired.
+  Widget _buildCompanionLabel() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Text(
+        'Auto-included',
+        style: TextStyle(
+          fontSize: 10,
+          color: Colors.white.withValues(alpha: 0.6),
+          fontStyle: FontStyle.italic,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+
+  // The optional paid upgrade toggle on a model that brings companions (the Emissary): buys or drops
+  // the extra companions for its upgrade cost. Highlighted when active; the card's own rule text
+  // explains what the upgrade does.
+  Widget _buildUpgradeRow() {
+    final selected = widget.entry.upgradeSelected;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: GestureDetector(
+          onTap: widget.onToggleUpgrade,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: selected ? 0.28 : 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: selected ? 0.6 : 0.3),
+                width: selected ? 1 : 0.5,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  selected ? Icons.check_circle : Icons.add_circle_outline,
+                  size: 12,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'Upgrade  +${widget.entry.upgradeDucats} Ducats',
+                  style: GoogleFonts.cinzel(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Shown on a demoted flex Leader the player may crown instead (two+ flex Leaders, no forced one).
+  Widget _buildPromoteRow() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: GestureDetector(
+          onTap: widget.onPromote,
+          child: _pillButton(icon: Icons.military_tech, label: 'Promote leader'),
+        ),
+      ),
+    );
+  }
+
   Widget _spellsButton() {
     return GestureDetector(
-      onTap: widget.busy ? null : widget.onEditSpells,
+      onTap: widget.onEditSpells,
       child: _pillButton(icon: Icons.auto_fix_high, label: AppLocalizations.of(context).labelSpells),
     );
   }
 
   Widget _apprenticeshipButton() {
     return GestureDetector(
-      onTap: widget.busy ? null : widget.onEditApprenticeship,
+      onTap: widget.onEditApprenticeship,
       child: _pillButton(icon: Icons.school_outlined, label: AppLocalizations.of(context).labelApprenticeship),
     );
   }

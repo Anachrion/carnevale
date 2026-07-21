@@ -346,8 +346,60 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
         gameId: widget.gameId,
         entry: entry,
         onStateChanged: _applyEntryState,
+        onCommit: _commitStats,
       ),
     );
+  }
+
+  api.EntryState? _entryStateFor(int entryId) {
+    for (final e in _data?.gang.entries ?? const <api.ListEntry>[]) {
+      if (e.id == entryId) return e.state;
+    }
+    return null;
+  }
+
+  /// Persists a model's debounced stat change (owned here, not in the dialog, so it survives the
+  /// dialog closing). Sends only the stats that actually moved. On success the tile adopts the
+  /// server's state — unless the value changed again while the write was in flight, so a newer
+  /// optimistic edit isn't clobbered. On failure it rolls back to the last synced value and tells
+  /// the player, so a silent desync can't leave the two players looking at different numbers.
+  Future<api.EntryState> _commitStats(
+    int entryId,
+    api.EntryState target,
+    api.EntryState confirmed,
+  ) async {
+    final lp = target.lifePoints.current != confirmed.lifePoints.current
+        ? target.lifePoints.current
+        : null;
+    final wp = target.willPoints.current != confirmed.willPoints.current
+        ? target.willPoints.current
+        : null;
+    final cp = target.commandPoints.current != confirmed.commandPoints.current
+        ? target.commandPoints.current
+        : null;
+    if (lp == null && wp == null && cp == null) return confirmed;
+    try {
+      final newState = await GameService().updateStats(
+        widget.gameId,
+        entryId,
+        lifePoints: lp,
+        willPoints: wp,
+        commandPoints: cp,
+      );
+      if (mounted && _entryStateFor(entryId) == target) {
+        _applyEntryState(entryId, newState);
+      }
+      return newState;
+    } catch (_) {
+      if (mounted) {
+        _applyEntryState(entryId, confirmed);
+        showAppToast(
+          context,
+          AppLocalizations.of(context).statUpdateReverted,
+        );
+      }
+      return confirmed;
+    }
   }
 
   // Activation is a turn-sequencing marker rather than a status counter, so it toggles straight

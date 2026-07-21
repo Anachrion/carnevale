@@ -65,6 +65,10 @@
 
   "fieldUsername": "Username",
   "fieldEmail": "Email",
+  "fieldEmailOrUsername": "Email or Username",
+  "@fieldEmailOrUsername": {
+    "description": "Label of the sign-in identifier field, which accepts either an email or a username (sign-up still asks for an email specifically and uses fieldEmail)"
+  },
   "fieldPassword": "Password",
   "fieldConfirmPassword": "Confirm Password",
   "fieldNewPassword": "New Password",
@@ -288,7 +292,10 @@
 
   "counterToggleFailed": "Could not update the counter. Please try again.",
   "counterTapToToggle": "Tap a counter to toggle it.",
-  "statUpdateFailed": "Could not update the stat. Please try again.",
+  "statUpdateReverted": "Couldn't save the change — reverted to the last synced value.",
+  "@statUpdateReverted": {
+    "description": "Toast shown when a debounced stat write fails and the displayed value rolls back to the last server-confirmed one. Not a retry prompt: the rollback already happened."
+  },
   "statLifePoints": "Life Points",
   "statWillPoints": "Will Points",
   "statCommandPoints": "Command Points",

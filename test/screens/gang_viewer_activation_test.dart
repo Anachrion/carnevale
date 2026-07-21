@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// The activation marker ("has this model gone this turn?") darkens a model tile's background, so a
 /// player can see at a glance who is still to activate. These drive the real service -> generated
@@ -81,7 +82,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(
+      localizedApp(
         home: GameGangsScreen(
           gameId: 1,
           myPlayerId: myPlayerId,
@@ -298,10 +299,15 @@ void main() {
     await tester.tap(
       find.descendant(of: lifeRow, matching: find.byIcon(Icons.add)),
     );
-    // Settle rather than pumping a fixed slice: the heal is a round-trip through the real service,
-    // and a fixed 50ms is a race that loses whenever the machine is busy.
-    await tester.pumpAndSettle();
+    // The revival is optimistic now — death mirrors HP locally — so a single pump already brings the
+    // model back, no round-trip needed.
+    await tester.pump();
+    expect(find.text('💀'), findsNothing);
 
+    // The save is debounced (~900ms after the last tap); advance past it and settle the round-trip so
+    // no timer is left pending.
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(find.text('💀'), findsNothing);
   });
 

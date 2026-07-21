@@ -25,6 +25,7 @@ import '../services/card_image_service.dart';
 import '../services/equipment_service.dart';
 import '../services/profile_service.dart';
 import '../services/settings_service.dart';
+import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
@@ -207,20 +208,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _UsernameEditor(
+                            key: ValueKey(user.username),
+                            initialUsername: user.username,
+                          ),
+                          const SizedBox(height: 12),
                           _SettingRow(
-                            label: l10n.settingsSignedInAs,
+                            label: l10n.fieldEmail,
                             child: Text(
                               user.email,
                               style: GoogleFonts.cinzel(
                                 color: context.textColor,
                                 fontWeight: FontWeight.w600,
+                                fontSize: 15,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          _UsernameEditor(
-                            key: ValueKey(user.username),
-                            initialUsername: user.username,
                           ),
                           const SizedBox(height: 12),
                           _AccountButton(
@@ -523,6 +525,7 @@ class _CardImageSyncState extends State<_CardImageSync> {
     ProfileService().reset();
     AbilityService().reset();
     EquipmentService().reset();
+    SpellService().reset();
     // Fire-and-forget: the service owns the work and publishes progress on syncStatus. `refresh`
     // re-pulls the manifest first; only missing/outdated faces download, so this resumes rather
     // than restarting an interrupted sync.
@@ -670,50 +673,45 @@ class _UsernameEditorState extends State<_UsernameEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SettingRow(
-          label: AppLocalizations.of(context).fieldUsername,
+          label: AppLocalizations.of(context).settingsSignedInAs,
           child: SizedBox(
             width: 170,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    onChanged: (_) => setState(() {}),
-                    onSubmitted: (_) => _save(),
-                    textAlign: TextAlign.right,
-                    style: GoogleFonts.cinzel(
-                      color: context.textColor,
-                      fontSize: 14,
-                    ),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      border: InputBorder.none,
+                  child: SizedBox(
+                    height: 22,
+                    child: TextField(
+                      controller: _controller,
+                      onChanged: (_) => setState(() {}),
+                      onSubmitted: (_) => _save(),
+                      textAlign: TextAlign.right,
+                      textAlignVertical: TextAlignVertical.center,
+                      style: GoogleFonts.cinzel(
+                        color: context.textColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                      decoration: const InputDecoration(
+                        isCollapsed: true,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
-                _saving
-                    ? SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.accentColor,
-                        ),
-                      )
-                    : IconButton(
-                        icon: Icon(
-                          Icons.check,
-                          size: 20,
-                          color: _changed
-                              ? context.accentColor
-                              : context.subtleTextColor.withValues(alpha: 0.3),
-                        ),
-                        onPressed: _changed ? _save : null,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
+                if (_saving) ...[
+                  const SizedBox(width: 6),
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: context.accentColor,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

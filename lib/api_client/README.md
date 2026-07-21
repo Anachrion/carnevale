@@ -97,6 +97,7 @@ Class | Method | HTTP request | Description
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntryIllustration**](doc/ListEntriesApi.md#setlistentryillustration) | **PATCH** /list_entries/{id}/illustration | Switch which illustration (card reference) a model is hired as
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntrySpells**](doc/ListEntriesApi.md#setlistentryspells) | **PATCH** /list_entries/{id}/spells | Set the spells (and Discipline(s)) a Mage model knows, per pool
+[*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntryUpgrade**](doc/ListEntriesApi.md#setlistentryupgrade) | **PATCH** /list_entries/{id}/upgrade | Toggle a model&#39;s optional paid companion upgrade
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 [*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list owned by the current user
 [*ListsApi*](doc/ListsApi.md) | [**deleteList**](doc/ListsApi.md#deletelist) | **DELETE** /lists/{id} | Delete a list
@@ -140,6 +141,8 @@ Class | Method | HTTP request | Description
  - [EntryPositionInputEntry](doc/EntryPositionInputEntry.md)
  - [EntryStatValue](doc/EntryStatValue.md)
  - [EntryState](doc/EntryState.md)
+ - [EntryUpgradeInput](doc/EntryUpgradeInput.md)
+ - [EntryUpgradeInputEntry](doc/EntryUpgradeInputEntry.md)
  - [Equipment](doc/Equipment.md)
  - [ForgotPasswordInput](doc/ForgotPasswordInput.md)
  - [ForgotPasswordInputUser](doc/ForgotPasswordInputUser.md)
