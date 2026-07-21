@@ -25,6 +25,7 @@ Method | HTTP request | Description
 [**getPlayerList**](GamesApi.md#getplayerlist) | **GET** /games/{id}/players/{player_id}/list | Either player&#39;s selected gang, in full (with entries)
 [**joinGame**](GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [**pickRole**](GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
+[**removeToken**](GamesApi.md#removetoken) | **DELETE** /games/{id}/entries/{list_entry_id}/tokens/{token_id} | Remove a player token from one of the current player&#39;s own models
 [**rewindTurn**](GamesApi.md#rewindturn) | **POST** /games/{id}/turns/rewind | Rewind the requesting player&#39;s turn cursor
 [**scoreAgenda**](GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
@@ -34,6 +35,7 @@ Method | HTTP request | Description
 [**updateCounters**](GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
 [**updateSpellCast**](GamesApi.md#updatespellcast) | **PATCH** /games/{id}/entries/{list_entry_id}/spell_casts | Mark (or unmark) one known/granted spell as cast, on one of the current player&#39;s own models
 [**updateStats**](GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
+[**updateToken**](GamesApi.md#updatetoken) | **PATCH** /games/{id}/entries/{list_entry_id}/tokens | Add or update a player token on one of the current player&#39;s own models
 
 
 # **advanceTurn**
@@ -795,6 +797,57 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **removeToken**
+> EntryState removeToken(id, listEntryId, tokenId)
+
+Remove a player token from one of the current player's own models
+
+Removes the token with this client-generated id. Only available while the game is in_progress, and only for the requesting player's own models. Broadcast to both players. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int listEntryId = 56; // int | 
+final String tokenId = tokenId_example; // String | 
+
+try {
+    final response = api.removeToken(id, listEntryId, tokenId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->removeToken: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **listEntryId** | **int**|  | 
+ **tokenId** | **String**|  | 
+
+### Return type
+
+[**EntryState**](EntryState.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **rewindTurn**
 > Game rewindTurn(id)
 
@@ -939,7 +992,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **summonModel**
-> BuiltList summonModel(id, summonModelRequest)
+> BuiltList summonModel(id, summonModelRequest, idempotencyKey)
 
 Conjure a model onto the board and add it to the current player's gang
 
@@ -956,9 +1009,10 @@ import 'package:carnevale_api/api.dart';
 final api = CarnevaleApi().getGamesApi();
 final int id = 56; // int | 
 final SummonModelRequest summonModelRequest = ; // SummonModelRequest | 
+final String idempotencyKey = idempotencyKey_example; // String | Optional client-generated opaque token that makes this additive create idempotent: a request re-sent after a lost response (e.g. the app's optimistic sync queue retrying a timed-out hire) replays the original result instead of creating a duplicate. Mint one token per logical action and reuse it across that action's retries. Bounded to `[A-Za-z0-9._-]{16,128}`; a value outside that is ignored (the create proceeds non-idempotently). 
 
 try {
-    final response = api.summonModel(id, summonModelRequest);
+    final response = api.summonModel(id, summonModelRequest, idempotencyKey);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling GamesApi->summonModel: $e\n');
@@ -971,6 +1025,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **int**|  | 
  **summonModelRequest** | [**SummonModelRequest**](SummonModelRequest.md)|  | 
+ **idempotencyKey** | **String**| Optional client-generated opaque token that makes this additive create idempotent: a request re-sent after a lost response (e.g. the app's optimistic sync queue retrying a timed-out hire) replays the original result instead of creating a duplicate. Mint one token per logical action and reuse it across that action's retries. Bounded to `[A-Za-z0-9._-]{16,128}`; a value outside that is ignored (the create proceeds non-idempotently).  | [optional] 
 
 ### Return type
 
@@ -1218,6 +1273,57 @@ Name | Type | Description  | Notes
  **id** | **int**|  | 
  **listEntryId** | **int**|  | 
  **updateStatsInput** | [**UpdateStatsInput**](UpdateStatsInput.md)|  | 
+
+### Return type
+
+[**EntryState**](EntryState.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateToken**
+> EntryState updateToken(id, listEntryId, updateTokenInput)
+
+Add or update a player token on one of the current player's own models
+
+Player tokens are free-form markers (a colour + optional label, optionally toggleable) the player uses to track an in-game effect a rule granted. Only available while the game is in_progress, and only for the requesting player's own models — the opponent's 404. Each token is keyed by a client-generated `id`: sending the same id again updates that token (edit it / flip its `active`) instead of adding a duplicate, so a retried request is safe. Broadcast to both players as a `game_state` event. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int listEntryId = 56; // int | 
+final UpdateTokenInput updateTokenInput = ; // UpdateTokenInput | 
+
+try {
+    final response = api.updateToken(id, listEntryId, updateTokenInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->updateToken: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **listEntryId** | **int**|  | 
+ **updateTokenInput** | [**UpdateTokenInput**](UpdateTokenInput.md)|  | 
 
 ### Return type
 
