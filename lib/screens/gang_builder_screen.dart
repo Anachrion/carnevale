@@ -22,6 +22,7 @@ import '../models/profile.dart';
 import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
+import '../services/idempotency.dart';
 import '../services/profile_service.dart';
 import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
@@ -651,11 +652,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     final refId = p.cardReferenceId;
     if (refId == null) return; // no printed card → nothing to hire
     final tempId = _nextTempId--;
+    // One key per op, reused across the queue's retries so a lost hire replays instead of duplicating.
+    final key = newIdempotencyKey();
     setState(() => _gang = _added(_tempCardEntry(p, refId, tempId)));
     _enqueue(
       _PendingOp(
         describe: 'add ${p.name}',
-        run: () => GangService().addEntry(_gang.id, refId, 'CardReference'),
+        run: () =>
+            GangService().addEntry(_gang.id, refId, 'CardReference', requestKey: key),
         onCreated: (u) => _mapCreatedId(
           tempId,
           refId,
@@ -669,11 +673,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
 
   void _addEquipment(api.Equipment e) {
     final tempId = _nextTempId--;
+    final key = newIdempotencyKey();
     setState(() => _gang = _added(_tempEquipmentEntry(e, tempId)));
     _enqueue(
       _PendingOp(
         describe: 'add ${e.name}',
-        run: () => GangService().addEntry(_gang.id, e.id, 'Equipment'),
+        run: () =>
+            GangService().addEntry(_gang.id, e.id, 'Equipment', requestKey: key),
         onCreated: (u) => _mapCreatedId(
           tempId,
           e.id,
