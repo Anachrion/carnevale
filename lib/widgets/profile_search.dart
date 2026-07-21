@@ -81,10 +81,14 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
   /// Wraps [child] so tapping anywhere that isn't itself a focusable/tappable control drops focus
   /// from the search field — dismissing the keyboard, and with it (via [hasSuggestions]) the
   /// suggestions panel. Refocusing the field brings the same suggestions straight back.
+  ///
+  /// Unfocus the field itself, not `FocusScope.of(context)`: unfocusing the scope clears its
+  /// parent's focused child, but leaves the enclosing route scope still remembering this field —
+  /// so pushing then popping a card viewer would restore focus here and pop the keyboard back up.
   Widget dismissSearchFocusOnTapOutside({required Widget child}) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () => searchFocusNode.unfocus(),
       child: child,
     );
   }

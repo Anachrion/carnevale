@@ -248,6 +248,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   /// Opens the card viewer on [p], then scrolls the hire list so the card the user ended on
   /// (they can swipe up/down to others) is centred, rather than leaving them wherever they were.
   Future<void> _openHireCard(api.Profile p) async {
+    // Tapping a card straight from a focused search field (keyboard up) never goes through the
+    // tap-outside dismiss, so the field stays this route's focused child. Drop it now, or popping
+    // the viewer would restore focus here and pop the keyboard back up over the hire list.
+    searchFocusNode.unfocus();
     final profiles = _visibleProfiles;
     var landedOn = profiles.indexOf(p);
     await Navigator.push(
@@ -957,7 +961,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     // here. Order must match _Tab: index 0 = list, 1 = hire.
     return PageView(
       controller: _pageController,
-      onPageChanged: (i) => setState(() => _tab = _Tab.values[i]),
+      onPageChanged: (i) {
+        // Leaving the Hire tab shouldn't strand its search keyboard over the List tab. No-op the
+        // other way round, since only Hire has a search field.
+        searchFocusNode.unfocus();
+        setState(() => _tab = _Tab.values[i]);
+      },
       children: [
         _KeepAlivePage(child: _buildListTab(factionColor)),
         _KeepAlivePage(child: _buildHireTab(factionColor)),
