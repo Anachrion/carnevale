@@ -297,7 +297,7 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       itemCount: sorted.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) =>
           _ProfileTile(profile: sorted[i], profiles: sorted, index: i),
     );

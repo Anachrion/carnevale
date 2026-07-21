@@ -176,7 +176,7 @@ class _EntryTileState extends State<_EntryTile>
   Widget build(BuildContext context) {
     return SizeTransition(
       sizeFactor: _size,
-      axisAlignment: -1,
+      alignment: const AlignmentDirectional(-1, -1),
       child: FadeTransition(
         opacity: _fade,
         child: SlideTransition(
@@ -633,7 +633,7 @@ class _HireToggleButton extends StatelessWidget {
         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
       );
     }
-    if (!canAdd)
+    if (!canAdd) {
       return SizedBox(
         width: 32,
         height: 32,
@@ -643,6 +643,7 @@ class _HireToggleButton extends StatelessWidget {
           color: Colors.white.withValues(alpha: 0.30),
         ),
       );
+    }
     return GestureDetector(
       onTap: onAdd,
       child: Container(

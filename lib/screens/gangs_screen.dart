@@ -216,7 +216,7 @@ class _GangsScreenState extends State<GangsScreen> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       itemCount: _gangs.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (_, i) {
         final gang = _gangs[i];
         final expanded = _expandedId == gang.id;

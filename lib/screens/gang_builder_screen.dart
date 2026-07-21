@@ -704,7 +704,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   }
 
   void _reorderEntry(int oldIndex, int newIndex) {
-    if (newIndex > oldIndex) newIndex--;
+    // onReorderItem already adjusts newIndex for the removed item at oldIndex.
     if (newIndex == oldIndex) return;
     // The drag indices count the non-leader models only (the Leader is a pinned header, not part of
     // the reorderable list). Rebuild that sub-order, keep the Leader — if any — at the top, and
@@ -715,7 +715,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     final leader = leaderIndex >= 0 ? rest.removeAt(leaderIndex) : null;
     final entry = rest.removeAt(oldIndex);
     rest.insert(newIndex, entry);
-    final reordered = [if (leader != null) leader, ...rest];
+    final reordered = [?leader, ...rest];
     final position = (leader != null ? 1 : 0) + newIndex + 1;
     final previous = _gang.entries.toList(); // restore this order on a genuine rejection
     setState(() => _gang = _gangWith(reordered));
@@ -1141,8 +1141,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       header: leaderEntry == null
           ? null
           : buildEntryTile(leaderEntry, last: reorderable.isEmpty),
-      onReorder: _reorderEntry,
-      proxyDecorator: (child, _, __) => child,
+      onReorderItem: _reorderEntry,
+      proxyDecorator: (child, _, _) => child,
       buildDefaultDragHandles: false,
       itemCount: reorderable.length,
       itemBuilder: (_, i) {
@@ -1295,7 +1295,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                 sliver: SliverList.separated(
                   itemCount: factionProfiles.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (_, i) => buildTile(factionProfiles[i]),
                 ),
               ),
@@ -1305,7 +1305,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                   sliver: SliverList.separated(
                     itemCount: giftedProfiles.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (_, i) => buildTile(giftedProfiles[i]),
                   ),
                 ),
@@ -1316,7 +1316,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                   sliver: SliverList.separated(
                     itemCount: _visibleEquipment.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (_, i) {
                       final e = _visibleEquipment[i];
                       final count = _gang.entries

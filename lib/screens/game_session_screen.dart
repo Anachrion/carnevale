@@ -310,10 +310,11 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     }
     final game = _game;
     final me = _me;
-    if (game == null || me == null)
+    if (game == null || me == null) {
       return Center(
         child: CircularProgressIndicator(color: context.accentColor),
       );
+    }
 
     // in_progress/completed (and any future status) render full-bleed below the header instead
     // of inside a SingleChildScrollView, since the models tab view manages its own scrolling
@@ -488,11 +489,12 @@ class _GameSessionScreenState extends State<GameSessionScreen>
         FutureBuilder<List<AvailableGang>>(
           future: _availableGangsFuture,
           builder: (context, snapshot) {
-            if (!snapshot.hasData)
+            if (!snapshot.hasData) {
               return Padding(
                 padding: const EdgeInsets.all(24),
                 child: CircularProgressIndicator(color: context.accentColor),
               );
+            }
             final gangs = snapshot.data!;
             if (gangs.isEmpty) {
               return Text(
