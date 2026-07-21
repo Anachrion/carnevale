@@ -97,8 +97,16 @@ api.ListEntry fakeListEntry({
   int entryId = 10,
   String name = 'Capodecina',
   int cost = 20,
+  List<String> keywords = const [],
+  bool flexibleLeader = false,
+  bool demotedLeader = false,
+  bool promotableLeader = false,
   api.EntryState? state,
   bool summoned = false,
+  int? companionOfEntryId,
+  bool upgradeSelected = false,
+  bool upgradeAvailable = false,
+  int upgradeDucats = 0,
 }) => api.ListEntry(
   (b) => b
     ..id = id
@@ -106,9 +114,18 @@ api.ListEntry fakeListEntry({
     ..entryType = entryType
     ..entryId = entryId
     ..name = name
-    ..keywords = ListBuilder<String>()
+    ..keywords = ListBuilder<String>(keywords)
+    ..flexibleLeader = flexibleLeader
+    ..demotedLeader = demotedLeader
+    ..promotableLeader = promotableLeader
     ..cost = cost
     ..summoned = summoned
+    // An ordinary hired model: brought in by nobody, and offering no paid upgrade (CARNEVALEB-23).
+    // Pass these to build an Emissary of Mother Hydra or one of its Tentacles.
+    ..companionOfEntryId = companionOfEntryId
+    ..upgradeSelected = upgradeSelected
+    ..upgradeAvailable = upgradeAvailable
+    ..upgradeDucats = upgradeDucats
     ..mage = false
     ..distinctDisciplinePerCopy = false
     ..pools = ListBuilder<api.SpellPool>()
@@ -194,6 +211,9 @@ api.Profile fakeProfile({
   String faction = 'guild',
   int ducats = 20,
   List<String> keywords = const ['Leader'],
+  bool flexibleLeader = false,
+  int? flexibleLeaderWith,
+  bool recruitable = true,
   List<String> abilities = const [],
   List<api.Weapon> weapons = const [],
   List<api.SpecialRule> specialRules = const [],
@@ -203,6 +223,11 @@ api.Profile fakeProfile({
     ..id = id
     ..name = name
     ..faction = faction
+    ..flexibleLeader = flexibleLeader
+    ..flexibleLeaderWith = flexibleLeaderWith
+    // Every ordinary model can be hired or summoned; pass false for a companion-only model such as
+    // the Emissary of Mother Hydra's Tentacles, which the hire/summon pickers must hide.
+    ..recruitable = recruitable
     ..ducats = ducats
     ..movement = 4
     ..attack = 3
@@ -368,11 +393,13 @@ api.CardReference fakeCardReference({
   int id = 10,
   String identifier = 'guild-capodecina',
   String profileName = 'Capodecina',
+  String cardFront = 'front.png',
+  String cardBack = 'back.png',
 }) => api.CardReference(
   (b) => b
     ..id = id
     ..identifier = identifier
     ..name = profileName
-    ..cardFront = 'front.png'
-    ..cardBack = 'back.png',
+    ..cardFront = cardFront
+    ..cardBack = cardBack,
 );

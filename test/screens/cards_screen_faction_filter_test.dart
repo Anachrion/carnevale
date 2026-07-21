@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// The faction row must show all seven factions at any screen width. It used to be a horizontal
 /// ListView of fixed-width chips, so on a narrow phone the last one (Rashaar) sat off-screen behind
@@ -31,7 +32,7 @@ void main() {
       '/profiles',
       listBody<api.Profile>([fakeProfile()], const FullType(api.Profile)),
     );
-    await tester.pumpWidget(const MaterialApp(home: CardsScreen()));
+    await tester.pumpWidget(localizedApp(home: CardsScreen()));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
   }

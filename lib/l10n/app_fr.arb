@@ -53,6 +53,7 @@
 
   "fieldUsername": "Nom d'utilisateur",
   "fieldEmail": "E-mail",
+  "fieldEmailOrUsername": "E-mail ou nom d'utilisateur",
   "fieldPassword": "Mot de passe",
   "fieldConfirmPassword": "Confirmer le mot de passe",
   "fieldNewPassword": "Nouveau mot de passe",
@@ -253,7 +254,7 @@
 
   "counterToggleFailed": "Impossible de mettre à jour le marqueur. Veuillez réessayer.",
   "counterTapToToggle": "Appuyez sur un marqueur pour l'activer.",
-  "statUpdateFailed": "Impossible de mettre à jour la caractéristique. Veuillez réessayer.",
+  "statUpdateReverted": "Échec de l'enregistrement — retour à la dernière valeur synchronisée.",
   "statLifePoints": "Points de vie",
   "statWillPoints": "Points de volonté",
   "statCommandPoints": "Points de commandement",

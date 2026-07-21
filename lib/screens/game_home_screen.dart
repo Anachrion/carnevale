@@ -54,10 +54,22 @@ class _GameHomeScreenState extends State<GameHomeScreen>
   void initState() {
     super.initState();
     authService.addListener(_onAuthChanged);
-    if (authService.isLoggedIn) {
-      _load();
-    } else {
+    if (!authService.isLoggedIn) {
       _loading = false;
+    } else {
+      // Show the last-known games instantly if we have them, then refresh in the background — same
+      // as the gangs index, so switching section and back doesn't blank to a spinner. First visit
+      // this session (no cache yet) falls back to a blocking load.
+      final active = _service.cachedGames(visibility: 'active');
+      final archived = _service.cachedGames(visibility: 'archived');
+      if (active != null && archived != null) {
+        _activeGames = active;
+        _archivedGames = archived;
+        _loading = false;
+        _refresh();
+      } else {
+        _load();
+      }
     }
     if (widget.initialJoinCode != null) {
       WidgetsBinding.instance.addPostFrameCallback(
@@ -112,19 +124,38 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     }
   }
 
+  /// Refreshes both game lists in the background while the cached games stay on screen — no spinner,
+  /// and a failure is silent since we already have something to show.
+  Future<void> _refresh() async {
+    try {
+      final results = await Future.wait([
+        _service.loadMyGames(visibility: 'active'),
+        _service.loadMyGames(visibility: 'archived'),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _activeGames = results[0];
+        _archivedGames = results[1];
+        _error = null;
+      });
+    } catch (e) {
+      debugPrint('GameHomeScreen background refresh failed: $e');
+    }
+  }
+
   void _openGame(int gameId) async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => GameSessionScreen(gameId: gameId)),
     );
-    await _load();
+    await _refresh();
   }
 
   Future<void> _archiveGame(int gameId) async {
     try {
       await _service.archiveGame(gameId);
       if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameArchived);
-      await _load();
+      await _refresh();
     } catch (e) {
       if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameArchiveFailed);
     }
@@ -134,7 +165,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     try {
       await _service.unarchiveGame(gameId);
       if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameRestored);
-      await _load();
+      await _refresh();
     } catch (e) {
       if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameRestoreFailed);
     }
@@ -144,7 +175,7 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     try {
       await _service.deleteGame(gameId);
       if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameDeleted);
-      await _load();
+      await _refresh();
     } catch (e) {
       if (mounted) showAppToast(context, AppLocalizations.of(context).toastGameDeleteFailed);
     }

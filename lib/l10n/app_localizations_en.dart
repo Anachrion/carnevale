@@ -169,6 +169,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fieldEmail => 'Email';
 
   @override
+  String get fieldEmailOrUsername => 'Email or Username';
+
+  @override
   String get fieldPassword => 'Password';
 
   @override
@@ -794,7 +797,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get counterTapToToggle => 'Tap a counter to toggle it.';
 
   @override
-  String get statUpdateFailed => 'Could not update the stat. Please try again.';
+  String get statUpdateReverted =>
+      'Couldn\'t save the change — reverted to the last synced value.';
 
   @override
   String get statLifePoints => 'Life Points';

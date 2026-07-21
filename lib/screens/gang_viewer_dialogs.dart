@@ -213,52 +213,88 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
 }
 
 /// Popup opened by tapping an HP/WP/CP pill: a −/+ stepper per stat the model has (WP and CP are
-/// omitted for models that never had them, i.e. starting 0). Each tap saves the new absolute
-/// value to the server immediately and can't push a stat below 0; the change echoes to both
-/// players. Only the model's own player can open it (the opponent's pills aren't tappable).
+/// omitted for models that never had them, i.e. starting 0). Taps update the value instantly and
+/// can't push a stat below 0; the change echoes to both players. Only the model's own player can
+/// open it (the opponent's pills aren't tappable). Edits apply optimistically and the new absolute
+/// value is saved ~1s after the last tap (immediately at 0 HP, which starts the server's death
+/// handling), so knocking a model down several HP is one request, not one per tap.
 class _StatEditDialog extends StatefulWidget {
   const _StatEditDialog({
     required this.gameId,
     required this.entry,
     required this.onStateChanged,
+    required this.onCommit,
   });
 
   final int gameId;
   final api.ListEntry entry;
+  // Echoes each optimistic change to the tile behind the dialog, instantly.
   final void Function(int listEntryId, api.EntryState state) onStateChanged;
+  // Persists the debounced final value. Owned by the parent (which outlives the dialog) so a change
+  // still pending when the dialog closes can still be saved — and rolled back with a toast if it
+  // fails. Returns the authoritative state: the server's on success, or `confirmed` after a revert.
+  final Future<api.EntryState> Function(
+    int entryId,
+    api.EntryState target,
+    api.EntryState confirmed,
+  )
+  onCommit;
 
   @override
   State<_StatEditDialog> createState() => _StatEditDialogState();
 }
 
 class _StatEditDialogState extends State<_StatEditDialog> {
+  // `_state` is the optimistic value shown/edited right now; `_confirmed` is the last state the
+  // server acknowledged and the value we roll back to if a save fails.
   late api.EntryState _state = widget.entry.state!;
-  bool _busy = false;
+  late api.EntryState _confirmed = widget.entry.state!;
+  Timer? _debounce;
+  bool _dirty = false; // an edit not yet sent to the server
 
-  Future<void> _update({
-    int? lifePoints,
-    int? willPoints,
-    int? commandPoints,
-  }) async {
-    if (_busy) return;
-    setState(() => _busy = true);
-    try {
-      final newState = await GameService().updateStats(
-        widget.gameId,
-        widget.entry.id,
-        lifePoints: lifePoints,
-        willPoints: willPoints,
-        commandPoints: commandPoints,
-      );
-      if (!mounted) return;
-      setState(() => _state = newState);
-      widget.onStateChanged(widget.entry.id, newState);
-    } catch (_) {
-      if (mounted)
-        showAppToast(context, AppLocalizations.of(context).statUpdateFailed);
-    } finally {
-      if (mounted) setState(() => _busy = false);
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    // A change still pending at close: hand it to the parent, which outlives the dialog and can roll
+    // it back + toast if it fails. Fire-and-forget — there's no dialog left to await it.
+    if (_dirty) widget.onCommit(widget.entry.id, _state, _confirmed);
+    super.dispose();
+  }
+
+  void _onChanged({int? lifePoints, int? willPoints, int? commandPoints}) {
+    setState(() {
+      _state = _state.rebuild((b) {
+        if (lifePoints != null) b.lifePoints.current = lifePoints;
+        if (willPoints != null) b.willPoints.current = willPoints;
+        if (commandPoints != null) b.commandPoints.current = commandPoints;
+        // Death is derived from HP, so mirror it optimistically — a model revives (or drops) the
+        // instant its HP crosses 0, without waiting on the round-trip. The server's own death
+        // handling still lands on the commit.
+        b.dead = b.lifePoints.current == 0;
+      });
+    });
+    widget.onStateChanged(widget.entry.id, _state); // tile updates instantly
+    _dirty = true;
+    _debounce?.cancel();
+    // A model dropping to 0 HP triggers the server's death handling, so don't sit on it — save now
+    // rather than after the debounce. Otherwise collapse a burst of taps into a single write.
+    if (_state.lifePoints.current == 0) {
+      _commit();
+    } else {
+      _debounce = Timer(const Duration(milliseconds: 900), _commit);
     }
+  }
+
+  Future<void> _commit() async {
+    if (!_dirty) return;
+    _dirty = false;
+    _debounce?.cancel();
+    final target = _state;
+    final result = await widget.onCommit(widget.entry.id, target, _confirmed);
+    _confirmed = result;
+    // Adopt the server's authoritative state (e.g. death-derived fields) only if nothing changed
+    // while the write was in flight, so a newer optimistic edit isn't clobbered.
+    if (mounted && !_dirty) setState(() => _state = result);
   }
 
   @override
@@ -286,21 +322,21 @@ class _StatEditDialogState extends State<_StatEditDialog> {
             context,
             label: AppLocalizations.of(context).statLifePoints,
             value: _state.lifePoints,
-            onChanged: (v) => _update(lifePoints: v),
+            onChanged: (v) => _onChanged(lifePoints: v),
           ),
           if (_state.willPoints.starting > 0)
             _statStepperRow(
               context,
               label: AppLocalizations.of(context).statWillPoints,
               value: _state.willPoints,
-              onChanged: (v) => _update(willPoints: v),
+              onChanged: (v) => _onChanged(willPoints: v),
             ),
           if (_state.commandPoints.starting > 0)
             _statStepperRow(
               context,
               label: AppLocalizations.of(context).statCommandPoints,
               value: _state.commandPoints,
-              onChanged: (v) => _update(commandPoints: v),
+              onChanged: (v) => _onChanged(commandPoints: v),
             ),
           Align(
             alignment: Alignment.centerRight,
@@ -344,9 +380,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
             context,
             icon: Icons.remove,
             // Can't drop below 0 (the server rejects it too); disabled at the floor.
-            onTap: _busy || value.current <= 0
-                ? null
-                : () => onChanged(value.current - 1),
+            onTap: value.current <= 0 ? null : () => onChanged(value.current - 1),
           ),
           Container(
             width: 56,
@@ -363,7 +397,7 @@ class _StatEditDialogState extends State<_StatEditDialog> {
           _stepperButton(
             context,
             icon: Icons.add,
-            onTap: _busy ? null : () => onChanged(value.current + 1),
+            onTap: () => onChanged(value.current + 1),
           ),
         ],
       ),
@@ -507,8 +541,11 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
   @override
   Set<String> get searchFactions => const {};
 
+  // Non-recruitable models (the Emissary's Tentacles) can't be summoned either — they only arrive
+  // with the model that brings them (CARNEVALEB-23) — so they're dropped from the pool.
   @override
-  void onSearchChanged() => _results = _service.matching(searchQuery);
+  void onSearchChanged() =>
+      _results = _service.matching(searchQuery).where((p) => p.recruitable).toList();
 
   @override
   void initState() {
@@ -562,63 +599,71 @@ class _SummonPickerDialogState extends State<_SummonPickerDialog>
 
   @override
   Widget build(BuildContext context) {
+    // Tapping anywhere in the dialog that isn't itself a focusable/tappable control drops
+    // keyboard focus, hiding the suggestions panel with it — a real tap directly on the search
+    // field or Cancel still wins its own gesture. Tapping back into the field brings both
+    // straight back.
     return ThemedDialogCard(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context).summonTitle,
-            style: GoogleFonts.cinzel(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
+      child: dismissSearchFocusOnTapOutside(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).summonTitle,
+              style: GoogleFonts.cinzel(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            AppLocalizations.of(context).summonBlurb,
-            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 12),
-          buildSearchField(hintText: AppLocalizations.of(context).summonSearchHint),
-          if (pickedFacets.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              AppLocalizations.of(context).summonBlurb,
+              style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+            ),
+            const SizedBox(height: 12),
+            buildSearchField(
+              hintText: AppLocalizations.of(context).summonSearchHint,
+            ),
+            if (pickedFacets.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              buildFacetChips(),
+            ],
             const SizedBox(height: 8),
-            buildFacetChips(),
-          ],
-          const SizedBox(height: 8),
-          // Fixed height, not Expanded: the dialog's Column is mainAxisSize.min, so it has no bounded
-          // height to divide up. The suggestions float over the results rather than pushing them
-          // down, as they do everywhere else the catalog search appears.
-          SizedBox(
-            height: 300,
-            child: Stack(
-              children: [
-                _buildResults(context),
-                if (hasSuggestions)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: buildSuggestions(),
-                  ),
-              ],
+            // Fixed height, not Expanded: the dialog's Column is mainAxisSize.min, so it has no
+            // bounded height to divide up. The suggestions float over the results rather than
+            // pushing them down, as they do everywhere else the catalog search appears.
+            SizedBox(
+              height: 300,
+              child: Stack(
+                children: [
+                  _buildResults(context),
+                  if (hasSuggestions)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: buildSuggestions(),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                AppLocalizations.of(context).actionCancel,
-                style: GoogleFonts.cinzel(
-                  fontWeight: FontWeight.w700,
-                  color: context.accentColor,
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  AppLocalizations.of(context).actionCancel,
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: context.accentColor,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

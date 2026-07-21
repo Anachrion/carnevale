@@ -30,9 +30,11 @@ part 'profile.g.dart';
 /// * [commandPoints] 
 /// * [size] 
 /// * [abilities] 
-/// * [keywords]
-/// * [flexibleLeader] - Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora), and may therefore be added to a gang that already has a Leader.
-/// * [version]
+/// * [keywords] 
+/// * [flexibleLeader] - Whether this Leader demotes to a plain Hero when the gang already contains another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora), and may therefore be added to a gang that already has a Leader. The gang builder uses it to keep such a model's \"add\" button enabled once a Leader is present; enforcement is ListValidationService. False for every non-flex Leader and non-Leader profile. 
+/// * [recruitable] - Whether this model may be hired or summoned directly. False for a model that can only arrive as another model's companion (the Emissary of Mother Hydra's Tentacles) — the client drops it from the hire search and the summon picker, though it stays browsable in the Cards catalog. True for every ordinary model. 
+/// * [flexibleLeaderWith] - For a *conditional* flex Leader (La Signora), the profile id of the specific partner she demotes alongside (Il Capitano). Null when the profile demotes alongside any Leader, or isn't a flex Leader. The gang builder uses it to restrict which Leader can still be recruited once she is in the list. 
+/// * [version] 
 /// * [mage] - Whether the profile has at least one spell pool and can be given spells (rulebook p24).
 /// * [spellSlots] - Summary total of non-Cantrip spells across every spell pool — informational only (the catalog browse view). 0 for non-Mages and for a profile whose only pool is `unlimited`. Real per-pool limits are enforced when hiring; see ListEntry.pools for the detail a gang builder needs. 
 /// * [disciplines] - Union of every pool's eligible Discipline slugs, e.g. [\"blood_rites\", \"divinity\"] — informational only, same caveat as spell_slots. Empty for a mentor_derived pool (Apprentice Doctor), which has no static Discipline list of its own. 
@@ -89,9 +91,17 @@ abstract class Profile implements Built<Profile, ProfileBuilder> {
   @BuiltValueField(wireName: r'keywords')
   BuiltList<String> get keywords;
 
-  /// Whether this Leader demotes to a plain Hero alongside another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora), and may therefore be added to a gang that already has a Leader.
+  /// Whether this Leader demotes to a plain Hero when the gang already contains another Leader (The Duke, Prince of Thieves, Sopracomito, La Signora), and may therefore be added to a gang that already has a Leader. The gang builder uses it to keep such a model's \"add\" button enabled once a Leader is present; enforcement is ListValidationService. False for every non-flex Leader and non-Leader profile. 
   @BuiltValueField(wireName: r'flexible_leader')
   bool get flexibleLeader;
+
+  /// Whether this model may be hired or summoned directly. False for a model that can only arrive as another model's companion (the Emissary of Mother Hydra's Tentacles) — the client drops it from the hire search and the summon picker, though it stays browsable in the Cards catalog. True for every ordinary model. 
+  @BuiltValueField(wireName: r'recruitable')
+  bool get recruitable;
+
+  /// For a *conditional* flex Leader (La Signora), the profile id of the specific partner she demotes alongside (Il Capitano). Null when the profile demotes alongside any Leader, or isn't a flex Leader. The gang builder uses it to restrict which Leader can still be recruited once she is in the list. 
+  @BuiltValueField(wireName: r'flexible_leader_with')
+  int? get flexibleLeaderWith;
 
   @BuiltValueField(wireName: r'version')
   String get version;
@@ -225,6 +235,18 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
       object.flexibleLeader,
       specifiedType: const FullType(bool),
     );
+    yield r'recruitable';
+    yield serializers.serialize(
+      object.recruitable,
+      specifiedType: const FullType(bool),
+    );
+    if (object.flexibleLeaderWith != null) {
+      yield r'flexible_leader_with';
+      yield serializers.serialize(
+        object.flexibleLeaderWith,
+        specifiedType: const FullType.nullable(int),
+      );
+    }
     yield r'version';
     yield serializers.serialize(
       object.version,
@@ -401,6 +423,21 @@ class _$ProfileSerializer implements PrimitiveSerializer<Profile> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.flexibleLeader = valueDes;
+          break;
+        case r'recruitable':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.recruitable = valueDes;
+          break;
+        case r'flexible_leader_with':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          if (valueDes == null) continue;
+          result.flexibleLeaderWith = valueDes;
           break;
         case r'version':
           final valueDes = serializers.deserialize(
