@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/game_home_screen.dart';
 import 'screens/home_screen.dart';
@@ -125,6 +126,11 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
       navigatorObservers: [routeObserver],
       title: 'Carnevale',
       debugShowCheckedModeBanner: false,
+      // null locale = follow the device (resolved against supportedLocales); a pinned value from
+      // settings overrides it. Rebuilds via _onSettingsChanged when the user switches language.
+      locale: settingsService.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       themeMode: settingsService.themeMode,
       theme: ThemeData(
         brightness: Brightness.light,

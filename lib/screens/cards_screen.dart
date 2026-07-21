@@ -16,6 +16,7 @@ import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../l10n/app_localizations.dart';
 import '../services/api_exception.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
@@ -114,7 +115,7 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
       // retry instead of spinning forever with an unhandled exception (C-6).
       if (!mounted) return;
       setState(() {
-        _error = e is ApiException ? e.message : 'Could not reach server';
+        _error = e is ApiException ? e.message : AppLocalizations.of(context).errorCouldNotReachServer;
         _loading = false;
       });
     }
@@ -186,16 +187,17 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
 
   Widget _buildHeader(BuildContext context) {
     return ScreenHeader(
-      title: 'Cards',
+      title: AppLocalizations.of(context).navCards,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
       trailing: Text(
-        '${_results.length} profiles',
+        AppLocalizations.of(context).cardsProfileCount(_results.length),
         style: TextStyle(fontSize: 12, color: context.subtleTextColor),
       ),
     );
   }
 
   Widget _buildSortChips() {
+    final l10n = AppLocalizations.of(context);
     Widget chip(String label, _CardSort value) => SortChip(
       label: label,
       selected: _sort == value,
@@ -212,11 +214,11 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Row(
         children: [
-          chip('Role', _CardSort.role),
+          chip(l10n.sortRole, _CardSort.role),
           const SizedBox(width: 6),
-          chip('Name', _CardSort.name),
+          chip(l10n.sortName, _CardSort.name),
           const SizedBox(width: 6),
-          chip('Cost', _CardSort.cost),
+          chip(l10n.sortCost, _CardSort.cost),
         ],
       ),
     );
@@ -286,7 +288,7 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
     if (_results.isEmpty) {
       return Center(
         child: Text(
-          'No profiles found.',
+          AppLocalizations.of(context).cardsNoProfiles,
           style: TextStyle(color: context.subtleTextColor, fontSize: 14),
         ),
       );
@@ -400,8 +402,8 @@ class _ProfileTile extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           profile.keywords.contains('Leader')
-                              ? 'leader'
-                              : 'hero',
+                              ? AppLocalizations.of(context).gangRoleLeader
+                              : AppLocalizations.of(context).gangRoleHero,
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.white.withValues(alpha: 0.65),

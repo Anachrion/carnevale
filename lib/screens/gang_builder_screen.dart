@@ -17,6 +17,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
@@ -347,7 +348,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       // Offline / flaky network: surface a retry instead of spinning forever (C-6).
       if (!mounted) return;
       setState(() {
-        _error = e is ApiException ? e.message : 'Could not reach server';
+        _error = e is ApiException ? e.message : AppLocalizations.of(context).errorCouldNotReachServer;
         _loading = false;
       });
     }
@@ -925,13 +926,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
         child: Row(
           children: [
             _TabButton(
-              label: 'List',
+              label: AppLocalizations.of(context).gangTabList,
               selected: _tab == _Tab.list,
               factionColor: factionColor,
               onTap: () => _selectTab(_Tab.list),
             ),
             _TabButton(
-              label: 'Hire',
+              label: AppLocalizations.of(context).gangTabHire,
               selected: _tab == _Tab.hire,
               factionColor: factionColor,
               onTap: () => _selectTab(_Tab.hire),
@@ -978,7 +979,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              'No models hired yet',
+              AppLocalizations.of(context).gangBuilderNoModels,
               style: GoogleFonts.cinzel(
                 fontSize: 15,
                 color: context.subtleTextColor,
@@ -986,7 +987,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             ),
             const SizedBox(height: 6),
             Text(
-              'Go to Hire to add models',
+              AppLocalizations.of(context).gangGoToHire,
               style: TextStyle(
                 fontSize: 12,
                 color: context.subtleTextColor.withValues(alpha: 0.7),
@@ -1058,11 +1059,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       // A demoted flex Leader has lost the Leader keyword, so it reads as a Hero even though its
       // profile still prints Leader.
       final role = entry.demotedLeader
-          ? 'hero'
+          ? AppLocalizations.of(context).gangRoleHero
           : entry.keywords.contains('Leader')
-          ? 'leader'
+          ? AppLocalizations.of(context).gangRoleLeader
           : entry.keywords.contains('Hero')
-          ? 'hero'
+          ? AppLocalizations.of(context).gangRoleHero
           : null;
       VoidCallback? onTap;
       if (profile != null) {
@@ -1276,14 +1277,14 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     return _profiles.isEmpty
         ? Center(
             child: Text(
-              'No profiles for this faction.',
+              AppLocalizations.of(context).gangNoProfilesForFaction,
               style: TextStyle(color: context.subtleTextColor),
             ),
           )
         : noResults
         ? Center(
             child: Text(
-              'Nothing matches your search.',
+              AppLocalizations.of(context).gangNothingMatches,
               style: TextStyle(color: context.subtleTextColor),
             ),
           )
@@ -1299,7 +1300,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                 ),
               ),
               if (giftedProfiles.isNotEmpty) ...[
-                _buildHireDivider('Mercenaries'),
+                _buildHireDivider(AppLocalizations.of(context).gangSectionMercenaries),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                   sliver: SliverList.separated(
@@ -1310,7 +1311,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                 ),
               ],
               if (_visibleEquipment.isNotEmpty) ...[
-                _buildHireDivider('Equipment'),
+                _buildHireDivider(AppLocalizations.of(context).gangSectionEquipment),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                   sliver: SliverList.separated(
@@ -1381,11 +1382,12 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   );
 
   Widget _buildHireControls() {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Column(
         children: [
-          buildSearchField(hintText: 'Search models, equipment, abilities...'),
+          buildSearchField(hintText: l10n.gangSearchHint),
           if (pickedFacets.isNotEmpty) ...[
             const SizedBox(height: 6),
             Align(alignment: Alignment.centerLeft, child: buildFacetChips()),
@@ -1393,10 +1395,10 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           const SizedBox(height: 6),
           Row(
             children: [
-              for (final option in const [
-                (label: 'Role', value: _HireSort.role),
-                (label: 'Name', value: _HireSort.name),
-                (label: 'Cost', value: _HireSort.cost),
+              for (final option in [
+                (label: l10n.sortRole, value: _HireSort.role),
+                (label: l10n.sortName, value: _HireSort.name),
+                (label: l10n.sortCost, value: _HireSort.cost),
               ]) ...[
                 if (option.value != _HireSort.role) const SizedBox(width: 6),
                 SortChip(

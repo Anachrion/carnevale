@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 /// The List tab pins the Leader to the top and makes it undraggable, so a hired Leader always leads
 /// the roster and can't be reordered below its models. Every other model stays long-press-draggable.
@@ -20,7 +21,7 @@ void main() {
     adapter.stub('GET', '/spells',
         listBody<api.Spell>([], const FullType(api.Spell)));
 
-    await tester.pumpWidget(MaterialApp(home: GangBuilderScreen(gang: gang)));
+    await tester.pumpWidget(localizedApp(home: GangBuilderScreen(gang: gang)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
   }

@@ -15,6 +15,7 @@
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/glass_panel.dart';
@@ -29,6 +30,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppPalette.background,
       drawer: const AppDrawer(current: AppDrawerRoute.home),
@@ -63,7 +65,7 @@ class HomeScreen extends StatelessWidget {
                                   children: [
                                     _MenuItem(
                                       imagePath: 'assets/images/cards_icon.png',
-                                      title: 'Cards',
+                                      title: l10n.navCards,
                                       onTap: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -75,7 +77,7 @@ class HomeScreen extends StatelessWidget {
                                     _MenuItem(
                                       imagePath: 'assets/images/list_icon.png',
                                       imageScale: 1.2,
-                                      title: 'Gangs',
+                                      title: l10n.navGangs,
                                       onTap: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -87,7 +89,7 @@ class HomeScreen extends StatelessWidget {
                                     _MenuItem(
                                       imagePath: 'assets/images/games_icon.png',
                                       imageScale: 1.10,
-                                      title: 'Games',
+                                      title: l10n.navGames,
                                       onTap: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -99,7 +101,7 @@ class HomeScreen extends StatelessWidget {
                                     const SizedBox(height: 12),
                                     _MenuItem(
                                       imagePath: 'assets/images/book_icon.png',
-                                      title: 'Rules',
+                                      title: l10n.navRules,
                                       onTap: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -111,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                                     _MenuItem(
                                       imagePath: 'assets/images/gear_icon.png',
                                       imageScale: 1.2,
-                                      title: 'Settings',
+                                      title: l10n.settingsTitle,
                                       onTap: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(

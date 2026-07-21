@@ -3,11 +3,13 @@ import 'package:carnevale/widgets/guarded_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/l10n.dart';
+
 void main() {
   Future<BuildContext> pumpHost(WidgetTester tester) async {
     late BuildContext ctx;
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: Builder(
           builder: (c) {
             ctx = c;

@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../services/rules_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
@@ -88,7 +89,7 @@ class _RulesScreenState extends State<RulesScreen> {
         child: Column(
           children: [
             ScreenHeader(
-              title: 'RULES',
+              title: AppLocalizations.of(context).rulesTitleUpper,
               onMenu: () => _scaffoldKey.currentState?.openDrawer(),
             ),
             Expanded(child: _body()),
@@ -166,7 +167,9 @@ class _DocumentTile extends StatelessWidget {
                       if (!kIsWeb) ...[
                         const SizedBox(height: 4),
                         Text(
-                          downloaded ? 'Available offline' : 'Downloads on first open',
+                          downloaded
+                              ? AppLocalizations.of(context).rulesAvailableOffline
+                              : AppLocalizations.of(context).rulesDownloadsOnOpen,
                           style: TextStyle(
                             fontSize: 12,
                             color: context.subtleTextColor,
@@ -200,8 +203,7 @@ class _Attribution extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
       child: Text(
-        'Rules PDFs are published by TT Combat and served from their site. '
-        'Carnevale is © TT Combat.',
+        AppLocalizations.of(context).rulesAttribution,
         textAlign: TextAlign.center,
         style: TextStyle(fontSize: 12, color: context.subtleTextColor),
       ),

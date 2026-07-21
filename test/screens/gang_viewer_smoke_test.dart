@@ -4,10 +4,10 @@ import 'package:carnevale/screens/gang_viewer_screen.dart';
 import 'package:carnevale/services/auth_service.dart';
 import 'package:carnevale/services/profile_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets(
@@ -50,7 +50,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(
+        localizedApp(
           home: GameGangsScreen(
             gameId: 1,
             myPlayerId: 2,
@@ -85,7 +85,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(
+      localizedApp(
         home: GameGangsScreen(
           gameId: 1,
           myPlayerId: 2,
@@ -182,7 +182,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(
+        localizedApp(
           home: GameGangsScreen(
             gameId: 1,
             myPlayerId: 2,

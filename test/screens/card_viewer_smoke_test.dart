@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets('CardViewerScreen renders the card pager for the given profiles', (
@@ -16,7 +17,7 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      MaterialApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
+      localizedApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
     );
     await tester.pump();
 
@@ -37,7 +38,7 @@ void main() {
     final profiles = [fakeProfile(name: 'Capodecina')];
 
     await tester.pumpWidget(
-      MaterialApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
+      localizedApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
     );
     await tester.pump();
 
@@ -95,7 +96,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
+        localizedApp(home: CardViewerScreen(profiles: profiles, initialIndex: 0)),
       );
       await tester.pump();
 

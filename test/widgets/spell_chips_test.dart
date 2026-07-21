@@ -2,6 +2,8 @@ import 'package:carnevale/widgets/spell_chips.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/l10n.dart';
+
 void main() {
   const uncast = KnownSpell(
     key: 'pool-1:5',
@@ -23,7 +25,7 @@ void main() {
 
   testWidgets("SpellsButton shows how many of the model's spells are cast", (tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: SpellsButton(spells: [uncast, cast]))),
+      localizedApp(home: Scaffold(body: SpellsButton(spells: [uncast, cast]))),
     );
 
     expect(find.text('Spells · 1/2 cast'), findsOneWidget);
@@ -32,7 +34,7 @@ void main() {
   testWidgets('tapping a spell row toggles it locally and calls onToggle', (tester) async {
     KnownSpell? toggled;
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: Scaffold(body: SpellsButton(spells: [uncast], onToggle: (s) => toggled = s)),
       ),
     );
@@ -51,7 +53,7 @@ void main() {
   });
 
   testWidgets('without onToggle, rows are read-only', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: SpellsButton(spells: [cast]))));
+    await tester.pumpWidget(localizedApp(home: Scaffold(body: SpellsButton(spells: [cast]))));
 
     await tester.tap(find.byType(SpellsButton));
     await tester.pumpAndSettle();

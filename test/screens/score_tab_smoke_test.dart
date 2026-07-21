@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets(
@@ -55,7 +56,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(home: GameSessionScreen(gameId: 1)),
+        localizedApp(home: GameSessionScreen(gameId: 1)),
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -123,7 +124,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(home: GameSessionScreen(gameId: 1)),
+      localizedApp(home: GameSessionScreen(gameId: 1)),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));

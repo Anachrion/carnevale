@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:carnevale_api/carnevale_api.dart';
 import 'package:dio/dio.dart';
+
+import 'settings_service.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._();
@@ -58,6 +62,10 @@ class ApiClient {
         if (authToken != null) {
           options.headers['Authorization'] = 'Bearer $authToken';
         }
+        // Tell the backend which language to render server-side messages in (validation/auth
+        // errors). Mirrors the app's own locale: the user's pinned choice, or the device locale
+        // when they follow the system. Read fresh per request so it tracks a mid-session change.
+        options.headers['Accept-Language'] = _acceptLanguage();
         handler.next(options);
       },
       onError: (error, handler) async {
@@ -100,6 +108,14 @@ class ApiClient {
     scenarios = ScenariosApi(_dio, standardSerializers);
     spells = SpellsApi(_dio, standardSerializers);
     rules = RulesApi(_dio, standardSerializers);
+  }
+
+  /// Language tag for the Accept-Language header: the user's pinned locale if set, otherwise the
+  /// device's current locale. The backend only honours locales it supports and falls back to
+  /// English otherwise, so sending the raw device language (which may be neither en nor fr) is safe.
+  String _acceptLanguage() {
+    final pinned = SettingsService().locale?.languageCode;
+    return pinned ?? PlatformDispatcher.instance.locale.languageCode;
   }
 
   late final Dio _dio;

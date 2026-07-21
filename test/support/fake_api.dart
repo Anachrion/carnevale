@@ -103,6 +103,10 @@ api.ListEntry fakeListEntry({
   bool promotableLeader = false,
   api.EntryState? state,
   bool summoned = false,
+  int? companionOfEntryId,
+  bool upgradeSelected = false,
+  bool upgradeAvailable = false,
+  int upgradeDucats = 0,
 }) => api.ListEntry(
   (b) => b
     ..id = id
@@ -116,6 +120,12 @@ api.ListEntry fakeListEntry({
     ..promotableLeader = promotableLeader
     ..cost = cost
     ..summoned = summoned
+    // An ordinary hired model: brought in by nobody, and offering no paid upgrade (CARNEVALEB-23).
+    // Pass these to build an Emissary of Mother Hydra or one of its Tentacles.
+    ..companionOfEntryId = companionOfEntryId
+    ..upgradeSelected = upgradeSelected
+    ..upgradeAvailable = upgradeAvailable
+    ..upgradeDucats = upgradeDucats
     ..mage = false
     ..distinctDisciplinePerCopy = false
     ..pools = ListBuilder<api.SpellPool>()
@@ -203,6 +213,7 @@ api.Profile fakeProfile({
   List<String> keywords = const ['Leader'],
   bool flexibleLeader = false,
   int? flexibleLeaderWith,
+  bool recruitable = true,
   List<String> abilities = const [],
   List<api.Weapon> weapons = const [],
   List<api.SpecialRule> specialRules = const [],
@@ -214,6 +225,9 @@ api.Profile fakeProfile({
     ..faction = faction
     ..flexibleLeader = flexibleLeader
     ..flexibleLeaderWith = flexibleLeaderWith
+    // Every ordinary model can be hired or summoned; pass false for a companion-only model such as
+    // the Emissary of Mother Hydra's Tentacles, which the hire/summon pickers must hide.
+    ..recruitable = recruitable
     ..ducats = ducats
     ..movement = 4
     ..attack = 3

@@ -2,10 +2,10 @@ import 'package:built_value/serializer.dart';
 import 'package:carnevale/screens/game_home_screen.dart';
 import 'package:carnevale/services/auth_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets('GameHomeScreen renders the current user\'s games from the API', (
@@ -25,7 +25,7 @@ void main() {
       ], const FullType(api.Game)),
     );
 
-    await tester.pumpWidget(const MaterialApp(home: GameHomeScreen()));
+    await tester.pumpWidget(localizedApp(home: const GameHomeScreen()));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 

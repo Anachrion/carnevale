@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart';
@@ -159,27 +160,27 @@ class _GameSessionScreenState extends State<GameSessionScreen>
   // Deployment is done around the table, not in the app: the moment both players confirm their
   // hand and the game goes live, surface a one-off prompt naming the deployment-roll winner.
   void _showDeploymentDialog() {
+    final l10n = AppLocalizations.of(context);
     final winnerName = (_me?.wonDeploymentRoll ?? false)
-        ? 'You'
+        ? l10n.youCap
         : (_opponent?.wonDeploymentRoll ?? false)
-        ? (_opponent?.username ?? 'Opponent')
+        ? (_opponent?.username ?? l10n.opponentLabel)
         : null;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Deploy your gangs'),
+          title: Text(l10n.deployTitle),
           content: Text(
             winnerName != null
-                ? '$winnerName won the deployment roll-off. Agree on deployment zones and '
-                      'place your miniatures at the table.'
-                : 'Agree on deployment zones and place your miniatures at the table.',
+                ? l10n.deployBodyWithWinner(winnerName)
+                : l10n.deployBodyNoWinner,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Got it'),
+              child: Text(l10n.actionGotIt),
             ),
           ],
         ),
@@ -192,7 +193,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       await _service.watch(widget.gameId);
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = 'Could not load this game.');
+      setState(() => _error = AppLocalizations.of(context).toastSessionLoadFailed);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -209,7 +210,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       if (mounted) {
         showAppToast(
           context,
-          e is ApiException ? e.message : 'Something went wrong. Please try again.',
+          e is ApiException ? e.message : AppLocalizations.of(context).errorGeneric,
         );
       }
     } finally {
@@ -232,6 +233,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final game = _game;
     final me = _me;
     final opponent = _opponent;
@@ -251,7 +253,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
           const SizedBox(width: 4),
           Expanded(
             child: Text(
-              _game?.name ?? 'Game',
+              _game?.name ?? l10n.gameFallbackTitle,
               style: GoogleFonts.cinzel(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -264,14 +266,14 @@ class _GameSessionScreenState extends State<GameSessionScreen>
           if (showGangsButton)
             IconButton(
               icon: Icon(Icons.groups_outlined, color: context.textColor),
-              tooltip: 'View gangs',
+              tooltip: l10n.sessionViewGangs,
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => GameGangsScreen(
                     gameId: game.id,
                     myPlayerId: me.id,
-                    myLabel: 'My Gang',
+                    myLabel: l10n.sessionMyGang,
                     opponentPlayerId: opponent.id,
                     opponentLabel: opponent.username,
                   ),
@@ -289,7 +291,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     // and offer a way back, rather than the null-assert crash the old `_me` getter would have hit.
     if (authService.currentUser == null) {
       return LoggedOutView(
-        message: 'Your session expired. Please log in again.',
+        message: AppLocalizations.of(context).sessionExpired,
         onLogin: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AccountScreen()),
@@ -354,18 +356,19 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     api.Game game,
     api.GamePlayer me,
   ) {
+    final l10n = AppLocalizations.of(context);
     return _PhaseCard(
-      title: 'Waiting for an opponent',
+      title: l10n.lobbyTitle,
       children: [
         Text(
-          'Share this code with the other player:',
+          l10n.lobbyShareCode,
           style: TextStyle(color: context.subtleTextColor, fontSize: 13),
         ),
         const SizedBox(height: 12),
         GestureDetector(
           onTap: () {
             Clipboard.setData(ClipboardData(text: game.joinCode));
-            showAppToast(context, 'Join code copied');
+            showAppToast(context, l10n.toastJoinCodeCopied);
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -405,13 +408,14 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     api.Game game,
     api.GamePlayer me,
   ) {
+    final l10n = AppLocalizations.of(context);
     final opponentWon = _opponent?.wonRoleRoll ?? false;
     if (me.wonRoleRoll && me.role == null) {
       return _PhaseCard(
-        title: 'You won the roll-off!',
+        title: l10n.rolloffWonTitle,
         children: [
           Text(
-            'Choose your role:',
+            l10n.rolloffChooseRole,
             style: TextStyle(color: context.subtleTextColor),
           ),
           const SizedBox(height: 16),
@@ -419,7 +423,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
             children: [
               Expanded(
                 child: _ActionButton(
-                  label: 'Attacker',
+                  label: l10n.roleAttacker,
                   onTap: () =>
                       _run(() => _service.pickRole(game.id, 'attacker')),
                   busy: _busy,
@@ -428,7 +432,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: _ActionButton(
-                  label: 'Defender',
+                  label: l10n.roleDefender,
                   onTap: () =>
                       _run(() => _service.pickRole(game.id, 'defender')),
                   busy: _busy,
@@ -441,13 +445,13 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     }
     if (me.wonRoleRoll || opponentWon) {
       final winnerName = opponentWon
-          ? (_opponent?.username ?? 'Opponent')
-          : 'you';
+          ? (_opponent?.username ?? l10n.opponentLabel)
+          : l10n.youLower;
       return _PhaseCard(
-        title: 'Role roll-off',
+        title: l10n.rolloffTitle,
         children: [
           Text(
-            'Waiting for $winnerName to choose a role...',
+            l10n.rolloffWaitingForWinner(winnerName),
             style: TextStyle(color: context.subtleTextColor),
           ),
           const SizedBox(height: 16),
@@ -456,10 +460,10 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       );
     }
     return _PhaseCard(
-      title: 'Role roll-off',
+      title: l10n.rolloffTitle,
       children: [
         Text(
-          'Determining who picks a role...',
+          l10n.rolloffDetermining,
           style: TextStyle(color: context.subtleTextColor),
         ),
         const SizedBox(height: 16),
@@ -475,10 +479,11 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     api.Game game,
     api.GamePlayer me,
   ) {
+    final l10n = AppLocalizations.of(context);
     _availableGangsFuture ??= _service.availableGangs(game.id);
     return _PhaseCard(
-      title: 'Pick your gang',
-      subtitle: 'Ducat limit: ${game.ducatLimit}',
+      title: l10n.gangPickTitle,
+      subtitle: l10n.gangPickDucatLimit(game.ducatLimit),
       children: [
         FutureBuilder<List<AvailableGang>>(
           future: _availableGangsFuture,
@@ -491,7 +496,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
             final gangs = snapshot.data!;
             if (gangs.isEmpty) {
               return Text(
-                'You have no gangs yet — build one now.',
+                l10n.gangPickNoGangs,
                 style: TextStyle(color: context.subtleTextColor),
               );
             }
@@ -524,7 +529,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
                 ),
               ),
               label: Text(
-                'Build a new gang',
+                l10n.gangPickBuildNew,
                 style: GoogleFonts.cinzel(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
@@ -552,7 +557,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Waiting for the opponent to pick a gang...',
+                  l10n.gangPickWaitingOpponent,
                   style: TextStyle(color: context.subtleTextColor),
                 ),
               ),
@@ -572,6 +577,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     api.GamePlayer me,
     AvailableGang g,
   ) {
+    final l10n = AppLocalizations.of(context);
     final isSelected = me.list?.sourceListId == g.gang.id;
     final Widget trailing;
     if (isSelected) {
@@ -587,7 +593,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         label: Text(
-          'Deselect',
+          l10n.actionDeselect,
           style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 13),
         ),
       );
@@ -604,13 +610,13 @@ class _GameSessionScreenState extends State<GameSessionScreen>
           elevation: 0,
         ),
         child: Text(
-          'Select',
+          l10n.actionSelect,
           style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, fontSize: 13),
         ),
       );
     } else {
       trailing = Text(
-        'Over limit',
+        l10n.gangOverLimit,
         style: TextStyle(
           fontSize: 11,
           color: context.dangerColor,
@@ -662,7 +668,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     try {
       gang = await _gangService.loadOne(listId);
     } catch (_) {
-      if (mounted) showAppToast(context, 'Could not open that gang.');
+      if (mounted) showAppToast(context, AppLocalizations.of(context).toastCouldNotOpenGang);
       return;
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -683,6 +689,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     api.Game game,
     api.GamePlayer me,
   ) {
+    final l10n = AppLocalizations.of(context);
     final secret = game.scenario.agendaRules.contains(
       api.ScenarioAgendaRulesEnum.secret,
     );
@@ -695,10 +702,10 @@ class _GameSessionScreenState extends State<GameSessionScreen>
         // present. This empty state only shows in the brief window before that broadcast lands.
         if (me.agendas.isEmpty)
           _PhaseCard(
-            title: 'Dealing your Agendas',
+            title: l10n.agendaDealingTitle,
             subtitle: secret
-                ? 'Kept secret from your opponent until achieved (Secret scenario).'
-                : 'Your opponent can see these — this scenario is not Secret.',
+                ? l10n.agendaDealingSecret
+                : l10n.agendaDealingOpen,
             children: [
               Center(
                 child: CircularProgressIndicator(color: context.accentColor),
@@ -737,9 +744,8 @@ class _GameSessionScreenState extends State<GameSessionScreen>
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _PhaseCard(
-                title: 'Your Spells',
-                subtitle:
-                    'Review each Mage\'s spells before confirming — Ready locks these in together with your Agendas.',
+                title: AppLocalizations.of(context).yourSpellsTitle,
+                subtitle: AppLocalizations.of(context).yourSpellsSubtitle,
                 children: [
                   for (final entry in mages)
                     _mageSpellRow(context, game, me, gang, allSpells, entry),
@@ -774,12 +780,13 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     final disciplines = entry.pools
         .expand((p) => p.chosenDisciplines)
         .toSet();
+    final l10n = AppLocalizations.of(context);
     final summary = needsMentor
-        ? 'No mentor chosen yet'
+        ? l10n.spellsNoMentor
         : [
             if (disciplines.isNotEmpty)
               disciplines.map(disciplineLabel).join(' + '),
-            '$knownCount/$slotTotal spells',
+            l10n.spellsKnownCount(knownCount, slotTotal),
           ].join(' · ');
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -829,7 +836,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
                 side: BorderSide(color: context.accentColor),
                 visualDensity: VisualDensity.compact,
               ),
-              child: Text(needsMentor ? 'Set up' : 'Edit'),
+              child: Text(needsMentor ? l10n.actionSetUp : l10n.actionEdit),
             ),
         ],
       ),
@@ -870,10 +877,10 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     final discarded = me.agendaHistory
         .where((e) => e.action == api.AgendaHistoryEntryActionEnum.discarded)
         .toList();
+    final l10n = AppLocalizations.of(context);
     return _PhaseCard(
-      title: 'Your Agendas',
-      subtitle:
-          'Any agenda that is impossible or duplicated can be discarded and redrawn — agree with your opponent that it is unachievable.',
+      title: l10n.yourAgendasTitle,
+      subtitle: l10n.yourAgendasSubtitle,
       children: [
         ...me.agendas.asMap().entries.map(
           (e) => _agendaDrawCard(context, game, me, e.value, e.key + 1),
@@ -884,21 +891,21 @@ class _GameSessionScreenState extends State<GameSessionScreen>
         // confirms. Once both players confirm, the game goes straight live.
         if (!me.agendasConfirmed) ...[
           Text(
-            'Confirming locks in your Agendas and your Spells together for the rest of the game.',
+            l10n.agendaConfirmBlurb,
             style: TextStyle(fontSize: 11.5, color: context.subtleTextColor),
           ),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
             child: _ActionButton(
-              label: "Ready",
+              label: l10n.actionReady,
               onTap: () => _run(() => _service.confirmAgendas(game.id)),
               busy: _busy,
             ),
           ),
         ] else ...[
           Text(
-            'Waiting for the opponent to be ready...',
+            l10n.waitingOpponentReady,
             style: TextStyle(color: context.subtleTextColor),
           ),
           const SizedBox(height: 16),
@@ -929,7 +936,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '$index - ${a.name}',
+            AppLocalizations.of(context).agendaIndexName(index, a.name),
             style: GoogleFonts.cinzel(
               fontWeight: FontWeight.w700,
               color: context.accentColor,
@@ -951,7 +958,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
               child: OutlinedButton.icon(
                 onPressed: _busy ? null : () => _mulligan(game.id, a),
                 icon: const Icon(Icons.autorenew, size: 16),
-                label: const Text('Unachievable — redraw'),
+                label: Text(AppLocalizations.of(context).agendaUnachievableRedraw),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: context.secondaryAccentColor,
                   side: BorderSide(color: context.secondaryAccentColor),
@@ -999,7 +1006,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Discarded (${discarded.length})',
+                  AppLocalizations.of(context).discardedCount(discarded.length),
                   style: GoogleFonts.cinzel(
                     fontWeight: FontWeight.w700,
                     color: context.subtleTextColor,
@@ -1053,22 +1060,20 @@ class _GameSessionScreenState extends State<GameSessionScreen>
   // Pre-game mulligan: confirm, then discard the impossible/duplicated agenda and redraw a
   // replacement. Visible to the opponent so they can agree it was unachievable.
   Future<void> _mulligan(int gameId, api.Agenda agenda) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Discard & redraw?'),
-        content: Text(
-          'Discard "${agenda.name}" as unachievable and draw a replacement? '
-          'Your opponent will see this.',
-        ),
+        title: Text(l10n.mulliganTitle),
+        content: Text(l10n.mulliganBody(agenda.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Discard & redraw'),
+            child: Text(l10n.actionDiscardRedraw),
           ),
         ],
       ),
@@ -1105,7 +1110,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       showListHeader: false,
       leadingTabs: [
         (
-          label: 'Score',
+          label: AppLocalizations.of(context).scoreTabLabel,
           view: ScoreTab(
             key: const ValueKey('score-tab'),
             game: game,

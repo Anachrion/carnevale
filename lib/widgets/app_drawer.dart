@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../screens/account_screen.dart';
 import '../screens/cards_screen.dart';
@@ -43,6 +44,7 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = context.accentColor;
+    final l10n = AppLocalizations.of(context);
     final borderColor = isDark
         ? AppPalette.mutedGold.withValues(alpha: 0.25)
         : AppPalette.ink.withValues(alpha: 0.15);
@@ -84,7 +86,7 @@ class AppDrawer extends StatelessWidget {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Log In',
+                        l10n.actionLogIn,
                         style: GoogleFonts.cinzel(fontWeight: FontWeight.w700, letterSpacing: 1, fontSize: 13),
                       ),
                     ),
@@ -99,37 +101,37 @@ class AppDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _NavItem(
-                    label: 'Home',
+                    label: l10n.navHome,
                     active: current == AppDrawerRoute.home,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.home, null),
                   ),
                   _NavItem(
-                    label: 'Cards',
+                    label: l10n.navCards,
                     active: current == AppDrawerRoute.cards,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.cards, const CardsScreen()),
                   ),
                   _NavItem(
-                    label: 'Gangs',
+                    label: l10n.navGangs,
                     active: current == AppDrawerRoute.gangs,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.gangs, const GangsScreen()),
                   ),
                   _NavItem(
-                    label: 'Games',
+                    label: l10n.navGames,
                     active: current == AppDrawerRoute.game,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.game, const GameHomeScreen()),
                   ),
                   _NavItem(
-                    label: 'Rules',
+                    label: l10n.navRules,
                     active: current == AppDrawerRoute.rules,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.rules, const RulesScreen()),
                   ),
                   _NavItem(
-                    label: 'Settings',
+                    label: l10n.settingsTitle,
                     active: current == AppDrawerRoute.settings,
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.settings, const SettingsScreen()),
@@ -207,7 +209,9 @@ class _ThemeToggle extends StatelessWidget {
           Row(
             children: [
               Text(
-                isDark ? 'DARK THEME' : 'LIGHT THEME',
+                isDark
+                    ? AppLocalizations.of(context).drawerDarkTheme
+                    : AppLocalizations.of(context).drawerLightTheme,
                 style: GoogleFonts.cinzel(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

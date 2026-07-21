@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_api.dart';
+import '../support/l10n.dart';
 
 void main() {
   testWidgets('GameSessionScreen renders the lobby for a pending game', (
@@ -26,7 +27,7 @@ void main() {
     adapter.stub('POST', '/cable_tickets', {'ticket': 'test-ticket'});
 
     await tester.pumpWidget(
-      const MaterialApp(home: GameSessionScreen(gameId: 1)),
+      localizedApp(home: const GameSessionScreen(gameId: 1)),
     );
     await tester.pump(); // initial snapshot resolves
     await tester.pump(const Duration(milliseconds: 50));
@@ -86,7 +87,7 @@ void main() {
         ),
       );
       await tester.pumpWidget(
-        const MaterialApp(home: GameSessionScreen(gameId: 1)),
+        localizedApp(home: const GameSessionScreen(gameId: 1)),
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -132,7 +133,7 @@ void main() {
         ),
       );
       await tester.pumpWidget(
-        const MaterialApp(home: GameSessionScreen(gameId: 1)),
+        localizedApp(home: const GameSessionScreen(gameId: 1)),
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -180,7 +181,7 @@ void main() {
         ),
       );
       await tester.pumpWidget(
-        const MaterialApp(home: GameSessionScreen(gameId: 1)),
+        localizedApp(home: const GameSessionScreen(gameId: 1)),
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
