@@ -361,13 +361,18 @@ class _ProfileTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              CardViewerScreen(profiles: profiles, initialIndex: index),
-        ),
-      ),
+      onTap: () {
+        // Drop a focused search field before opening the viewer, or popping it would restore
+        // focus here and pop the keyboard back up (see dismissSearchFocusOnTapOutside).
+        FocusManager.instance.primaryFocus?.unfocus();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                CardViewerScreen(profiles: profiles, initialIndex: index),
+          ),
+        );
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
