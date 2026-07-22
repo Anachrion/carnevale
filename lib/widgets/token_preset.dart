@@ -17,129 +17,187 @@ import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'spell_chips.dart';
 
 /// A ready-made token offered in the Edit modal's Predefined tab. Tapping it drops an ordinary token
-/// (this colour/label, this `toggleable`) onto the model — it's a shortcut for the Custom builder,
-/// nothing more: no link back to what produced it, no engine, no duration (see CARNEVALEB-16).
+/// ([text] label, [color], [toggleable]) onto the model — a shortcut for the Custom builder, nothing
+/// more: no link back to what produced it, no engine, no duration (see CARNEVALEB-16).
+///
+/// [source] is the exact catalog name (a spell or a special rule) that gates the preset: a **buff**
+/// is offered when the current player's own gang has it, a **debuff** when the *opposing* gang has it
+/// (a debuff is cast on the enemy, so it appears in the target's list). [label] overrides the token's
+/// text when the catalog name is too long or differs from what should read on the tile.
 class TokenPreset {
-  const TokenPreset({
-    required this.label,
+  const TokenPreset(
+    this.source, {
+    this.label,
     required this.color,
-    required this.toggleable,
+    this.toggleable = false,
+    this.debuff = false,
   });
 
-  final String label;
+  /// The catalog spell/special-rule name that a gang must have for this preset to be offered.
+  final String source;
+
+  /// The token's label; defaults to [source] when null. See [text].
+  final String? label;
   final api.TokenColorEnum color;
 
-  /// Per-preset: a per-turn/round buff is toggleable; a game-long one (a Capodecina aura) is not.
+  /// Per-preset: a per-turn/round effect is toggleable; a game-long one is not.
   final bool toggleable;
+
+  /// Sourced from the opposing gang (cast on us) rather than our own.
+  final bool debuff;
+
+  /// The label the dropped token carries.
+  String get text => label ?? source;
 }
 
-/// Curated spell buffs, by exact catalog name — a spell's text doesn't say "buff", so which ones
-/// matter is hand-picked. A buff is cast on an ally, so it's offered on any model of the *casting*
-/// gang. Teal, so a glance reads "friendly". Grow after in-game review.
-const Set<String> kBuffSpellNames = {
-  'Bloodlust',
-  'Protection of the Eye',
-  'Eldritch Armour',
-  'Defender of Destiny',
-  'Cantrip of the Stars',
-  'Blessing of the Sky',
-  'Glimpse of Glory',
-  'Renewed Vigour',
-  'Walk Between Worlds',
-  'They Sleep Underwater',
-};
+// Colour-codes the kind: a spell buff, an ability/special-rule buff, and (either kind of) debuff.
+const _spellBuff = api.TokenColorEnum.teal;
+const _ruleBuff = api.TokenColorEnum.azure;
+const _debuff = api.TokenColorEnum.crimson;
 
-/// Curated spell debuffs, by exact catalog name. A debuff is cast on the *enemy*, so it appears in
-/// the target's own Predefined list, sourced from the *opposing* gang's spells. Crimson = "on me, and
-/// it's not mine".
-const Set<String> kDebuffSpellNames = {
-  "Marksman's Fortune",
-  'Curse of the Rent',
-  'Sunder Armour',
-};
+/// Every predefined token, keyed by the exact catalog name it's sourced from. Buffs are offered on
+/// models of the gang that has the spell/rule; debuffs on the opposing side's models. Curated by hand
+/// (a spell/rule's text doesn't say "buff") — grow after in-game review.
+const List<TokenPreset> kPredefinedPresets = [
+  // --- Spell buffs (own gang) ---
+  TokenPreset('Bloodlust', color: _spellBuff, toggleable: true),
+  TokenPreset('Protection of the Eye', color: _spellBuff, toggleable: true),
+  TokenPreset('Eldritch Armour', color: _spellBuff, toggleable: true),
+  TokenPreset('Defender of Destiny', color: _spellBuff, toggleable: true),
+  TokenPreset('Cantrip of the Stars', color: _spellBuff, toggleable: true),
+  TokenPreset('Blessing of the Sky', color: _spellBuff, toggleable: true),
+  TokenPreset('Glimpse of Glory', color: _spellBuff, toggleable: true),
+  TokenPreset('Renewed Vigour', color: _spellBuff, toggleable: true),
+  TokenPreset('Walk Between Worlds', color: _spellBuff, toggleable: true),
+  TokenPreset('They Sleep Underwater', color: _spellBuff, toggleable: true),
 
-/// Colour for an ability/special-rule buff — distinct from spell buffs (teal) and debuffs (crimson).
-const _abilityColor = api.TokenColorEnum.azure;
+  // --- Spell debuffs (opposing gang) ---
+  TokenPreset("Marksman's Fortune", color: _debuff, toggleable: true, debuff: true),
+  TokenPreset('Curse of the Rent', color: _debuff, toggleable: true, debuff: true),
+  TokenPreset('Sunder Armour', color: _debuff, toggleable: true, debuff: true),
 
-/// Curated buffs that live on a model's *special rules*, keyed by the exact catalog special-rule name
-/// and offered on any friendly model that carries the rule. `toggleable` is per-ability: on for a
-/// per-turn/round effect, off for a game-long one. Grow as more factions are covered.
-const Map<String, TokenPreset> kSpecialRulePresets = {
-  // --- Guild ---
-  'Fight For the Guild!':
-      TokenPreset(label: 'Fight for the Guild', color: _abilityColor, toggleable: false),
-  'Toughen Up': TokenPreset(label: 'Toughen Up', color: _abilityColor, toggleable: true),
-  'Start the Horrorshow!':
-      TokenPreset(label: 'Start the Horrorshow!', color: _abilityColor, toggleable: true),
-  "Don't Let Them Take You!":
-      TokenPreset(label: "Don't Let Them Take You!", color: _abilityColor, toggleable: false),
-  "Strike When They're Vulnerable":
-      TokenPreset(label: "Strike When They're Vulnerable", color: _abilityColor, toggleable: true),
-  'Full Tilt!': TokenPreset(label: 'Full Tilt!', color: _abilityColor, toggleable: true),
-  'Thieves Guild Training':
-      TokenPreset(label: 'Thieves Guild Training', color: _abilityColor, toggleable: false),
-  'Rally to the Light!':
-      TokenPreset(label: 'Rally to the Light!', color: _abilityColor, toggleable: true),
-  'Hearty Fish Soup':
-      TokenPreset(label: 'Hearty Fish Soup', color: _abilityColor, toggleable: true),
-  'Prey Upon': TokenPreset(label: 'Prey Upon', color: _abilityColor, toggleable: false),
-  'Go For the Eyes':
-      TokenPreset(label: 'Go For the Eyes', color: _abilityColor, toggleable: false),
-  'Intimidation': TokenPreset(label: 'Intimidation', color: _abilityColor, toggleable: true),
-  'Fancy a Tipple?':
-      TokenPreset(label: 'Fancy a Tipple?', color: _abilityColor, toggleable: true),
-  'Bring it Down!':
-      TokenPreset(label: 'Bring it Down!', color: _abilityColor, toggleable: false),
-  'Extortion': TokenPreset(label: 'Extortion', color: _abilityColor, toggleable: true),
-  'Get to the Roof':
-      TokenPreset(label: 'Get to the Roof', color: _abilityColor, toggleable: false),
-};
+  // --- Guild special rules ---
+  TokenPreset('Fight For the Guild!', label: 'Fight for the Guild', color: _ruleBuff),
+  TokenPreset('Toughen Up', color: _ruleBuff, toggleable: true),
+  TokenPreset('Start the Horrorshow!', color: _ruleBuff, toggleable: true),
+  TokenPreset("Don't Let Them Take You!", color: _ruleBuff),
+  TokenPreset("Strike When They're Vulnerable", color: _ruleBuff, toggleable: true),
+  TokenPreset('Full Tilt!', color: _ruleBuff, toggleable: true),
+  TokenPreset('Thieves Guild Training', color: _ruleBuff),
+  TokenPreset('Rally to the Light!', color: _ruleBuff, toggleable: true),
+  TokenPreset('Hearty Fish Soup', color: _ruleBuff, toggleable: true),
+  TokenPreset('Prey Upon', color: _ruleBuff),
+  TokenPreset('Go For the Eyes', color: _ruleBuff),
+  TokenPreset('Intimidation', color: _ruleBuff, toggleable: true),
+  TokenPreset('Fancy a Tipple?', color: _ruleBuff, toggleable: true),
+  TokenPreset('Bring it Down!', color: _ruleBuff),
+  TokenPreset('Extortion', color: _ruleBuff, toggleable: true),
+  TokenPreset('Get to the Roof', color: _ruleBuff),
 
-const _buffColor = api.TokenColorEnum.teal;
-const _debuffColor = api.TokenColorEnum.crimson;
+  // --- Other special rules (buffs unless marked) ---
+  TokenPreset('Protective Bubble - 1AP', label: 'Protective Bubble', color: _ruleBuff, toggleable: true),
+  TokenPreset('Justice Served', color: _debuff, debuff: true),
+  TokenPreset('Always Scheming', color: _ruleBuff, toggleable: true),
+  TokenPreset('All According to Plan', color: _ruleBuff, toggleable: true),
+  TokenPreset('Vindictive', color: _debuff, debuff: true),
+  TokenPreset('You there! Do something!', color: _ruleBuff, toggleable: true),
+  TokenPreset('Take Arms', color: _ruleBuff, toggleable: true),
+  TokenPreset('Aim Fire!', color: _ruleBuff, toggleable: true),
+  TokenPreset('The Monster Behind the Mask', color: _ruleBuff, toggleable: true),
+  TokenPreset('Venetian Drive', color: _ruleBuff, toggleable: true),
+  TokenPreset('Coordinated Attack', color: _ruleBuff, toggleable: true),
+  TokenPreset('Take Aim!', color: _ruleBuff, toggleable: true),
+  TokenPreset('The Other, Other White Meat', color: _ruleBuff, toggleable: true),
+  TokenPreset('We Trained For This', color: _ruleBuff, toggleable: true),
+  TokenPreset('Barbary Discipline', color: _ruleBuff, toggleable: true),
+  TokenPreset('Sadism', color: _ruleBuff, toggleable: true),
+  TokenPreset('Gun Laying', color: _ruleBuff, toggleable: true),
+  TokenPreset("There's Coin in it for You", color: _ruleBuff, toggleable: true),
+  TokenPreset('Fury of Dagon', color: _ruleBuff, toggleable: true),
+  TokenPreset('Shield to the Enlightened', color: _ruleBuff, toggleable: true),
+  TokenPreset('Hide of The Deep', color: _ruleBuff, toggleable: true),
+  TokenPreset('Blessing of Dagon', color: _ruleBuff, toggleable: true),
+  TokenPreset('Fanaticism For Dagon', color: _ruleBuff, toggleable: true),
+  TokenPreset('Bolster Your Faith', color: _ruleBuff, toggleable: true),
+  TokenPreset('Prove Yourselves to Dagon!', color: _ruleBuff, toggleable: true),
+  TokenPreset('Gift of the Elder Gods', color: _ruleBuff, toggleable: true),
+  TokenPreset('Hypnotic Song', color: _ruleBuff, toggleable: true),
+  TokenPreset('Writhe Inside', color: _ruleBuff),
+  TokenPreset('Clairvoyancy', color: _ruleBuff, toggleable: true),
+  TokenPreset('Blood Frenzy', color: _ruleBuff, toggleable: true),
+  TokenPreset('Defensive Lines', color: _ruleBuff, toggleable: true),
+  TokenPreset('Natural Camouflage', color: _ruleBuff, toggleable: true),
+  TokenPreset('Romani Fury', color: _ruleBuff, toggleable: true),
+  TokenPreset('African Bewitching', color: _ruleBuff, toggleable: true),
+  TokenPreset('Eastern Swiftness', color: _ruleBuff, toggleable: true),
+  TokenPreset('Bankroll', color: _ruleBuff, toggleable: true),
+  TokenPreset('Lunar Might', color: _ruleBuff),
+  TokenPreset('Judgement', color: _debuff, debuff: true),
+  TokenPreset('Rejuvenated', color: _ruleBuff, toggleable: true),
+  TokenPreset('Mind Gazing', color: _ruleBuff, toggleable: true),
+  TokenPreset('Unliving Curse', color: _ruleBuff),
+  TokenPreset('Electrical Stimulation', color: _ruleBuff),
+  TokenPreset('Protective Field', color: _ruleBuff, toggleable: true),
+  TokenPreset('Biological Studies', color: _ruleBuff, toggleable: true),
+  // Elixir is a single rule; the model picks a variant in play, so offer all three labels off it.
+  TokenPreset('Elixir', label: 'Elixir Acrobatic', color: _ruleBuff),
+  TokenPreset('Elixir', label: 'Elixir Engage', color: _ruleBuff),
+  TokenPreset('Elixir', label: 'Elixir Slippery', color: _ruleBuff),
+  TokenPreset('Overcharged Discipline', color: _ruleBuff),
+  TokenPreset('Void Walker', color: _ruleBuff),
+  TokenPreset('Regenerating', color: _ruleBuff, toggleable: true),
+  TokenPreset('He Will Strengthen You and Protect You', color: _ruleBuff, toggleable: true),
+  TokenPreset('Gates of Heaven', color: _ruleBuff, toggleable: true),
+  TokenPreset('Fear the Lord', color: _ruleBuff, toggleable: true),
+  TokenPreset('For the Glory of God', color: _ruleBuff, toggleable: true),
+  TokenPreset('Fight Until the Last', color: _ruleBuff),
+  TokenPreset('Put it Through the Heart!', color: _ruleBuff, toggleable: true),
+  TokenPreset('Walk Through The Fire And You Will Not Be Burned', label: 'Holy Flame', color: _ruleBuff, toggleable: true),
+  TokenPreset('Look With Satisfaction Upon My Enemies', color: _ruleBuff, toggleable: true),
+  TokenPreset('Hasten Your Steps, The Unfaithful Must Be Cleansed', label: 'Hasten', color: _ruleBuff, toggleable: true),
+  TokenPreset('Spurring Incense - 1AP', label: 'Spurring Incense', color: _ruleBuff, toggleable: true),
+];
 
-/// The predefined tokens offered on a model of the current player's gang:
-/// - curated special-rule buffs present on an in-gang profile ([ownProfiles]),
-/// - spell buffs the player's own gang ([ownEntries]) can cast on it,
-/// - spell debuffs the *opposing* gang ([opponentEntries]) can cast on it.
-///
-/// Spell buffs/debuffs are gathered gang-wide, since a buff lands on any ally and a debuff on any
-/// enemy. Deduped by label; special-rule buffs first, then spell buffs, then incoming debuffs.
+// Every spell + special-rule name a gang has, across its in-gang models — the pool a preset's
+// [TokenPreset.source] is checked against.
+Set<String> _possessedNames(
+  Iterable<api.ListEntry> entries,
+  Iterable<api.Profile> profiles,
+) {
+  final names = <String>{};
+  for (final e in entries) {
+    for (final s in knownSpellsFor(e)) {
+      names.add(s.name);
+    }
+  }
+  final refIds = entries.map((e) => e.entryId).toSet();
+  for (final p in profiles) {
+    if (!p.cardReferences.any((c) => refIds.contains(c.id))) continue;
+    for (final r in p.specialRules) {
+      names.add(r.name);
+    }
+  }
+  return names;
+}
+
+/// The predefined tokens offered on a model of the current player's gang: buffs the player's own gang
+/// ([ownEntries] / [ownProfiles]) has, plus debuffs the opposing gang ([opponentEntries] /
+/// [opponentProfiles]) has (a debuff is cast on us, so it's sourced from the caster's side). Deduped
+/// by label, in list order.
 List<TokenPreset> predefinedPresetsFor({
   required Iterable<api.ListEntry> ownEntries,
   required Iterable<api.Profile> ownProfiles,
   required Iterable<api.ListEntry> opponentEntries,
+  required Iterable<api.Profile> opponentProfiles,
 }) {
+  final ownNames = _possessedNames(ownEntries, ownProfiles);
+  final oppNames = _possessedNames(opponentEntries, opponentProfiles);
   final out = <TokenPreset>[];
   final seen = <String>{};
-  void add(TokenPreset p) {
-    if (seen.add(p.label)) out.add(p);
-  }
-
-  // Special-rule buffs — only those actually present on a profile that's in this gang.
-  final ownRefIds = ownEntries.map((e) => e.entryId).toSet();
-  for (final p in ownProfiles) {
-    if (!p.cardReferences.any((c) => ownRefIds.contains(c.id))) continue;
-    for (final r in p.specialRules) {
-      final preset = kSpecialRulePresets[r.name];
-      if (preset != null) add(preset);
-    }
-  }
-  // Spell buffs this gang can cast.
-  for (final e in ownEntries) {
-    for (final s in knownSpellsFor(e)) {
-      if (kBuffSpellNames.contains(s.name)) {
-        add(TokenPreset(label: s.name, color: _buffColor, toggleable: true));
-      }
-    }
-  }
-  // Spell debuffs the opposing gang can cast on this model.
-  for (final e in opponentEntries) {
-    for (final s in knownSpellsFor(e)) {
-      if (kDebuffSpellNames.contains(s.name)) {
-        add(TokenPreset(label: s.name, color: _debuffColor, toggleable: true));
-      }
-    }
+  for (final p in kPredefinedPresets) {
+    final has = p.debuff ? oppNames : ownNames;
+    if (!has.contains(p.source)) continue;
+    if (seen.add(p.text)) out.add(p);
   }
   return out;
 }
