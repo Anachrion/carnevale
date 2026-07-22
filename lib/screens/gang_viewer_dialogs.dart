@@ -129,8 +129,8 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     final media = MediaQuery.of(context);
     // Shrink the tab body when the keyboard is open so the dialog card never overflows (each tab's
     // own list scrolls within it). ~300 covers the title, tab bar, Done, and card/dialog padding.
-    final tabHeight = (media.size.height - media.viewInsets.bottom - 300)
-        .clamp(160.0, 340.0);
+    final tabHeight = (media.size.height - media.viewInsets.bottom - 280)
+        .clamp(160.0, 440.0);
     return DefaultTabController(
       length: 3,
       child: ThemedDialogCard(
@@ -283,77 +283,87 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
           thickness: 0.5,
           height: 16,
         ),
-        // New-token builder — pinned, always visible.
+        // New-token builder — pinned, always visible. Two compact lines: colour + label, then the
+        // toggleable flag + Add, so the list above keeps most of the room.
         _sectionLabel(context, l10n.tokenSectionNew),
-        Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          children: [for (final c in kTokenPalette) _swatch(context, c)],
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _labelCtrl,
-          textCapitalization: TextCapitalization.characters,
-          style: GoogleFonts.cinzel(fontSize: 13, color: context.textColor),
-          decoration: InputDecoration(
-            hintText: l10n.tokenLabelHint,
-            isDense: true,
-            hintStyle: TextStyle(color: context.subtleTextColor),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(9),
-              borderSide: BorderSide(
-                color: context.subtleTextColor.withValues(alpha: 0.4),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(9),
-              borderSide: BorderSide(color: context.accentColor),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        InkWell(
-          onTap: () => setState(() => _newToggleable = !_newToggleable),
-          child: Row(
-            children: [
-              Icon(
-                _newToggleable
-                    ? Icons.check_box
-                    : Icons.check_box_outline_blank,
-                size: 20,
-                color: _newToggleable
-                    ? context.accentColor
-                    : context.subtleTextColor,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                l10n.tokenToggleable,
-                style: GoogleFonts.cinzel(
-                  fontSize: 12,
-                  color: context.textColor,
+        Row(
+          children: [
+            // A single swatch of the chosen colour; tapping it opens the palette picker.
+            _colorSpot(context, l10n),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _labelCtrl,
+                textCapitalization: TextCapitalization.characters,
+                style: GoogleFonts.cinzel(fontSize: 13, color: context.textColor),
+                decoration: InputDecoration(
+                  hintText: l10n.tokenLabelHint,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+                  hintStyle: TextStyle(color: context.subtleTextColor),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(
+                      color: context.subtleTextColor.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(color: context.accentColor),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: _busy ? null : _addToken,
-            style: TextButton.styleFrom(
-              backgroundColor: context.accentColor,
-              foregroundColor: context.cardBgColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: () => setState(() => _newToggleable = !_newToggleable),
+                child: Row(
+                  children: [
+                    Icon(
+                      _newToggleable
+                          ? Icons.check_box
+                          : Icons.check_box_outline_blank,
+                      size: 20,
+                      color: _newToggleable
+                          ? context.accentColor
+                          : context.subtleTextColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        l10n.tokenToggleable,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 12,
+                          color: context.textColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            child: Text(
-              l10n.tokenAdd,
-              style: GoogleFonts.cinzel(fontWeight: FontWeight.w700),
+            const SizedBox(width: 10),
+            TextButton(
+              onPressed: _busy ? null : _addToken,
+              style: TextButton.styleFrom(
+                backgroundColor: context.accentColor,
+                foregroundColor: context.cardBgColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+              ),
+              child: Text(
+                l10n.tokenAdd,
+                style: GoogleFonts.cinzel(fontWeight: FontWeight.w700),
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );
@@ -385,23 +395,68 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     ),
   );
 
-  Widget _swatch(BuildContext context, api.TokenColorEnum color) {
-    final selected = color == _newColor;
-    return GestureDetector(
-      onTap: () => setState(() => _newColor = color),
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: tokenColor(color),
-          border: Border.all(
-            color: selected ? context.accentColor : Colors.transparent,
-            width: 2.5,
-          ),
+  // The colour cell in the builder's first line — the chosen colour with a small caret hinting it's
+  // tappable; opens the palette picker.
+  Widget _colorSpot(BuildContext context, AppLocalizations l10n) => GestureDetector(
+    onTap: _pickColor,
+    child: Container(
+      width: 46,
+      height: 46,
+      alignment: Alignment.bottomRight,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: tokenColor(_newColor),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.4)),
+      ),
+      child: Icon(
+        Icons.arrow_drop_down,
+        size: 18,
+        color: Colors.white.withValues(alpha: 0.9),
+      ),
+    ),
+  );
+
+  Future<void> _pickColor() async {
+    FocusScope.of(context).unfocus();
+    final picked = await showDialog<api.TokenColorEnum>(
+      context: context,
+      builder: (ctx) => ThemedDialogCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionLabel(ctx, AppLocalizations.of(ctx).tokenColorLabel),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                for (final c in kTokenPalette)
+                  GestureDetector(
+                    onTap: () => Navigator.of(ctx).pop(c),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: tokenColor(c),
+                        border: Border.all(
+                          color: c == _newColor
+                              ? context.accentColor
+                              : Colors.transparent,
+                          width: 2.5,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );
+    if (picked != null && mounted) setState(() => _newColor = picked);
   }
 
   Widget _tokenRow(BuildContext context, AppLocalizations l10n, api.Token token) {
