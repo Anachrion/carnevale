@@ -324,16 +324,23 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 onTap: () => setState(() => _newToggleable = !_newToggleable),
                 child: Row(
                   children: [
-                    Icon(
-                      _newToggleable
-                          ? Icons.check_box
-                          : Icons.check_box_outline_blank,
-                      size: 20,
-                      color: _newToggleable
-                          ? context.accentColor
-                          : context.subtleTextColor,
+                    // The check sits in a slot the width of the colour spot above, so their centres
+                    // line up on the vertical axis.
+                    SizedBox(
+                      width: 46,
+                      child: Center(
+                        child: Icon(
+                          _newToggleable
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                          size: 22,
+                          color: _newToggleable
+                              ? context.accentColor
+                              : context.subtleTextColor,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Flexible(
                       child: Text(
                         l10n.tokenToggleable,
@@ -395,24 +402,23 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     ),
   );
 
-  // The colour cell in the builder's first line — the chosen colour with a small caret hinting it's
-  // tappable; opens the palette picker.
+  // The colour cell in the builder's first line — a round swatch of the chosen colour, matching the
+  // token's dot on the card, with a small caret hinting it opens the palette picker.
   Widget _colorSpot(BuildContext context, AppLocalizations l10n) => GestureDetector(
     onTap: _pickColor,
     child: Container(
       width: 46,
       height: 46,
-      alignment: Alignment.bottomRight,
-      padding: const EdgeInsets.all(3),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
+        shape: BoxShape.circle,
         color: tokenColor(_newColor),
-        borderRadius: BorderRadius.circular(9),
         border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.4)),
       ),
       child: Icon(
         Icons.arrow_drop_down,
         size: 18,
-        color: Colors.white.withValues(alpha: 0.9),
+        color: Colors.white.withValues(alpha: 0.85),
       ),
     ),
   );
@@ -460,30 +466,13 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   }
 
   Widget _tokenRow(BuildContext context, AppLocalizations l10n, api.Token token) {
-    final hasText = (token.text ?? '').isNotEmpty;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: tokenColor(token.color),
-            ),
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Text(
-              hasText ? token.text! : l10n.tokenNoLabel,
-              style: GoogleFonts.cinzel(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: hasText ? context.textColor : context.subtleTextColor,
-              ),
-            ),
-          ),
+          // The token exactly as it renders on the model tile.
+          TokenChip(token: token),
+          const Spacer(),
           if (token.toggleable) ...[
             Text(
               l10n.tokenToggleable,
@@ -494,10 +483,12 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 color: context.subtleTextColor,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
           ],
           IconButton(
             visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             onPressed: _busy
                 ? null
                 : () => _mutateTokens(
