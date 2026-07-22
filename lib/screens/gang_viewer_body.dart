@@ -750,8 +750,8 @@ class _TileMarkerIcon extends StatelessWidget {
     return Tooltip(
       message: label,
       child: Container(
-        width: 28,
-        height: 28,
+        width: 34,
+        height: 34,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.black.withValues(alpha: 0.28),
@@ -763,8 +763,8 @@ class _TileMarkerIcon extends StatelessWidget {
           children: [
             Image.asset(
               asset,
-              width: 17,
-              height: 17,
+              width: 21,
+              height: 21,
               color: Colors.white,
               colorBlendMode: BlendMode.srcIn,
             ),
