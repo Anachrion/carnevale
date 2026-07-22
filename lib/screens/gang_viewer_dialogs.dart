@@ -14,12 +14,12 @@
 
 part of 'gang_viewer_screen.dart';
 
-/// Popup opened by [_AddCounterButton]: lists all five counters with their current state;
-/// tapping a row toggles it (underwater cycles 0 → 1 → 2 → 0) and saves immediately — no
-/// confirm step, matching how quickly counters flip at the table. Every change lands on the
-/// server before the row updates, so the popup never shows a state the opponent won't get.
-class _CounterEditDialog extends StatefulWidget {
-  const _CounterEditDialog({
+/// Opened by the tile's Edit (pencil) button: one modal covering everything a model carries in
+/// game. Three swipeable tabs — Generic (the built-in status counters), Custom (free-form player
+/// tokens), and Predefined (deferred). Every change lands on the server before the row updates, so
+/// the modal never shows a state the opponent won't get.
+class _ModelEditDialog extends StatefulWidget {
+  const _ModelEditDialog({
     required this.gameId,
     required this.entry,
     required this.onStateChanged,
@@ -30,12 +30,23 @@ class _CounterEditDialog extends StatefulWidget {
   final void Function(int listEntryId, api.EntryState state) onStateChanged;
 
   @override
-  State<_CounterEditDialog> createState() => _CounterEditDialogState();
+  State<_ModelEditDialog> createState() => _ModelEditDialogState();
 }
 
-class _CounterEditDialogState extends State<_CounterEditDialog> {
+class _ModelEditDialogState extends State<_ModelEditDialog> {
   late api.EntryState _state = widget.entry.state!;
   bool _busy = false;
+
+  // Custom-token builder state.
+  api.TokenColorEnum _newColor = kTokenPalette.first;
+  final TextEditingController _labelCtrl = TextEditingController();
+  bool _newToggleable = false;
+
+  @override
+  void dispose() {
+    _labelCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _update({
     bool? stunned,
@@ -71,95 +82,348 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
     }
   }
 
+  // Adds or removes a token and echoes the new state to the tile — mirrors _update for counters.
+  Future<void> _mutateTokens(
+    Future<api.EntryState> Function() call,
+  ) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final newState = await call();
+      if (!mounted) return;
+      setState(() => _state = newState);
+      widget.onStateChanged(widget.entry.id, newState);
+    } catch (_) {
+      if (mounted) {
+        showAppToast(context, AppLocalizations.of(context).tokenUpdateFailed);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _addToken() async {
+    final text = _labelCtrl.text.trim();
+    await _mutateTokens(
+      () => GameService().upsertToken(
+        widget.gameId,
+        widget.entry.id,
+        tokenId: newIdempotencyKey(),
+        color: _newColor,
+        text: text.isEmpty ? null : text,
+        toggleable: _newToggleable,
+        active: true,
+      ),
+    );
+    if (mounted) {
+      setState(() {
+        _labelCtrl.clear();
+        _newToggleable = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ThemedDialogCard(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.entry.name,
-            style: GoogleFonts.cinzel(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.counterTapToToggle,
-            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 12),
-          Divider(
-            color: context.subtleTextColor.withValues(alpha: 0.3),
-            thickness: 0.5,
-          ),
-          const SizedBox(height: 4),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/stunned.png',
-            label: l10n.counterStunned,
-            active: _state.stunned,
-            onTap: () => _update(stunned: !_state.stunned),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/hidden.png',
-            label: l10n.counterHidden,
-            active: _state.hidden,
-            onTap: () => _update(hidden: !_state.hidden),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/guard.png',
-            label: l10n.counterGuarding,
-            active: _state.guarding,
-            onTap: () => _update(guarding: !_state.guarding),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/carry_objective.png',
-            label: l10n.counterCarryingObjective,
-            active: _state.carryingObjective,
-            onTap: () => _update(carryingObjective: !_state.carryingObjective),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/underwater_counter.png',
-            label: l10n.counterUnderwater,
-            active: _state.underwaterCounters > 0,
-            badge: _state.underwaterCounters > 0
-                ? _state.underwaterCounters
-                : null,
-            trailing: Text(
-              '${_state.underwaterCounters} / 2',
+    return DefaultTabController(
+      length: 3,
+      child: ThemedDialogCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.entry.name,
               style: GoogleFonts.cinzel(
-                fontSize: 13,
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: _state.underwaterCounters > 0
-                    ? context.accentColor
-                    : context.subtleTextColor,
+                color: context.textColor,
               ),
             ),
-            onTap: () => _update(
-              underwaterCounters: (_state.underwaterCounters + 1) % 3,
+            const SizedBox(height: 8),
+            TabBar(
+              labelColor: context.accentColor,
+              unselectedLabelColor: context.subtleTextColor,
+              indicatorColor: context.accentColor,
+              labelStyle: GoogleFonts.cinzel(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+              tabs: [
+                Tab(text: l10n.tokenTabGeneric),
+                Tab(text: l10n.tokenTabCustom),
+                Tab(text: l10n.tokenTabPredefined),
+              ],
             ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                AppLocalizations.of(context).actionDone,
-                style: GoogleFonts.cinzel(
-                  fontWeight: FontWeight.w700,
-                  color: context.accentColor,
+            SizedBox(
+              height: 320,
+              child: TabBarView(
+                children: [
+                  _genericTab(context, l10n),
+                  _customTab(context, l10n),
+                  _predefinedTab(context, l10n),
+                ],
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  l10n.actionDone,
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: context.accentColor,
+                  ),
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Generic tab: the built-in status counters (the old counter popup, folded in).
+  Widget _genericTab(BuildContext context, AppLocalizations l10n) {
+    return ListView(
+      padding: const EdgeInsets.only(top: 4),
+      children: [
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/stunned.png',
+          label: l10n.counterStunned,
+          active: _state.stunned,
+          onTap: () => _update(stunned: !_state.stunned),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/hidden.png',
+          label: l10n.counterHidden,
+          active: _state.hidden,
+          onTap: () => _update(hidden: !_state.hidden),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/guard.png',
+          label: l10n.counterGuarding,
+          active: _state.guarding,
+          onTap: () => _update(guarding: !_state.guarding),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/carry_objective.png',
+          label: l10n.counterCarryingObjective,
+          active: _state.carryingObjective,
+          onTap: () => _update(carryingObjective: !_state.carryingObjective),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/underwater_counter.png',
+          label: l10n.counterUnderwater,
+          active: _state.underwaterCounters > 0,
+          badge: _state.underwaterCounters > 0 ? _state.underwaterCounters : null,
+          trailing: Text(
+            '${_state.underwaterCounters} / 2',
+            style: GoogleFonts.cinzel(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: _state.underwaterCounters > 0
+                  ? context.accentColor
+                  : context.subtleTextColor,
+            ),
+          ),
+          onTap: () => _update(
+            underwaterCounters: (_state.underwaterCounters + 1) % 3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Custom tab: the model's player tokens (manage) plus a builder (colour + optional label +
+  // toggleable). No per-token switch here — a token is toggled on the card.
+  Widget _customTab(BuildContext context, AppLocalizations l10n) {
+    final tokens = _state.tokens;
+    return ListView(
+      padding: const EdgeInsets.only(top: 4),
+      children: [
+        if (tokens.isNotEmpty) ...[
+          _sectionLabel(context, l10n.tokenSectionOnModel),
+          for (final t in tokens) _tokenRow(context, l10n, t),
+          const SizedBox(height: 14),
+        ],
+        _sectionLabel(context, l10n.tokenSectionNew),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [for (final c in kTokenPalette) _swatch(context, c)],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _labelCtrl,
+          textCapitalization: TextCapitalization.characters,
+          style: GoogleFonts.cinzel(fontSize: 13, color: context.textColor),
+          decoration: InputDecoration(
+            hintText: l10n.tokenLabelHint,
+            isDense: true,
+            hintStyle: TextStyle(color: context.subtleTextColor),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(9),
+              borderSide: BorderSide(
+                color: context.subtleTextColor.withValues(alpha: 0.4),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(9),
+              borderSide: BorderSide(color: context.accentColor),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: () => setState(() => _newToggleable = !_newToggleable),
+          child: Row(
+            children: [
+              Icon(
+                _newToggleable
+                    ? Icons.check_box
+                    : Icons.check_box_outline_blank,
+                size: 20,
+                color: _newToggleable
+                    ? context.accentColor
+                    : context.subtleTextColor,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.tokenToggleable,
+                style: GoogleFonts.cinzel(
+                  fontSize: 12,
+                  color: context.textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: _busy ? null : _addToken,
+            style: TextButton.styleFrom(
+              backgroundColor: context.accentColor,
+              foregroundColor: context.cardBgColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            child: Text(
+              l10n.tokenAdd,
+              style: GoogleFonts.cinzel(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _predefinedTab(BuildContext context, AppLocalizations l10n) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Text(
+          l10n.tokenPredefinedSoon,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 13, color: context.subtleTextColor),
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionLabel(BuildContext context, String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: GoogleFonts.cinzel(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.6,
+        color: context.subtleTextColor,
+      ),
+    ),
+  );
+
+  Widget _swatch(BuildContext context, api.TokenColorEnum color) {
+    final selected = color == _newColor;
+    return GestureDetector(
+      onTap: () => setState(() => _newColor = color),
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: tokenColor(color),
+          border: Border.all(
+            color: selected ? context.accentColor : Colors.transparent,
+            width: 2.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _tokenRow(BuildContext context, AppLocalizations l10n, api.Token token) {
+    final hasText = (token.text ?? '').isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        children: [
+          Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: tokenColor(token.color),
+            ),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Text(
+              hasText ? token.text! : l10n.tokenNoLabel,
+              style: GoogleFonts.cinzel(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: hasText ? context.textColor : context.subtleTextColor,
+              ),
+            ),
+          ),
+          if (token.toggleable) ...[
+            Text(
+              l10n.tokenToggleable,
+              style: GoogleFonts.cinzel(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: context.subtleTextColor,
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            onPressed: _busy
+                ? null
+                : () => _mutateTokens(
+                    () => GameService().removeToken(
+                      widget.gameId,
+                      widget.entry.id,
+                      token.id,
+                    ),
+                  ),
+            icon: Icon(Icons.close, size: 18, color: context.subtleTextColor),
           ),
         ],
       ),

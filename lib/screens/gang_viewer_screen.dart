@@ -23,6 +23,7 @@ import '../models/profile.dart';
 import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/game_service.dart';
+import '../services/idempotency.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
@@ -34,6 +35,7 @@ import '../widgets/profile_search.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/status_views.dart';
 import '../widgets/themed_dialog_card.dart';
+import '../widgets/token_chip.dart';
 import 'card_viewer_screen.dart';
 
 part 'gang_viewer_body.dart';
@@ -328,15 +330,37 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  void _editCounters(api.ListEntry entry) {
+  void _editModel(api.ListEntry entry) {
     showDialog(
       context: context,
-      builder: (_) => _CounterEditDialog(
+      builder: (_) => _ModelEditDialog(
         gameId: widget.gameId,
         entry: entry,
         onStateChanged: _applyEntryState,
       ),
     );
+  }
+
+  // Flips a toggleable token's active state straight from the tile — the frequent per-turn flip.
+  // Upserts by the token's own id, so the server updates it in place.
+  Future<void> _toggleToken(api.ListEntry entry, api.Token token) async {
+    try {
+      final newState = await GameService().upsertToken(
+        widget.gameId,
+        entry.id,
+        tokenId: token.id,
+        color: token.color,
+        text: token.text,
+        toggleable: token.toggleable,
+        active: !token.active,
+      );
+      if (!mounted) return;
+      _applyEntryState(entry.id, newState);
+    } catch (_) {
+      if (mounted) {
+        showAppToast(context, AppLocalizations.of(context).tokenUpdateFailed);
+      }
+    }
   }
 
   void _editStats(api.ListEntry entry) {
@@ -563,9 +587,10 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       profiles: data.profiles,
       equipment: data.equipment,
       showHeader: widget.showListHeader,
-      onEditCounters: widget.editable ? _editCounters : null,
+      onEditModel: widget.editable ? _editModel : null,
       onEditStats: widget.editable ? _editStats : null,
       onToggleActivated: widget.editable ? _toggleActivated : null,
+      onToggleToken: widget.editable ? _toggleToken : null,
       onToggleSpellCast: widget.editable ? _toggleSpellCast : null,
       onSummon: widget.editable ? _summon : null,
       onDismissSummon: widget.editable ? _dismissSummon : null,

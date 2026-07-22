@@ -20,9 +20,10 @@ class _ReadOnlyGangBody extends StatelessWidget {
     required this.profiles,
     required this.equipment,
     this.showHeader = true,
-    this.onEditCounters,
+    this.onEditModel,
     this.onEditStats,
     this.onToggleActivated,
+    this.onToggleToken,
     this.onToggleSpellCast,
     this.onSummon,
     this.onDismissSummon,
@@ -35,15 +36,18 @@ class _ReadOnlyGangBody extends StatelessWidget {
   /// Whether to show the gang name/faction header and ducats bar above the models.
   final bool showHeader;
 
-  /// When set, model tiles with an entry state get a + button that opens the counter popup.
-  final void Function(api.ListEntry entry)? onEditCounters;
+  /// When set, model tiles get an Edit (pencil) button that opens the counter + token modal.
+  final void Function(api.ListEntry entry)? onEditModel;
 
   /// When set, tapping a model's HP/WP/CP pill opens the stat stepper popup.
   final void Function(api.ListEntry entry)? onEditStats;
 
-  /// When set, model tiles get a tappable bolt that marks the model as having activated this turn.
-  /// Own models only — an opponent's activated models still darken, they just can't be toggled.
+  /// When set, model tiles get a spelled-out Activate control that marks the model activated this
+  /// turn. Own models only — an opponent's activated models still darken, they just can't be toggled.
   final void Function(api.ListEntry entry)? onToggleActivated;
+
+  /// When set, tapping a toggleable token on a model's tile flips its active state. Own models only.
+  final void Function(api.ListEntry entry, api.Token token)? onToggleToken;
 
   /// When set, a Mage's known/granted spells render as pure-toggle chips (mark cast) plus one
   /// detail button, instead of the read-only tappable-for-detail chips. Own models only — the
@@ -259,14 +263,17 @@ class _ReadOnlyGangBody extends StatelessWidget {
           entry: entry,
           color: entryColor,
           onTap: onTap,
-          onEditCounters: onEditCounters != null && entry.state != null
-              ? () => onEditCounters!(entry)
+          onEditModel: onEditModel != null && entry.state != null
+              ? () => onEditModel!(entry)
               : null,
           onEditStats: onEditStats != null && entry.state != null
               ? () => onEditStats!(entry)
               : null,
           onToggleActivated: onToggleActivated != null && entry.state != null
               ? () => onToggleActivated!(entry)
+              : null,
+          onToggleToken: onToggleToken != null && entry.state != null
+              ? (token) => onToggleToken!(entry, token)
               : null,
           onToggleSpellCast: onToggleSpellCast != null && entry.state != null
               ? (spell) => onToggleSpellCast!(entry, spell)
@@ -463,9 +470,10 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     required this.entry,
     required this.color,
     this.onTap,
-    this.onEditCounters,
+    this.onEditModel,
     this.onEditStats,
     this.onToggleActivated,
+    this.onToggleToken,
     this.onToggleSpellCast,
     this.onDismiss,
   });
@@ -473,9 +481,14 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   final api.ListEntry entry;
   final Color color;
   final VoidCallback? onTap;
-  final VoidCallback? onEditCounters;
+
+  /// Opens the counter/token modal (own models only). Replaces the old counter "+".
+  final VoidCallback? onEditModel;
   final VoidCallback? onEditStats;
   final VoidCallback? onToggleActivated;
+
+  /// Flips a toggleable token's active state straight from the tile (own models only).
+  final void Function(api.Token token)? onToggleToken;
   final void Function(KnownSpell spell)? onToggleSpellCast;
 
   /// Removes this model from the gang. Only ever set on a summoned model of your own.
@@ -567,71 +580,86 @@ class _ReadOnlyEntryTile extends StatelessWidget {
               ),
               if (state != null) ...[
                 const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                // Stats keep their own row — the markers below never compress them into a column.
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
                   children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          _StatPill(
-                            label: 'HP',
-                            value: state.lifePoints,
-                            borderColors: AppPalette.hpBorder,
-                            onTap: onEditStats,
-                          ),
-                          // Hidden (not omitted) when the model was never given this stat at
-                          // all (starting 0) — keeps the pill in the tree/layout, just invisible,
-                          // rather than skipping it and shifting everything after it over. An
-                          // invisible pill isn't tappable (onTap null).
-                          Opacity(
-                            opacity: state.willPoints.starting == 0 ? 0 : 1,
-                            child: _StatPill(
-                              label: 'WP',
-                              value: state.willPoints,
-                              borderColors: AppPalette.wpBorder,
-                              onTap: state.willPoints.starting == 0
-                                  ? null
-                                  : onEditStats,
-                            ),
-                          ),
-                          Opacity(
-                            opacity: state.commandPoints.starting == 0 ? 0 : 1,
-                            child: _StatPill(
-                              label: 'CP',
-                              value: state.commandPoints,
-                              borderColors: AppPalette.cpBorder,
-                              onTap: state.commandPoints.starting == 0
-                                  ? null
-                                  : onEditStats,
-                            ),
-                          ),
-                        ],
+                    _StatPill(
+                      label: 'HP',
+                      value: state.lifePoints,
+                      borderColors: AppPalette.hpBorder,
+                      onTap: onEditStats,
+                    ),
+                    // Hidden (not omitted) when the model was never given this stat at all
+                    // (starting 0) — keeps the pill in the layout, just invisible, rather than
+                    // shifting everything after it over. An invisible pill isn't tappable.
+                    Opacity(
+                      opacity: state.willPoints.starting == 0 ? 0 : 1,
+                      child: _StatPill(
+                        label: 'WP',
+                        value: state.willPoints,
+                        borderColors: AppPalette.wpBorder,
+                        onTap: state.willPoints.starting == 0 ? null : onEditStats,
                       ),
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 6,
-                      children: [
-                        ..._counterIcons(context, state),
-                        // Own model: always offer the toggle. Opponent's: show the bolt only once
-                        // they've activated, as a read-only marker to go with the darkened tile.
-                        if (onToggleActivated != null)
-                          _ActivationButton(
-                            activated: activated,
-                            onTap: onToggleActivated!,
-                          )
-                        else if (activated)
-                          const _ActivationButton(activated: true),
-                        if (onEditCounters != null)
-                          _AddCounterButton(onTap: onEditCounters!),
-                        if (onDismiss != null)
-                          _DismissButton(onTap: onDismiss!),
-                      ],
+                    Opacity(
+                      opacity: state.commandPoints.starting == 0 ? 0 : 1,
+                      child: _StatPill(
+                        label: 'CP',
+                        value: state.commandPoints,
+                        borderColors: AppPalette.cpBorder,
+                        onTap: state.commandPoints.starting == 0 ? null : onEditStats,
+                      ),
                     ),
                   ],
                 ),
+                // Marker shelf: neutral counters then coloured player tokens, wrapping across as
+                // many lines as they need instead of thinning into a single strip.
+                if (_hasMarkers(state)) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      ..._counterIcons(context, state),
+                      for (final token in state.tokens)
+                        TokenChip(
+                          token: token,
+                          // Tap toggles a toggleable token's active state right on the card (the
+                          // frequent per-turn flip); everything else is handled in the Edit modal.
+                          onTap: token.toggleable && onToggleToken != null
+                              ? () => onToggleToken!(token)
+                              : null,
+                        ),
+                    ],
+                  ),
+                ],
+                // Bottom controls: Edit opens the counter/token modal; Activate is the fast
+                // per-turn tap. Opponents show a read-only Activated marker only.
+                if (onEditModel != null ||
+                    onToggleActivated != null ||
+                    onDismiss != null ||
+                    activated) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      if (onDismiss != null) ...[
+                        _DismissButton(onTap: onDismiss!),
+                        const SizedBox(width: 8),
+                      ],
+                      const Spacer(),
+                      if (onEditModel != null) ...[
+                        _EditButton(onTap: onEditModel!),
+                        const SizedBox(width: 8),
+                      ],
+                      if (onToggleActivated != null)
+                        _ActivateButton(activated: activated, onTap: onToggleActivated!)
+                      else if (activated)
+                        const _ActivateButton(activated: true),
+                    ],
+                  ),
+                ],
               ],
               if (_knownSpells.isNotEmpty) ...[
                 const SizedBox(height: 10),
@@ -646,6 +674,15 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 
   // Known/granted spells for a Mage model. Empty for everything else.
   List<KnownSpell> get _knownSpells => entry.mage ? knownSpellsFor(entry) : const [];
+
+  // Whether the marker shelf has anything to show: an active counter or any player token.
+  bool _hasMarkers(api.EntryState s) =>
+      s.stunned ||
+      s.hidden ||
+      s.guarding ||
+      s.carryingObjective ||
+      s.underwaterCounters > 0 ||
+      s.tokens.isNotEmpty;
 
   // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
   // entirely, so a clean model shows no counter icons at all. Editing happens through the +
@@ -786,45 +823,46 @@ class _GradientBorderPainter extends CustomPainter {
       oldDelegate.strokeWidth != strokeWidth;
 }
 
-/// The "has this model gone yet?" bolt. Solid-filled once activated, so the tile's own darkening
-/// is reinforced by an explicit marker rather than relying on the background alone — and so the
-/// control you'd tap to undo a mis-tap stays obvious. Rendered without an [onTap] for an
-/// opponent's models, where it's read-only.
-class _ActivationButton extends StatelessWidget {
-  const _ActivationButton({required this.activated, this.onTap});
+/// The "has this model gone yet?" control, spelled out. Solid-filled once activated. Activate and
+/// Activated occupy the same fixed width with the bolt pinned left and the word centred, so flipping
+/// it never nudges the layout. Rendered without an [onTap] for an opponent's models (read-only).
+class _ActivateButton extends StatelessWidget {
+  const _ActivateButton({required this.activated, this.onTap});
 
   final bool activated;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: activated
-          ? AppLocalizations.of(context).tooltipActivatedThisTurn
-          : AppLocalizations.of(context).tooltipMarkActivated,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: activated ? Colors.white : Colors.transparent,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: activated ? 1 : 0.5),
-              width: 1.2,
-            ),
-          ),
-          child: Icon(
-            Icons.bolt,
-            size: 22,
-            // Knocked out against the white fill when activated, so the bolt stays readable rather
-            // than disappearing into it.
-            color: activated ? Colors.black87 : Colors.white,
-          ),
+    final l10n = AppLocalizations.of(context);
+    final fg = activated ? Colors.black87 : Colors.white;
+    final button = Container(
+      height: 34,
+      width: 132,
+      padding: const EdgeInsets.only(left: 12, right: 6),
+      decoration: BoxDecoration(
+        color: activated ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: activated ? 1 : 0.5),
+          width: 1.4,
         ),
       ),
+      child: Row(
+        children: [
+          Icon(Icons.bolt, size: 16, color: fg),
+          Expanded(
+            child: Text(
+              activated ? l10n.actionActivated : l10n.actionActivate,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
+            ),
+          ),
+        ],
+      ),
     );
+    if (onTap == null) return button;
+    return GestureDetector(onTap: onTap, child: button);
   }
 }
 
@@ -858,17 +896,17 @@ class _DismissButton extends StatelessWidget {
   }
 }
 
-/// The small + next to a model's counter icons (own models only): opens the popup for toggling
-/// counters. Sized to read as an affordance on the counter row rather than a sixth counter.
-class _AddCounterButton extends StatelessWidget {
-  const _AddCounterButton({required this.onTap});
+/// Opens the model's counter + token modal (own models only). A pencil, so it reads as "edit"
+/// rather than the old ambiguous "+" that both added and removed.
+class _EditButton extends StatelessWidget {
+  const _EditButton({required this.onTap});
 
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: AppLocalizations.of(context).tooltipEditCounters,
+      message: AppLocalizations.of(context).tooltipEditModel,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -881,7 +919,7 @@ class _AddCounterButton extends StatelessWidget {
               width: 1.2,
             ),
           ),
-          child: const Icon(Icons.add, size: 22, color: Colors.white),
+          child: const Icon(Icons.edit_outlined, size: 18, color: Colors.white),
         ),
       ),
     );
