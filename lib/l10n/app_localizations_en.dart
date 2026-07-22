@@ -840,6 +840,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tokenNoneYet => 'No tokens yet.';
 
   @override
+  String get tokenLabelTaken => 'Already on this model';
+
+  @override
   String get tokenColorLabel => 'Color';
 
   @override

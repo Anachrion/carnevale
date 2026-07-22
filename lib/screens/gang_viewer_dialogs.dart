@@ -130,7 +130,16 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     }
   }
 
+  // A model can't carry two tokens with the same label — the empty label included, so it's also at
+  // most one colour-only dot. This keeps the label-based Custom/Predefined split unambiguous and
+  // stops accidental duplicates. Checked against every token (custom and predefined alike).
+  bool get _labelTaken {
+    final label = _labelCtrl.text.trim();
+    return _state.tokens.any((t) => (t.text ?? '') == label);
+  }
+
   Future<void> _addToken() async {
+    if (_labelTaken) return;
     final text = _labelCtrl.text.trim();
     await _mutateTokens(
       () => GameService().upsertToken(
@@ -332,12 +341,16 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               child: TextField(
                 controller: _labelCtrl,
                 textCapitalization: TextCapitalization.characters,
+                // Rebuild so the Add button + duplicate-label warning track what's typed.
+                onChanged: (_) => setState(() {}),
                 style: GoogleFonts.cinzel(fontSize: 13, color: context.textColor),
                 decoration: InputDecoration(
                   hintText: l10n.tokenLabelHint,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                   hintStyle: TextStyle(color: context.subtleTextColor),
+                  errorText: _labelTaken ? l10n.tokenLabelTaken : null,
+                  errorStyle: GoogleFonts.cinzel(fontSize: 10),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(9),
                     borderSide: BorderSide(
@@ -393,7 +406,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
             ),
             const SizedBox(width: 10),
             TextButton(
-              onPressed: _busy ? null : _addToken,
+              onPressed: (_busy || _labelTaken) ? null : _addToken,
               style: TextButton.styleFrom(
                 backgroundColor: context.accentColor,
                 foregroundColor: context.cardBgColor,

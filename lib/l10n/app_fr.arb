@@ -268,6 +268,7 @@
   "tokenAdd": "Ajouter le jeton",
   "tokenNoLabel": "Sans libellé",
   "tokenNoneYet": "Aucun jeton pour l'instant.",
+  "tokenLabelTaken": "Déjà sur ce modèle",
   "tokenColorLabel": "Couleur",
   "tokenPredefinedEmpty": "Aucun sort ou buff à ajouter pour cette bande.",
   "tokenPredefinedSoon": "Bientôt : des jetons tirés des sorts et règles de ce modèle.",

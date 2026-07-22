@@ -291,18 +291,6 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
         profiles = results[0] as List<api.Profile>;
         equipment = results[1] as List<api.Equipment>;
       }
-      // Load the opposing gang once (for debuff presets). A failure just means no debuffs show.
-      if (widget.opponentPlayerId != null && _opponentEntries == null) {
-        try {
-          final opp = await _gameService.playerList(
-            widget.gameId,
-            widget.opponentPlayerId!,
-          );
-          _opponentEntries = opp.entries.toList();
-        } catch (_) {
-          // Debuffs simply won't be offered until a later refresh succeeds.
-        }
-      }
       if (!mounted) return;
       // A local optimistic update landed while this fetch was in flight — keep the fresher local
       // state and let a later broadcast reconcile, rather than clobbering it with a stale snapshot.
@@ -318,6 +306,26 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     } catch (e) {
       // On a failed refresh keep showing the last good snapshot instead of an error.
       if (mounted && _data == null) setState(() => _failed = true);
+    }
+    // Load the opposing gang for debuff presets *after* our own gang is on screen — off the critical
+    // path, so the tab never waits on a second player-list fetch to first paint.
+    unawaited(_ensureOpponentEntries());
+  }
+
+  // Loads the opposing gang's entries once (their spell composition is static mid-game) to source the
+  // debuff presets. Deliberately not awaited by _load — a failure just means no debuffs until a later
+  // refresh retries (the null guard lets it).
+  Future<void> _ensureOpponentEntries() async {
+    if (widget.opponentPlayerId == null || _opponentEntries != null) return;
+    try {
+      final opp = await _gameService.playerList(
+        widget.gameId,
+        widget.opponentPlayerId!,
+      );
+      if (!mounted) return;
+      setState(() => _opponentEntries = opp.entries.toList());
+    } catch (_) {
+      // Debuffs simply won't be offered until a later refresh succeeds.
     }
   }
 
