@@ -20,6 +20,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     required this.profiles,
     required this.equipment,
     this.showHeader = true,
+    this.presetLabels = const {},
     this.onEditModel,
     this.onEditStats,
     this.onToggleActivated,
@@ -36,8 +37,12 @@ class _ReadOnlyGangBody extends StatelessWidget {
   /// Whether to show the gang name/faction header and ducats bar above the models.
   final bool showHeader;
 
-  /// When set, model tiles get an Edit (pencil) button that opens the counter + token modal.
-  final void Function(api.ListEntry entry)? onEditModel;
+  /// Labels of the predefined presets, so a tapped token routes to the Predefined vs Custom tab.
+  final Set<String> presetLabels;
+
+  /// When set, model tiles get an Edit (pencil) button that opens the counter + token modal, and a
+  /// tapped marker opens it on its own tab. The tab argument selects which.
+  final void Function(api.ListEntry entry, ModelEditTab tab)? onEditModel;
 
   /// When set, tapping a model's HP/WP/CP pill opens the stat stepper popup.
   final void Function(api.ListEntry entry)? onEditStats;
@@ -263,8 +268,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
           entry: entry,
           color: entryColor,
           onTap: onTap,
+          presetLabels: presetLabels,
           onEditModel: onEditModel != null && entry.state != null
-              ? () => onEditModel!(entry)
+              ? (tab) => onEditModel!(entry, tab)
               : null,
           onEditStats: onEditStats != null && entry.state != null
               ? () => onEditStats!(entry)
@@ -470,6 +476,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     required this.entry,
     required this.color,
     this.onTap,
+    this.presetLabels = const {},
     this.onEditModel,
     this.onEditStats,
     this.onToggleActivated,
@@ -482,8 +489,12 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
 
-  /// Opens the counter/token modal (own models only). Replaces the old counter "+".
-  final VoidCallback? onEditModel;
+  /// Labels of the predefined presets, so a tapped token opens the Predefined vs Custom tab.
+  final Set<String> presetLabels;
+
+  /// Opens the counter/token modal on a given tab (own models only). The Edit button and a tapped
+  /// marker both go through here. Replaces the old counter "+".
+  final void Function(ModelEditTab tab)? onEditModel;
   final VoidCallback? onEditStats;
   final VoidCallback? onToggleActivated;
 
@@ -626,7 +637,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                     ],
                     if (onEditModel != null) ...[
                       const SizedBox(width: 8),
-                      _EditButton(onTap: onEditModel!),
+                      _EditButton(
+                        onTap: () => onEditModel!(ModelEditTab.generic),
+                      ),
                     ],
                     if (onToggleActivated != null) ...[
                       const SizedBox(width: 8),
@@ -645,11 +658,18 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                     for (final token in state.tokens)
                       TokenChip(
                         token: token,
-                        // Tap flips a toggleable token's active state right on the card (the frequent
-                        // per-turn flip); everything else is in the Edit modal. A non-toggleable token
-                        // still swallows the tap so it doesn't fall through and open the card viewer.
+                        // A toggleable token flips on tap (the frequent per-turn flip). A
+                        // non-toggleable one opens the Edit modal on its own tab — Predefined if it's
+                        // a preset, else Custom — or, on a read-only tile, just swallows the tap so it
+                        // doesn't fall through and open the card viewer.
                         onTap: token.toggleable && onToggleToken != null
                             ? () => onToggleToken!(token)
+                            : onEditModel != null
+                            ? () => onEditModel!(
+                                presetLabels.contains(token.text ?? '')
+                                    ? ModelEditTab.predefined
+                                    : ModelEditTab.custom,
+                              )
                             : () {},
                       ),
                   ],
@@ -672,28 +692,45 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   // Known/granted spells for a Mage model. Empty for everything else.
   List<KnownSpell> get _knownSpells => entry.mage ? knownSpellsFor(entry) : const [];
 
-  // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
-  // entirely, so a clean model shows no counter icons at all. Editing happens through the +
-  // button next to them (own models only), not by tapping the icons themselves.
+  // Only the active counters appear — a counter set to false (or 0 underwater) is omitted entirely,
+  // so a clean model shows no counter icons at all. Tapping one opens the Edit modal on the Generic
+  // tab (own models); on a read-only tile it just swallows the tap.
   List<Widget> _counterIcons(BuildContext context, api.EntryState state) {
     final l10n = AppLocalizations.of(context);
+    final onTap = onEditModel != null
+        ? () => onEditModel!(ModelEditTab.generic)
+        : null;
     return [
       if (state.stunned)
-        _TileMarkerIcon(asset: 'assets/images/counters/stunned.png', label: l10n.counterStunned),
+        _TileMarkerIcon(
+          asset: 'assets/images/counters/stunned.png',
+          label: l10n.counterStunned,
+          onTap: onTap,
+        ),
       if (state.hidden)
-        _TileMarkerIcon(asset: 'assets/images/counters/hidden.png', label: l10n.counterHidden),
+        _TileMarkerIcon(
+          asset: 'assets/images/counters/hidden.png',
+          label: l10n.counterHidden,
+          onTap: onTap,
+        ),
       if (state.guarding)
-        _TileMarkerIcon(asset: 'assets/images/counters/guard.png', label: l10n.counterGuarding),
+        _TileMarkerIcon(
+          asset: 'assets/images/counters/guard.png',
+          label: l10n.counterGuarding,
+          onTap: onTap,
+        ),
       if (state.carryingObjective)
         _TileMarkerIcon(
           asset: 'assets/images/counters/carry_objective.png',
           label: l10n.counterCarryingObjective,
+          onTap: onTap,
         ),
       if (state.underwaterCounters > 0)
         _TileMarkerIcon(
           asset: 'assets/images/counters/underwater_counter.png',
           label: l10n.counterUnderwater,
           badge: state.underwaterCounters,
+          onTap: onTap,
         ),
     ];
   }
@@ -742,19 +779,27 @@ class _MarkerShelf extends StatelessWidget {
 /// legible on the lighter *and* darker parts of the faction-coloured row (the old accent-tinted
 /// circle washed out on the lighter side).
 class _TileMarkerIcon extends StatelessWidget {
-  const _TileMarkerIcon({required this.asset, required this.label, this.badge});
+  const _TileMarkerIcon({
+    required this.asset,
+    required this.label,
+    this.badge,
+    this.onTap,
+  });
 
   final String asset;
   final String label;
   final int? badge;
 
+  /// Opens the Edit modal on the Generic tab (own models). Null on a read-only tile — the tap is
+  /// still swallowed so it doesn't fall through and open the card viewer.
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: label,
-      // Like a token, a counter swallows the tap so it doesn't fall through and open the card viewer.
       child: GestureDetector(
-        onTap: () {},
+        onTap: onTap ?? () {},
         behavior: HitTestBehavior.opaque,
         child: Container(
           width: 34,

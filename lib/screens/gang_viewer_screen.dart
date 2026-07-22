@@ -353,22 +353,32 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  void _editModel(api.ListEntry entry) {
+  // Buffs come from this gang (self-cast on allies); debuffs from the opposing gang (cast on us).
+  List<TokenPreset> get _presets {
     final data = _data;
-    // Buffs come from this gang (self-cast on allies); debuffs from the opposing gang (cast on us).
-    final presets = data == null
-        ? const <TokenPreset>[]
-        : predefinedPresetsFor(
-            ownEntries: data.gang.entries,
-            ownProfiles: data.profiles,
-            opponentEntries: _opponentEntries ?? const [],
-          );
+    if (data == null) return const [];
+    return predefinedPresetsFor(
+      ownEntries: data.gang.entries,
+      ownProfiles: data.profiles,
+      opponentEntries: _opponentEntries ?? const [],
+    );
+  }
+
+  // Labels of the predefined presets — lets a tile route a tapped token to the Predefined vs Custom
+  // tab (a token whose label is a preset is a predefined one).
+  Set<String> get _presetLabels => {for (final p in _presets) p.label};
+
+  void _editModel(
+    api.ListEntry entry, [
+    ModelEditTab initialTab = ModelEditTab.generic,
+  ]) {
     showDialog(
       context: context,
       builder: (_) => _ModelEditDialog(
         gameId: widget.gameId,
         entry: entry,
-        presets: presets,
+        presets: _presets,
+        initialTab: initialTab,
         onStateChanged: _applyEntryState,
       ),
     );
@@ -637,6 +647,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       profiles: data.profiles,
       equipment: data.equipment,
       showHeader: widget.showListHeader,
+      presetLabels: widget.editable ? _presetLabels : const {},
       onEditModel: widget.editable ? _editModel : null,
       onEditStats: widget.editable ? _editStats : null,
       onToggleActivated: widget.editable ? _toggleActivated : null,

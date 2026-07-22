@@ -18,12 +18,17 @@ part of 'gang_viewer_screen.dart';
 /// game. Three swipeable tabs — Generic (the built-in status counters), Custom (free-form player
 /// tokens), and Predefined (deferred). Every change lands on the server before the row updates, so
 /// the modal never shows a state the opponent won't get.
+/// Which tab the model Edit modal opens on. Tapping a marker on the tile jumps straight to where it's
+/// managed — a counter to Generic, a predefined token to Predefined, a hand-built one to Custom.
+enum ModelEditTab { generic, custom, predefined }
+
 class _ModelEditDialog extends StatefulWidget {
   const _ModelEditDialog({
     required this.gameId,
     required this.entry,
     required this.presets,
     required this.onStateChanged,
+    this.initialTab = ModelEditTab.generic,
   });
 
   final int gameId;
@@ -32,6 +37,9 @@ class _ModelEditDialog extends StatefulWidget {
   /// Gang-wide predefined tokens (spells + curated special-rule buffs) for the Predefined tab.
   final List<TokenPreset> presets;
   final void Function(int listEntryId, api.EntryState state) onStateChanged;
+
+  /// The tab to open on — set from the marker that was tapped to open the modal.
+  final ModelEditTab initialTab;
 
   @override
   State<_ModelEditDialog> createState() => _ModelEditDialogState();
@@ -153,6 +161,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
         .clamp(160.0, 440.0);
     return DefaultTabController(
       length: 3,
+      initialIndex: widget.initialTab.index,
       child: ThemedDialogCard(
         // Tapping any empty area of the modal drops the keyboard (the label field opens one).
         child: GestureDetector(
