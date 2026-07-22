@@ -162,6 +162,7 @@ class GangsTabView extends StatelessWidget {
                   gameId: gameId,
                   playerId: myPlayerId,
                   editable: true,
+                  opponentPlayerId: opponentPlayerId,
                   showListHeader: showListHeader,
                 ),
                 _GangTab(
@@ -220,12 +221,17 @@ class _GangTab extends StatefulWidget {
     required this.gameId,
     required this.playerId,
     required this.editable,
+    this.opponentPlayerId,
     this.showListHeader = true,
   });
 
   final int gameId;
   final int playerId;
   final bool editable;
+
+  /// Set only on the editable tab: the other gang, whose spells source the *debuff* presets a mage
+  /// there can cast onto this player's models (see [predefinedPresetsFor]).
+  final int? opponentPlayerId;
   final bool showListHeader;
 
   @override
@@ -236,6 +242,10 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   final _gameService = GameService();
   _GangTabData? _data;
   bool _failed = false;
+
+  // The opposing gang's entries, loaded once on the editable tab, used only to source debuff presets
+  // (their spell composition is static mid-game). Null until loaded / on the read-only tab.
+  List<api.ListEntry>? _opponentEntries;
 
   // game_state broadcasts don't carry entry states, so each one triggers a player-list refetch.
   // This timer coalesces a burst of broadcasts into a single fetch instead of one per frame.
@@ -280,6 +290,18 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
         ]);
         profiles = results[0] as List<api.Profile>;
         equipment = results[1] as List<api.Equipment>;
+      }
+      // Load the opposing gang once (for debuff presets). A failure just means no debuffs show.
+      if (widget.opponentPlayerId != null && _opponentEntries == null) {
+        try {
+          final opp = await _gameService.playerList(
+            widget.gameId,
+            widget.opponentPlayerId!,
+          );
+          _opponentEntries = opp.entries.toList();
+        } catch (_) {
+          // Debuffs simply won't be offered until a later refresh succeeds.
+        }
       }
       if (!mounted) return;
       // A local optimistic update landed while this fetch was in flight — keep the fresher local
@@ -333,11 +355,14 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
 
   void _editModel(api.ListEntry entry) {
     final data = _data;
-    // Predefined tokens are gathered gang-wide (a buff can land on a model other than its source),
-    // so every model's Predefined tab offers the same set.
+    // Buffs come from this gang (self-cast on allies); debuffs from the opposing gang (cast on us).
     final presets = data == null
         ? const <TokenPreset>[]
-        : predefinedPresetsForGang(data.gang.entries, data.profiles);
+        : predefinedPresetsFor(
+            ownEntries: data.gang.entries,
+            ownProfiles: data.profiles,
+            opponentEntries: _opponentEntries ?? const [],
+          );
     showDialog(
       context: context,
       builder: (_) => _ModelEditDialog(
