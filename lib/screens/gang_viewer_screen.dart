@@ -36,6 +36,7 @@ import '../widgets/spell_chips.dart';
 import '../widgets/status_views.dart';
 import '../widgets/themed_dialog_card.dart';
 import '../widgets/token_chip.dart';
+import '../widgets/token_preset.dart';
 import 'card_viewer_screen.dart';
 
 part 'gang_viewer_body.dart';
@@ -331,11 +332,18 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   }
 
   void _editModel(api.ListEntry entry) {
+    final data = _data;
+    // Predefined tokens are gathered gang-wide (a buff can land on a model other than its source),
+    // so every model's Predefined tab offers the same set.
+    final presets = data == null
+        ? const <TokenPreset>[]
+        : predefinedPresetsForGang(data.gang.entries, data.profiles);
     showDialog(
       context: context,
       builder: (_) => _ModelEditDialog(
         gameId: widget.gameId,
         entry: entry,
+        presets: presets,
         onStateChanged: _applyEntryState,
       ),
     );
