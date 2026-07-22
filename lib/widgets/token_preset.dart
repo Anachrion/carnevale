@@ -32,6 +32,7 @@ class TokenPreset {
     required this.color,
     this.toggleable = false,
     this.debuff = false,
+    this.count,
   });
 
   /// The catalog spell/special-rule name that a gang must have for this preset to be offered. When
@@ -51,6 +52,9 @@ class TokenPreset {
 
   /// Sourced from the opposing gang (cast on us) rather than our own.
   final bool debuff;
+
+  /// A counter preset's starting value; null when the preset isn't a counter.
+  final int? count;
 
   /// The label the dropped token carries.
   String get text => label ?? source;
@@ -163,6 +167,14 @@ const List<TokenPreset> kPredefinedPresets = [
   TokenPreset('Look With Satisfaction Upon My Enemies', color: _ruleBuff, toggleable: true),
   TokenPreset('Hasten Your Steps, The Unfaithful Must Be Cleansed', label: 'Hasten', color: _ruleBuff, toggleable: true),
   TokenPreset('Spurring Incense - 1AP', label: 'Spurring Incense', color: _ruleBuff, toggleable: true),
+
+  // --- Counter special rules (a running total that grows or spends; tap to step it) ---
+  TokenPreset('Gifts of Dried Meats', color: _ruleBuff, count: 3),
+  TokenPreset('Impaler', color: _ruleBuff, count: 0),
+  // The End is Near boosts one of three stats each turn; offer all three off the one rule.
+  TokenPreset('The End is Near', label: 'The End is Near — Mv.', color: _ruleBuff, count: 0),
+  TokenPreset('The End is Near', label: 'The End is Near — Dex.', color: _ruleBuff, count: 0),
+  TokenPreset('The End is Near', label: 'The End is Near — Att.', color: _ruleBuff, count: 0),
 
   // --- Faction abilities (not modelled per-model in the catalog; offered by the gang's faction) ---
   // Necrotic Mist — a Strigoi command ability, available whenever the gang is Strigoi.

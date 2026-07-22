@@ -853,6 +853,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tokenLabelTaken => 'Déjà sur ce modèle';
 
   @override
+  String get tokenCountLabel => 'Compteur';
+
+  @override
+  String get tokenKindPlain => 'Simple';
+
+  @override
+  String get tokenKindToggle => 'Bascule';
+
+  @override
+  String get tokenKindCounter => 'Compteur';
+
+  @override
   String get tokenColorLabel => 'Couleur';
 
   @override

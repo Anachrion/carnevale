@@ -175,5 +175,3 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/token_test.dart
-test/update_token_input_test.dart

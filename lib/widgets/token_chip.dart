@@ -142,7 +142,41 @@ class TokenChip extends StatelessWidget {
       ),
     );
 
-    if (onTap == null) return chip;
-    return GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: chip);
+    // A counter token carries a running total, shown as a corner badge in its own colour — the same
+    // treatment as the underwater counter marker. Tapping the token opens a −/+ stepper.
+    final count = token.count;
+    final Widget body = count == null
+        ? chip
+        : Stack(
+            clipBehavior: Clip.none,
+            children: [
+              chip,
+              Positioned(
+                right: -5,
+                bottom: -4,
+                child: Container(
+                  constraints: const BoxConstraints(minWidth: 17),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: swatch,
+                    borderRadius: BorderRadius.circular(9),
+                    border: Border.all(color: Colors.black.withValues(alpha: 0.35), width: 1),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+
+    if (onTap == null) return body;
+    return GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: body);
   }
 }

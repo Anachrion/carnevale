@@ -103,6 +103,8 @@ class _$Token extends Token {
   final bool toggleable;
   @override
   final bool active;
+  @override
+  final int? count;
 
   factory _$Token([void Function(TokenBuilder)? updates]) =>
       (TokenBuilder()..update(updates))._build();
@@ -113,6 +115,7 @@ class _$Token extends Token {
     this.text,
     required this.toggleable,
     required this.active,
+    this.count,
   }) : super._();
   @override
   Token rebuild(void Function(TokenBuilder) updates) =>
@@ -129,7 +132,8 @@ class _$Token extends Token {
         color == other.color &&
         text == other.text &&
         toggleable == other.toggleable &&
-        active == other.active;
+        active == other.active &&
+        count == other.count;
   }
 
   @override
@@ -140,6 +144,7 @@ class _$Token extends Token {
     _$hash = $jc(_$hash, text.hashCode);
     _$hash = $jc(_$hash, toggleable.hashCode);
     _$hash = $jc(_$hash, active.hashCode);
+    _$hash = $jc(_$hash, count.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -151,7 +156,8 @@ class _$Token extends Token {
           ..add('color', color)
           ..add('text', text)
           ..add('toggleable', toggleable)
-          ..add('active', active))
+          ..add('active', active)
+          ..add('count', count))
         .toString();
   }
 }
@@ -179,6 +185,10 @@ class TokenBuilder implements Builder<Token, TokenBuilder> {
   bool? get active => _$this._active;
   set active(bool? active) => _$this._active = active;
 
+  int? _count;
+  int? get count => _$this._count;
+  set count(int? count) => _$this._count = count;
+
   TokenBuilder() {
     Token._defaults(this);
   }
@@ -191,6 +201,7 @@ class TokenBuilder implements Builder<Token, TokenBuilder> {
       _text = $v.text;
       _toggleable = $v.toggleable;
       _active = $v.active;
+      _count = $v.count;
       _$v = null;
     }
     return this;
@@ -230,6 +241,7 @@ class TokenBuilder implements Builder<Token, TokenBuilder> {
             r'Token',
             'active',
           ),
+          count: count,
         );
     replace(_$result);
     return _$result;

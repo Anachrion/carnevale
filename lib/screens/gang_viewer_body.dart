@@ -25,6 +25,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     this.onEditStats,
     this.onToggleActivated,
     this.onToggleToken,
+    this.onEditTokenCount,
     this.onToggleSpellCast,
     this.onSummon,
     this.onDismissSummon,
@@ -53,6 +54,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
 
   /// When set, tapping a toggleable token on a model's tile flips its active state. Own models only.
   final void Function(api.ListEntry entry, api.Token token)? onToggleToken;
+
+  /// When set, tapping a counter token opens its −/+ stepper. Own models only.
+  final void Function(api.ListEntry entry, api.Token token)? onEditTokenCount;
 
   /// When set, a Mage's known/granted spells render as pure-toggle chips (mark cast) plus one
   /// detail button, instead of the read-only tappable-for-detail chips. Own models only — the
@@ -281,6 +285,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
           onToggleToken: onToggleToken != null && entry.state != null
               ? (token) => onToggleToken!(entry, token)
               : null,
+          onEditTokenCount: onEditTokenCount != null && entry.state != null
+              ? (token) => onEditTokenCount!(entry, token)
+              : null,
           onToggleSpellCast: onToggleSpellCast != null && entry.state != null
               ? (spell) => onToggleSpellCast!(entry, spell)
               : null,
@@ -481,6 +488,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     this.onEditStats,
     this.onToggleActivated,
     this.onToggleToken,
+    this.onEditTokenCount,
     this.onToggleSpellCast,
     this.onDismiss,
   });
@@ -500,6 +508,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 
   /// Flips a toggleable token's active state straight from the tile (own models only).
   final void Function(api.Token token)? onToggleToken;
+
+  /// Opens the −/+ stepper for a counter token (own models only).
+  final void Function(api.Token token)? onEditTokenCount;
   final void Function(KnownSpell spell)? onToggleSpellCast;
 
   /// Removes this model from the gang. Only ever set on a summoned model of your own.
@@ -658,11 +669,13 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                     for (final token in state.tokens)
                       TokenChip(
                         token: token,
-                        // A toggleable token flips on tap (the frequent per-turn flip). A
-                        // non-toggleable one opens the Edit modal on its own tab — Predefined if it's
-                        // a preset, else Custom — or, on a read-only tile, just swallows the tap so it
-                        // doesn't fall through and open the card viewer.
-                        onTap: token.toggleable && onToggleToken != null
+                        // A counter token opens its −/+ stepper; a toggleable one flips on tap (the
+                        // frequent per-turn flip); a plain one opens the Edit modal on its own tab —
+                        // Predefined if it's a preset, else Custom. On a read-only tile the tap is
+                        // just swallowed so it doesn't fall through and open the card viewer.
+                        onTap: token.count != null && onEditTokenCount != null
+                            ? () => onEditTokenCount!(token)
+                            : token.toggleable && onToggleToken != null
                             ? () => onToggleToken!(token)
                             : onEditModel != null
                             ? () => onEditModel!(
