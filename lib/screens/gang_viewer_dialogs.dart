@@ -126,6 +126,11 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final media = MediaQuery.of(context);
+    // Shrink the tab body when the keyboard is open so the dialog card never overflows (each tab's
+    // own list scrolls within it). ~300 covers the title, tab bar, Done, and card/dialog padding.
+    final tabHeight = (media.size.height - media.viewInsets.bottom - 300)
+        .clamp(160.0, 340.0);
     return DefaultTabController(
       length: 3,
       child: ThemedDialogCard(
@@ -158,7 +163,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               ],
             ),
             SizedBox(
-              height: 320,
+              height: tabHeight,
               child: TabBarView(
                 children: [
                   _genericTab(context, l10n),
