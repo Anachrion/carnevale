@@ -58,15 +58,41 @@ const Set<String> kDebuffSpellNames = {
   'Sunder Armour',
 };
 
-/// Curated buffs that live on a model's *special rules*, keyed by the exact special-rule name. Offered
-/// gang-wide (a support model's aura covers its allies). Start small; grow after in-game review.
+/// Colour for an ability/special-rule buff — distinct from spell buffs (teal) and debuffs (crimson).
+const _abilityColor = api.TokenColorEnum.azure;
+
+/// Curated buffs that live on a model's *special rules*, keyed by the exact catalog special-rule name
+/// and offered on any friendly model that carries the rule. `toggleable` is per-ability: on for a
+/// per-turn/round effect, off for a game-long one. Grow as more factions are covered.
 const Map<String, TokenPreset> kSpecialRulePresets = {
-  // Capodecina — a game-long re-roll aura granted to friendly models, so it isn't toggleable.
-  'Fight For the Guild!': TokenPreset(
-    label: 'Fight for the Guild',
-    color: api.TokenColorEnum.azure,
-    toggleable: false,
-  ),
+  // --- Guild ---
+  'Fight For the Guild!':
+      TokenPreset(label: 'Fight for the Guild', color: _abilityColor, toggleable: false),
+  'Toughen Up': TokenPreset(label: 'Toughen Up', color: _abilityColor, toggleable: true),
+  'Start the Horrorshow!':
+      TokenPreset(label: 'Start the Horrorshow!', color: _abilityColor, toggleable: true),
+  "Don't Let Them Take You!":
+      TokenPreset(label: "Don't Let Them Take You!", color: _abilityColor, toggleable: false),
+  "Strike When They're Vulnerable":
+      TokenPreset(label: "Strike When They're Vulnerable", color: _abilityColor, toggleable: true),
+  'Full Tilt!': TokenPreset(label: 'Full Tilt!', color: _abilityColor, toggleable: true),
+  'Thieves Guild Training':
+      TokenPreset(label: 'Thieves Guild Training', color: _abilityColor, toggleable: false),
+  'Rally to the Light!':
+      TokenPreset(label: 'Rally to the Light!', color: _abilityColor, toggleable: true),
+  'Hearty Fish Soup':
+      TokenPreset(label: 'Hearty Fish Soup', color: _abilityColor, toggleable: true),
+  'Prey Upon': TokenPreset(label: 'Prey Upon', color: _abilityColor, toggleable: false),
+  'Go For the Eyes':
+      TokenPreset(label: 'Go For the Eyes', color: _abilityColor, toggleable: false),
+  'Intimidation': TokenPreset(label: 'Intimidation', color: _abilityColor, toggleable: true),
+  'Fancy a Tipple?':
+      TokenPreset(label: 'Fancy a Tipple?', color: _abilityColor, toggleable: true),
+  'Bring it Down!':
+      TokenPreset(label: 'Bring it Down!', color: _abilityColor, toggleable: false),
+  'Extortion': TokenPreset(label: 'Extortion', color: _abilityColor, toggleable: true),
+  'Get to the Roof':
+      TokenPreset(label: 'Get to the Roof', color: _abilityColor, toggleable: false),
 };
 
 const _buffColor = api.TokenColorEnum.teal;
