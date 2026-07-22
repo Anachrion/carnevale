@@ -41,10 +41,11 @@ const List<api.TokenColorEnum> kTokenPalette = [
 ];
 
 /// A player token as it renders on the model tile's marker shelf: a quiet neutral chip (matching the
-/// counter markers). A *labelled* token carries its colour in the label text itself (no dot); a
-/// *dot-only* token is just the coloured disc (a hollow ring when a toggleable token is off). Either
-/// way a toggled-off token dims. The colour stays a cue, so the stat pills remain the loudest thing
-/// on the row. [onTap] flips a toggleable token's active state.
+/// counter markers). A *labelled* token shows its colour in the label; a *dot-only* token is the
+/// coloured disc. A *toggleable* token also carries a small status LED — lit when on, a hollow ring
+/// when off — which is what distinguishes it from a fixed marker; a toggled-off token additionally
+/// dims. The colour stays a cue, so the stat pills remain the loudest thing on the row. [onTap]
+/// flips a toggleable token's active state.
 class TokenChip extends StatelessWidget {
   const TokenChip({super.key, required this.token, this.onTap});
 
@@ -55,12 +56,15 @@ class TokenChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final swatch = tokenColor(token.color);
     final active = token.active;
+    final toggleable = token.toggleable;
     final label = token.text ?? '';
     final hasText = label.isNotEmpty;
+    // A static dot-only token stays a fixed circle; anything with a label or a toggle LED is a pill.
+    final circle = !hasText && !toggleable;
 
-    // Labelled → the coloured label is the whole content; dot-only → the coloured disc (hollow when
-    // toggled off). Label sized to the stat pills (fontSize 11) so it doesn't shout past them.
-    final Widget content = hasText
+    // Labelled → the coloured label; dot-only → the coloured disc. (A token is only ever off when it's
+    // toggleable, so the disc stays the filled colour cue — the LED below carries the on/off state.)
+    final Widget primary = hasText
         ? Text(
             label,
             style: GoogleFonts.cinzel(
@@ -72,12 +76,25 @@ class TokenChip extends StatelessWidget {
         : Container(
             width: 16,
             height: 16,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: swatch),
+          );
+
+    // The toggle LED: lit (filled + faint glow) when on, a hollow ring when off. Present only on a
+    // toggleable token — its absence is how a fixed marker reads as fixed.
+    final Widget? led = toggleable
+        ? Container(
+            width: 9,
+            height: 9,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: active ? swatch : Colors.transparent,
-              border: active ? null : Border.all(color: swatch, width: 2),
+              border: active ? null : Border.all(color: swatch, width: 1.5),
+              boxShadow: active
+                  ? [BoxShadow(color: swatch.withValues(alpha: 0.55), blurRadius: 5)]
+                  : null,
             ),
-          );
+          )
+        : null;
 
     // Same quiet dark chip + hairline light border as the counter markers, so tokens and counters
     // read as one family. Only a genuinely toggled-off token dims — an active token stays full.
@@ -85,19 +102,21 @@ class TokenChip extends StatelessWidget {
       opacity: active ? 1 : 0.45,
       child: Container(
         height: 34,
-        width: hasText ? null : 34,
-        padding: EdgeInsets.symmetric(horizontal: hasText ? 12 : 0),
+        width: circle ? 34 : null,
+        padding: EdgeInsets.symmetric(horizontal: circle ? 0 : (hasText ? 12 : 9)),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.28),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
         ),
-        // mainAxisSize.min so a labelled chip hugs its text instead of stretching the whole line;
-        // a dot-only chip has a fixed 34 width, which centres the disc.
+        // mainAxisSize.min so a pill hugs its content instead of stretching the whole line.
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [content],
+          children: [
+            primary,
+            if (led != null) ...[const SizedBox(width: 7), led],
+          ],
         ),
       ),
     );
