@@ -28,13 +28,19 @@ class TokenPreset {
   const TokenPreset(
     this.source, {
     this.label,
+    this.faction,
     required this.color,
     this.toggleable = false,
     this.debuff = false,
   });
 
-  /// The catalog spell/special-rule name that a gang must have for this preset to be offered.
+  /// The catalog spell/special-rule name that a gang must have for this preset to be offered. When
+  /// [faction] is set this is just the identity/label fallback — sourcing goes by faction instead.
   final String source;
+
+  /// If set, the preset is offered by the gang's *faction* rather than a specific spell/rule — for a
+  /// faction-wide ability the catalog doesn't model per-model (e.g. a Strigoi command ability).
+  final String? faction;
 
   /// The token's label; defaults to [source] when null. See [text].
   final String? label;
@@ -139,8 +145,9 @@ const List<TokenPreset> kPredefinedPresets = [
   TokenPreset('Electrical Stimulation', color: _ruleBuff),
   TokenPreset('Protective Field', color: _ruleBuff, toggleable: true),
   TokenPreset('Biological Studies', color: _ruleBuff, toggleable: true),
-  // Elixir is a single rule; the model picks a variant in play, so offer all three labels off it.
-  TokenPreset('Elixir', label: 'Elixir Acrobatic', color: _ruleBuff),
+  // Elixir is the Doctor of Poisons' single rule; in play they pick one variant for the game, so
+  // offer all three labels off it (the "(3)" on Acrobatic is part of the buff and kept).
+  TokenPreset('Elixir', label: 'Elixir Acrobatic (3)', color: _ruleBuff),
   TokenPreset('Elixir', label: 'Elixir Engage', color: _ruleBuff),
   TokenPreset('Elixir', label: 'Elixir Slippery', color: _ruleBuff),
   TokenPreset('Overcharged Discipline', color: _ruleBuff),
@@ -156,6 +163,10 @@ const List<TokenPreset> kPredefinedPresets = [
   TokenPreset('Look With Satisfaction Upon My Enemies', color: _ruleBuff, toggleable: true),
   TokenPreset('Hasten Your Steps, The Unfaithful Must Be Cleansed', label: 'Hasten', color: _ruleBuff, toggleable: true),
   TokenPreset('Spurring Incense - 1AP', label: 'Spurring Incense', color: _ruleBuff, toggleable: true),
+
+  // --- Faction abilities (not modelled per-model in the catalog; offered by the gang's faction) ---
+  // Necrotic Mist — a Strigoi command ability, available whenever the gang is Strigoi.
+  TokenPreset('Necrotic Mist', faction: 'strigoi', color: _ruleBuff, toggleable: true),
 ];
 
 // Every spell + special-rule name a gang has, across its in-gang models — the pool a preset's
@@ -187,16 +198,24 @@ Set<String> _possessedNames(
 List<TokenPreset> predefinedPresetsFor({
   required Iterable<api.ListEntry> ownEntries,
   required Iterable<api.Profile> ownProfiles,
+  required String ownFaction,
   required Iterable<api.ListEntry> opponentEntries,
   required Iterable<api.Profile> opponentProfiles,
+  required String opponentFaction,
 }) {
   final ownNames = _possessedNames(ownEntries, ownProfiles);
   final oppNames = _possessedNames(opponentEntries, opponentProfiles);
   final out = <TokenPreset>[];
   final seen = <String>{};
   for (final p in kPredefinedPresets) {
-    final has = p.debuff ? oppNames : ownNames;
-    if (!has.contains(p.source)) continue;
+    // A buff is checked against our side, a debuff against the opposing side (it's cast on us).
+    final bool has;
+    if (p.faction != null) {
+      has = (p.debuff ? opponentFaction : ownFaction) == p.faction;
+    } else {
+      has = (p.debuff ? oppNames : ownNames).contains(p.source);
+    }
+    if (!has) continue;
     if (seen.add(p.text)) out.add(p);
   }
   return out;
