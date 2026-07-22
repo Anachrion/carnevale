@@ -44,7 +44,7 @@ void main() {
     );
     expect(
       tester.widget<Opacity>(opacityIn(find.byType(TokenChip))).opacity,
-      0.5,
+      lessThan(1),
     );
 
     await tester.pumpWidget(

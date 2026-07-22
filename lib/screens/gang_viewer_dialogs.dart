@@ -134,12 +134,16 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     return DefaultTabController(
       length: 3,
       child: ThemedDialogCard(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.entry.name,
+        // Tapping any empty area of the modal drops the keyboard (the label field opens one).
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.entry.name,
               style: GoogleFonts.cinzel(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -186,6 +190,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );
@@ -252,14 +257,33 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   // toggleable). No per-token switch here — a token is toggled on the card.
   Widget _customTab(BuildContext context, AppLocalizations l10n) {
     final tokens = _state.tokens;
-    return ListView(
-      padding: const EdgeInsets.only(top: 4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (tokens.isNotEmpty) ...[
-          _sectionLabel(context, l10n.tokenSectionOnModel),
-          for (final t in tokens) _tokenRow(context, l10n, t),
-          const SizedBox(height: 14),
-        ],
+        // The model's current tokens — the only scrollable part, so the builder below never
+        // scrolls out of reach however many tokens the model carries.
+        Expanded(
+          child: tokens.isEmpty
+              ? Center(
+                  child: Text(
+                    l10n.tokenNoneYet,
+                    style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+                  ),
+                )
+              : ListView(
+                  padding: const EdgeInsets.only(top: 4),
+                  children: [
+                    _sectionLabel(context, l10n.tokenSectionOnModel),
+                    for (final t in tokens) _tokenRow(context, l10n, t),
+                  ],
+                ),
+        ),
+        Divider(
+          color: context.subtleTextColor.withValues(alpha: 0.3),
+          thickness: 0.5,
+          height: 16,
+        ),
+        // New-token builder — pinned, always visible.
         _sectionLabel(context, l10n.tokenSectionNew),
         Wrap(
           spacing: 12,
