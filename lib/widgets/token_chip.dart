@@ -87,13 +87,18 @@ class TokenChip extends StatelessWidget {
         height: 34,
         width: hasText ? null : 34,
         padding: EdgeInsets.symmetric(horizontal: hasText ? 12 : 0),
-        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.28),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
         ),
-        child: content,
+        // mainAxisSize.min so a labelled chip hugs its text instead of stretching the whole line;
+        // a dot-only chip has a fixed 34 width, which centres the disc.
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [content],
+        ),
       ),
     );
 
