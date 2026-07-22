@@ -41,9 +41,10 @@ const List<api.TokenColorEnum> kTokenPalette = [
 ];
 
 /// A player token as it renders on the model tile's marker shelf: a quiet neutral chip (matching the
-/// counter markers) carrying a small colour dot — the colour is a *cue*, not a fill, so the stat
-/// pills stay the loudest thing on the row. No label → just the dot; a toggleable token that is off
-/// dims to a hollow ring. [onTap] flips a toggleable token's active state.
+/// counter markers). A *labelled* token carries its colour in the label text itself (no dot); a
+/// *dot-only* token is just the coloured disc (a hollow ring when a toggleable token is off). Either
+/// way a toggled-off token dims. The colour stays a cue, so the stat pills remain the loudest thing
+/// on the row. [onTap] flips a toggleable token's active state.
 class TokenChip extends StatelessWidget {
   const TokenChip({super.key, required this.token, this.onTap});
 
@@ -57,15 +58,26 @@ class TokenChip extends StatelessWidget {
     final label = token.text ?? '';
     final hasText = label.isNotEmpty;
 
-    final dot = Container(
-      width: 16,
-      height: 16,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: active ? swatch : Colors.transparent,
-        border: active ? null : Border.all(color: swatch, width: 2),
-      ),
-    );
+    // Labelled → the coloured label is the whole content; dot-only → the coloured disc (hollow when
+    // toggled off). Label sized to the stat pills (fontSize 11) so it doesn't shout past them.
+    final Widget content = hasText
+        ? Text(
+            label,
+            style: GoogleFonts.cinzel(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: swatch,
+            ),
+          )
+        : Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: active ? swatch : Colors.transparent,
+              border: active ? null : Border.all(color: swatch, width: 2),
+            ),
+          );
 
     // Same quiet dark chip + hairline light border as the counter markers, so tokens and counters
     // read as one family. Only a genuinely toggled-off token dims — an active token stays full.
@@ -74,30 +86,14 @@ class TokenChip extends StatelessWidget {
       child: Container(
         height: 34,
         width: hasText ? null : 34,
-        padding: EdgeInsets.symmetric(horizontal: hasText ? 11 : 0),
+        padding: EdgeInsets.symmetric(horizontal: hasText ? 12 : 0),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.28),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            dot,
-            if (hasText) ...[
-              const SizedBox(width: 7),
-              Text(
-                label,
-                style: GoogleFonts.cinzel(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ],
-        ),
+        child: content,
       ),
     );
 

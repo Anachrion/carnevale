@@ -818,8 +818,8 @@ class _CounterIcon extends StatelessWidget {
               opacity: active ? 1.0 : 0.35,
               child: Image.asset(
                 asset,
-                width: 26,
-                height: 26,
+                width: 29,
+                height: 29,
                 color: foreground,
                 colorBlendMode: BlendMode.srcIn,
               ),
