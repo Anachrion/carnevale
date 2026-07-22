@@ -837,6 +837,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tokenNoLabel => 'No label';
 
   @override
+  String get tokenNoneYet => 'No tokens yet.';
+
+  @override
   String get tokenPredefinedSoon =>
       'Coming soon: tokens drawn from this model\'s own spells and rules.';
 

@@ -618,13 +618,16 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                 // few markers doesn't sprout a whole extra line. Stats stay on their own row above,
                 // so the markers wrapping here never squeeze them.
                 if (_hasMarkers(state) ||
+                    _knownSpells.isNotEmpty ||
                     onEditModel != null ||
                     onToggleActivated != null ||
                     onDismiss != null ||
                     activated) ...[
                   const SizedBox(height: 8),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    // Bottom-align: the controls (and Spells) sit on the last line of markers rather
+                    // than floating centred against a multi-line wrap.
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
                         child: Wrap(
@@ -644,6 +647,10 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                           ],
                         ),
                       ),
+                      if (_knownSpells.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        SpellsButton(spells: _knownSpells, onToggle: onToggleSpellCast),
+                      ],
                       if (onDismiss != null) ...[
                         const SizedBox(width: 8),
                         _DismissButton(onTap: onDismiss!),
@@ -663,7 +670,8 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                   ),
                 ],
               ],
-              if (_knownSpells.isNotEmpty) ...[
+              // Standalone (no in-game state): no controls row, so a Mage's spells get their own line.
+              if (state == null && _knownSpells.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 SpellsButton(spells: _knownSpells, onToggle: onToggleSpellCast),
               ],
@@ -693,37 +701,84 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return [
       if (state.stunned)
-        _CounterIcon(
-          asset: 'assets/images/counters/stunned.png',
-          label: l10n.counterStunned,
-          active: true,
-        ),
+        _TileMarkerIcon(asset: 'assets/images/counters/stunned.png', label: l10n.counterStunned),
       if (state.hidden)
-        _CounterIcon(
-          asset: 'assets/images/counters/hidden.png',
-          label: l10n.counterHidden,
-          active: true,
-        ),
+        _TileMarkerIcon(asset: 'assets/images/counters/hidden.png', label: l10n.counterHidden),
       if (state.guarding)
-        _CounterIcon(
-          asset: 'assets/images/counters/guard.png',
-          label: l10n.counterGuarding,
-          active: true,
-        ),
+        _TileMarkerIcon(asset: 'assets/images/counters/guard.png', label: l10n.counterGuarding),
       if (state.carryingObjective)
-        _CounterIcon(
+        _TileMarkerIcon(
           asset: 'assets/images/counters/carry_objective.png',
           label: l10n.counterCarryingObjective,
-          active: true,
         ),
       if (state.underwaterCounters > 0)
-        _CounterIcon(
+        _TileMarkerIcon(
           asset: 'assets/images/counters/underwater_counter.png',
           label: l10n.counterUnderwater,
-          active: true,
           badge: state.underwaterCounters,
         ),
     ];
+  }
+}
+
+/// An active counter on the model tile's marker shelf. Coherent with [TokenChip]: the same quiet
+/// dark chip + hairline light border, so counters and tokens read as one family and both stay
+/// legible on the lighter *and* darker parts of the faction-coloured row (the old accent-tinted
+/// circle washed out on the lighter side).
+class _TileMarkerIcon extends StatelessWidget {
+  const _TileMarkerIcon({required this.asset, required this.label, this.badge});
+
+  final String asset;
+  final String label;
+  final int? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.black.withValues(alpha: 0.28),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.32), width: 1),
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Image.asset(
+              asset,
+              width: 17,
+              height: 17,
+              color: Colors.white,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+            if (badge != null)
+              Positioned(
+                right: -3,
+                bottom: -3,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: context.accentColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '$badge',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

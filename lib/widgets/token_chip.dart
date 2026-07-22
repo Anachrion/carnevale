@@ -58,8 +58,8 @@ class TokenChip extends StatelessWidget {
     final hasText = label.isNotEmpty;
 
     final dot = Container(
-      width: 11,
-      height: 11,
+      width: 13,
+      height: 13,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: active ? swatch : Colors.transparent,
@@ -67,16 +67,18 @@ class TokenChip extends StatelessWidget {
       ),
     );
 
+    // Same quiet dark chip + hairline light border as the counter markers, so tokens and counters
+    // read as one family. Only a genuinely toggled-off token dims — an active token stays full.
     final chip = Opacity(
-      opacity: active ? 1 : 0.5,
+      opacity: active ? 1 : 0.45,
       child: Container(
         height: 28,
         width: hasText ? null : 28,
         padding: EdgeInsets.symmetric(horizontal: hasText ? 9 : 0),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.30),
+          color: Colors.black.withValues(alpha: 0.28),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

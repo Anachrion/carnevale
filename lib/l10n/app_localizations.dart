@@ -1580,6 +1580,12 @@ abstract class AppLocalizations {
   /// **'No label'**
   String get tokenNoLabel;
 
+  /// No description provided for @tokenNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No tokens yet.'**
+  String get tokenNoneYet;
+
   /// No description provided for @tokenPredefinedSoon.
   ///
   /// In en, this message translates to:
