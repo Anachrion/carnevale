@@ -719,9 +719,9 @@ class _MarkerShelf extends StatelessWidget {
     if (markers.isEmpty && !hasSpells) return const SizedBox.shrink();
 
     return Padding(
-      // Small top gap: the stat pills above float centred in a row sized by the taller controls, so
-      // they already carry slack below them — this keeps the pill→marker gap ≈ the marker→spells gap.
-      padding: const EdgeInsets.only(top: 2),
+      // Clear the stats row above: the pills float centred in a row sized by the taller controls, so
+      // there's already some slack, but this keeps the rightmost markers from crowding the buttons.
+      padding: const EdgeInsets.only(top: 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
