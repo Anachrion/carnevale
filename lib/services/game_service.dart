@@ -386,6 +386,7 @@ class GameService extends ChangeNotifier {
     String? text,
     required bool toggleable,
     required bool active,
+    int? count,
   }) => _guard(() async {
     final res = await _client.games.updateToken(
       id: gameId,
@@ -396,7 +397,8 @@ class GameService extends ChangeNotifier {
           ..token.color = color
           ..token.text = text
           ..token.toggleable = toggleable
-          ..token.active = active,
+          ..token.active = active
+          ..token.count = count,
       ),
     );
     return res.data!;

@@ -347,6 +347,60 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     _refetchTimer = Timer(const Duration(milliseconds: 300), _load);
   }
 
+  // Opens the −/+ stepper for a counter token, mirroring the stat stepper: optimistic + debounced,
+  // and the persist is owned here (survives the dialog closing, rolls back + toasts on failure).
+  void _editTokenCount(api.ListEntry entry, api.Token token) {
+    showDialog(
+      context: context,
+      builder: (_) => _TokenCountDialog(
+        entry: entry,
+        token: token,
+        onStateChanged: _applyEntryState,
+        onCommit: (entryId, target, confirmed) =>
+            _commitTokenCount(entryId, token, target, confirmed),
+      ),
+    );
+  }
+
+  Future<api.EntryState> _commitTokenCount(
+    int entryId,
+    api.Token token,
+    api.EntryState target,
+    api.EntryState confirmed,
+  ) async {
+    int? countIn(api.EntryState s) {
+      for (final t in s.tokens) {
+        if (t.id == token.id) return t.count;
+      }
+      return null;
+    }
+
+    final targetCount = countIn(target);
+    if (targetCount == null || targetCount == countIn(confirmed)) return confirmed;
+    try {
+      final newState = await GameService().upsertToken(
+        widget.gameId,
+        entryId,
+        tokenId: token.id,
+        color: token.color,
+        text: token.text,
+        toggleable: token.toggleable,
+        active: token.active,
+        count: targetCount,
+      );
+      if (mounted && _entryStateFor(entryId) == target) {
+        _applyEntryState(entryId, newState);
+      }
+      return newState;
+    } catch (_) {
+      if (mounted) {
+        _applyEntryState(entryId, confirmed);
+        showAppToast(context, AppLocalizations.of(context).tokenUpdateFailed);
+      }
+      return confirmed;
+    }
+  }
+
   // Applies a PATCH response locally right away rather than waiting for the echo broadcast's
   // re-fetch, so the tapped counter never lags behind the dialog.
   void _applyEntryState(int listEntryId, api.EntryState state) {
@@ -673,6 +727,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       onEditStats: widget.editable ? _editStats : null,
       onToggleActivated: widget.editable ? _toggleActivated : null,
       onToggleToken: widget.editable ? _toggleToken : null,
+      onEditTokenCount: widget.editable ? _editTokenCount : null,
       onToggleSpellCast: widget.editable ? _toggleSpellCast : null,
       onSummon: widget.editable ? _summon : null,
       onDismissSummon: widget.editable ? _dismissSummon : null,

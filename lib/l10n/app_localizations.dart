@@ -1592,6 +1592,30 @@ abstract class AppLocalizations {
   /// **'Already on this model'**
   String get tokenLabelTaken;
 
+  /// No description provided for @tokenCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get tokenCountLabel;
+
+  /// No description provided for @tokenKindPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain'**
+  String get tokenKindPlain;
+
+  /// No description provided for @tokenKindToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle'**
+  String get tokenKindToggle;
+
+  /// No description provided for @tokenKindCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter'**
+  String get tokenKindCounter;
+
   /// No description provided for @tokenColorLabel.
   ///
   /// In en, this message translates to:

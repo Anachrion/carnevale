@@ -17,6 +17,7 @@ part 'token.g.dart';
 /// * [text] - Optional label; a colour-only token omits it and renders as a dot.
 /// * [toggleable] - Whether the player can flip it on/off (a recurring effect) rather than only add/remove it.
 /// * [active] 
+/// * [count] - A counter token's running total (grows or spends); null for plain/toggleable tokens.
 @BuiltValue()
 abstract class Token implements Built<Token, TokenBuilder> {
   /// Client-generated stable id; re-sending the same id updates the token instead of adding a duplicate.
@@ -37,6 +38,10 @@ abstract class Token implements Built<Token, TokenBuilder> {
 
   @BuiltValueField(wireName: r'active')
   bool get active;
+
+  /// A counter token's running total (grows or spends); null for plain/toggleable tokens.
+  @BuiltValueField(wireName: r'count')
+  int? get count;
 
   Token._();
 
@@ -88,6 +93,13 @@ class _$TokenSerializer implements PrimitiveSerializer<Token> {
       object.active,
       specifiedType: const FullType(bool),
     );
+    if (object.count != null) {
+      yield r'count';
+      yield serializers.serialize(
+        object.count,
+        specifiedType: const FullType.nullable(int),
+      );
+    }
   }
 
   @override
@@ -146,6 +158,14 @@ class _$TokenSerializer implements PrimitiveSerializer<Token> {
             specifiedType: const FullType(bool),
           ) as bool;
           result.active = valueDes;
+          break;
+        case r'count':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(int),
+          ) as int?;
+          if (valueDes == null) continue;
+          result.count = valueDes;
           break;
         default:
           unhandled.add(key);

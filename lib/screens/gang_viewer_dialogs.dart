@@ -22,6 +22,10 @@ part of 'gang_viewer_screen.dart';
 /// managed — a counter to Generic, a predefined token to Predefined, a hand-built one to Custom.
 enum ModelEditTab { generic, custom, predefined }
 
+/// The kind of token the Custom builder makes: a plain marker, a toggleable on/off, or a counter
+/// that holds a stepped number. Mutually exclusive.
+enum _TokenKind { plain, toggleable, counter }
+
 class _ModelEditDialog extends StatefulWidget {
   const _ModelEditDialog({
     required this.gameId,
@@ -52,7 +56,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   // Custom-token builder state.
   api.TokenColorEnum _newColor = kTokenPalette.first;
   final TextEditingController _labelCtrl = TextEditingController();
-  bool _newToggleable = false;
+  _TokenKind _newKind = _TokenKind.plain;
 
   @override
   void dispose() {
@@ -149,14 +153,15 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
         tokenId: newIdempotencyKey(),
         color: _newColor,
         text: text.isEmpty ? null : text,
-        toggleable: _newToggleable,
+        toggleable: _newKind == _TokenKind.toggleable,
         active: true,
+        count: _newKind == _TokenKind.counter ? 0 : null,
       ),
     );
     if (mounted) {
       setState(() {
         _labelCtrl.clear();
-        _newToggleable = false;
+        _newKind = _TokenKind.plain;
       });
     }
   }
@@ -369,60 +374,25 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
           ],
         ),
         const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: () => setState(() => _newToggleable = !_newToggleable),
-                child: Row(
-                  children: [
-                    // The check sits in a slot the width of the colour spot above, so their centres
-                    // line up on the vertical axis.
-                    SizedBox(
-                      width: 46,
-                      child: Center(
-                        child: Icon(
-                          _newToggleable
-                              ? Icons.check_box
-                              : Icons.check_box_outline_blank,
-                          size: 22,
-                          color: _newToggleable
-                              ? context.accentColor
-                              : context.subtleTextColor,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Flexible(
-                      child: Text(
-                        l10n.tokenToggleable,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 12,
-                          color: context.textColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+        _kindSelector(context, l10n),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: (_busy || _labelTaken) ? null : _addToken,
+            style: TextButton.styleFrom(
+              backgroundColor: context.accentColor,
+              foregroundColor: context.cardBgColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            const SizedBox(width: 10),
-            TextButton(
-              onPressed: (_busy || _labelTaken) ? null : _addToken,
-              style: TextButton.styleFrom(
-                backgroundColor: context.accentColor,
-                foregroundColor: context.cardBgColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-              ),
-              child: Text(
-                l10n.tokenAdd,
-                style: GoogleFonts.cinzel(fontWeight: FontWeight.w700),
-              ),
+            child: Text(
+              l10n.tokenAdd,
+              style: GoogleFonts.cinzel(fontWeight: FontWeight.w700),
             ),
-          ],
+          ),
         ),
       ],
     );
@@ -472,7 +442,8 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
         ..color = preset.color
         ..text = preset.text
         ..toggleable = preset.toggleable
-        ..active = true,
+        ..active = true
+        ..count = preset.count,
     );
     final added = onModel != null;
     return InkWell(
@@ -506,12 +477,76 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       text: preset.text,
       toggleable: preset.toggleable,
       active: true,
+      count: preset.count,
     ),
   );
 
   Future<void> _removeToken(String tokenId) => _mutateTokens(
     () => GameService().removeToken(widget.gameId, widget.entry.id, tokenId),
   );
+
+  // Segmented one-of-three kind picker for the builder: Plain / Toggle / Counter.
+  Widget _kindSelector(BuildContext context, AppLocalizations l10n) {
+    Widget seg(_TokenKind kind, IconData icon, String label) {
+      final on = _newKind == kind;
+      return Expanded(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _newKind = kind),
+          child: Container(
+            color: on ? context.accentColor : Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 9),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 15,
+                  color: on ? context.cardBgColor : context.subtleTextColor,
+                ),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: on ? context.cardBgColor : context.textColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final divider = Container(
+      width: 1,
+      height: 22,
+      color: context.subtleTextColor.withValues(alpha: 0.3),
+    );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(9),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: [
+            seg(_TokenKind.plain, Icons.circle, l10n.tokenKindPlain),
+            divider,
+            seg(_TokenKind.toggleable, Icons.toggle_on, l10n.tokenKindToggle),
+            divider,
+            seg(_TokenKind.counter, Icons.tag, l10n.tokenKindCounter),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _sectionLabel(BuildContext context, String text) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
@@ -871,6 +906,196 @@ class _StatEditDialogState extends State<_StatEditDialog> {
   }
 
   Widget _stepperButton(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback? onTap,
+  }) {
+    final enabled = onTap != null;
+    final color = enabled
+        ? context.textColor
+        : context.subtleTextColor.withValues(alpha: 0.4);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: enabled ? color.withValues(alpha: 0.5) : color,
+            width: 1.2,
+          ),
+        ),
+        child: Icon(icon, size: 20, color: color),
+      ),
+    );
+  }
+}
+
+/// Steps a counter token's running total up/down — the same optimistic + debounced + rollback dance
+/// as [_StatEditDialog], persisting the whole token via `upsertToken` (its count changed). Opened by
+/// tapping a counter token on the tile.
+class _TokenCountDialog extends StatefulWidget {
+  const _TokenCountDialog({
+    required this.entry,
+    required this.token,
+    required this.onStateChanged,
+    required this.onCommit,
+  });
+
+  final api.ListEntry entry;
+  final api.Token token;
+  final void Function(int listEntryId, api.EntryState state) onStateChanged;
+  final Future<api.EntryState> Function(
+    int listEntryId,
+    api.EntryState target,
+    api.EntryState confirmed,
+  ) onCommit;
+
+  @override
+  State<_TokenCountDialog> createState() => _TokenCountDialogState();
+}
+
+class _TokenCountDialogState extends State<_TokenCountDialog> {
+  late api.EntryState _state = widget.entry.state!;
+  late api.EntryState _confirmed = widget.entry.state!;
+  Timer? _debounce;
+  bool _dirty = false;
+
+  int get _count {
+    for (final t in _state.tokens) {
+      if (t.id == widget.token.id) return t.count ?? 0;
+    }
+    return 0;
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    if (_dirty) widget.onCommit(widget.entry.id, _state, _confirmed);
+    super.dispose();
+  }
+
+  void _onChanged(int count) {
+    setState(() {
+      _state = _state.rebuild(
+        (b) => b.tokens.replace(
+          _state.tokens.map(
+            (t) => t.id == widget.token.id
+                ? t.rebuild((tb) => tb.count = count)
+                : t,
+          ),
+        ),
+      );
+    });
+    widget.onStateChanged(widget.entry.id, _state); // tile badge updates instantly
+    _dirty = true;
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 900), _commit);
+  }
+
+  Future<void> _commit() async {
+    if (!_dirty) return;
+    _dirty = false;
+    _debounce?.cancel();
+    final target = _state;
+    final result = await widget.onCommit(widget.entry.id, target, _confirmed);
+    _confirmed = result;
+    if (mounted && !_dirty) setState(() => _state = result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final title = (widget.token.text ?? '').isNotEmpty
+        ? widget.token.text!
+        : l10n.tokenTabCustom;
+    return ThemedDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              TokenChip(token: widget.token),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Divider(
+            color: context.subtleTextColor.withValues(alpha: 0.3),
+            thickness: 0.5,
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.tokenCountLabel,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.textColor,
+                    ),
+                  ),
+                ),
+                _countStepButton(
+                  context,
+                  icon: Icons.remove,
+                  // Can't drop below 0 (the server rejects it too); disabled at the floor.
+                  onTap: _count <= 0 ? null : () => _onChanged(_count - 1),
+                ),
+                Container(
+                  width: 48,
+                  alignment: Alignment.center,
+                  child: Text(
+                    '$_count',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor,
+                    ),
+                  ),
+                ),
+                _countStepButton(
+                  context,
+                  icon: Icons.add,
+                  onTap: () => _onChanged(_count + 1),
+                ),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                l10n.actionDone,
+                style: GoogleFonts.cinzel(
+                  fontWeight: FontWeight.w700,
+                  color: context.accentColor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _countStepButton(
     BuildContext context, {
     required IconData icon,
     required VoidCallback? onTap,
