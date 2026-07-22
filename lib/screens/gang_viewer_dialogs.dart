@@ -164,15 +164,6 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final media = MediaQuery.of(context);
-    // Shrink the tab body when the keyboard is open so the dialog card never overflows (each tab's
-    // own list scrolls within it). ~300 covers the title, tab bar, Done, and card/dialog padding.
-    // The floor must clear the Custom tab's pinned builder (colour+label row, toggle+Add row, and a
-    // possible error line) so its scrollable list never gets squeezed to a negative height — that
-    // was the source of the yellow/black overflow stripes flashing during the keyboard animation. The
-    // ceiling stays a touch below a full sheet so the card keeps clear of the keyboard mid-transition.
-    final tabHeight = (media.size.height - media.viewInsets.bottom - 280)
-        .clamp(230.0, 400.0);
     return DefaultTabController(
       length: 3,
       initialIndex: widget.initialTab.index,
@@ -209,14 +200,20 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 Tab(text: l10n.tokenTabPredefined),
               ],
             ),
-            SizedBox(
-              height: tabHeight,
-              child: TabBarView(
-                children: [
-                  _genericTab(context, l10n),
-                  _customTab(context, l10n),
-                  _predefinedTab(context, l10n),
-                ],
+            // Fit the tab body to the card's *real* available height — a Flexible in a
+            // height-bounded Column — rather than deriving it from MediaQuery.viewInsets, which
+            // desynced from the actual constraint mid keyboard-animation and overflowed the card
+            // (the flashing yellow/black stripes). Capped so it doesn't sprawl when there's room.
+            Flexible(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: TabBarView(
+                  children: [
+                    _genericTab(context, l10n),
+                    _customTab(context, l10n),
+                    _predefinedTab(context, l10n),
+                  ],
+                ),
               ),
             ),
             Align(
