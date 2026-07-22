@@ -1592,6 +1592,12 @@ abstract class AppLocalizations {
   /// **'Color'**
   String get tokenColorLabel;
 
+  /// No description provided for @tokenPredefinedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No spells or buffs to add for this gang.'**
+  String get tokenPredefinedEmpty;
+
   /// No description provided for @tokenPredefinedSoon.
   ///
   /// In en, this message translates to:

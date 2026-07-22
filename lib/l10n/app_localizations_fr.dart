@@ -853,6 +853,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tokenColorLabel => 'Couleur';
 
   @override
+  String get tokenPredefinedEmpty =>
+      'Aucun sort ou buff à ajouter pour cette bande.';
+
+  @override
   String get tokenPredefinedSoon =>
       'Bientôt : des jetons tirés des sorts et règles de ce modèle.';
 

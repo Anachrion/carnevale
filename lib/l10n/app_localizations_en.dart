@@ -843,6 +843,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tokenColorLabel => 'Color';
 
   @override
+  String get tokenPredefinedEmpty => 'No spells or buffs to add for this gang.';
+
+  @override
   String get tokenPredefinedSoon =>
       'Coming soon: tokens drawn from this model\'s own spells and rules.';
 

@@ -22,11 +22,15 @@ class _ModelEditDialog extends StatefulWidget {
   const _ModelEditDialog({
     required this.gameId,
     required this.entry,
+    required this.presets,
     required this.onStateChanged,
   });
 
   final int gameId;
   final api.ListEntry entry;
+
+  /// Gang-wide predefined tokens (spells + curated special-rule buffs) for the Predefined tab.
+  final List<TokenPreset> presets;
   final void Function(int listEntryId, api.EntryState state) onStateChanged;
 
   @override
@@ -393,17 +397,80 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   }
 
   Widget _predefinedTab(BuildContext context, AppLocalizations l10n) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Text(
-          l10n.tokenPredefinedSoon,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 13, color: context.subtleTextColor),
+    if (widget.presets.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            l10n.tokenPredefinedEmpty,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: context.subtleTextColor),
+          ),
+        ),
+      );
+    }
+    // A preset already on this model is shown ticked and inert, so tapping down the list can't stack
+    // duplicates. Matched by label — the same thing the token carries.
+    final present = {
+      for (final t in _state.tokens)
+        if ((t.text ?? '').isNotEmpty) t.text,
+    };
+    return ListView(
+      padding: const EdgeInsets.only(top: 4),
+      children: [
+        for (final p in widget.presets)
+          _presetRow(context, p, alreadyOn: present.contains(p.label)),
+      ],
+    );
+  }
+
+  Widget _presetRow(
+    BuildContext context,
+    TokenPreset preset, {
+    required bool alreadyOn,
+  }) {
+    final token = api.Token(
+      (b) => b
+        ..id = 'preview'
+        ..color = preset.color
+        ..text = preset.label
+        ..toggleable = preset.toggleable
+        ..active = true,
+    );
+    return Opacity(
+      opacity: alreadyOn ? 0.4 : 1,
+      child: InkWell(
+        onTap: (alreadyOn || _busy) ? null : () => _addPreset(preset),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Row(
+            children: [
+              TokenChip(token: token),
+              const Spacer(),
+              Icon(
+                alreadyOn ? Icons.check : Icons.add,
+                size: 20,
+                color: alreadyOn ? context.subtleTextColor : context.accentColor,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  Future<void> _addPreset(TokenPreset preset) => _mutateTokens(
+    () => GameService().upsertToken(
+      widget.gameId,
+      widget.entry.id,
+      tokenId: newIdempotencyKey(),
+      color: preset.color,
+      text: preset.label,
+      toggleable: preset.toggleable,
+      active: true,
+    ),
+  );
 
   Widget _sectionLabel(BuildContext context, String text) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
