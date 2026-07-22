@@ -797,6 +797,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get counterTapToToggle => 'Tap a counter to toggle it.';
 
   @override
+  String get tooltipEditModel => 'Edit counters and tokens';
+
+  @override
+  String get actionActivate => 'Activate';
+
+  @override
+  String get actionActivated => 'Activated';
+
+  @override
+  String get tokenUpdateFailed =>
+      'Could not update the token. Please try again.';
+
+  @override
+  String get tokenTabGeneric => 'Generic';
+
+  @override
+  String get tokenTabCustom => 'Custom';
+
+  @override
+  String get tokenTabPredefined => 'Predefined';
+
+  @override
+  String get tokenSectionOnModel => 'On this model';
+
+  @override
+  String get tokenSectionNew => 'New token';
+
+  @override
+  String get tokenLabelHint => 'Label — optional';
+
+  @override
+  String get tokenToggleable => 'Toggleable';
+
+  @override
+  String get tokenAdd => 'Add token';
+
+  @override
+  String get tokenNoLabel => 'No label';
+
+  @override
+  String get tokenNoneYet => 'No tokens yet.';
+
+  @override
+  String get tokenLabelTaken => 'Already on this model';
+
+  @override
+  String get tokenCountLabel => 'Count';
+
+  @override
+  String get tokenKindPlain => 'Plain';
+
+  @override
+  String get tokenKindToggle => 'Toggle';
+
+  @override
+  String get tokenKindCounter => 'Counter';
+
+  @override
+  String get tokenColorLabel => 'Color';
+
+  @override
+  String get tokenPredefinedEmpty => 'No spells or buffs to add for this gang.';
+
+  @override
+  String get tokenPredefinedSoon =>
+      'Coming soon: tokens drawn from this model\'s own spells and rules.';
+
+  @override
   String get statUpdateReverted =>
       'Couldn\'t save the change — reverted to the last synced value.';
 

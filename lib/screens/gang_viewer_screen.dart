@@ -23,6 +23,7 @@ import '../models/profile.dart';
 import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/game_service.dart';
+import '../services/idempotency.dart';
 import '../services/profile_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
@@ -34,6 +35,8 @@ import '../widgets/profile_search.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/status_views.dart';
 import '../widgets/themed_dialog_card.dart';
+import '../widgets/token_chip.dart';
+import '../widgets/token_preset.dart';
 import 'card_viewer_screen.dart';
 
 part 'gang_viewer_body.dart';
@@ -159,6 +162,7 @@ class GangsTabView extends StatelessWidget {
                   gameId: gameId,
                   playerId: myPlayerId,
                   editable: true,
+                  opponentPlayerId: opponentPlayerId,
                   showListHeader: showListHeader,
                 ),
                 _GangTab(
@@ -217,12 +221,17 @@ class _GangTab extends StatefulWidget {
     required this.gameId,
     required this.playerId,
     required this.editable,
+    this.opponentPlayerId,
     this.showListHeader = true,
   });
 
   final int gameId;
   final int playerId;
   final bool editable;
+
+  /// Set only on the editable tab: the other gang, whose spells source the *debuff* presets a mage
+  /// there can cast onto this player's models (see [predefinedPresetsFor]).
+  final int? opponentPlayerId;
   final bool showListHeader;
 
   @override
@@ -233,6 +242,12 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   final _gameService = GameService();
   _GangTabData? _data;
   bool _failed = false;
+
+  // The opposing gang's entries and profiles, loaded once on the editable tab, used only to source
+  // debuff presets (their composition is static mid-game). Null until loaded / on the read-only tab.
+  List<api.ListEntry>? _opponentEntries;
+  List<api.Profile>? _opponentProfiles;
+  String _opponentFaction = '';
 
   // game_state broadcasts don't carry entry states, so each one triggers a player-list refetch.
   // This timer coalesces a burst of broadcasts into a single fetch instead of one per frame.
@@ -294,6 +309,34 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       // On a failed refresh keep showing the last good snapshot instead of an error.
       if (mounted && _data == null) setState(() => _failed = true);
     }
+    // Load the opposing gang for debuff presets *after* our own gang is on screen — off the critical
+    // path, so the tab never waits on a second player-list fetch to first paint.
+    unawaited(_ensureOpponentData());
+  }
+
+  // Loads the opposing gang's entries and profiles once (their composition is static mid-game) to
+  // source the debuff presets. Deliberately not awaited by _load — a failure just means no debuffs
+  // until a later refresh retries (the null guard lets it).
+  Future<void> _ensureOpponentData() async {
+    if (widget.opponentPlayerId == null || _opponentEntries != null) return;
+    try {
+      final opp = await _gameService.playerList(
+        widget.gameId,
+        widget.opponentPlayerId!,
+      );
+      final profiles = await ProfileService().search(
+        '',
+        factions: {opp.faction, 'gifted'},
+      );
+      if (!mounted) return;
+      setState(() {
+        _opponentEntries = opp.entries.toList();
+        _opponentProfiles = profiles;
+        _opponentFaction = opp.faction;
+      });
+    } catch (_) {
+      // Debuffs simply won't be offered until a later refresh succeeds.
+    }
   }
 
   // game_state broadcasts don't carry entry states (those live in the player-list payload), so any
@@ -302,6 +345,60 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   void _onGameUpdate() {
     _refetchTimer?.cancel();
     _refetchTimer = Timer(const Duration(milliseconds: 300), _load);
+  }
+
+  // Opens the −/+ stepper for a counter token, mirroring the stat stepper: optimistic + debounced,
+  // and the persist is owned here (survives the dialog closing, rolls back + toasts on failure).
+  void _editTokenCount(api.ListEntry entry, api.Token token) {
+    showDialog(
+      context: context,
+      builder: (_) => _TokenCountDialog(
+        entry: entry,
+        token: token,
+        onStateChanged: _applyEntryState,
+        onCommit: (entryId, target, confirmed) =>
+            _commitTokenCount(entryId, token, target, confirmed),
+      ),
+    );
+  }
+
+  Future<api.EntryState> _commitTokenCount(
+    int entryId,
+    api.Token token,
+    api.EntryState target,
+    api.EntryState confirmed,
+  ) async {
+    int? countIn(api.EntryState s) {
+      for (final t in s.tokens) {
+        if (t.id == token.id) return t.count;
+      }
+      return null;
+    }
+
+    final targetCount = countIn(target);
+    if (targetCount == null || targetCount == countIn(confirmed)) return confirmed;
+    try {
+      final newState = await GameService().upsertToken(
+        widget.gameId,
+        entryId,
+        tokenId: token.id,
+        color: token.color,
+        text: token.text,
+        toggleable: token.toggleable,
+        active: token.active,
+        count: targetCount,
+      );
+      if (mounted && _entryStateFor(entryId) == target) {
+        _applyEntryState(entryId, newState);
+      }
+      return newState;
+    } catch (_) {
+      if (mounted) {
+        _applyEntryState(entryId, confirmed);
+        showAppToast(context, AppLocalizations.of(context).tokenUpdateFailed);
+      }
+      return confirmed;
+    }
   }
 
   // Applies a PATCH response locally right away rather than waiting for the echo broadcast's
@@ -328,15 +425,77 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  void _editCounters(api.ListEntry entry) {
+  // Buffs come from this gang (self-cast on allies); debuffs from the opposing gang (cast on us).
+  List<TokenPreset> get _presets {
+    final data = _data;
+    if (data == null) return const [];
+    return predefinedPresetsFor(
+      ownEntries: data.gang.entries,
+      ownProfiles: data.profiles,
+      ownFaction: data.gang.faction,
+      opponentEntries: _opponentEntries ?? const [],
+      opponentProfiles: _opponentProfiles ?? const [],
+      opponentFaction: _opponentFaction,
+    );
+  }
+
+  // Labels of the predefined presets — lets a tile route a tapped token to the Predefined vs Custom
+  // tab (a token whose label is a preset is a predefined one).
+  Set<String> get _presetLabels => {for (final p in _presets) p.text};
+
+  void _editModel(
+    api.ListEntry entry, [
+    ModelEditTab initialTab = ModelEditTab.generic,
+  ]) {
     showDialog(
       context: context,
-      builder: (_) => _CounterEditDialog(
+      builder: (_) => _ModelEditDialog(
         gameId: widget.gameId,
         entry: entry,
+        presets: _presets,
+        initialTab: initialTab,
         onStateChanged: _applyEntryState,
       ),
     );
+  }
+
+  // Flips a toggleable token's active state straight from the tile — the frequent per-turn flip.
+  // Upserts by the token's own id, so the server updates it in place.
+  // Flipping a token is a frequent per-turn tap, so it applies optimistically — the chip's LED flips
+  // the instant you tap, before the round-trip. The upsert is idempotent, so the persist can't
+  // meaningfully fail; on the off chance it does, we revert and say so.
+  Future<void> _toggleToken(api.ListEntry entry, api.Token token) async {
+    final current = entry.state;
+    if (current == null) return;
+    final flipped = token.rebuild((b) => b.active = !token.active);
+    final optimistic = current.rebuild(
+      (b) => b.tokens.replace(
+        current.tokens.map((t) => t.id == token.id ? flipped : t),
+      ),
+    );
+    _applyEntryState(entry.id, optimistic);
+    try {
+      final confirmed = await GameService().upsertToken(
+        widget.gameId,
+        entry.id,
+        tokenId: token.id,
+        color: token.color,
+        text: token.text,
+        toggleable: token.toggleable,
+        active: flipped.active,
+      );
+      // Adopt the server's state only if nothing newer has moved this model since (== is the guard).
+      if (mounted && _entryStateFor(entry.id) == optimistic) {
+        _applyEntryState(entry.id, confirmed);
+      }
+    } catch (_) {
+      if (mounted) {
+        if (_entryStateFor(entry.id) == optimistic) {
+          _applyEntryState(entry.id, current);
+        }
+        showAppToast(context, AppLocalizations.of(context).tokenUpdateFailed);
+      }
+    }
   }
 
   void _editStats(api.ListEntry entry) {
@@ -563,9 +722,12 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       profiles: data.profiles,
       equipment: data.equipment,
       showHeader: widget.showListHeader,
-      onEditCounters: widget.editable ? _editCounters : null,
+      presetLabels: widget.editable ? _presetLabels : const {},
+      onEditModel: widget.editable ? _editModel : null,
       onEditStats: widget.editable ? _editStats : null,
       onToggleActivated: widget.editable ? _toggleActivated : null,
+      onToggleToken: widget.editable ? _toggleToken : null,
+      onEditTokenCount: widget.editable ? _editTokenCount : null,
       onToggleSpellCast: widget.editable ? _toggleSpellCast : null,
       onSummon: widget.editable ? _summon : null,
       onDismissSummon: widget.editable ? _dismissSummon : null,

@@ -69,6 +69,17 @@ abstract final class AppPalette {
   static const wpBorder = [Color(0xFF93AED2), Color(0xFF3B6BAE)];
   static const cpBorder = [Color(0xFF89AF97), Color(0xFF296E42)];
 
+  // ── Player-token palette (CARNEVALEB-16) ─────────────────────────────────────
+  // A fixed, theme-independent set: the same swatch in light and dark, chosen to read on any faction
+  // row tint and to stay off the HP-red / WP-blue / CP-green stat semantics. Keyed by the server's
+  // TokenColorEnum via tokenColor() in app_colors.dart.
+  static const tokenCrimson = Color(0xFFDC4A41);
+  static const tokenAzure = Color(0xFF3F90D8);
+  static const tokenTeal = Color(0xFF17A79B);
+  static const tokenAmethyst = Color(0xFF9D5CD2);
+  static const tokenFuchsia = Color(0xFFD6519F);
+  static const tokenPewter = Color(0xFF9AA4B0);
+
   // ── Factions ───────────────────────────────────────────────────────────────
   static const factionColors = <String, Color>{
     'doctors': Color(0xFF177282),

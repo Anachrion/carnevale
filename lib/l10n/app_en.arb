@@ -292,6 +292,31 @@
 
   "counterToggleFailed": "Could not update the counter. Please try again.",
   "counterTapToToggle": "Tap a counter to toggle it.",
+  "tooltipEditModel": "Edit counters and tokens",
+  "actionActivate": "Activate",
+  "actionActivated": "Activated",
+  "tokenUpdateFailed": "Could not update the token. Please try again.",
+  "tokenTabGeneric": "Generic",
+  "tokenTabCustom": "Custom",
+  "tokenTabPredefined": "Predefined",
+  "tokenSectionOnModel": "On this model",
+  "tokenSectionNew": "New token",
+  "tokenLabelHint": "Label — optional",
+  "tokenToggleable": "Toggleable",
+  "@tokenToggleable": {
+    "description": "Label for the option that makes a token one you can flip on/off on the card (a recurring effect), rather than only add and remove."
+  },
+  "tokenAdd": "Add token",
+  "tokenNoLabel": "No label",
+  "tokenNoneYet": "No tokens yet.",
+  "tokenLabelTaken": "Already on this model",
+  "tokenCountLabel": "Count",
+  "tokenKindPlain": "Plain",
+  "tokenKindToggle": "Toggle",
+  "tokenKindCounter": "Counter",
+  "tokenColorLabel": "Color",
+  "tokenPredefinedEmpty": "No spells or buffs to add for this gang.",
+  "tokenPredefinedSoon": "Coming soon: tokens drawn from this model's own spells and rules.",
   "statUpdateReverted": "Couldn't save the change — reverted to the last synced value.",
   "@statUpdateReverted": {
     "description": "Toast shown when a debounced stat write fails and the displayed value rolls back to the last server-confirmed one. Not a retry prompt: the rollback already happened."

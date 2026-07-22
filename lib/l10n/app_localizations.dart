@@ -1502,6 +1502,138 @@ abstract class AppLocalizations {
   /// **'Tap a counter to toggle it.'**
   String get counterTapToToggle;
 
+  /// No description provided for @tooltipEditModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit counters and tokens'**
+  String get tooltipEditModel;
+
+  /// No description provided for @actionActivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get actionActivate;
+
+  /// No description provided for @actionActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Activated'**
+  String get actionActivated;
+
+  /// No description provided for @tokenUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update the token. Please try again.'**
+  String get tokenUpdateFailed;
+
+  /// No description provided for @tokenTabGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Generic'**
+  String get tokenTabGeneric;
+
+  /// No description provided for @tokenTabCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get tokenTabCustom;
+
+  /// No description provided for @tokenTabPredefined.
+  ///
+  /// In en, this message translates to:
+  /// **'Predefined'**
+  String get tokenTabPredefined;
+
+  /// No description provided for @tokenSectionOnModel.
+  ///
+  /// In en, this message translates to:
+  /// **'On this model'**
+  String get tokenSectionOnModel;
+
+  /// No description provided for @tokenSectionNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New token'**
+  String get tokenSectionNew;
+
+  /// No description provided for @tokenLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Label — optional'**
+  String get tokenLabelHint;
+
+  /// Label for the option that makes a token one you can flip on/off on the card (a recurring effect), rather than only add and remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggleable'**
+  String get tokenToggleable;
+
+  /// No description provided for @tokenAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add token'**
+  String get tokenAdd;
+
+  /// No description provided for @tokenNoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No label'**
+  String get tokenNoLabel;
+
+  /// No description provided for @tokenNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No tokens yet.'**
+  String get tokenNoneYet;
+
+  /// No description provided for @tokenLabelTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Already on this model'**
+  String get tokenLabelTaken;
+
+  /// No description provided for @tokenCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get tokenCountLabel;
+
+  /// No description provided for @tokenKindPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain'**
+  String get tokenKindPlain;
+
+  /// No description provided for @tokenKindToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle'**
+  String get tokenKindToggle;
+
+  /// No description provided for @tokenKindCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter'**
+  String get tokenKindCounter;
+
+  /// No description provided for @tokenColorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get tokenColorLabel;
+
+  /// No description provided for @tokenPredefinedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No spells or buffs to add for this gang.'**
+  String get tokenPredefinedEmpty;
+
+  /// No description provided for @tokenPredefinedSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon: tokens drawn from this model\'s own spells and rules.'**
+  String get tokenPredefinedSoon;
+
   /// Toast shown when a debounced stat write fails and the displayed value rolls back to the last server-confirmed one. Not a retry prompt: the rollback already happened.
   ///
   /// In en, this message translates to:

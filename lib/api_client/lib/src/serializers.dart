@@ -72,6 +72,7 @@ import 'package:carnevale_api/src/model/spell.dart';
 import 'package:carnevale_api/src/model/spell_pool.dart';
 import 'package:carnevale_api/src/model/spell_rule_ref.dart';
 import 'package:carnevale_api/src/model/summon_model_request.dart';
+import 'package:carnevale_api/src/model/token.dart';
 import 'package:carnevale_api/src/model/update_account_input.dart';
 import 'package:carnevale_api/src/model/update_account_input_user.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
@@ -80,6 +81,7 @@ import 'package:carnevale_api/src/model/update_spell_cast_input.dart';
 import 'package:carnevale_api/src/model/update_spell_cast_input_spell_cast.dart';
 import 'package:carnevale_api/src/model/update_stats_input.dart';
 import 'package:carnevale_api/src/model/update_stats_input_stats.dart';
+import 'package:carnevale_api/src/model/update_token_input.dart';
 import 'package:carnevale_api/src/model/validation_errors.dart';
 import 'package:carnevale_api/src/model/weapon.dart';
 
@@ -144,6 +146,7 @@ part 'serializers.g.dart';
   SpellPool,
   SpellRuleRef,
   SummonModelRequest,
+  Token,
   UpdateAccountInput,
   UpdateAccountInputUser,
   UpdateCountersInput,
@@ -152,6 +155,7 @@ part 'serializers.g.dart';
   UpdateSpellCastInputSpellCast,
   UpdateStatsInput,
   UpdateStatsInputStats,
+  UpdateTokenInput,
   ValidationErrors,
   Weapon,
 ])

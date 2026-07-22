@@ -27,6 +27,8 @@ class _$EntryState extends EntryState {
   final bool activated;
   @override
   final bool dead;
+  @override
+  final BuiltList<Token> tokens;
 
   factory _$EntryState([void Function(EntryStateBuilder)? updates]) =>
       (EntryStateBuilder()..update(updates))._build();
@@ -42,6 +44,7 @@ class _$EntryState extends EntryState {
     required this.underwaterCounters,
     required this.activated,
     required this.dead,
+    required this.tokens,
   }) : super._();
   @override
   EntryState rebuild(void Function(EntryStateBuilder) updates) =>
@@ -63,7 +66,8 @@ class _$EntryState extends EntryState {
         carryingObjective == other.carryingObjective &&
         underwaterCounters == other.underwaterCounters &&
         activated == other.activated &&
-        dead == other.dead;
+        dead == other.dead &&
+        tokens == other.tokens;
   }
 
   @override
@@ -79,6 +83,7 @@ class _$EntryState extends EntryState {
     _$hash = $jc(_$hash, underwaterCounters.hashCode);
     _$hash = $jc(_$hash, activated.hashCode);
     _$hash = $jc(_$hash, dead.hashCode);
+    _$hash = $jc(_$hash, tokens.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -95,7 +100,8 @@ class _$EntryState extends EntryState {
           ..add('carryingObjective', carryingObjective)
           ..add('underwaterCounters', underwaterCounters)
           ..add('activated', activated)
-          ..add('dead', dead))
+          ..add('dead', dead)
+          ..add('tokens', tokens))
         .toString();
   }
 }
@@ -151,6 +157,10 @@ class EntryStateBuilder implements Builder<EntryState, EntryStateBuilder> {
   bool? get dead => _$this._dead;
   set dead(bool? dead) => _$this._dead = dead;
 
+  ListBuilder<Token>? _tokens;
+  ListBuilder<Token> get tokens => _$this._tokens ??= ListBuilder<Token>();
+  set tokens(ListBuilder<Token>? tokens) => _$this._tokens = tokens;
+
   EntryStateBuilder() {
     EntryState._defaults(this);
   }
@@ -168,6 +178,7 @@ class EntryStateBuilder implements Builder<EntryState, EntryStateBuilder> {
       _underwaterCounters = $v.underwaterCounters;
       _activated = $v.activated;
       _dead = $v.dead;
+      _tokens = $v.tokens.toBuilder();
       _$v = null;
     }
     return this;
@@ -230,6 +241,7 @@ class EntryStateBuilder implements Builder<EntryState, EntryStateBuilder> {
               r'EntryState',
               'dead',
             ),
+            tokens: tokens.build(),
           );
     } catch (_) {
       late String _$failedField;
@@ -240,6 +252,9 @@ class EntryStateBuilder implements Builder<EntryState, EntryStateBuilder> {
         willPoints.build();
         _$failedField = 'commandPoints';
         commandPoints.build();
+
+        _$failedField = 'tokens';
+        tokens.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
           r'EntryState',

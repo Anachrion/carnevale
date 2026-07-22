@@ -84,6 +84,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**getPlayerList**](doc/GamesApi.md#getplayerlist) | **GET** /games/{id}/players/{player_id}/list | Either player&#39;s selected gang, in full (with entries)
 [*GamesApi*](doc/GamesApi.md) | [**joinGame**](doc/GamesApi.md#joingame) | **POST** /games/join | Join a game via its join_code
 [*GamesApi*](doc/GamesApi.md) | [**pickRole**](doc/GamesApi.md#pickrole) | **PATCH** /games/{id}/role | Pick Attacker or Defender (role roll-off winner only)
+[*GamesApi*](doc/GamesApi.md) | [**removeToken**](doc/GamesApi.md#removetoken) | **DELETE** /games/{id}/entries/{list_entry_id}/tokens/{token_id} | Remove a player token from one of the current player&#39;s own models
 [*GamesApi*](doc/GamesApi.md) | [**rewindTurn**](doc/GamesApi.md#rewindturn) | **POST** /games/{id}/turns/rewind | Rewind the requesting player&#39;s turn cursor
 [*GamesApi*](doc/GamesApi.md) | [**scoreAgenda**](doc/GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
@@ -93,6 +94,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**updateCounters**](doc/GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
 [*GamesApi*](doc/GamesApi.md) | [**updateSpellCast**](doc/GamesApi.md#updatespellcast) | **PATCH** /games/{id}/entries/{list_entry_id}/spell_casts | Mark (or unmark) one known/granted spell as cast, on one of the current player&#39;s own models
 [*GamesApi*](doc/GamesApi.md) | [**updateStats**](doc/GamesApi.md#updatestats) | **PATCH** /games/{id}/entries/{list_entry_id}/stats | Update current HP/WP/CP on one of the current player&#39;s own models
+[*GamesApi*](doc/GamesApi.md) | [**updateToken**](doc/GamesApi.md#updatetoken) | **PATCH** /games/{id}/entries/{list_entry_id}/tokens | Add or update a player token on one of the current player&#39;s own models
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**createListEntry**](doc/ListEntriesApi.md#createlistentry) | **POST** /list_entries | Add a card to a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**deleteListEntry**](doc/ListEntriesApi.md#deletelistentry) | **DELETE** /list_entries/{id} | Remove a card from a list
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**setListEntryIllustration**](doc/ListEntriesApi.md#setlistentryillustration) | **PATCH** /list_entries/{id}/illustration | Switch which illustration (card reference) a model is hired as
@@ -179,6 +181,7 @@ Class | Method | HTTP request | Description
  - [SpellPool](doc/SpellPool.md)
  - [SpellRuleRef](doc/SpellRuleRef.md)
  - [SummonModelRequest](doc/SummonModelRequest.md)
+ - [Token](doc/Token.md)
  - [UpdateAccountInput](doc/UpdateAccountInput.md)
  - [UpdateAccountInputUser](doc/UpdateAccountInputUser.md)
  - [UpdateCountersInput](doc/UpdateCountersInput.md)
@@ -187,6 +190,7 @@ Class | Method | HTTP request | Description
  - [UpdateSpellCastInputSpellCast](doc/UpdateSpellCastInputSpellCast.md)
  - [UpdateStatsInput](doc/UpdateStatsInput.md)
  - [UpdateStatsInputStats](doc/UpdateStatsInputStats.md)
+ - [UpdateTokenInput](doc/UpdateTokenInput.md)
  - [ValidationErrors](doc/ValidationErrors.md)
  - [Weapon](doc/Weapon.md)
 

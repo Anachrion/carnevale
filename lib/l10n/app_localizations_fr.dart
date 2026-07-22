@@ -807,6 +807,75 @@ class AppLocalizationsFr extends AppLocalizations {
   String get counterTapToToggle => 'Appuyez sur un marqueur pour l\'activer.';
 
   @override
+  String get tooltipEditModel => 'Modifier marqueurs et jetons';
+
+  @override
+  String get actionActivate => 'Activer';
+
+  @override
+  String get actionActivated => 'Activé';
+
+  @override
+  String get tokenUpdateFailed =>
+      'Impossible de mettre à jour le jeton. Veuillez réessayer.';
+
+  @override
+  String get tokenTabGeneric => 'Génériques';
+
+  @override
+  String get tokenTabCustom => 'Personnalisés';
+
+  @override
+  String get tokenTabPredefined => 'Prédéfinis';
+
+  @override
+  String get tokenSectionOnModel => 'Sur ce modèle';
+
+  @override
+  String get tokenSectionNew => 'Nouveau jeton';
+
+  @override
+  String get tokenLabelHint => 'Libellé — facultatif';
+
+  @override
+  String get tokenToggleable => 'Activable';
+
+  @override
+  String get tokenAdd => 'Ajouter le jeton';
+
+  @override
+  String get tokenNoLabel => 'Sans libellé';
+
+  @override
+  String get tokenNoneYet => 'Aucun jeton pour l\'instant.';
+
+  @override
+  String get tokenLabelTaken => 'Déjà sur ce modèle';
+
+  @override
+  String get tokenCountLabel => 'Compteur';
+
+  @override
+  String get tokenKindPlain => 'Simple';
+
+  @override
+  String get tokenKindToggle => 'Bascule';
+
+  @override
+  String get tokenKindCounter => 'Compteur';
+
+  @override
+  String get tokenColorLabel => 'Couleur';
+
+  @override
+  String get tokenPredefinedEmpty =>
+      'Aucun sort ou buff à ajouter pour cette bande.';
+
+  @override
+  String get tokenPredefinedSoon =>
+      'Bientôt : des jetons tirés des sorts et règles de ce modèle.';
+
+  @override
   String get statUpdateReverted =>
       'Échec de l\'enregistrement — retour à la dernière valeur synchronisée.';
 

@@ -14,28 +14,55 @@
 
 part of 'gang_viewer_screen.dart';
 
-/// Popup opened by [_AddCounterButton]: lists all five counters with their current state;
-/// tapping a row toggles it (underwater cycles 0 → 1 → 2 → 0) and saves immediately — no
-/// confirm step, matching how quickly counters flip at the table. Every change lands on the
-/// server before the row updates, so the popup never shows a state the opponent won't get.
-class _CounterEditDialog extends StatefulWidget {
-  const _CounterEditDialog({
+/// Opened by the tile's Edit (pencil) button: one modal covering everything a model carries in
+/// game. Three swipeable tabs — Generic (the built-in status counters), Custom (free-form player
+/// tokens), and Predefined (deferred). Every change lands on the server before the row updates, so
+/// the modal never shows a state the opponent won't get.
+/// Which tab the model Edit modal opens on. Tapping a marker on the tile jumps straight to where it's
+/// managed — a counter to Generic, a predefined token to Predefined, a hand-built one to Custom.
+enum ModelEditTab { generic, custom, predefined }
+
+/// The kind of token the Custom builder makes: a plain marker, a toggleable on/off, or a counter
+/// that holds a stepped number. Mutually exclusive.
+enum _TokenKind { plain, toggleable, counter }
+
+class _ModelEditDialog extends StatefulWidget {
+  const _ModelEditDialog({
     required this.gameId,
     required this.entry,
+    required this.presets,
     required this.onStateChanged,
+    this.initialTab = ModelEditTab.generic,
   });
 
   final int gameId;
   final api.ListEntry entry;
+
+  /// Gang-wide predefined tokens (spells + curated special-rule buffs) for the Predefined tab.
+  final List<TokenPreset> presets;
   final void Function(int listEntryId, api.EntryState state) onStateChanged;
 
+  /// The tab to open on — set from the marker that was tapped to open the modal.
+  final ModelEditTab initialTab;
+
   @override
-  State<_CounterEditDialog> createState() => _CounterEditDialogState();
+  State<_ModelEditDialog> createState() => _ModelEditDialogState();
 }
 
-class _CounterEditDialogState extends State<_CounterEditDialog> {
+class _ModelEditDialogState extends State<_ModelEditDialog> {
   late api.EntryState _state = widget.entry.state!;
   bool _busy = false;
+
+  // Custom-token builder state.
+  api.TokenColorEnum _newColor = kTokenPalette.first;
+  final TextEditingController _labelCtrl = TextEditingController();
+  _TokenKind _newKind = _TokenKind.plain;
+
+  @override
+  void dispose() {
+    _labelCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _update({
     bool? stunned,
@@ -44,10 +71,21 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
     bool? carryingObjective,
     int? underwaterCounters,
   }) async {
-    if (_busy) return;
-    setState(() => _busy = true);
+    // Optimistic: the counter flips locally (in the row and on the tile) the instant you tap, then
+    // persists. No _busy gate — a status toggle must feel snappy and can't meaningfully fail (the
+    // merge is idempotent). On the rare failure we roll back to the pre-tap value and say so.
+    final previous = _state;
+    final optimistic = _state.rebuild((b) {
+      if (stunned != null) b.stunned = stunned;
+      if (hidden != null) b.hidden = hidden;
+      if (guarding != null) b.guarding = guarding;
+      if (carryingObjective != null) b.carryingObjective = carryingObjective;
+      if (underwaterCounters != null) b.underwaterCounters = underwaterCounters;
+    });
+    setState(() => _state = optimistic);
+    widget.onStateChanged(widget.entry.id, optimistic);
     try {
-      final newState = await GameService().updateCounters(
+      final confirmed = await GameService().updateCounters(
         widget.gameId,
         widget.entry.id,
         stunned: stunned,
@@ -57,109 +95,570 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
         underwaterCounters: underwaterCounters,
       );
       if (!mounted) return;
-      setState(() => _state = newState);
-      widget.onStateChanged(widget.entry.id, newState);
+      // Adopt the server's state only if no newer tap has moved us on since (== is the guard).
+      if (_state == optimistic) {
+        setState(() => _state = confirmed);
+        widget.onStateChanged(widget.entry.id, confirmed);
+      }
     } catch (_) {
       if (mounted) {
+        if (_state == optimistic) {
+          setState(() => _state = previous);
+          widget.onStateChanged(widget.entry.id, previous);
+        }
         showAppToast(
           context,
           AppLocalizations.of(context).counterToggleFailed,
         );
+      }
+    }
+  }
+
+  // Adds or removes a token and echoes the new state to the tile — mirrors _update for counters.
+  Future<void> _mutateTokens(
+    Future<api.EntryState> Function() call,
+  ) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final newState = await call();
+      if (!mounted) return;
+      setState(() => _state = newState);
+      widget.onStateChanged(widget.entry.id, newState);
+    } catch (_) {
+      if (mounted) {
+        showAppToast(context, AppLocalizations.of(context).tokenUpdateFailed);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
+  // A model can't carry two tokens with the same *label* — it keeps the label-based Custom/Predefined
+  // split unambiguous and stops accidental duplicates. Colour-only tokens (empty label) are exempt:
+  // several plain dots, even of one colour, are fine. Checked against every token, custom or preset.
+  bool get _labelTaken {
+    final label = _labelCtrl.text.trim();
+    if (label.isEmpty) return false;
+    return _state.tokens.any((t) => (t.text ?? '') == label);
+  }
+
+  Future<void> _addToken() async {
+    if (_labelTaken) return;
+    final text = _labelCtrl.text.trim();
+    await _mutateTokens(
+      () => GameService().upsertToken(
+        widget.gameId,
+        widget.entry.id,
+        tokenId: newIdempotencyKey(),
+        color: _newColor,
+        text: text.isEmpty ? null : text,
+        toggleable: _newKind == _TokenKind.toggleable,
+        active: true,
+        count: _newKind == _TokenKind.counter ? 0 : null,
+      ),
+    );
+    if (mounted) {
+      setState(() {
+        _labelCtrl.clear();
+        _newKind = _TokenKind.plain;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ThemedDialogCard(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.entry.name,
-            style: GoogleFonts.cinzel(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.counterTapToToggle,
-            style: TextStyle(fontSize: 12, color: context.subtleTextColor),
-          ),
-          const SizedBox(height: 12),
-          Divider(
-            color: context.subtleTextColor.withValues(alpha: 0.3),
-            thickness: 0.5,
-          ),
-          const SizedBox(height: 4),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/stunned.png',
-            label: l10n.counterStunned,
-            active: _state.stunned,
-            onTap: () => _update(stunned: !_state.stunned),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/hidden.png',
-            label: l10n.counterHidden,
-            active: _state.hidden,
-            onTap: () => _update(hidden: !_state.hidden),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/guard.png',
-            label: l10n.counterGuarding,
-            active: _state.guarding,
-            onTap: () => _update(guarding: !_state.guarding),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/carry_objective.png',
-            label: l10n.counterCarryingObjective,
-            active: _state.carryingObjective,
-            onTap: () => _update(carryingObjective: !_state.carryingObjective),
-          ),
-          _counterRow(
-            context,
-            asset: 'assets/images/counters/underwater_counter.png',
-            label: l10n.counterUnderwater,
-            active: _state.underwaterCounters > 0,
-            badge: _state.underwaterCounters > 0
-                ? _state.underwaterCounters
-                : null,
-            trailing: Text(
-              '${_state.underwaterCounters} / 2',
+    return DefaultTabController(
+      length: 3,
+      initialIndex: widget.initialTab.index,
+      child: ThemedDialogCard(
+        // Tapping any empty area of the modal drops the keyboard (the label field opens one).
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.entry.name,
               style: GoogleFonts.cinzel(
-                fontSize: 13,
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: _state.underwaterCounters > 0
-                    ? context.accentColor
-                    : context.subtleTextColor,
+                color: context.textColor,
               ),
             ),
-            onTap: () => _update(
-              underwaterCounters: (_state.underwaterCounters + 1) % 3,
+            const SizedBox(height: 8),
+            TabBar(
+              labelColor: context.accentColor,
+              unselectedLabelColor: context.subtleTextColor,
+              indicatorColor: context.accentColor,
+              labelStyle: GoogleFonts.cinzel(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+              tabs: [
+                Tab(text: l10n.tokenTabGeneric),
+                Tab(text: l10n.tokenTabCustom),
+                Tab(text: l10n.tokenTabPredefined),
+              ],
             ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                AppLocalizations.of(context).actionDone,
-                style: GoogleFonts.cinzel(
-                  fontWeight: FontWeight.w700,
-                  color: context.accentColor,
+            // Fit the tab body to the card's *real* available height — a Flexible in a
+            // height-bounded Column — rather than deriving it from MediaQuery.viewInsets, which
+            // desynced from the actual constraint mid keyboard-animation and overflowed the card
+            // (the flashing yellow/black stripes). Capped so it doesn't sprawl when there's room.
+            Flexible(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: TabBarView(
+                  children: [
+                    _genericTab(context, l10n),
+                    _customTab(context, l10n),
+                    _predefinedTab(context, l10n),
+                  ],
                 ),
               ),
             ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  l10n.actionDone,
+                  style: GoogleFonts.cinzel(
+                    fontWeight: FontWeight.w700,
+                    color: context.accentColor,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Generic tab: the built-in status counters (the old counter popup, folded in).
+  Widget _genericTab(BuildContext context, AppLocalizations l10n) {
+    return ListView(
+      padding: const EdgeInsets.only(top: 4),
+      children: [
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/stunned.png',
+          label: l10n.counterStunned,
+          active: _state.stunned,
+          onTap: () => _update(stunned: !_state.stunned),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/hidden.png',
+          label: l10n.counterHidden,
+          active: _state.hidden,
+          onTap: () => _update(hidden: !_state.hidden),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/guard.png',
+          label: l10n.counterGuarding,
+          active: _state.guarding,
+          onTap: () => _update(guarding: !_state.guarding),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/carry_objective.png',
+          label: l10n.counterCarryingObjective,
+          active: _state.carryingObjective,
+          onTap: () => _update(carryingObjective: !_state.carryingObjective),
+        ),
+        _counterRow(
+          context,
+          asset: 'assets/images/counters/underwater_counter.png',
+          label: l10n.counterUnderwater,
+          active: _state.underwaterCounters > 0,
+          badge: _state.underwaterCounters > 0 ? _state.underwaterCounters : null,
+          trailing: Text(
+            '${_state.underwaterCounters} / 2',
+            style: GoogleFonts.cinzel(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: _state.underwaterCounters > 0
+                  ? context.accentColor
+                  : context.subtleTextColor,
+            ),
+          ),
+          onTap: () => _update(
+            underwaterCounters: (_state.underwaterCounters + 1) % 3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Labels offered as predefined presets for this model — used to keep those tokens out of the
+  // Custom tab so the two concepts don't blur together (they're managed in the Predefined tab).
+  Set<String> get _presetLabels => {for (final p in widget.presets) p.text};
+
+  // Custom tab: the model's *hand-built* player tokens (manage) plus a builder (colour + optional
+  // label + toggleable). Predefined tokens are excluded — they live in the Predefined tab. No
+  // per-token switch here — a token is toggled on the card.
+  Widget _customTab(BuildContext context, AppLocalizations l10n) {
+    final presetLabels = _presetLabels;
+    final tokens = _state.tokens
+        .where((t) => !presetLabels.contains(t.text ?? ''))
+        .toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // The model's current tokens — the only scrollable part, so the builder below never
+        // scrolls out of reach however many tokens the model carries.
+        Expanded(
+          child: tokens.isEmpty
+              ? Center(
+                  child: Text(
+                    l10n.tokenNoneYet,
+                    style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+                  ),
+                )
+              : ListView(
+                  padding: const EdgeInsets.only(top: 4),
+                  children: [
+                    _sectionLabel(context, l10n.tokenSectionOnModel),
+                    for (final t in tokens) _tokenRow(context, l10n, t),
+                  ],
+                ),
+        ),
+        Divider(
+          color: context.subtleTextColor.withValues(alpha: 0.3),
+          thickness: 0.5,
+          height: 16,
+        ),
+        // New-token builder — pinned, always visible. Two compact lines: colour + label, then the
+        // toggleable flag + Add, so the list above keeps most of the room.
+        _sectionLabel(context, l10n.tokenSectionNew),
+        Row(
+          children: [
+            // A single swatch of the chosen colour; tapping it opens the palette picker.
+            _colorSpot(context, l10n),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _labelCtrl,
+                textCapitalization: TextCapitalization.characters,
+                // Rebuild so the Add button + duplicate-label warning track what's typed.
+                onChanged: (_) => setState(() {}),
+                style: GoogleFonts.cinzel(fontSize: 13, color: context.textColor),
+                decoration: InputDecoration(
+                  hintText: l10n.tokenLabelHint,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+                  hintStyle: TextStyle(color: context.subtleTextColor),
+                  errorText: _labelTaken ? l10n.tokenLabelTaken : null,
+                  errorStyle: GoogleFonts.cinzel(fontSize: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(
+                      color: context.subtleTextColor.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(color: context.accentColor),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _kindSelector(context, l10n),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: (_busy || _labelTaken) ? null : _addToken,
+            style: TextButton.styleFrom(
+              backgroundColor: context.accentColor,
+              foregroundColor: context.cardBgColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            child: Text(
+              l10n.tokenAdd,
+              style: GoogleFonts.cinzel(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _predefinedTab(BuildContext context, AppLocalizations l10n) {
+    if (widget.presets.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            l10n.tokenPredefinedEmpty,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: context.subtleTextColor),
+          ),
+        ),
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.only(top: 4),
+      children: [
+        for (final p in widget.presets)
+          _presetRow(context, p, onModel: _tokenForLabel(p.text)),
+      ],
+    );
+  }
+
+  // The token on this model that a preset added, matched by label, or null if it isn't on yet.
+  api.Token? _tokenForLabel(String label) {
+    for (final t in _state.tokens) {
+      if (t.text == label) return t;
+    }
+    return null;
+  }
+
+  // A preset row is an add/remove toggle: not on the model → tap adds it; already on → tap removes
+  // that token (so a predefined token can be cleared without hunting for it in the Custom tab). The
+  // preview never greys out — the trailing icon carries the on/off state instead.
+  Widget _presetRow(
+    BuildContext context,
+    TokenPreset preset, {
+    required api.Token? onModel,
+  }) {
+    final token = api.Token(
+      (b) => b
+        ..id = 'preview'
+        ..color = preset.color
+        ..text = preset.text
+        ..toggleable = preset.toggleable
+        ..active = true
+        ..count = preset.count,
+    );
+    final added = onModel != null;
+    return InkWell(
+      onTap: _busy
+          ? null
+          : () => added ? _removeToken(onModel.id) : _addPreset(preset),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          children: [
+            TokenChip(token: token),
+            const Spacer(),
+            Icon(
+              added ? Icons.check_circle : Icons.add_circle_outline,
+              size: 22,
+              color: context.accentColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addPreset(TokenPreset preset) => _mutateTokens(
+    () => GameService().upsertToken(
+      widget.gameId,
+      widget.entry.id,
+      tokenId: newIdempotencyKey(),
+      color: preset.color,
+      text: preset.text,
+      toggleable: preset.toggleable,
+      active: true,
+      count: preset.count,
+    ),
+  );
+
+  Future<void> _removeToken(String tokenId) => _mutateTokens(
+    () => GameService().removeToken(widget.gameId, widget.entry.id, tokenId),
+  );
+
+  // Segmented one-of-three kind picker for the builder: Plain / Toggle / Counter.
+  Widget _kindSelector(BuildContext context, AppLocalizations l10n) {
+    Widget seg(_TokenKind kind, IconData icon, String label) {
+      final on = _newKind == kind;
+      return Expanded(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _newKind = kind),
+          child: Container(
+            color: on ? context.accentColor : Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 9),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 15,
+                  color: on ? context.cardBgColor : context.subtleTextColor,
+                ),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: on ? context.cardBgColor : context.textColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final divider = Container(
+      width: 1,
+      height: 22,
+      color: context.subtleTextColor.withValues(alpha: 0.3),
+    );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(9),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: [
+            seg(_TokenKind.plain, Icons.circle, l10n.tokenKindPlain),
+            divider,
+            seg(_TokenKind.toggleable, Icons.toggle_on, l10n.tokenKindToggle),
+            divider,
+            seg(_TokenKind.counter, Icons.tag, l10n.tokenKindCounter),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionLabel(BuildContext context, String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: GoogleFonts.cinzel(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.6,
+        color: context.subtleTextColor,
+      ),
+    ),
+  );
+
+  // A label-less token in a given colour, used as the swatch everywhere a colour is shown so it
+  // matches exactly how a dot-only token renders on the card (the coloured dot in a grey chip).
+  api.Token _previewToken(api.TokenColorEnum color) => api.Token(
+    (b) => b
+      ..id = 'preview'
+      ..color = color
+      ..toggleable = false
+      ..active = true,
+  );
+
+  // The colour cell in the builder's first line — the chosen colour shown as its dot-only token,
+  // centred so it lines up with the Toggleable check below. Tap opens the palette picker.
+  Widget _colorSpot(BuildContext context, AppLocalizations l10n) => GestureDetector(
+    onTap: _pickColor,
+    behavior: HitTestBehavior.opaque,
+    child: SizedBox(
+      width: 46,
+      height: 46,
+      child: Center(child: TokenChip(token: _previewToken(_newColor))),
+    ),
+  );
+
+  Future<void> _pickColor() async {
+    FocusScope.of(context).unfocus();
+    final picked = await showDialog<api.TokenColorEnum>(
+      context: context,
+      builder: (ctx) => ThemedDialogCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionLabel(ctx, AppLocalizations.of(ctx).tokenColorLabel),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 14,
+              runSpacing: 14,
+              children: [
+                for (final c in kTokenPalette)
+                  GestureDetector(
+                    onTap: () => Navigator.of(ctx).pop(c),
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: c == _newColor
+                              ? context.accentColor
+                              : Colors.transparent,
+                          width: 2.5,
+                        ),
+                      ),
+                      child: TokenChip(token: _previewToken(c)),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (picked != null && mounted) setState(() => _newColor = picked);
+  }
+
+  Widget _tokenRow(BuildContext context, AppLocalizations l10n, api.Token token) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          // The token as it looks on the tile — but always shown active, since this is a preview of
+          // the token itself, not a readout of its current on/off state (you toggle that on the card).
+          TokenChip(token: token.rebuild((b) => b.active = true)),
+          const Spacer(),
+          if (token.toggleable) ...[
+            Text(
+              l10n.tokenToggleable,
+              style: GoogleFonts.cinzel(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: context.subtleTextColor,
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            onPressed: _busy
+                ? null
+                : () => _mutateTokens(
+                    () => GameService().removeToken(
+                      widget.gameId,
+                      widget.entry.id,
+                      token.id,
+                    ),
+                  ),
+            icon: Icon(Icons.close, size: 18, color: context.subtleTextColor),
           ),
         ],
       ),
@@ -176,7 +675,8 @@ class _CounterEditDialogState extends State<_CounterEditDialog> {
     required VoidCallback onTap,
   }) {
     return InkWell(
-      onTap: _busy ? null : onTap,
+      // No _busy gate: counter toggles are optimistic, so the row stays live for rapid taps.
+      onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
@@ -432,6 +932,196 @@ class _StatEditDialogState extends State<_StatEditDialog> {
   }
 }
 
+/// Steps a counter token's running total up/down — the same optimistic + debounced + rollback dance
+/// as [_StatEditDialog], persisting the whole token via `upsertToken` (its count changed). Opened by
+/// tapping a counter token on the tile.
+class _TokenCountDialog extends StatefulWidget {
+  const _TokenCountDialog({
+    required this.entry,
+    required this.token,
+    required this.onStateChanged,
+    required this.onCommit,
+  });
+
+  final api.ListEntry entry;
+  final api.Token token;
+  final void Function(int listEntryId, api.EntryState state) onStateChanged;
+  final Future<api.EntryState> Function(
+    int listEntryId,
+    api.EntryState target,
+    api.EntryState confirmed,
+  ) onCommit;
+
+  @override
+  State<_TokenCountDialog> createState() => _TokenCountDialogState();
+}
+
+class _TokenCountDialogState extends State<_TokenCountDialog> {
+  late api.EntryState _state = widget.entry.state!;
+  late api.EntryState _confirmed = widget.entry.state!;
+  Timer? _debounce;
+  bool _dirty = false;
+
+  int get _count {
+    for (final t in _state.tokens) {
+      if (t.id == widget.token.id) return t.count ?? 0;
+    }
+    return 0;
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    if (_dirty) widget.onCommit(widget.entry.id, _state, _confirmed);
+    super.dispose();
+  }
+
+  void _onChanged(int count) {
+    setState(() {
+      _state = _state.rebuild(
+        (b) => b.tokens.replace(
+          _state.tokens.map(
+            (t) => t.id == widget.token.id
+                ? t.rebuild((tb) => tb.count = count)
+                : t,
+          ),
+        ),
+      );
+    });
+    widget.onStateChanged(widget.entry.id, _state); // tile badge updates instantly
+    _dirty = true;
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 900), _commit);
+  }
+
+  Future<void> _commit() async {
+    if (!_dirty) return;
+    _dirty = false;
+    _debounce?.cancel();
+    final target = _state;
+    final result = await widget.onCommit(widget.entry.id, target, _confirmed);
+    _confirmed = result;
+    if (mounted && !_dirty) setState(() => _state = result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final title = (widget.token.text ?? '').isNotEmpty
+        ? widget.token.text!
+        : l10n.tokenTabCustom;
+    return ThemedDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              TokenChip(token: widget.token),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Divider(
+            color: context.subtleTextColor.withValues(alpha: 0.3),
+            thickness: 0.5,
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.tokenCountLabel,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.textColor,
+                    ),
+                  ),
+                ),
+                _countStepButton(
+                  context,
+                  icon: Icons.remove,
+                  // Can't drop below 0 (the server rejects it too); disabled at the floor.
+                  onTap: _count <= 0 ? null : () => _onChanged(_count - 1),
+                ),
+                Container(
+                  width: 48,
+                  alignment: Alignment.center,
+                  child: Text(
+                    '$_count',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor,
+                    ),
+                  ),
+                ),
+                _countStepButton(
+                  context,
+                  icon: Icons.add,
+                  onTap: () => _onChanged(_count + 1),
+                ),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                l10n.actionDone,
+                style: GoogleFonts.cinzel(
+                  fontWeight: FontWeight.w700,
+                  color: context.accentColor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _countStepButton(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback? onTap,
+  }) {
+    final enabled = onTap != null;
+    final color = enabled
+        ? context.textColor
+        : context.subtleTextColor.withValues(alpha: 0.4);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: enabled ? color.withValues(alpha: 0.5) : color,
+            width: 1.2,
+          ),
+        ),
+        child: Icon(icon, size: 20, color: color),
+      ),
+    );
+  }
+}
+
 /// A single status counter icon (stunned/hidden/guarding/carrying objective/underwater), always
 /// rendered so tile layouts stay consistent — full opacity with a gold ring when the counter is
 /// active, dimmed with no ring when it isn't. Underwater additionally carries a count badge (it
@@ -478,8 +1168,8 @@ class _CounterIcon extends StatelessWidget {
               opacity: active ? 1.0 : 0.35,
               child: Image.asset(
                 asset,
-                width: 26,
-                height: 26,
+                width: 29,
+                height: 29,
                 color: foreground,
                 colorBlendMode: BlendMode.srcIn,
               ),
