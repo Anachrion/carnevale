@@ -42,10 +42,10 @@ const List<api.TokenColorEnum> kTokenPalette = [
 
 /// A player token as it renders on the model tile's marker shelf: a quiet neutral chip (matching the
 /// counter markers). A *labelled* token shows its colour in the label; a *dot-only* token is the
-/// coloured disc. A *toggleable* token also carries a small status LED — lit when on, a hollow ring
-/// when off — which is what distinguishes it from a fixed marker; a toggled-off token additionally
-/// dims. The colour stays a cue, so the stat pills remain the loudest thing on the row. [onTap]
-/// flips a toggleable token's active state.
+/// coloured disc. A *toggleable* token shows its on/off state and marks itself as toggleable: a
+/// labelled one via a trailing status LED (lit on / hollow off), a dot-only one via a radio disc — a
+/// ring that fills to a solid centre when on and empties when off. A toggled-off token also dims. The
+/// colour stays a cue, so the stat pills stay the loudest thing on the row. [onTap] flips it.
 class TokenChip extends StatelessWidget {
   const TokenChip({super.key, required this.token, this.onTap});
 
@@ -59,11 +59,36 @@ class TokenChip extends StatelessWidget {
     final toggleable = token.toggleable;
     final label = token.text ?? '';
     final hasText = label.isNotEmpty;
-    // A static dot-only token stays a fixed circle; anything with a label or a toggle LED is a pill.
-    final circle = !hasText && !toggleable;
+    // Every dot-only token is a fixed circle; only a label makes the chip a pill.
+    final circle = !hasText;
 
-    // Labelled → the coloured label; dot-only → the coloured disc. (A token is only ever off when it's
-    // toggleable, so the disc stays the filled colour cue — the LED below carries the on/off state.)
+    // The dot-only disc. Static → a plain filled disc. Toggleable → a radio: a ring that fills to a
+    // solid centre when on and empties when off — carrying both its on/off state and its "toggleable"
+    // mark in one, so a dot-only token needs no separate LED.
+    final Widget disc = !toggleable
+        ? Container(
+            width: 17,
+            height: 17,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: swatch),
+          )
+        : Container(
+            width: 17,
+            height: 17,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: swatch, width: 2),
+            ),
+            child: active
+                ? Center(
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: swatch),
+                    ),
+                  )
+                : null,
+          );
+
     final Widget primary = hasText
         ? Text(
             label,
@@ -73,15 +98,11 @@ class TokenChip extends StatelessWidget {
               color: swatch,
             ),
           )
-        : Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: swatch),
-          );
+        : disc;
 
-    // The toggle LED: lit (filled + faint glow) when on, a hollow ring when off. Present only on a
-    // toggleable token — its absence is how a fixed marker reads as fixed.
-    final Widget? led = toggleable
+    // Only a *labelled* toggleable token gets the trailing status LED (lit on / hollow off); a
+    // dot-only one already carries its state in the radio disc above.
+    final Widget? led = (hasText && toggleable)
         ? Container(
             width: 9,
             height: 9,
@@ -103,7 +124,7 @@ class TokenChip extends StatelessWidget {
       child: Container(
         height: 34,
         width: circle ? 34 : null,
-        padding: EdgeInsets.symmetric(horizontal: circle ? 0 : (hasText ? 12 : 9)),
+        padding: EdgeInsets.symmetric(horizontal: circle ? 0 : 12),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.28),
           borderRadius: BorderRadius.circular(999),
