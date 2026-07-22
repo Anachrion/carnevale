@@ -130,11 +130,12 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     }
   }
 
-  // A model can't carry two tokens with the same label — the empty label included, so it's also at
-  // most one colour-only dot. This keeps the label-based Custom/Predefined split unambiguous and
-  // stops accidental duplicates. Checked against every token (custom and predefined alike).
+  // A model can't carry two tokens with the same *label* — it keeps the label-based Custom/Predefined
+  // split unambiguous and stops accidental duplicates. Colour-only tokens (empty label) are exempt:
+  // several plain dots, even of one colour, are fine. Checked against every token, custom or preset.
   bool get _labelTaken {
     final label = _labelCtrl.text.trim();
+    if (label.isEmpty) return false;
     return _state.tokens.any((t) => (t.text ?? '') == label);
   }
 
@@ -166,8 +167,12 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     final media = MediaQuery.of(context);
     // Shrink the tab body when the keyboard is open so the dialog card never overflows (each tab's
     // own list scrolls within it). ~300 covers the title, tab bar, Done, and card/dialog padding.
+    // The floor must clear the Custom tab's pinned builder (colour+label row, toggle+Add row, and a
+    // possible error line) so its scrollable list never gets squeezed to a negative height — that
+    // was the source of the yellow/black overflow stripes flashing during the keyboard animation. The
+    // ceiling stays a touch below a full sheet so the card keeps clear of the keyboard mid-transition.
     final tabHeight = (media.size.height - media.viewInsets.bottom - 280)
-        .clamp(160.0, 440.0);
+        .clamp(230.0, 400.0);
     return DefaultTabController(
       length: 3,
       initialIndex: widget.initialTab.index,
