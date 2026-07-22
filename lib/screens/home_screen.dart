@@ -57,72 +57,85 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               const _Header(),
                               const SizedBox(height: 24),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
+                              // Cap the menu width so the buttons stay compact
+                              // and horizontally centered on wide/landscape
+                              // screens instead of stretching full-bleed.
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 600,
                                 ),
-                                child: Column(
-                                  children: [
-                                    _MenuItem(
-                                      imagePath: 'assets/images/cards_icon.png',
-                                      title: l10n.navCards,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => const CardsScreen(),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _MenuItem(
+                                        imagePath:
+                                            'assets/images/cards_icon.png',
+                                        title: l10n.navCards,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const CardsScreen(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _MenuItem(
-                                      imagePath: 'assets/images/list_icon.png',
-                                      imageScale: 1.2,
-                                      title: l10n.navGangs,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => const GangsScreen(),
+                                      const SizedBox(height: 12),
+                                      _MenuItem(
+                                        imagePath:
+                                            'assets/images/list_icon.png',
+                                        imageScale: 1.2,
+                                        title: l10n.navGangs,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const GangsScreen(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _MenuItem(
-                                      imagePath: 'assets/images/games_icon.png',
-                                      imageScale: 1.10,
-                                      title: l10n.navGames,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const GameHomeScreen(),
+                                      const SizedBox(height: 12),
+                                      _MenuItem(
+                                        imagePath:
+                                            'assets/images/games_icon.png',
+                                        imageScale: 1.10,
+                                        title: l10n.navGames,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const GameHomeScreen(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _MenuItem(
-                                      imagePath: 'assets/images/book_icon.png',
-                                      title: l10n.navRules,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => const RulesScreen(),
+                                      const SizedBox(height: 12),
+                                      _MenuItem(
+                                        imagePath:
+                                            'assets/images/book_icon.png',
+                                        title: l10n.navRules,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const RulesScreen(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _MenuItem(
-                                      imagePath: 'assets/images/gear_icon.png',
-                                      imageScale: 1.2,
-                                      title: l10n.settingsTitle,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const SettingsScreen(),
+                                      const SizedBox(height: 12),
+                                      _MenuItem(
+                                        imagePath:
+                                            'assets/images/gear_icon.png',
+                                        imageScale: 1.2,
+                                        title: l10n.settingsTitle,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const SettingsScreen(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
