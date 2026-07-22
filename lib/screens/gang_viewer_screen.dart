@@ -247,6 +247,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   // debuff presets (their composition is static mid-game). Null until loaded / on the read-only tab.
   List<api.ListEntry>? _opponentEntries;
   List<api.Profile>? _opponentProfiles;
+  String _opponentFaction = '';
 
   // game_state broadcasts don't carry entry states, so each one triggers a player-list refetch.
   // This timer coalesces a burst of broadcasts into a single fetch instead of one per frame.
@@ -331,6 +332,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       setState(() {
         _opponentEntries = opp.entries.toList();
         _opponentProfiles = profiles;
+        _opponentFaction = opp.faction;
       });
     } catch (_) {
       // Debuffs simply won't be offered until a later refresh succeeds.
@@ -376,8 +378,10 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     return predefinedPresetsFor(
       ownEntries: data.gang.entries,
       ownProfiles: data.profiles,
+      ownFaction: data.gang.faction,
       opponentEntries: _opponentEntries ?? const [],
       opponentProfiles: _opponentProfiles ?? const [],
+      opponentFaction: _opponentFaction,
     );
   }
 
