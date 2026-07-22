@@ -840,7 +840,7 @@ class _StatPill extends StatelessWidget {
       ),
       child: Container(
         width: _width,
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.25),
