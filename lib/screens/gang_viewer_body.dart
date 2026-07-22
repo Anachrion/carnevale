@@ -614,61 +614,30 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Markers (counters + tokens) share the row with the controls, so a model with a
-                // few markers doesn't sprout a whole extra line. Stats stay on their own row above,
-                // so the markers wrapping here never squeeze them.
-                if (_hasMarkers(state) ||
-                    _knownSpells.isNotEmpty ||
-                    onEditModel != null ||
-                    onToggleActivated != null ||
-                    onDismiss != null ||
-                    activated) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    // Bottom-align: the controls (and Spells) sit on the last line of markers rather
-                    // than floating centred against a multi-line wrap.
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            ..._counterIcons(context, state),
-                            for (final token in state.tokens)
-                              TokenChip(
-                                token: token,
-                                // Tap flips a toggleable token's active state right on the card
-                                // (the frequent per-turn flip); everything else is in the Edit modal.
-                                onTap: token.toggleable && onToggleToken != null
-                                    ? () => onToggleToken!(token)
-                                    : null,
-                              ),
-                          ],
-                        ),
+                // Markers (counters + tokens) and the tile controls. When the model has spells, the
+                // Spells pill anchors the bottom-left of the controls line and the markers get their
+                // own line above it; with no spells, the markers instead share the controls line so a
+                // plain model doesn't sprout an extra row. Stats keep their own row above either way.
+                _MarkersAndControls(
+                  markers: [
+                    ..._counterIcons(context, state),
+                    for (final token in state.tokens)
+                      TokenChip(
+                        token: token,
+                        // Tap flips a toggleable token's active state right on the card (the frequent
+                        // per-turn flip); everything else is in the Edit modal.
+                        onTap: token.toggleable && onToggleToken != null
+                            ? () => onToggleToken!(token)
+                            : null,
                       ),
-                      if (_knownSpells.isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        SpellsButton(spells: _knownSpells, onToggle: onToggleSpellCast),
-                      ],
-                      if (onDismiss != null) ...[
-                        const SizedBox(width: 8),
-                        _DismissButton(onTap: onDismiss!),
-                      ],
-                      if (onEditModel != null) ...[
-                        const SizedBox(width: 8),
-                        _EditButton(onTap: onEditModel!),
-                      ],
-                      if (onToggleActivated != null) ...[
-                        const SizedBox(width: 8),
-                        _ActivateButton(activated: activated, onTap: onToggleActivated!),
-                      ] else if (activated) ...[
-                        const SizedBox(width: 8),
-                        const _ActivateButton(activated: true),
-                      ],
-                    ],
-                  ),
-                ],
+                  ],
+                  spells: _knownSpells,
+                  onToggleSpellCast: onToggleSpellCast,
+                  onDismiss: onDismiss,
+                  onEditModel: onEditModel,
+                  onToggleActivated: onToggleActivated,
+                  activated: activated,
+                ),
               ],
               // Standalone (no in-game state): no controls row, so a Mage's spells get their own line.
               if (state == null && _knownSpells.isNotEmpty) ...[
@@ -684,15 +653,6 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 
   // Known/granted spells for a Mage model. Empty for everything else.
   List<KnownSpell> get _knownSpells => entry.mage ? knownSpellsFor(entry) : const [];
-
-  // Whether the marker shelf has anything to show: an active counter or any player token.
-  bool _hasMarkers(api.EntryState s) =>
-      s.stunned ||
-      s.hidden ||
-      s.guarding ||
-      s.carryingObjective ||
-      s.underwaterCounters > 0 ||
-      s.tokens.isNotEmpty;
 
   // Only the active counters appear — a counter set to false (or 0 underwater) is omitted
   // entirely, so a clean model shows no counter icons at all. Editing happens through the +
@@ -718,6 +678,80 @@ class _ReadOnlyEntryTile extends StatelessWidget {
           badge: state.underwaterCounters,
         ),
     ];
+  }
+}
+
+/// The tile's marker shelf + controls line. Two layouts, picked by whether the model knows spells:
+/// with spells, the Spells pill anchors the bottom-left of the controls line (Edit/Activate on the
+/// right) and the markers get their own line above; with none, the markers share the controls line
+/// so a plain model doesn't grow an extra row. Renders nothing when there's nothing to show.
+class _MarkersAndControls extends StatelessWidget {
+  const _MarkersAndControls({
+    required this.markers,
+    required this.spells,
+    required this.activated,
+    this.onToggleSpellCast,
+    this.onDismiss,
+    this.onEditModel,
+    this.onToggleActivated,
+  });
+
+  final List<Widget> markers;
+  final List<KnownSpell> spells;
+  final bool activated;
+  final void Function(KnownSpell spell)? onToggleSpellCast;
+  final VoidCallback? onDismiss;
+  final VoidCallback? onEditModel;
+  final VoidCallback? onToggleActivated;
+
+  @override
+  Widget build(BuildContext context) {
+    final rightControls = <Widget>[
+      if (onDismiss != null) _DismissButton(onTap: onDismiss!),
+      if (onEditModel != null) _EditButton(onTap: onEditModel!),
+      if (onToggleActivated != null)
+        _ActivateButton(activated: activated, onTap: onToggleActivated!)
+      else if (activated)
+        const _ActivateButton(activated: true),
+    ];
+    final hasSpells = spells.isNotEmpty;
+    if (markers.isEmpty && !hasSpells && rightControls.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final markerWrap = Wrap(spacing: 6, runSpacing: 6, children: markers);
+
+    if (hasSpells) {
+      // Bottom line: Spells (left) + Edit/Activate (right); markers on their own line above.
+      return Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (markers.isNotEmpty) ...[markerWrap, const SizedBox(height: 8)],
+            Row(
+              children: [
+                SpellsButton(spells: spells, onToggle: onToggleSpellCast),
+                const Spacer(),
+                for (final c in rightControls) ...[const SizedBox(width: 8), c],
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // No spells: the markers share the controls line, bottom-aligned to the last wrapped row.
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(child: markerWrap),
+          for (final c in rightControls) ...[const SizedBox(width: 8), c],
+        ],
+      ),
+    );
   }
 }
 

@@ -1586,6 +1586,12 @@ abstract class AppLocalizations {
   /// **'No tokens yet.'**
   String get tokenNoneYet;
 
+  /// No description provided for @tokenColorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get tokenColorLabel;
+
   /// No description provided for @tokenPredefinedSoon.
   ///
   /// In en, this message translates to:

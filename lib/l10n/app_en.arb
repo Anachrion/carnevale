@@ -309,6 +309,7 @@
   "tokenAdd": "Add token",
   "tokenNoLabel": "No label",
   "tokenNoneYet": "No tokens yet.",
+  "tokenColorLabel": "Color",
   "tokenPredefinedSoon": "Coming soon: tokens drawn from this model's own spells and rules.",
   "statUpdateReverted": "Couldn't save the change — reverted to the last synced value.",
   "@statUpdateReverted": {

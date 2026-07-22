@@ -268,6 +268,7 @@
   "tokenAdd": "Ajouter le jeton",
   "tokenNoLabel": "Sans libellé",
   "tokenNoneYet": "Aucun jeton pour l'instant.",
+  "tokenColorLabel": "Couleur",
   "tokenPredefinedSoon": "Bientôt : des jetons tirés des sorts et règles de ce modèle.",
   "statUpdateReverted": "Échec de l'enregistrement — retour à la dernière valeur synchronisée.",
   "statLifePoints": "Points de vie",
