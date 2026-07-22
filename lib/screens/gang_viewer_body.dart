@@ -584,6 +584,10 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                 // an extra row just to carry Edit/Activate. Stats still keep their own row — the
                 // markers below never compress them into a column.
                 Row(
+                  // Anchor the stat pills to the bottom of the row (the taller Edit/Activate buttons
+                  // set its height), so the gap down to the markers matches the marker→spells gap
+                  // instead of gaining the pills' centring slack.
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
                       child: Wrap(
@@ -646,10 +650,11 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                       TokenChip(
                         token: token,
                         // Tap flips a toggleable token's active state right on the card (the frequent
-                        // per-turn flip); everything else is in the Edit modal.
+                        // per-turn flip); everything else is in the Edit modal. A non-toggleable token
+                        // still swallows the tap so it doesn't fall through and open the card viewer.
                         onTap: token.toggleable && onToggleToken != null
                             ? () => onToggleToken!(token)
-                            : null,
+                            : () {},
                       ),
                   ],
                   spells: _knownSpells,
@@ -763,8 +768,8 @@ class _TileMarkerIcon extends StatelessWidget {
           children: [
             Image.asset(
               asset,
-              width: 21,
-              height: 21,
+              width: 26,
+              height: 26,
               color: Colors.white,
               colorBlendMode: BlendMode.srcIn,
             ),
