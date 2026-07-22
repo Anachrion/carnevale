@@ -850,6 +850,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tokenNoneYet => 'Aucun jeton pour l\'instant.';
 
   @override
+  String get tokenLabelTaken => 'Déjà sur ce modèle';
+
+  @override
   String get tokenColorLabel => 'Couleur';
 
   @override

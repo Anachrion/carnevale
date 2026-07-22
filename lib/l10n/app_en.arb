@@ -309,6 +309,7 @@
   "tokenAdd": "Add token",
   "tokenNoLabel": "No label",
   "tokenNoneYet": "No tokens yet.",
+  "tokenLabelTaken": "Already on this model",
   "tokenColorLabel": "Color",
   "tokenPredefinedEmpty": "No spells or buffs to add for this gang.",
   "tokenPredefinedSoon": "Coming soon: tokens drawn from this model's own spells and rules.",
