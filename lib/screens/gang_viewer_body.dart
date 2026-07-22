@@ -584,10 +584,6 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                 // an extra row just to carry Edit/Activate. Stats still keep their own row — the
                 // markers below never compress them into a column.
                 Row(
-                  // Anchor the stat pills to the bottom of the row (the taller Edit/Activate buttons
-                  // set its height), so the gap down to the markers matches the marker→spells gap
-                  // instead of gaining the pills' centring slack.
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
                       child: Wrap(
@@ -723,7 +719,9 @@ class _MarkerShelf extends StatelessWidget {
     if (markers.isEmpty && !hasSpells) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      // Small top gap: the stat pills above float centred in a row sized by the taller controls, so
+      // they already carry slack below them — this keeps the pill→marker gap ≈ the marker→spells gap.
+      padding: const EdgeInsets.only(top: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -754,25 +752,29 @@ class _TileMarkerIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: label,
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.black.withValues(alpha: 0.28),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.32), width: 1),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              asset,
-              width: 26,
-              height: 26,
-              color: Colors.white,
-              colorBlendMode: BlendMode.srcIn,
-            ),
+      // Like a token, a counter swallows the tap so it doesn't fall through and open the card viewer.
+      child: GestureDetector(
+        onTap: () {},
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.black.withValues(alpha: 0.28),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.32), width: 1),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Image.asset(
+                asset,
+                width: 29,
+                height: 29,
+                color: Colors.white,
+                colorBlendMode: BlendMode.srcIn,
+              ),
             if (badge != null)
               Positioned(
                 right: -3,
@@ -794,6 +796,7 @@ class _TileMarkerIcon extends StatelessWidget {
                 ),
               ),
           ],
+          ),
         ),
       ),
     );
