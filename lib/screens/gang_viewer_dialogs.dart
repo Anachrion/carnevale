@@ -295,7 +295,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
 
   // Labels offered as predefined presets for this model — used to keep those tokens out of the
   // Custom tab so the two concepts don't blur together (they're managed in the Predefined tab).
-  Set<String> get _presetLabels => {for (final p in widget.presets) p.label};
+  Set<String> get _presetLabels => {for (final p in widget.presets) p.text};
 
   // Custom tab: the model's *hand-built* player tokens (manage) plus a builder (colour + optional
   // label + toggleable). Predefined tokens are excluded — they live in the Predefined tab. No
@@ -445,7 +445,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       padding: const EdgeInsets.only(top: 4),
       children: [
         for (final p in widget.presets)
-          _presetRow(context, p, onModel: _tokenForLabel(p.label)),
+          _presetRow(context, p, onModel: _tokenForLabel(p.text)),
       ],
     );
   }
@@ -470,7 +470,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       (b) => b
         ..id = 'preview'
         ..color = preset.color
-        ..text = preset.label
+        ..text = preset.text
         ..toggleable = preset.toggleable
         ..active = true,
     );
@@ -503,7 +503,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       widget.entry.id,
       tokenId: newIdempotencyKey(),
       color: preset.color,
-      text: preset.label,
+      text: preset.text,
       toggleable: preset.toggleable,
       active: true,
     ),

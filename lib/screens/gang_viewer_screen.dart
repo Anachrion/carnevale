@@ -243,9 +243,10 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   _GangTabData? _data;
   bool _failed = false;
 
-  // The opposing gang's entries, loaded once on the editable tab, used only to source debuff presets
-  // (their spell composition is static mid-game). Null until loaded / on the read-only tab.
+  // The opposing gang's entries and profiles, loaded once on the editable tab, used only to source
+  // debuff presets (their composition is static mid-game). Null until loaded / on the read-only tab.
   List<api.ListEntry>? _opponentEntries;
+  List<api.Profile>? _opponentProfiles;
 
   // game_state broadcasts don't carry entry states, so each one triggers a player-list refetch.
   // This timer coalesces a burst of broadcasts into a single fetch instead of one per frame.
@@ -309,21 +310,28 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
     // Load the opposing gang for debuff presets *after* our own gang is on screen — off the critical
     // path, so the tab never waits on a second player-list fetch to first paint.
-    unawaited(_ensureOpponentEntries());
+    unawaited(_ensureOpponentData());
   }
 
-  // Loads the opposing gang's entries once (their spell composition is static mid-game) to source the
-  // debuff presets. Deliberately not awaited by _load — a failure just means no debuffs until a later
-  // refresh retries (the null guard lets it).
-  Future<void> _ensureOpponentEntries() async {
+  // Loads the opposing gang's entries and profiles once (their composition is static mid-game) to
+  // source the debuff presets. Deliberately not awaited by _load — a failure just means no debuffs
+  // until a later refresh retries (the null guard lets it).
+  Future<void> _ensureOpponentData() async {
     if (widget.opponentPlayerId == null || _opponentEntries != null) return;
     try {
       final opp = await _gameService.playerList(
         widget.gameId,
         widget.opponentPlayerId!,
       );
+      final profiles = await ProfileService().search(
+        '',
+        factions: {opp.faction, 'gifted'},
+      );
       if (!mounted) return;
-      setState(() => _opponentEntries = opp.entries.toList());
+      setState(() {
+        _opponentEntries = opp.entries.toList();
+        _opponentProfiles = profiles;
+      });
     } catch (_) {
       // Debuffs simply won't be offered until a later refresh succeeds.
     }
@@ -369,12 +377,13 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       ownEntries: data.gang.entries,
       ownProfiles: data.profiles,
       opponentEntries: _opponentEntries ?? const [],
+      opponentProfiles: _opponentProfiles ?? const [],
     );
   }
 
   // Labels of the predefined presets — lets a tile route a tapped token to the Predefined vs Custom
   // tab (a token whose label is a preset is a predefined one).
-  Set<String> get _presetLabels => {for (final p in _presets) p.label};
+  Set<String> get _presetLabels => {for (final p in _presets) p.text};
 
   void _editModel(
     api.ListEntry entry, [
