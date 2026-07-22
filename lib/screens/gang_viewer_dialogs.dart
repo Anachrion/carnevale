@@ -55,10 +55,21 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     bool? carryingObjective,
     int? underwaterCounters,
   }) async {
-    if (_busy) return;
-    setState(() => _busy = true);
+    // Optimistic: the counter flips locally (in the row and on the tile) the instant you tap, then
+    // persists. No _busy gate — a status toggle must feel snappy and can't meaningfully fail (the
+    // merge is idempotent). On the rare failure we roll back to the pre-tap value and say so.
+    final previous = _state;
+    final optimistic = _state.rebuild((b) {
+      if (stunned != null) b.stunned = stunned;
+      if (hidden != null) b.hidden = hidden;
+      if (guarding != null) b.guarding = guarding;
+      if (carryingObjective != null) b.carryingObjective = carryingObjective;
+      if (underwaterCounters != null) b.underwaterCounters = underwaterCounters;
+    });
+    setState(() => _state = optimistic);
+    widget.onStateChanged(widget.entry.id, optimistic);
     try {
-      final newState = await GameService().updateCounters(
+      final confirmed = await GameService().updateCounters(
         widget.gameId,
         widget.entry.id,
         stunned: stunned,
@@ -68,17 +79,22 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
         underwaterCounters: underwaterCounters,
       );
       if (!mounted) return;
-      setState(() => _state = newState);
-      widget.onStateChanged(widget.entry.id, newState);
+      // Adopt the server's state only if no newer tap has moved us on since (== is the guard).
+      if (_state == optimistic) {
+        setState(() => _state = confirmed);
+        widget.onStateChanged(widget.entry.id, confirmed);
+      }
     } catch (_) {
       if (mounted) {
+        if (_state == optimistic) {
+          setState(() => _state = previous);
+          widget.onStateChanged(widget.entry.id, previous);
+        }
         showAppToast(
           context,
           AppLocalizations.of(context).counterToggleFailed,
         );
       }
-    } finally {
-      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -516,7 +532,8 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     required VoidCallback onTap,
   }) {
     return InkWell(
-      onTap: _busy ? null : onTap,
+      // No _busy gate: counter toggles are optimistic, so the row stays live for rapid taps.
+      onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
