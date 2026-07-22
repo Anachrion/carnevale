@@ -580,45 +580,66 @@ class _ReadOnlyEntryTile extends StatelessWidget {
               ),
               if (state != null) ...[
                 const SizedBox(height: 10),
-                // Stats keep their own row — the markers below never compress them into a column.
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
+                // Stats and the tile controls share one line, so a model with no markers doesn't grow
+                // an extra row just to carry Edit/Activate. Stats still keep their own row — the
+                // markers below never compress them into a column.
+                Row(
                   children: [
-                    _StatPill(
-                      label: 'HP',
-                      value: state.lifePoints,
-                      borderColors: AppPalette.hpBorder,
-                      onTap: onEditStats,
-                    ),
-                    // Hidden (not omitted) when the model was never given this stat at all
-                    // (starting 0) — keeps the pill in the layout, just invisible, rather than
-                    // shifting everything after it over. An invisible pill isn't tappable.
-                    Opacity(
-                      opacity: state.willPoints.starting == 0 ? 0 : 1,
-                      child: _StatPill(
-                        label: 'WP',
-                        value: state.willPoints,
-                        borderColors: AppPalette.wpBorder,
-                        onTap: state.willPoints.starting == 0 ? null : onEditStats,
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          _StatPill(
+                            label: 'HP',
+                            value: state.lifePoints,
+                            borderColors: AppPalette.hpBorder,
+                            onTap: onEditStats,
+                          ),
+                          // Hidden (not omitted) when the model was never given this stat at all
+                          // (starting 0) — keeps the pill in the layout, just invisible, rather than
+                          // shifting everything after it over. An invisible pill isn't tappable.
+                          Opacity(
+                            opacity: state.willPoints.starting == 0 ? 0 : 1,
+                            child: _StatPill(
+                              label: 'WP',
+                              value: state.willPoints,
+                              borderColors: AppPalette.wpBorder,
+                              onTap: state.willPoints.starting == 0 ? null : onEditStats,
+                            ),
+                          ),
+                          Opacity(
+                            opacity: state.commandPoints.starting == 0 ? 0 : 1,
+                            child: _StatPill(
+                              label: 'CP',
+                              value: state.commandPoints,
+                              borderColors: AppPalette.cpBorder,
+                              onTap: state.commandPoints.starting == 0 ? null : onEditStats,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Opacity(
-                      opacity: state.commandPoints.starting == 0 ? 0 : 1,
-                      child: _StatPill(
-                        label: 'CP',
-                        value: state.commandPoints,
-                        borderColors: AppPalette.cpBorder,
-                        onTap: state.commandPoints.starting == 0 ? null : onEditStats,
-                      ),
-                    ),
+                    if (onDismiss != null) ...[
+                      const SizedBox(width: 8),
+                      _DismissButton(onTap: onDismiss!),
+                    ],
+                    if (onEditModel != null) ...[
+                      const SizedBox(width: 8),
+                      _EditButton(onTap: onEditModel!),
+                    ],
+                    if (onToggleActivated != null) ...[
+                      const SizedBox(width: 8),
+                      _ActivateButton(activated: activated, onTap: onToggleActivated!),
+                    ] else if (activated) ...[
+                      const SizedBox(width: 8),
+                      const _ActivateButton(activated: true),
+                    ],
                   ],
                 ),
-                // Markers (counters + tokens) and the tile controls. When the model has spells, the
-                // Spells pill anchors the bottom-left of the controls line and the markers get their
-                // own line above it; with no spells, the markers instead share the controls line so a
-                // plain model doesn't sprout an extra row. Stats keep their own row above either way.
-                _MarkersAndControls(
+                // Markers (counters + tokens) and, for a Mage, the Spells pill — each taking a line
+                // only when there's something to show, so a plain model ends at the stats row.
+                _MarkerShelf(
                   markers: [
                     ..._counterIcons(context, state),
                     for (final token in state.tokens)
@@ -633,10 +654,6 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                   ],
                   spells: _knownSpells,
                   onToggleSpellCast: onToggleSpellCast,
-                  onDismiss: onDismiss,
-                  onEditModel: onEditModel,
-                  onToggleActivated: onToggleActivated,
-                  activated: activated,
                 ),
               ],
               // Standalone (no in-game state): no controls row, so a Mage's spells get their own line.
@@ -681,74 +698,36 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   }
 }
 
-/// The tile's marker shelf + controls line. Two layouts, picked by whether the model knows spells:
-/// with spells, the Spells pill anchors the bottom-left of the controls line (Edit/Activate on the
-/// right) and the markers get their own line above; with none, the markers share the controls line
-/// so a plain model doesn't grow an extra row. Renders nothing when there's nothing to show.
-class _MarkersAndControls extends StatelessWidget {
-  const _MarkersAndControls({
+/// The tile's marker shelf: the counter/token markers and, for a Mage, the Spells pill. Each only
+/// takes a line when it has something to show, so a plain model ends at the stats row (Edit/Activate
+/// now live up there). Renders nothing when there are no markers and no spells.
+class _MarkerShelf extends StatelessWidget {
+  const _MarkerShelf({
     required this.markers,
     required this.spells,
-    required this.activated,
     this.onToggleSpellCast,
-    this.onDismiss,
-    this.onEditModel,
-    this.onToggleActivated,
   });
 
   final List<Widget> markers;
   final List<KnownSpell> spells;
-  final bool activated;
   final void Function(KnownSpell spell)? onToggleSpellCast;
-  final VoidCallback? onDismiss;
-  final VoidCallback? onEditModel;
-  final VoidCallback? onToggleActivated;
 
   @override
   Widget build(BuildContext context) {
-    final rightControls = <Widget>[
-      if (onDismiss != null) _DismissButton(onTap: onDismiss!),
-      if (onEditModel != null) _EditButton(onTap: onEditModel!),
-      if (onToggleActivated != null)
-        _ActivateButton(activated: activated, onTap: onToggleActivated!)
-      else if (activated)
-        const _ActivateButton(activated: true),
-    ];
     final hasSpells = spells.isNotEmpty;
-    if (markers.isEmpty && !hasSpells && rightControls.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (markers.isEmpty && !hasSpells) return const SizedBox.shrink();
 
-    final markerWrap = Wrap(spacing: 6, runSpacing: 6, children: markers);
-
-    if (hasSpells) {
-      // Bottom line: Spells (left) + Edit/Activate (right); markers on their own line above.
-      return Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (markers.isNotEmpty) ...[markerWrap, const SizedBox(height: 8)],
-            Row(
-              children: [
-                SpellsButton(spells: spells, onToggle: onToggleSpellCast),
-                const Spacer(),
-                for (final c in rightControls) ...[const SizedBox(width: 8), c],
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    // No spells: the markers share the controls line, bottom-aligned to the last wrapped row.
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: markerWrap),
-          for (final c in rightControls) ...[const SizedBox(width: 8), c],
+          if (markers.isNotEmpty)
+            Wrap(spacing: 6, runSpacing: 6, children: markers),
+          if (hasSpells) ...[
+            if (markers.isNotEmpty) const SizedBox(height: 8),
+            SpellsButton(spells: spells, onToggle: onToggleSpellCast),
+          ],
         ],
       ),
     );
