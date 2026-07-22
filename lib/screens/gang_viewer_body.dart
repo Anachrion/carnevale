@@ -614,49 +614,51 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Marker shelf: neutral counters then coloured player tokens, wrapping across as
-                // many lines as they need instead of thinning into a single strip.
-                if (_hasMarkers(state)) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      ..._counterIcons(context, state),
-                      for (final token in state.tokens)
-                        TokenChip(
-                          token: token,
-                          // Tap toggles a toggleable token's active state right on the card (the
-                          // frequent per-turn flip); everything else is handled in the Edit modal.
-                          onTap: token.toggleable && onToggleToken != null
-                              ? () => onToggleToken!(token)
-                              : null,
-                        ),
-                    ],
-                  ),
-                ],
-                // Bottom controls: Edit opens the counter/token modal; Activate is the fast
-                // per-turn tap. Opponents show a read-only Activated marker only.
-                if (onEditModel != null ||
+                // Markers (counters + tokens) share the row with the controls, so a model with a
+                // few markers doesn't sprout a whole extra line. Stats stay on their own row above,
+                // so the markers wrapping here never squeeze them.
+                if (_hasMarkers(state) ||
+                    onEditModel != null ||
                     onToggleActivated != null ||
                     onDismiss != null ||
                     activated) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Expanded(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            ..._counterIcons(context, state),
+                            for (final token in state.tokens)
+                              TokenChip(
+                                token: token,
+                                // Tap flips a toggleable token's active state right on the card
+                                // (the frequent per-turn flip); everything else is in the Edit modal.
+                                onTap: token.toggleable && onToggleToken != null
+                                    ? () => onToggleToken!(token)
+                                    : null,
+                              ),
+                          ],
+                        ),
+                      ),
                       if (onDismiss != null) ...[
+                        const SizedBox(width: 8),
                         _DismissButton(onTap: onDismiss!),
-                        const SizedBox(width: 8),
                       ],
-                      const Spacer(),
                       if (onEditModel != null) ...[
-                        _EditButton(onTap: onEditModel!),
                         const SizedBox(width: 8),
+                        _EditButton(onTap: onEditModel!),
                       ],
-                      if (onToggleActivated != null)
-                        _ActivateButton(activated: activated, onTap: onToggleActivated!)
-                      else if (activated)
+                      if (onToggleActivated != null) ...[
+                        const SizedBox(width: 8),
+                        _ActivateButton(activated: activated, onTap: onToggleActivated!),
+                      ] else if (activated) ...[
+                        const SizedBox(width: 8),
                         const _ActivateButton(activated: true),
+                      ],
                     ],
                   ),
                 ],
@@ -823,9 +825,8 @@ class _GradientBorderPainter extends CustomPainter {
       oldDelegate.strokeWidth != strokeWidth;
 }
 
-/// The "has this model gone yet?" control, spelled out. Solid-filled once activated. Activate and
-/// Activated occupy the same fixed width with the bolt pinned left and the word centred, so flipping
-/// it never nudges the layout. Rendered without an [onTap] for an opponent's models (read-only).
+/// The "has this model gone yet?" bolt. Solid-filled once activated, so the tile's own darkening is
+/// reinforced by an explicit marker. Rendered without an [onTap] for an opponent's models (read-only).
 class _ActivateButton extends StatelessWidget {
   const _ActivateButton({required this.activated, this.onTap});
 
@@ -835,30 +836,24 @@ class _ActivateButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final fg = activated ? Colors.black87 : Colors.white;
-    final button = Container(
-      height: 34,
-      width: 132,
-      padding: const EdgeInsets.only(left: 12, right: 6),
-      decoration: BoxDecoration(
-        color: activated ? Colors.white : Colors.transparent,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: activated ? 1 : 0.5),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.bolt, size: 16, color: fg),
-          Expanded(
-            child: Text(
-              activated ? l10n.actionActivated : l10n.actionActivate,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
-            ),
+    final button = Tooltip(
+      message: activated ? l10n.actionActivated : l10n.actionActivate,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: activated ? Colors.white : Colors.transparent,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: activated ? 1 : 0.5),
+            width: 1.4,
           ),
-        ],
+        ),
+        child: Icon(
+          Icons.bolt,
+          size: 20,
+          color: activated ? Colors.black87 : Colors.white,
+        ),
       ),
     );
     if (onTap == null) return button;
