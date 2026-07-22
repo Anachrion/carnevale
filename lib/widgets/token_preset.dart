@@ -33,9 +33,33 @@ class TokenPreset {
   final bool toggleable;
 }
 
-/// Curated buffs that live on a model's *special rules*, keyed by the exact special-rule name — a
-/// rule's text doesn't say "this is a buff", so which ones matter has to be hand-picked. Start small
-/// and grow after in-game review. These are offered gang-wide (see [predefinedPresetsForGang]).
+/// Curated spell buffs, by exact catalog name — a spell's text doesn't say "buff", so which ones
+/// matter is hand-picked. A buff is cast on an ally, so it's offered on any model of the *casting*
+/// gang. Teal, so a glance reads "friendly". Grow after in-game review.
+const Set<String> kBuffSpellNames = {
+  'Bloodlust',
+  'Protection of the Eye',
+  'Eldritch Armour',
+  'Defender of Destiny',
+  'Cantrip of the Stars',
+  'Blessing of the Sky',
+  'Glimpse of Glory',
+  'Renewed Vigour',
+  'Walk Between Worlds',
+  'They Sleep Underwater',
+};
+
+/// Curated spell debuffs, by exact catalog name. A debuff is cast on the *enemy*, so it appears in
+/// the target's own Predefined list, sourced from the *opposing* gang's spells. Crimson = "on me, and
+/// it's not mine".
+const Set<String> kDebuffSpellNames = {
+  "Marksman's Fortune",
+  'Curse of the Rent',
+  'Sunder Armour',
+};
+
+/// Curated buffs that live on a model's *special rules*, keyed by the exact special-rule name. Offered
+/// gang-wide (a support model's aura covers its allies). Start small; grow after in-game review.
 const Map<String, TokenPreset> kSpecialRulePresets = {
   // Capodecina — a game-long re-roll aura granted to friendly models, so it isn't toggleable.
   'Fight For the Guild!': TokenPreset(
@@ -45,37 +69,50 @@ const Map<String, TokenPreset> kSpecialRulePresets = {
   ),
 };
 
-/// The predefined tokens offered for a gang, gathered gang-wide because buffs land on models other
-/// than their source: a spell buff can be cast on an ally, a support model's aura covers the whole
-/// gang. So every model's Predefined tab shows the same set — every spell any model knows, plus every
-/// curated special-rule buff present in the gang. Deduped by label; curated buffs listed first.
-List<TokenPreset> predefinedPresetsForGang(
-  Iterable<api.ListEntry> entries,
-  Iterable<api.Profile> profiles,
-) {
+const _buffColor = api.TokenColorEnum.teal;
+const _debuffColor = api.TokenColorEnum.crimson;
+
+/// The predefined tokens offered on a model of the current player's gang:
+/// - curated special-rule buffs present on an in-gang profile ([ownProfiles]),
+/// - spell buffs the player's own gang ([ownEntries]) can cast on it,
+/// - spell debuffs the *opposing* gang ([opponentEntries]) can cast on it.
+///
+/// Spell buffs/debuffs are gathered gang-wide, since a buff lands on any ally and a debuff on any
+/// enemy. Deduped by label; special-rule buffs first, then spell buffs, then incoming debuffs.
+List<TokenPreset> predefinedPresetsFor({
+  required Iterable<api.ListEntry> ownEntries,
+  required Iterable<api.Profile> ownProfiles,
+  required Iterable<api.ListEntry> opponentEntries,
+}) {
   final out = <TokenPreset>[];
   final seen = <String>{};
   void add(TokenPreset p) {
     if (seen.add(p.label)) out.add(p);
   }
 
-  // Curated special-rule buffs — only those actually present on a profile that's in this gang.
-  final gangRefIds = entries.map((e) => e.entryId).toSet();
-  for (final p in profiles) {
-    if (!p.cardReferences.any((c) => gangRefIds.contains(c.id))) continue;
+  // Special-rule buffs — only those actually present on a profile that's in this gang.
+  final ownRefIds = ownEntries.map((e) => e.entryId).toSet();
+  for (final p in ownProfiles) {
+    if (!p.cardReferences.any((c) => ownRefIds.contains(c.id))) continue;
     for (final r in p.specialRules) {
       final preset = kSpecialRulePresets[r.name];
       if (preset != null) add(preset);
     }
   }
-  // Then every spell known anywhere in the gang (a spell buff can be applied to any model).
-  for (final e in entries) {
+  // Spell buffs this gang can cast.
+  for (final e in ownEntries) {
     for (final s in knownSpellsFor(e)) {
-      add(TokenPreset(
-        label: s.name,
-        color: api.TokenColorEnum.amethyst,
-        toggleable: true,
-      ));
+      if (kBuffSpellNames.contains(s.name)) {
+        add(TokenPreset(label: s.name, color: _buffColor, toggleable: true));
+      }
+    }
+  }
+  // Spell debuffs the opposing gang can cast on this model.
+  for (final e in opponentEntries) {
+    for (final s in knownSpellsFor(e)) {
+      if (kDebuffSpellNames.contains(s.name)) {
+        add(TokenPreset(label: s.name, color: _debuffColor, toggleable: true));
+      }
     }
   }
   return out;

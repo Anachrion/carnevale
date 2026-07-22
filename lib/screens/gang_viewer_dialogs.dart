@@ -273,10 +273,18 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     );
   }
 
-  // Custom tab: the model's player tokens (manage) plus a builder (colour + optional label +
-  // toggleable). No per-token switch here — a token is toggled on the card.
+  // Labels offered as predefined presets for this model — used to keep those tokens out of the
+  // Custom tab so the two concepts don't blur together (they're managed in the Predefined tab).
+  Set<String> get _presetLabels => {for (final p in widget.presets) p.label};
+
+  // Custom tab: the model's *hand-built* player tokens (manage) plus a builder (colour + optional
+  // label + toggleable). Predefined tokens are excluded — they live in the Predefined tab. No
+  // per-token switch here — a token is toggled on the card.
   Widget _customTab(BuildContext context, AppLocalizations l10n) {
-    final tokens = _state.tokens;
+    final presetLabels = _presetLabels;
+    final tokens = _state.tokens
+        .where((t) => !presetLabels.contains(t.text ?? ''))
+        .toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -409,25 +417,30 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
         ),
       );
     }
-    // A preset already on this model is shown ticked and inert, so tapping down the list can't stack
-    // duplicates. Matched by label — the same thing the token carries.
-    final present = {
-      for (final t in _state.tokens)
-        if ((t.text ?? '').isNotEmpty) t.text,
-    };
     return ListView(
       padding: const EdgeInsets.only(top: 4),
       children: [
         for (final p in widget.presets)
-          _presetRow(context, p, alreadyOn: present.contains(p.label)),
+          _presetRow(context, p, onModel: _tokenForLabel(p.label)),
       ],
     );
   }
 
+  // The token on this model that a preset added, matched by label, or null if it isn't on yet.
+  api.Token? _tokenForLabel(String label) {
+    for (final t in _state.tokens) {
+      if (t.text == label) return t;
+    }
+    return null;
+  }
+
+  // A preset row is an add/remove toggle: not on the model → tap adds it; already on → tap removes
+  // that token (so a predefined token can be cleared without hunting for it in the Custom tab). The
+  // preview never greys out — the trailing icon carries the on/off state instead.
   Widget _presetRow(
     BuildContext context,
     TokenPreset preset, {
-    required bool alreadyOn,
+    required api.Token? onModel,
   }) {
     final token = api.Token(
       (b) => b
@@ -437,24 +450,24 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
         ..toggleable = preset.toggleable
         ..active = true,
     );
-    return Opacity(
-      opacity: alreadyOn ? 0.4 : 1,
-      child: InkWell(
-        onTap: (alreadyOn || _busy) ? null : () => _addPreset(preset),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Row(
-            children: [
-              TokenChip(token: token),
-              const Spacer(),
-              Icon(
-                alreadyOn ? Icons.check : Icons.add,
-                size: 20,
-                color: alreadyOn ? context.subtleTextColor : context.accentColor,
-              ),
-            ],
-          ),
+    final added = onModel != null;
+    return InkWell(
+      onTap: _busy
+          ? null
+          : () => added ? _removeToken(onModel.id) : _addPreset(preset),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          children: [
+            TokenChip(token: token),
+            const Spacer(),
+            Icon(
+              added ? Icons.check_circle : Icons.add_circle_outline,
+              size: 22,
+              color: context.accentColor,
+            ),
+          ],
         ),
       ),
     );
@@ -470,6 +483,10 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       toggleable: preset.toggleable,
       active: true,
     ),
+  );
+
+  Future<void> _removeToken(String tokenId) => _mutateTokens(
+    () => GameService().removeToken(widget.gameId, widget.entry.id, tokenId),
   );
 
   Widget _sectionLabel(BuildContext context, String text) => Padding(
