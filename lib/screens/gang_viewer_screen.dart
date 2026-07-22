@@ -343,21 +343,38 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
 
   // Flips a toggleable token's active state straight from the tile — the frequent per-turn flip.
   // Upserts by the token's own id, so the server updates it in place.
+  // Flipping a token is a frequent per-turn tap, so it applies optimistically — the chip's LED flips
+  // the instant you tap, before the round-trip. The upsert is idempotent, so the persist can't
+  // meaningfully fail; on the off chance it does, we revert and say so.
   Future<void> _toggleToken(api.ListEntry entry, api.Token token) async {
+    final current = entry.state;
+    if (current == null) return;
+    final flipped = token.rebuild((b) => b.active = !token.active);
+    final optimistic = current.rebuild(
+      (b) => b.tokens.replace(
+        current.tokens.map((t) => t.id == token.id ? flipped : t),
+      ),
+    );
+    _applyEntryState(entry.id, optimistic);
     try {
-      final newState = await GameService().upsertToken(
+      final confirmed = await GameService().upsertToken(
         widget.gameId,
         entry.id,
         tokenId: token.id,
         color: token.color,
         text: token.text,
         toggleable: token.toggleable,
-        active: !token.active,
+        active: flipped.active,
       );
-      if (!mounted) return;
-      _applyEntryState(entry.id, newState);
+      // Adopt the server's state only if nothing newer has moved this model since (== is the guard).
+      if (mounted && _entryStateFor(entry.id) == optimistic) {
+        _applyEntryState(entry.id, confirmed);
+      }
     } catch (_) {
       if (mounted) {
+        if (_entryStateFor(entry.id) == optimistic) {
+          _applyEntryState(entry.id, current);
+        }
         showAppToast(context, AppLocalizations.of(context).tokenUpdateFailed);
       }
     }
