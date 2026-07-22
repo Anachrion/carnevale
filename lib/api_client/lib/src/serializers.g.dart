@@ -85,6 +85,8 @@ Serializers _$serializers =
           ..add(SpellPool.serializer)
           ..add(SpellRuleRef.serializer)
           ..add(SummonModelRequest.serializer)
+          ..add(Token.serializer)
+          ..add(TokenColorEnum.serializer)
           ..add(UpdateAccountInput.serializer)
           ..add(UpdateAccountInputUser.serializer)
           ..add(UpdateCountersInput.serializer)
@@ -93,6 +95,7 @@ Serializers _$serializers =
           ..add(UpdateSpellCastInputSpellCast.serializer)
           ..add(UpdateStatsInput.serializer)
           ..add(UpdateStatsInputStats.serializer)
+          ..add(UpdateTokenInput.serializer)
           ..add(ValidationErrors.serializer)
           ..add(Weapon.serializer)
           ..addBuilderFactory(
@@ -221,6 +224,10 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(CardReference)]),
             () => ListBuilder<CardReference>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(Token)]),
+            () => ListBuilder<Token>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltMap, const [
