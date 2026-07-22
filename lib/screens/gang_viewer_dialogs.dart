@@ -470,8 +470,9 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          // The token exactly as it renders on the model tile.
-          TokenChip(token: token),
+          // The token as it looks on the tile — but always shown active, since this is a preview of
+          // the token itself, not a readout of its current on/off state (you toggle that on the card).
+          TokenChip(token: token.rebuild((b) => b.active = true)),
           const Spacer(),
           if (token.toggleable) ...[
             Text(
