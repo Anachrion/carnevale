@@ -46,11 +46,14 @@ class AppBackground extends StatelessWidget {
           image: DecorationImage(
             image: AssetImage(
               isDark
-                  ? 'assets/images/bg_dark.png'
-                  : 'assets/images/bg_light.png',
+                  ? 'assets/images/bg_dark.webp'
+                  : 'assets/images/bg_light.webp',
             ),
             fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+            // Center crop: the bg artwork is a 1:1 square (canal centered). In portrait,
+            // cover crops the sides (full height shown). In landscape, cover crops top &
+            // bottom — centering keeps the horizon/canal band visible instead of only sky.
+            alignment: Alignment.center,
           ),
         ),
         child: Stack(
