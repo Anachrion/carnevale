@@ -402,24 +402,25 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     ),
   );
 
-  // The colour cell in the builder's first line — a round swatch of the chosen colour, matching the
-  // token's dot on the card, with a small caret hinting it opens the palette picker.
+  // A label-less token in a given colour, used as the swatch everywhere a colour is shown so it
+  // matches exactly how a dot-only token renders on the card (the coloured dot in a grey chip).
+  api.Token _previewToken(api.TokenColorEnum color) => api.Token(
+    (b) => b
+      ..id = 'preview'
+      ..color = color
+      ..toggleable = false
+      ..active = true,
+  );
+
+  // The colour cell in the builder's first line — the chosen colour shown as its dot-only token,
+  // centred so it lines up with the Toggleable check below. Tap opens the palette picker.
   Widget _colorSpot(BuildContext context, AppLocalizations l10n) => GestureDetector(
     onTap: _pickColor,
-    child: Container(
+    behavior: HitTestBehavior.opaque,
+    child: SizedBox(
       width: 46,
       height: 46,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: tokenColor(_newColor),
-        border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.4)),
-      ),
-      child: Icon(
-        Icons.arrow_drop_down,
-        size: 18,
-        color: Colors.white.withValues(alpha: 0.85),
-      ),
+      child: Center(child: TokenChip(token: _previewToken(_newColor))),
     ),
   );
 
@@ -435,18 +436,16 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
             _sectionLabel(ctx, AppLocalizations.of(ctx).tokenColorLabel),
             const SizedBox(height: 4),
             Wrap(
-              spacing: 16,
-              runSpacing: 16,
+              spacing: 14,
+              runSpacing: 14,
               children: [
                 for (final c in kTokenPalette)
                   GestureDetector(
                     onTap: () => Navigator.of(ctx).pop(c),
                     child: Container(
-                      width: 38,
-                      height: 38,
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: tokenColor(c),
                         border: Border.all(
                           color: c == _newColor
                               ? context.accentColor
@@ -454,6 +453,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                           width: 2.5,
                         ),
                       ),
+                      child: TokenChip(token: _previewToken(c)),
                     ),
                   ),
               ],
