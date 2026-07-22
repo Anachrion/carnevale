@@ -58,8 +58,8 @@ class TokenChip extends StatelessWidget {
     final hasText = label.isNotEmpty;
 
     final dot = Container(
-      width: 13,
-      height: 13,
+      width: 16,
+      height: 16,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: active ? swatch : Colors.transparent,
@@ -72,9 +72,9 @@ class TokenChip extends StatelessWidget {
     final chip = Opacity(
       opacity: active ? 1 : 0.45,
       child: Container(
-        height: 28,
-        width: hasText ? null : 28,
-        padding: EdgeInsets.symmetric(horizontal: hasText ? 9 : 0),
+        height: 34,
+        width: hasText ? null : 34,
+        padding: EdgeInsets.symmetric(horizontal: hasText ? 11 : 0),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.28),
           borderRadius: BorderRadius.circular(999),
@@ -86,11 +86,11 @@ class TokenChip extends StatelessWidget {
           children: [
             dot,
             if (hasText) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: 7),
               Text(
                 label,
                 style: GoogleFonts.cinzel(
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
