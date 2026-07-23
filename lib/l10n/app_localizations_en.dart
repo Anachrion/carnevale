@@ -865,6 +865,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Coming soon: tokens drawn from this model\'s own spells and rules.';
 
   @override
+  String get grantTooltipMask => 'Give a mask';
+
+  @override
+  String get grantTooltipChoice => 'Make a choice';
+
+  @override
+  String get grantChooseTarget => 'Choose a model to wear the mask';
+
+  @override
+  String get grantChooseEffect => 'Choose an effect';
+
+  @override
+  String get grantNoTargets => 'No eligible models to wear this mask.';
+
+  @override
+  String get grantGive => 'Give mask';
+
+  @override
+  String grantWornBy(String name) {
+    return 'Worn by $name';
+  }
+
+  @override
   String get statUpdateReverted =>
       'Couldn\'t save the change — reverted to the last synced value.';
 

@@ -22,6 +22,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     this.showHeader = true,
     this.presetLabels = const {},
     this.onEditModel,
+    this.onOpenGrant,
     this.onEditStats,
     this.onToggleActivated,
     this.onToggleToken,
@@ -44,6 +45,10 @@ class _ReadOnlyGangBody extends StatelessWidget {
   /// When set, model tiles get an Edit (pencil) button that opens the counter + token modal, and a
   /// tapped marker opens it on its own tab. The tab argument selects which.
   final void Function(api.ListEntry entry, ModelEditTab tab)? onEditModel;
+
+  /// When set, a mask giver / choice model gets a tile button that opens the grant modal. Own models
+  /// only — a grant is always cast by (and within) the acting player's own gang.
+  final void Function(api.ListEntry entry)? onOpenGrant;
 
   /// When set, tapping a model's HP/WP/CP pill opens the stat stepper popup.
   final void Function(api.ListEntry entry)? onEditStats;
@@ -228,6 +233,16 @@ class _ReadOnlyGangBody extends StatelessWidget {
     // Parallel to hiredProfiles: which illustration each entry was actually hired as, so the
     // viewer opens A/B-pair models on the art the player picked rather than the profile's first.
     final hiredReferenceIds = hired.map((pair) => pair.entry.entryId).toList();
+    // Every giver whose grant is already on the board (its token id encodes the giver), so a mask
+    // giver's button reads as consumed. Scanned once across the gang since a mask's token sits on its
+    // target, not the giver.
+    final placedGiverIds = <int>{};
+    for (final e in gang.entries) {
+      for (final t in e.state?.tokens ?? const <api.Token>[]) {
+        final giverId = grantGiverId(t);
+        if (giverId != null) placedGiverIds.add(giverId);
+      }
+    }
     // Ordering (and the death animation that reorders) lives in _GangEntryList, which is given the
     // roster as-is so it can tell a *fresh* casualty from one that was already down.
     return _GangEntryList(
@@ -268,6 +283,9 @@ class _ReadOnlyGangBody extends StatelessWidget {
         } else if (equipmentItem != null) {
           onTap = () => showEquipmentDetailDialog(context, equipmentItem);
         }
+        // A mask giver / choice model offers the grant button; a mask giver whose mask is already on
+        // the board shows it as consumed.
+        final grant = profile != null ? grantSourceFor(profile) : null;
         return _ReadOnlyEntryTile(
           entry: entry,
           color: entryColor,
@@ -276,6 +294,13 @@ class _ReadOnlyGangBody extends StatelessWidget {
           onEditModel: onEditModel != null && entry.state != null
               ? (tab) => onEditModel!(entry, tab)
               : null,
+          onGrant: onOpenGrant != null && grant != null && entry.state != null
+              ? () => onOpenGrant!(entry)
+              : null,
+          grantIsMask: grant?.targetsOther ?? false,
+          grantUsed: grant != null &&
+              grant.oncePerGame &&
+              placedGiverIds.contains(entry.id),
           onEditStats: onEditStats != null && entry.state != null
               ? () => onEditStats!(entry)
               : null,
@@ -485,6 +510,9 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     this.onTap,
     this.presetLabels = const {},
     this.onEditModel,
+    this.onGrant,
+    this.grantIsMask = false,
+    this.grantUsed = false,
     this.onEditStats,
     this.onToggleActivated,
     this.onToggleToken,
@@ -503,6 +531,17 @@ class _ReadOnlyEntryTile extends StatelessWidget {
   /// Opens the counter/token modal on a given tab (own models only). The Edit button and a tapped
   /// marker both go through here. Replaces the old counter "+".
   final void Function(ModelEditTab tab)? onEditModel;
+
+  /// Opens the grant modal (mask giver / choice model, own models only).
+  final VoidCallback? onGrant;
+
+  /// Whether the grant is a mask (given to another model) vs a self choice — only affects the button
+  /// tooltip.
+  final bool grantIsMask;
+
+  /// A once-per-game mask giver whose mask is already on the board — the button reads as consumed.
+  final bool grantUsed;
+
   final VoidCallback? onEditStats;
   final VoidCallback? onToggleActivated;
 
@@ -646,6 +685,14 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                       const SizedBox(width: 8),
                       _DismissButton(onTap: onDismiss!),
                     ],
+                    if (onGrant != null) ...[
+                      const SizedBox(width: 8),
+                      _GrantButton(
+                        used: grantUsed,
+                        isMask: grantIsMask,
+                        onTap: onGrant!,
+                      ),
+                    ],
                     if (onEditModel != null) ...[
                       const SizedBox(width: 8),
                       _EditButton(
@@ -669,11 +716,15 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                     for (final token in state.tokens)
                       TokenChip(
                         token: token,
-                        // A counter token opens its −/+ stepper; a toggleable one flips on tap (the
-                        // frequent per-turn flip); a plain one opens the Edit modal on its own tab —
-                        // Predefined if it's a preset, else Custom. On a read-only tile the tap is
-                        // just swallowed so it doesn't fall through and open the card viewer.
-                        onTap: token.count != null && onEditTokenCount != null
+                        // A grant token (a mask/choice) is non-editable — managed only from its
+                        // giver's grant modal — so its tap is swallowed. Otherwise: a counter token
+                        // opens its −/+ stepper; a toggleable one flips on tap (the frequent per-turn
+                        // flip); a plain one opens the Edit modal on its own tab — Predefined if it's a
+                        // preset, else Custom. On a read-only tile the tap is just swallowed so it
+                        // doesn't fall through and open the card viewer.
+                        onTap: isGrantToken(token)
+                            ? () {}
+                            : token.count != null && onEditTokenCount != null
                             ? () => onEditTokenCount!(token)
                             : token.toggleable && onToggleToken != null
                             ? () => onToggleToken!(token)
@@ -1019,6 +1070,53 @@ class _DismissButton extends StatelessWidget {
             ),
           ),
           child: const Icon(Icons.close, size: 20, color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opens the grant modal for a mask giver / choice model (own models only). A theatre-mask glyph ties
+/// it to masks; once a once-per-game mask has been given the button dims to read as spent — it stays
+/// tappable (to see who wears it and undo if needed) but no longer draws the eye like a live action.
+class _GrantButton extends StatelessWidget {
+  const _GrantButton({
+    required this.used,
+    required this.isMask,
+    required this.onTap,
+  });
+
+  final bool used;
+  final bool isMask;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Tooltip(
+      message: isMask ? l10n.grantTooltipMask : l10n.grantTooltipChoice,
+      child: GestureDetector(
+        onTap: onTap,
+        // A spent once-per-game mask dims rather than filling in: it's done its job, so it recedes
+        // instead of shouting for attention like the still-actionable controls beside it.
+        child: Opacity(
+          opacity: used ? 0.4 : 1,
+          child: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.5),
+                width: 1.2,
+              ),
+            ),
+            child: const Icon(
+              Icons.theater_comedy,
+              size: 18,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );

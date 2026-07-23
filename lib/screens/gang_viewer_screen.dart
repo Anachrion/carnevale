@@ -35,12 +35,14 @@ import '../widgets/profile_search.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/status_views.dart';
 import '../widgets/themed_dialog_card.dart';
+import '../widgets/grant_catalog.dart';
 import '../widgets/token_chip.dart';
 import '../widgets/token_preset.dart';
 import 'card_viewer_screen.dart';
 
 part 'gang_viewer_body.dart';
 part 'gang_viewer_dialogs.dart';
+part 'gang_viewer_grant_dialog.dart';
 
 /// Read-only view of both players' gangs for a game once each has picked one — reuses the
 /// gang builder's visual language (faction colors, entry tiles, tap-to-view-card) but with no
@@ -459,6 +461,60 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  // The hired profile behind an entry (its printed card), or null for equipment / an unmatched entry.
+  api.Profile? _profileFor(api.ListEntry entry) {
+    if (entry.entryType !=
+        api.ListEntryEntryTypeEnum.catalogColonColonCardReference) {
+      return null;
+    }
+    return _data?.profiles
+        .where((p) => p.cardReferenceIds.contains(entry.entryId))
+        .firstOrNull;
+  }
+
+  // Opens the grant modal for a mask giver / choice model. Builds, from the whole gang, the eligible
+  // mask targets and locates any grant this giver has already placed (its token is keyed by the
+  // giver's id but may sit on another model), so the modal can offer Give / Remove / re-pick.
+  void _openGrant(api.ListEntry giver) {
+    final data = _data;
+    if (data == null) return;
+    final profile = _profileFor(giver);
+    final source = profile == null ? null : grantSourceFor(profile);
+    if (source == null) return;
+
+    final targets = <({api.ListEntry entry, api.Profile profile})>[];
+    if (source.targetsOther) {
+      for (final e in data.gang.entries) {
+        final p = _profileFor(e);
+        if (p != null && canWearMask(p, e, giverEntryId: giver.id)) {
+          targets.add((entry: e, profile: p));
+        }
+      }
+    }
+
+    final id = grantTokenId(giver.id);
+    ({api.ListEntry carrier, api.Token token})? current;
+    for (final e in data.gang.entries) {
+      final token = e.state?.tokens.where((t) => t.id == id).firstOrNull;
+      if (token != null) {
+        current = (carrier: e, token: token);
+        break;
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => _GrantDialog(
+        gameId: widget.gameId,
+        giver: giver,
+        source: source,
+        targets: targets,
+        current: current,
+        onStateChanged: _applyEntryState,
+      ),
+    );
+  }
+
   // Flips a toggleable token's active state straight from the tile — the frequent per-turn flip.
   // Upserts by the token's own id, so the server updates it in place.
   // Flipping a token is a frequent per-turn tap, so it applies optimistically — the chip's LED flips
@@ -724,6 +780,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       showHeader: widget.showListHeader,
       presetLabels: widget.editable ? _presetLabels : const {},
       onEditModel: widget.editable ? _editModel : null,
+      onOpenGrant: widget.editable ? _openGrant : null,
       onEditStats: widget.editable ? _editStats : null,
       onToggleActivated: widget.editable ? _toggleActivated : null,
       onToggleToken: widget.editable ? _toggleToken : null,

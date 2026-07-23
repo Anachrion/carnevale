@@ -317,6 +317,23 @@
   "tokenColorLabel": "Color",
   "tokenPredefinedEmpty": "No spells or buffs to add for this gang.",
   "tokenPredefinedSoon": "Coming soon: tokens drawn from this model's own spells and rules.",
+  "grantTooltipMask": "Give a mask",
+  "@grantTooltipMask": {
+    "description": "Tooltip on the tile button of a mask-giver model (e.g. Artisan Elena), which opens the modal to give one of its masks to another friendly model."
+  },
+  "grantTooltipChoice": "Make a choice",
+  "@grantTooltipChoice": {
+    "description": "Tooltip on the tile button of a choice model (The Mask Maker, Master of Arcane Security), which opens the modal to pick the effect it gains this round."
+  },
+  "grantChooseTarget": "Choose a model to wear the mask",
+  "grantChooseEffect": "Choose an effect",
+  "grantNoTargets": "No eligible models to wear this mask.",
+  "grantGive": "Give mask",
+  "grantWornBy": "Worn by {name}",
+  "@grantWornBy": {
+    "description": "Header shown in the mask modal once the mask has been given, naming the model that now wears it.",
+    "placeholders": { "name": { "type": "String" } }
+  },
   "statUpdateReverted": "Couldn't save the change — reverted to the last synced value.",
   "@statUpdateReverted": {
     "description": "Toast shown when a debounced stat write fails and the displayed value rolls back to the last server-confirmed one. Not a retry prompt: the rollback already happened."

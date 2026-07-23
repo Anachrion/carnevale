@@ -1634,6 +1634,48 @@ abstract class AppLocalizations {
   /// **'Coming soon: tokens drawn from this model\'s own spells and rules.'**
   String get tokenPredefinedSoon;
 
+  /// Tooltip on the tile button of a mask-giver model (e.g. Artisan Elena), which opens the modal to give one of its masks to another friendly model.
+  ///
+  /// In en, this message translates to:
+  /// **'Give a mask'**
+  String get grantTooltipMask;
+
+  /// Tooltip on the tile button of a choice model (The Mask Maker, Master of Arcane Security), which opens the modal to pick the effect it gains this round.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a choice'**
+  String get grantTooltipChoice;
+
+  /// No description provided for @grantChooseTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a model to wear the mask'**
+  String get grantChooseTarget;
+
+  /// No description provided for @grantChooseEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an effect'**
+  String get grantChooseEffect;
+
+  /// No description provided for @grantNoTargets.
+  ///
+  /// In en, this message translates to:
+  /// **'No eligible models to wear this mask.'**
+  String get grantNoTargets;
+
+  /// No description provided for @grantGive.
+  ///
+  /// In en, this message translates to:
+  /// **'Give mask'**
+  String get grantGive;
+
+  /// Header shown in the mask modal once the mask has been given, naming the model that now wears it.
+  ///
+  /// In en, this message translates to:
+  /// **'Worn by {name}'**
+  String grantWornBy(String name);
+
   /// Toast shown when a debounced stat write fails and the displayed value rolls back to the last server-confirmed one. Not a retry prompt: the rollback already happened.
   ///
   /// In en, this message translates to:
