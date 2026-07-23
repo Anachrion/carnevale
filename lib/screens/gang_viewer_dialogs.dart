@@ -307,8 +307,10 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   // per-token switch here — a token is toggled on the card.
   Widget _customTab(BuildContext context, AppLocalizations l10n) {
     final presetLabels = _presetLabels;
+    // Grant tokens (masks/choices) are managed only from their giver's grant modal, so they're kept
+    // out of the hand-built Custom list — same reasoning as excluding the predefined presets.
     final tokens = _state.tokens
-        .where((t) => !presetLabels.contains(t.text ?? ''))
+        .where((t) => !presetLabels.contains(t.text ?? '') && !isGrantToken(t))
         .toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
