@@ -876,6 +876,29 @@ class AppLocalizationsFr extends AppLocalizations {
       'Bientôt : des jetons tirés des sorts et règles de ce modèle.';
 
   @override
+  String get grantTooltipMask => 'Donner un masque';
+
+  @override
+  String get grantTooltipChoice => 'Faire un choix';
+
+  @override
+  String get grantChooseTarget => 'Choisir un modèle pour porter le masque';
+
+  @override
+  String get grantChooseEffect => 'Choisir un effet';
+
+  @override
+  String get grantNoTargets => 'Aucun modèle éligible pour porter ce masque.';
+
+  @override
+  String get grantGive => 'Donner le masque';
+
+  @override
+  String grantWornBy(String name) {
+    return 'Porté par $name';
+  }
+
+  @override
   String get statUpdateReverted =>
       'Échec de l\'enregistrement — retour à la dernière valeur synchronisée.';
 
