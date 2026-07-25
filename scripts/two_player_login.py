@@ -103,8 +103,11 @@ def log_in(driver: webdriver.Chrome, url: str, email: str, password: str) -> Non
     enable_semantics(driver, wait)
     open_login_form(driver, wait)
 
-    type_into(driver, wait, '[aria-label="Email"]', email)
-    password_field = type_into(driver, wait, '[aria-label="Password"]', password)
+    # The login field's label is "Email or Username" (sign-up uses plain
+    # "Email"), so match on a substring rather than the exact string - keeps
+    # this working across label tweaks.
+    type_into(driver, wait, '[aria-label*="Email"]', email)
+    password_field = type_into(driver, wait, '[aria-label*="Password"]', password)
     password_field.send_keys(Keys.RETURN)
 
     # On success the app shows a toast and navigates back to Home; on failure
