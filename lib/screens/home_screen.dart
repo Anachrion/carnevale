@@ -98,7 +98,7 @@ class HomeScreen extends StatelessWidget {
                                       _MenuItem(
                                         imagePath:
                                             'assets/images/games_icon.png',
-                                        imageScale: 1.10,
+                                        imageScale: 1.3,
                                         title: l10n.navGames,
                                         onTap: () => Navigator.push(
                                           context,
