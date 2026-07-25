@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# Materialize the Android release-signing files from Infisical, so a Play Store
+# build needs no keystore on disk beforehand and works on any machine.
+#
+# The upload keystore + its passwords live in Infisical (project "carnevale",
+# Production environment, /android folder):
+#
+#     ANDROID_UPLOAD_KEYSTORE_B64   base64 of the .jks (the irreplaceable bit)
+#     ANDROID_UPLOAD_STORE_PASSWORD store == key password
+#     ANDROID_UPLOAD_KEY_ALIAS      key alias ("upload")
+#
+# Run it wrapped in `infisical run` so the secrets are injected; there is no
+# local-file fallback on purpose (same posture as the backend's bin/_load-secrets):
+#
+#     infisical run --env=prod --path=/android -- bin/android-signing
+#     flutter build appbundle    # signs with the release key automatically
+#
+# Both outputs are git-ignored (android/.gitignore covers *.jks and key.properties).
+# Re-run any time; it overwrites in place.
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+require() {
+  local var
+  for var in "$@"; do
+    if [ -z "${!var:-}" ]; then
+      echo "error: $var is not set." >&2
+      echo "       Run via: infisical run --env=prod --path=/android -- $0" >&2
+      exit 1
+    fi
+  done
+}
+require ANDROID_UPLOAD_KEYSTORE_B64 ANDROID_UPLOAD_STORE_PASSWORD ANDROID_UPLOAD_KEY_ALIAS
+
+keystore="android/upload-keystore.jks"
+
+umask 077
+printf '%s' "$ANDROID_UPLOAD_KEYSTORE_B64" | base64 -d > "$keystore"
+
+cat > android/key.properties <<EOF
+storePassword=${ANDROID_UPLOAD_STORE_PASSWORD}
+keyPassword=${ANDROID_UPLOAD_STORE_PASSWORD}
+keyAlias=${ANDROID_UPLOAD_KEY_ALIAS}
+storeFile=${PWD}/${keystore}
+EOF
+
+echo "==> Wrote android/key.properties and ${keystore} (mode 600)."
+echo "    sha256: $(shasum -a 256 "$keystore" | cut -d' ' -f1)"
