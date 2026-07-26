@@ -391,6 +391,7 @@ class _AboutDialog extends StatelessWidget {
           maxHeight: MediaQuery.of(context).size.height * 0.82,
         ),
         child: GlassPanel(
+          opaque: true,
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
           child: SingleChildScrollView(
             child: Column(
@@ -398,7 +399,14 @@ class _AboutDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
-                  child: Image.asset('assets/images/mask.png', width: 64, height: 64),
+                  child: Image.asset(
+                    'assets/images/mask.png',
+                    width: 64,
+                    height: 64,
+                    // Match the app's mask treatment: deep red in light theme, native gold in dark.
+                    color: isLight ? AppPalette.red : null,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Text(
@@ -415,8 +423,8 @@ class _AboutDialog extends StatelessWidget {
                 Text(
                   version,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 12,
+                  style: GoogleFonts.ebGaramond(
+                    fontSize: 13,
                     color: context.subtleTextColor,
                   ),
                 ),
@@ -438,8 +446,8 @@ class _AboutDialog extends StatelessWidget {
                 Text(
                   l10n.aboutDescription,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 13,
+                  style: GoogleFonts.ebGaramond(
+                    fontSize: 15,
                     color: context.textColor,
                     height: 1.4,
                   ),
@@ -448,10 +456,19 @@ class _AboutDialog extends StatelessWidget {
                 Text(
                   l10n.aboutCredits,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 13,
+                  style: GoogleFonts.ebGaramond(
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: context.textColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  l10n.aboutLegalese,
+                  style: GoogleFonts.ebGaramond(
+                    fontSize: 13,
+                    color: context.subtleTextColor,
+                    height: 1.45,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -475,12 +492,22 @@ class _AboutDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  l10n.aboutLegalese,
+                  l10n.aboutLegalHeading,
                   style: GoogleFonts.cinzel(
                     fontSize: 11,
-                    color: context.subtleTextColor,
-                    height: 1.5,
+                    fontWeight: FontWeight.w600,
+                    color: accent,
+                    letterSpacing: 2,
                   ),
+                ),
+                const SizedBox(height: 4),
+                _SourceLink(
+                  label: l10n.aboutPrivacyPolicy,
+                  url: 'https://carnevale-app.com/privacy',
+                ),
+                _SourceLink(
+                  label: l10n.aboutAccountDeletion,
+                  url: 'https://carnevale-app.com/account-deletion',
                 ),
                 const SizedBox(height: 22),
                 GlassActionButton(

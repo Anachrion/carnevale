@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutCredits.
   ///
   /// In en, this message translates to:
-  /// **'Created by Anachrion.'**
+  /// **'Created by Anachrion and Eldrim.'**
   String get aboutCredits;
 
   /// No description provided for @aboutSourceHeading.
@@ -302,6 +302,24 @@ abstract class AppLocalizations {
   /// **'Server (Rails)'**
   String get aboutSourceServer;
 
+  /// No description provided for @aboutLegalHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & data'**
+  String get aboutLegalHeading;
+
+  /// No description provided for @aboutPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get aboutPrivacyPolicy;
+
+  /// No description provided for @aboutAccountDeletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account'**
+  String get aboutAccountDeletion;
+
   /// No description provided for @aboutViewLicenses.
   ///
   /// In en, this message translates to:
@@ -311,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutLegalese.
   ///
   /// In en, this message translates to:
-  /// **'Carnevale is an independent, fan-made application. It is not affiliated with, endorsed by, or sponsored by any official Carnival or Carnevale organization. All third-party names, trademarks, and artwork are the property of their respective owners.\n\n© 2026 Anachrion. Licensed under the Apache License, Version 2.0.'**
+  /// **'Carnevale is a tabletop miniatures game created and published by TT Combat, which owns all associated intellectual property, including the Carnevale name, artwork, and trademarks. We claim no ownership of it. This is an independent, fan-made companion app — not an official product. It is not affiliated with or endorsed by TT Combat, and is used with their kind permission; it is provided free of charge and is never sold. All names, trademarks, and artwork remain the property of TT Combat and their respective owners.\n\n© 2026 Anachrion & Eldrim. Licensed under the Apache License, Version 2.0.'**
   String get aboutLegalese;
 
   /// No description provided for @toastUsernameUpdated.

@@ -113,7 +113,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une application compagnon non officielle et amateur pour le jeu de table.';
 
   @override
-  String get aboutCredits => 'Créé par Anachrion.';
+  String get aboutCredits => 'Créé par Anachrion et Eldrim.';
 
   @override
   String get aboutSourceHeading => 'Code source';
@@ -125,11 +125,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get aboutSourceServer => 'Serveur (Rails)';
 
   @override
+  String get aboutLegalHeading => 'Confidentialité et données';
+
+  @override
+  String get aboutPrivacyPolicy => 'Politique de confidentialité';
+
+  @override
+  String get aboutAccountDeletion => 'Supprimer votre compte';
+
+  @override
   String get aboutViewLicenses => 'Licences';
 
   @override
   String get aboutLegalese =>
-      'Carnevale est une application indépendante réalisée par des fans. Elle n\'est ni affiliée, ni approuvée, ni sponsorisée par une quelconque organisation officielle du Carnaval ou de Carnevale. Tous les noms, marques et illustrations tiers appartiennent à leurs propriétaires respectifs.\n\n© 2026 Anachrion. Distribué sous licence Apache, version 2.0.';
+      'Carnevale est un jeu de figurines créé et publié par TT Combat, qui détient l\'ensemble des droits de propriété intellectuelle associés, y compris le nom, les illustrations et les marques Carnevale. Nous n\'en revendiquons aucune propriété. Ceci est une application compagnon indépendante et amateur — sans caractère officiel. Elle n\'est ni affiliée à TT Combat ni approuvée par elle, et est utilisée avec son aimable autorisation ; elle est fournie gratuitement et n\'est jamais vendue. Tous les noms, marques et illustrations demeurent la propriété de TT Combat et de leurs détenteurs respectifs.\n\n© 2026 Anachrion & Eldrim. Distribué sous licence Apache, version 2.0.';
 
   @override
   String get toastUsernameUpdated => 'Nom d\'utilisateur mis à jour !';

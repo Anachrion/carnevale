@@ -113,7 +113,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'An unofficial, fan-made companion app for tabletop play.';
 
   @override
-  String get aboutCredits => 'Created by Anachrion.';
+  String get aboutCredits => 'Created by Anachrion and Eldrim.';
 
   @override
   String get aboutSourceHeading => 'Source code';
@@ -125,11 +125,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutSourceServer => 'Server (Rails)';
 
   @override
+  String get aboutLegalHeading => 'Privacy & data';
+
+  @override
+  String get aboutPrivacyPolicy => 'Privacy policy';
+
+  @override
+  String get aboutAccountDeletion => 'Delete your account';
+
+  @override
   String get aboutViewLicenses => 'View Licenses';
 
   @override
   String get aboutLegalese =>
-      'Carnevale is an independent, fan-made application. It is not affiliated with, endorsed by, or sponsored by any official Carnival or Carnevale organization. All third-party names, trademarks, and artwork are the property of their respective owners.\n\n© 2026 Anachrion. Licensed under the Apache License, Version 2.0.';
+      'Carnevale is a tabletop miniatures game created and published by TT Combat, which owns all associated intellectual property, including the Carnevale name, artwork, and trademarks. We claim no ownership of it. This is an independent, fan-made companion app — not an official product. It is not affiliated with or endorsed by TT Combat, and is used with their kind permission; it is provided free of charge and is never sold. All names, trademarks, and artwork remain the property of TT Combat and their respective owners.\n\n© 2026 Anachrion & Eldrim. Licensed under the Apache License, Version 2.0.';
 
   @override
   String get toastUsernameUpdated => 'Username updated!';

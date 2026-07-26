@@ -21,6 +21,7 @@ class GlassPanel extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(20),
+    this.opaque = false,
   });
 
   final Widget child;
@@ -29,20 +30,34 @@ class GlassPanel extends StatelessWidget {
   /// (e.g. a `Material`/`InkWell` tappable row or a bare `TextField`).
   final EdgeInsetsGeometry padding;
 
+  /// Paint a solid [AppColors.cardBgColor] base beneath the frosted gradient. Inline rows sit on
+  /// the page and read fine at the default translucency, but a modal popup floats over a darkened
+  /// scrim — in light theme the translucent cream then composites to a muddy grey. Opaque popups
+  /// get a proper theme-correct surface (cream in light, near-black in dark) while keeping the
+  /// ornamental gradient and border on top.
+  final bool opaque;
+
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
+        child: DecoratedBox(
+          // Solid backing (opaque popups only), under the gradient below. A BoxDecoration can't
+          // carry both a color and a gradient, so the two live on separate layers.
           decoration: BoxDecoration(
-            gradient: context.panelGradient,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.panelBorderColor, width: 1.0),
+            color: opaque ? context.cardBgColor : null,
           ),
-          padding: padding,
-          child: child,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: context.panelGradient,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.panelBorderColor, width: 1.0),
+            ),
+            padding: padding,
+            child: child,
+          ),
         ),
       ),
     );

@@ -226,6 +226,7 @@ class _ChangeUsernameDialogState extends State<_ChangeUsernameDialog> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
         child: GlassPanel(
+          opaque: true,
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Form(
             key: _formKey,
