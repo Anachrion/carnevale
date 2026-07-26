@@ -90,4 +90,4 @@ python3 scripts/play_upload.py \
   --track "$TRACK" \
   --status "$STATUS" \
   --release-name "$VERSION_NAME" \
-  "${notes_arg[@]}"
+  "${notes_arg[@]+"${notes_arg[@]}"}"
