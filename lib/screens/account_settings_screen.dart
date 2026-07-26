@@ -251,13 +251,13 @@ class _ChangeUsernameDialogState extends State<_ChangeUsernameDialog> {
                   textCapitalization: TextCapitalization.none,
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _save(),
-                  style: GoogleFonts.notoSans(
+                  style: GoogleFonts.ebGaramond(
                     color: context.textColor,
-                    fontSize: 15,
+                    fontSize: 16,
                   ),
                   decoration: InputDecoration(
                     labelText: l10n.fieldUsername,
-                    labelStyle: GoogleFonts.notoSans(
+                    labelStyle: GoogleFonts.cinzel(
                       color: context.subtleTextColor,
                       fontSize: 13,
                     ),

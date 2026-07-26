@@ -271,7 +271,7 @@ class _AuthFormState extends State<_AuthForm> {
                 focusNode: _usernameFocus,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _emailFocus.requestFocus(),
-                style: GoogleFonts.notoSans(
+                style: GoogleFonts.ebGaramond(
                   color: context.textColor,
                   fontSize: 15,
                 ),
@@ -289,7 +289,7 @@ class _AuthFormState extends State<_AuthForm> {
                   : TextInputType.text,
               textInputAction: TextInputAction.next,
               onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
-              style: GoogleFonts.notoSans(
+              style: GoogleFonts.ebGaramond(
                 color: context.textColor,
                 fontSize: 15,
               ),
@@ -314,7 +314,7 @@ class _AuthFormState extends State<_AuthForm> {
               onFieldSubmitted: (_) => _isSignUp
                   ? _passwordConfirmationFocus.requestFocus()
                   : _submit(),
-              style: GoogleFonts.notoSans(
+              style: GoogleFonts.ebGaramond(
                 color: context.textColor,
                 fontSize: 15,
               ),
@@ -333,7 +333,7 @@ class _AuthFormState extends State<_AuthForm> {
                   onTap: () => _showForgotPasswordDialog(context),
                   child: Text(
                     l10n.authForgotPassword,
-                    style: GoogleFonts.notoSans(
+                    style: GoogleFonts.ebGaramond(
                       fontSize: 13,
                       color: context.accentColor,
                       fontWeight: FontWeight.w600,
@@ -350,7 +350,7 @@ class _AuthFormState extends State<_AuthForm> {
                 obscureText: true,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _submit(),
-                style: GoogleFonts.notoSans(
+                style: GoogleFonts.ebGaramond(
                   color: context.textColor,
                   fontSize: 15,
                 ),
@@ -405,7 +405,7 @@ class _AuthFormState extends State<_AuthForm> {
                 onTap: () => _switchMode(!_isSignUp),
                 child: RichText(
                   text: TextSpan(
-                    style: GoogleFonts.notoSans(
+                    style: GoogleFonts.ebGaramond(
                       fontSize: 13,
                       color: context.subtleTextColor,
                     ),
@@ -490,7 +490,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
           children: [
             Text(
               l10n.authResetPasswordBlurb,
-              style: GoogleFonts.notoSans(
+              style: GoogleFonts.ebGaramond(
                 fontSize: 13,
                 color: context.subtleTextColor,
               ),
@@ -502,13 +502,13 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _send(),
-              style: GoogleFonts.notoSans(
+              style: GoogleFonts.ebGaramond(
                 color: context.textColor,
                 fontSize: 15,
               ),
               decoration: InputDecoration(
                 labelText: l10n.fieldEmail,
-                labelStyle: GoogleFonts.notoSans(
+                labelStyle: GoogleFonts.ebGaramond(
                   color: context.subtleTextColor,
                   fontSize: 13,
                 ),

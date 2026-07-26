@@ -24,14 +24,17 @@ InputDecoration goldInputDecoration(
   BuildContext context, {
   String? label,
   String? hint,
+  TextStyle? labelStyle,
 }) {
   return InputDecoration(
     labelText: label,
     hintText: hint,
-    labelStyle: GoogleFonts.notoSans(
-      color: context.subtleTextColor,
-      fontSize: 13,
-    ),
+    labelStyle:
+        labelStyle ??
+        GoogleFonts.ebGaramond(
+          color: context.subtleTextColor,
+          fontSize: 13,
+        ),
     hintStyle: hint == null
         ? null
         : TextStyle(

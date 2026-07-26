@@ -102,7 +102,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   children: [
                     Text(
                       l10n.resetPasswordBlurb,
-                      style: GoogleFonts.notoSans(
+                      style: GoogleFonts.ebGaramond(
                         fontSize: 13,
                         color: context.subtleTextColor,
                       ),
@@ -115,7 +115,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       textInputAction: TextInputAction.next,
                       onFieldSubmitted: (_) =>
                           _passwordConfirmationFocus.requestFocus(),
-                      style: GoogleFonts.notoSans(
+                      style: GoogleFonts.ebGaramond(
                         color: context.textColor,
                         fontSize: 15,
                       ),
@@ -136,7 +136,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
-                      style: GoogleFonts.notoSans(
+                      style: GoogleFonts.ebGaramond(
                         color: context.textColor,
                         fontSize: 15,
                       ),

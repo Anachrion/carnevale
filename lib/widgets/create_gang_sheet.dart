@@ -101,16 +101,30 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
         TextField(
           controller: _nameController,
           autofocus: true,
-          style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
-          decoration: goldInputDecoration(context, label: l10n.gangNameLabel),
+          style: GoogleFonts.ebGaramond(color: context.textColor, fontSize: 16),
+          decoration: goldInputDecoration(
+            context,
+            label: l10n.gangNameLabel,
+            labelStyle: GoogleFonts.cinzel(
+              color: context.subtleTextColor,
+              fontSize: 13,
+            ),
+          ),
           onSubmitted: (_) => _submit(),
         ),
         const SizedBox(height: 16),
         TextField(
           controller: _pointsController,
           keyboardType: TextInputType.number,
-          style: GoogleFonts.cinzel(color: context.textColor, fontSize: 15),
-          decoration: goldInputDecoration(context, label: l10n.gangPointLimit),
+          style: GoogleFonts.ebGaramond(color: context.textColor, fontSize: 16),
+          decoration: goldInputDecoration(
+            context,
+            label: l10n.gangPointLimit,
+            labelStyle: GoogleFonts.cinzel(
+              color: context.subtleTextColor,
+              fontSize: 13,
+            ),
+          ),
         ),
         const SizedBox(height: 24),
         Text(
