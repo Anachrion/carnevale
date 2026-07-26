@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#
+# Build a signed release App Bundle and publish it to a Google Play track
+# (defaults to the closed-testing "alpha" track). One command, no keystore or
+# credentials on disk beforehand — everything comes from Infisical, matching
+# bin/android-signing and the backend's `infisical run -- kamal deploy`.
+#
+# Run it wrapped in `infisical run` with --recursive so BOTH the /android
+# secrets (keystore + Play service account) and the root API_KEY are injected:
+#
+#     infisical run --env=prod --recursive -- bin/publish-play
+#
+# Options (all optional):
+#     --track NAME     Play track to release to (default: alpha = closed testing)
+#     --status STATUS  completed | draft | inProgress | halted (default: completed)
+#     --dry-run        build + sign only; skip the upload to Play
+#
+# Version: versionName comes from pubspec.yaml; versionCode is the git commit
+# count, so every commit yields a strictly higher, gap-free code with no manual
+# bookkeeping. The build points at the production backend over TLS by default;
+# override with PLAY_API_HOST / PLAY_API_USE_TLS if you need to.
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+TRACK="alpha"
+STATUS="completed"
+DRY_RUN=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --track)  TRACK="$2"; shift 2 ;;
+    --status) STATUS="$2"; shift 2 ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+API_HOST="${PLAY_API_HOST:-carnevale-app.com}"
+API_USE_TLS="${PLAY_API_USE_TLS:-true}"
+PACKAGE="app.carnevale.mobile"
+NOTES_FILE="store-assets/whatsnew/en-US.txt"
+
+require() {
+  local var
+  for var in "$@"; do
+    if [ -z "${!var:-}" ]; then
+      echo "error: $var is not set." >&2
+      echo "       Run via: infisical run --env=prod --recursive -- $0" >&2
+      exit 1
+    fi
+  done
+}
+# Keystore secrets are consumed by bin/android-signing; API_KEY is baked into the
+# build; the service-account JSON authenticates the upload.
+require ANDROID_UPLOAD_KEYSTORE_B64 ANDROID_UPLOAD_STORE_PASSWORD ANDROID_UPLOAD_KEY_ALIAS API_KEY
+[ "$DRY_RUN" -eq 1 ] || require ANDROID_PLAY_SERVICE_ACCOUNT_JSON
+
+VERSION_NAME="$(sed -n 's/^version: *\([0-9][0-9.]*\).*/\1/p' pubspec.yaml)"
+VERSION_CODE="$(git rev-list --count HEAD)"
+[ -n "$VERSION_NAME" ] || { echo "error: could not parse version from pubspec.yaml" >&2; exit 1; }
+echo "==> $PACKAGE  $VERSION_NAME (versionCode $VERSION_CODE)  ->  track '$TRACK'"
+
+echo "==> Materializing release signing key from Infisical..."
+bin/android-signing
+
+echo "==> Building release app bundle..."
+flutter build appbundle --release \
+  --build-name="$VERSION_NAME" \
+  --build-number="$VERSION_CODE" \
+  --dart-define=API_HOST="$API_HOST" \
+  --dart-define=API_USE_TLS="$API_USE_TLS" \
+  --dart-define=API_KEY="$API_KEY"
+
+AAB="build/app/outputs/bundle/release/app-release.aab"
+[ -f "$AAB" ] || { echo "error: expected bundle not found at $AAB" >&2; exit 1; }
+echo "==> Built $AAB"
+
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "==> --dry-run: skipping Play upload. Bundle is ready at $AAB"
+  exit 0
+fi
+
+notes_arg=()
+[ -f "$NOTES_FILE" ] && notes_arg=(--notes-file "$NOTES_FILE")
+
+echo "==> Uploading to Google Play..."
+python3 scripts/play_upload.py \
+  --aab "$AAB" \
+  --package "$PACKAGE" \
+  --track "$TRACK" \
+  --status "$STATUS" \
+  --release-name "$VERSION_NAME" \
+  "${notes_arg[@]}"
