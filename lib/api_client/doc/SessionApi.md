@@ -333,7 +333,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **updateAccount**
-> Session updateAccount(updateAccountInput)
+> Account updateAccount(updateAccountInput)
 
 Update the current user's username
 
@@ -364,7 +364,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Session**](Session.md)
+[**Account**](Account.md)
 
 ### Authorization
 

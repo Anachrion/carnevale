@@ -10,6 +10,7 @@ Serializers _$serializers =
     (Serializers().toBuilder()
           ..add(Ability.serializer)
           ..add(AbilityCategoryEnum.serializer)
+          ..add(Account.serializer)
           ..add(Agenda.serializer)
           ..add(AgendaHistoryEntry.serializer)
           ..add(AgendaHistoryEntryActionEnum.serializer)

@@ -66,6 +66,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsSignedInAs => 'Connecté en tant que';
 
   @override
+  String get settingsChangeUsername => 'Changer de nom d\'utilisateur';
+
+  @override
   String get settingsSyncBlurb =>
       'Téléchargez les images de cartes manquantes ou obsolètes sur cet appareil.';
 

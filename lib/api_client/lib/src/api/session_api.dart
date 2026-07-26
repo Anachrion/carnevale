@@ -8,6 +8,7 @@ import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
 
+import 'package:carnevale_api/src/model/account.dart';
 import 'package:carnevale_api/src/model/create_cable_ticket201_response.dart';
 import 'package:carnevale_api/src/model/forgot_password_input.dart';
 import 'package:carnevale_api/src/model/login_input.dart';
@@ -660,9 +661,9 @@ class SessionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [Session] as data
+  /// Returns a [Future] containing a [Response] with a [Account] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<Session>> updateAccount({ 
+  Future<Response<Account>> updateAccount({ 
     required UpdateAccountInput updateAccountInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -723,14 +724,14 @@ class SessionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    Session? _responseData;
+    Account? _responseData;
 
     try {
       final rawResponse = _response.data;
       _responseData = rawResponse == null ? null : _serializers.deserialize(
         rawResponse,
-        specifiedType: const FullType(Session),
-      ) as Session;
+        specifiedType: const FullType(Account),
+      ) as Account;
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -742,7 +743,7 @@ class SessionApi {
       );
     }
 
-    return Response<Session>(
+    return Response<Account>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

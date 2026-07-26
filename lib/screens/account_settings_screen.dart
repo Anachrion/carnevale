@@ -20,6 +20,7 @@ import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/glass_panel.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/settings_controls.dart';
 
@@ -64,6 +65,15 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     Navigator.of(context).pop();
   }
 
+  void _showChangeUsernameDialog(String currentUsername) {
+    // The screen already listens to authService, so a successful change rebuilds the username row
+    // here on its own — the dialog just needs to fire the update and close.
+    showDialog<void>(
+      context: context,
+      builder: (_) => _ChangeUsernameDialog(currentUsername: currentUsername),
+    );
+  }
+
   Future<void> _sendResetEmail(String email) async {
     setState(() => _sendingReset = true);
     try {
@@ -98,11 +108,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   : ListView(
                       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                       children: [
-                        _UsernameEditor(
-                          key: ValueKey(user.username),
-                          initialUsername: user.username,
-                        ),
-                        const SizedBox(height: 12),
                         SettingRow(
                           label: l10n.fieldEmail,
                           child: Text(
@@ -115,10 +120,29 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
+                        SettingRow(
+                          label: l10n.settingsSignedInAs,
+                          child: Text(
+                            user.username,
+                            style: GoogleFonts.cinzel(
+                              color: context.textColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        GlassActionButton(
+                          icon: Icons.badge_outlined,
+                          label: l10n.settingsChangeUsername,
+                          color: AppPalette.toggleBlue,
+                          onPressed: () => _showChangeUsernameDialog(user.username),
+                        ),
+                        const SizedBox(height: 12),
                         GlassActionButton(
                           icon: Icons.vpn_key_outlined,
                           label: l10n.authResetPassword,
-                          color: AppPalette.toggleBlue,
+                          color: AppPalette.tokenAmethyst,
                           onPressed: _sendingReset ? null : () => _sendResetEmail(user.email),
                           loading: _sendingReset,
                         ),
@@ -141,19 +165,22 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   }
 }
 
-/// Inline editor for the account username: a text field pre-filled with the current name that saves
-/// on submit and surfaces validation errors from the server.
-class _UsernameEditor extends StatefulWidget {
-  const _UsernameEditor({super.key, required this.initialUsername});
+/// Popup for changing the account username: a single text field pre-filled with the current name,
+/// with Cancel/Save actions. Saving updates the account and surfaces validation errors from the
+/// server inline; on success it pops and the parent screen's authService listener refreshes the
+/// displayed name. Mirrors the reset-password dialog it sits beside on this screen.
+class _ChangeUsernameDialog extends StatefulWidget {
+  const _ChangeUsernameDialog({required this.currentUsername});
 
-  final String initialUsername;
+  final String currentUsername;
 
   @override
-  State<_UsernameEditor> createState() => _UsernameEditorState();
+  State<_ChangeUsernameDialog> createState() => _ChangeUsernameDialogState();
 }
 
-class _UsernameEditorState extends State<_UsernameEditor> {
-  late final _controller = TextEditingController(text: widget.initialUsername);
+class _ChangeUsernameDialogState extends State<_ChangeUsernameDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _controller = TextEditingController(text: widget.currentUsername);
   bool _saving = false;
   String? _error;
 
@@ -163,20 +190,23 @@ class _UsernameEditorState extends State<_UsernameEditor> {
     super.dispose();
   }
 
-  bool get _changed {
-    final trimmed = _controller.text.trim();
-    return trimmed.isNotEmpty && trimmed != widget.initialUsername;
-  }
-
   Future<void> _save() async {
-    if (!_changed) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final next = _controller.text.trim();
+    // Nothing to do if the name is unchanged — just close rather than hitting the server.
+    if (next == widget.currentUsername) {
+      Navigator.of(context).pop();
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
     });
     try {
-      await authService.updateUsername(_controller.text.trim());
-      if (mounted) showAppToast(context, AppLocalizations.of(context).toastUsernameUpdated);
+      await authService.updateUsername(next);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      showAppToast(context, AppLocalizations.of(context).toastUsernameUpdated);
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } finally {
@@ -186,62 +216,119 @@ class _UsernameEditorState extends State<_UsernameEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SettingRow(
-          label: AppLocalizations.of(context).settingsSignedInAs,
-          child: SizedBox(
-            width: 170,
-            child: Row(
+    final l10n = AppLocalizations.of(context);
+    // Frosted glass surface matching the Settings "About" popup (see _AboutDialog): a transparent
+    // Dialog wrapping a width-capped GlassPanel, rather than a stock Material AlertDialog.
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: GlassPanel(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Form(
+            key: _formKey,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 22,
-                    child: TextField(
-                      controller: _controller,
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => _save(),
-                      textAlign: TextAlign.right,
-                      textAlignVertical: TextAlignVertical.center,
-                      style: GoogleFonts.cinzel(
-                        color: context.textColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                      decoration: const InputDecoration(
-                        isCollapsed: true,
-                        contentPadding: EdgeInsets.zero,
-                        border: InputBorder.none,
-                      ),
-                    ),
+                Text(
+                  l10n.settingsChangeUsername,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                    letterSpacing: 2,
                   ),
                 ),
-                if (_saving) ...[
-                  const SizedBox(width: 6),
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: context.accentColor,
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _controller,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.none,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _save(),
+                  style: GoogleFonts.notoSans(
+                    color: context.textColor,
+                    fontSize: 15,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: l10n.fieldUsername,
+                    labelStyle: GoogleFonts.notoSans(
+                      color: context.subtleTextColor,
+                      fontSize: 13,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: context.accentColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: context.accentColor,
+                        width: 1.5,
+                      ),
                     ),
                   ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return l10n.validationRequired;
+                    }
+                    return null;
+                  },
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _error!,
+                    style: TextStyle(color: context.dangerColor, fontSize: 13),
+                  ),
                 ],
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: _saving ? null : () => Navigator.of(context).pop(),
+                      child: Text(
+                        l10n.actionCancel,
+                        style: GoogleFonts.cinzel(
+                          color: context.subtleTextColor,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: _saving ? null : _save,
+                      child: _saving
+                          ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: context.accentColor,
+                              ),
+                            )
+                          : Text(
+                              l10n.actionSave,
+                              style: GoogleFonts.cinzel(
+                                color: context.accentColor,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
-        if (_error != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
-            child: Text(
-              _error!,
-              style: TextStyle(color: context.dangerColor, fontSize: 12),
-            ),
-          ),
-      ],
+      ),
     );
   }
 }

@@ -73,6 +73,17 @@ class GlassActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final tint = tintColor ?? color;
+    // Give the button a near-opaque base (a dark navy in dark mode, a light paper in light mode) so
+    // the busy background no longer bleeds through, then layer the accent [tint] over it for hue.
+    // Earlier this was a bare 6–30%-alpha tint with the label drawn in the accent [color] — readable
+    // enough in gold, but a low-contrast muddle for the steel-blue actions. The label now uses the
+    // high-contrast text color; the accent survives in the icon, border and fill tint.
+    final baseTop = isDark
+        ? const Color(0xD90D1622)
+        : Colors.white.withValues(alpha: 0.74);
+    final baseBottom = isDark
+        ? const Color(0xF20D1622)
+        : Colors.white.withValues(alpha: 0.90);
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
@@ -87,19 +98,20 @@ class GlassActionButton extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: isDark
-                      ? [
-                          tint.withValues(alpha: 0.10),
-                          tint.withValues(alpha: 0.30),
-                        ]
-                      : [
-                          tint.withValues(alpha: 0.06),
-                          tint.withValues(alpha: 0.16),
-                        ],
+                  colors: [
+                    Color.alphaBlend(
+                      tint.withValues(alpha: isDark ? 0.16 : 0.12),
+                      baseTop,
+                    ),
+                    Color.alphaBlend(
+                      tint.withValues(alpha: isDark ? 0.32 : 0.22),
+                      baseBottom,
+                    ),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: color.withValues(alpha: 0.6),
+                  color: color.withValues(alpha: 0.7),
                   width: 1.2,
                 ),
               ),
@@ -123,7 +135,7 @@ class GlassActionButton extends StatelessWidget {
                         Text(
                           label,
                           style: GoogleFonts.cinzel(
-                            color: color,
+                            color: context.textColor,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1,
                           ),

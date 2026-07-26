@@ -23,6 +23,7 @@ export 'package:carnevale_api/src/api/session_api.dart';
 export 'package:carnevale_api/src/api/spells_api.dart';
 
 export 'package:carnevale_api/src/model/ability.dart';
+export 'package:carnevale_api/src/model/account.dart';
 export 'package:carnevale_api/src/model/agenda.dart';
 export 'package:carnevale_api/src/model/agenda_history_entry.dart';
 export 'package:carnevale_api/src/model/agenda_history_entry_agenda.dart';

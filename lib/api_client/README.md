@@ -124,6 +124,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [Ability](doc/Ability.md)
+ - [Account](doc/Account.md)
  - [Agenda](doc/Agenda.md)
  - [AgendaHistoryEntry](doc/AgendaHistoryEntry.md)
  - [AgendaHistoryEntryAgenda](doc/AgendaHistoryEntryAgenda.md)

@@ -3,6 +3,7 @@ README.md
 analysis_options.yaml
 doc/AbilitiesApi.md
 doc/Ability.md
+doc/Account.md
 doc/Agenda.md
 doc/AgendaHistoryEntry.md
 doc/AgendaHistoryEntryAgenda.md
@@ -103,6 +104,7 @@ lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/date_serializer.dart
 lib/src/model/ability.dart
+lib/src/model/account.dart
 lib/src/model/agenda.dart
 lib/src/model/agenda_history_entry.dart
 lib/src/model/agenda_history_entry_agenda.dart
@@ -175,3 +177,4 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
+test/account_test.dart

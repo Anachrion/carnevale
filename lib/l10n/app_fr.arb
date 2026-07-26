@@ -20,6 +20,7 @@
   "settingsDownloadWifiOnly": "Wi-Fi uniquement",
   "settingsNotLoggedIn": "Non connecté",
   "settingsSignedInAs": "Connecté en tant que",
+  "settingsChangeUsername": "Changer de nom d'utilisateur",
   "settingsSyncBlurb": "Téléchargez les images de cartes manquantes ou obsolètes sur cet appareil.",
   "settingsSyncCards": "Synchroniser les cartes",
   "settingsSyncCardsWithCount": "Synchroniser les cartes ({details})",

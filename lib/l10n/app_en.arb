@@ -23,6 +23,7 @@
   "settingsDownloadWifiOnly": "Wi-Fi only",
   "settingsNotLoggedIn": "Not logged in",
   "settingsSignedInAs": "Signed in as",
+  "settingsChangeUsername": "Change username",
   "settingsSyncBlurb": "Download any card images that are missing or out of date on this device.",
   "settingsSyncCards": "Sync Cards",
   "settingsSyncCardsWithCount": "Sync Cards ({details})",

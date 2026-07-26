@@ -15,6 +15,7 @@ import 'package:carnevale_api/src/date_serializer.dart';
 import 'package:carnevale_api/src/model/date.dart';
 
 import 'package:carnevale_api/src/model/ability.dart';
+import 'package:carnevale_api/src/model/account.dart';
 import 'package:carnevale_api/src/model/agenda.dart';
 import 'package:carnevale_api/src/model/agenda_history_entry.dart';
 import 'package:carnevale_api/src/model/agenda_history_entry_agenda.dart';
@@ -89,6 +90,7 @@ part 'serializers.g.dart';
 
 @SerializersFor([
   Ability,
+  Account,
   Agenda,
   AgendaHistoryEntry,
   AgendaHistoryEntryAgenda,

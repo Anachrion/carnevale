@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'Signed in as'**
   String get settingsSignedInAs;
 
+  /// No description provided for @settingsChangeUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Change username'**
+  String get settingsChangeUsername;
+
   /// No description provided for @settingsSyncBlurb.
   ///
   /// In en, this message translates to:
