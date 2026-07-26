@@ -73,6 +73,14 @@ void main() {
   testWidgets(
     'Swiping to another card keeps showing the same side (front/back)',
     (tester) async {
+      // Flip-to-reveal only exists in the single-face layout, so pin the viewport to portrait:
+      // the default 800x600 test surface is landscape enough (ratio >= 1.2) that _showBothFaces
+      // kicks in and renders front and back together, leaving nothing to flip.
+      tester.view.physicalSize = const Size(600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final profiles = [
         fakeProfile(
           name: 'Capodecina',

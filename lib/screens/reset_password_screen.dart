@@ -102,7 +102,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   children: [
                     Text(
                       l10n.resetPasswordBlurb,
-                      style: GoogleFonts.ebGaramond(
+                      style: GoogleFonts.cinzel(
                         fontSize: 13,
                         color: context.subtleTextColor,
                       ),
