@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
 import '../app_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/ability_service.dart';
-import '../services/auth_service.dart';
 import '../services/card_image_service.dart';
 import '../services/equipment_service.dart';
 import '../services/profile_service.dart';
@@ -31,7 +31,9 @@ import '../widgets/app_drawer.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/screen_header.dart';
+import '../widgets/settings_controls.dart';
 import 'account_screen.dart';
+import 'account_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -42,8 +44,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _loggingOut = false;
-  bool _sendingReset = false;
 
   @override
   void initState() {
@@ -58,26 +58,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _rebuild() => setState(() {});
-
-  Future<void> _logOut() async {
-    setState(() => _loggingOut = true);
-    await authService.logOut();
-    if (!mounted) return;
-    setState(() => _loggingOut = false);
-    showAppToast(context, AppLocalizations.of(context).toastLoggedOut);
-  }
-
-  Future<void> _sendResetEmail(String email) async {
-    setState(() => _sendingReset = true);
-    try {
-      await authService.forgotPassword(email);
-      if (mounted) showAppToast(context, AppLocalizations.of(context).toastResetEmailSent);
-    } on AuthException catch (e) {
-      if (mounted) showAppToast(context, e.message);
-    } finally {
-      if (mounted) setState(() => _sendingReset = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _SettingRow(
+                  SettingRow(
                     label: l10n.settingsLanguage,
                     child: _OptionPicker<Locale?>(
                       value: settingsService.locale,
@@ -116,7 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _SettingRow(
+                  SettingRow(
                     label: l10n.settingsThemeMode,
                     child: _OptionPicker<ThemeMode>(
                       value: settingsService.themeMode,
@@ -130,7 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _SettingRow(
+                  SettingRow(
                     label: l10n.settingsCardFlip,
                     child: _OptionPicker<CardFlipStyle>(
                       value: settingsService.cardFlipStyle,
@@ -153,7 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _SettingRow(
+                    SettingRow(
                       label: l10n.settingsDownload,
                       child: _OptionPicker<CardDownloadMode>(
                         value: settingsService.cardDownloadMode,
@@ -185,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     builder: (context, _) {
                       final user = authService.currentUser;
                       if (user == null) {
-                        return _SettingRow(
+                        return SettingRow(
                           label: l10n.settingsNotLoggedIn,
                           child: TextButton(
                             onPressed: () => Navigator.push(
@@ -204,48 +184,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         );
                       }
-                      final logoutColor = context.accentColor;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _UsernameEditor(
-                            key: ValueKey(user.username),
-                            initialUsername: user.username,
-                          ),
-                          const SizedBox(height: 12),
-                          _SettingRow(
-                            label: l10n.fieldEmail,
-                            child: Text(
-                              user.email,
-                              style: GoogleFonts.cinzel(
-                                color: context.textColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _AccountButton(
-                            icon: Icons.vpn_key_outlined,
-                            label: l10n.authResetPassword,
-                            color: AppPalette.toggleBlue,
-                            onPressed: _sendingReset
-                                ? null
-                                : () => _sendResetEmail(user.email),
-                            loading: _sendingReset,
-                          ),
-                          const SizedBox(height: 12),
-                          _AccountButton(
-                            icon: Icons.logout,
-                            label: l10n.actionLogOut,
-                            color: logoutColor,
-                            tintColor: AppPalette.red,
-                            onPressed: _loggingOut ? null : _logOut,
-                            loading: _loggingOut,
-                          ),
-                        ],
+                      // Signed in: username editing, password reset and log out now live on their
+                      // own page. This row is the entry point — it shows who you are and pushes
+                      // AccountSettingsScreen on tap.
+                      return _AccountNavRow(
+                        username: user.username,
+                        email: user.email,
                       );
                     },
+                  ),
+                  const SizedBox(height: 28),
+                  Text(
+                    l10n.settingsAbout,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: context.accentColor,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  GlassActionButton(
+                    icon: Icons.info_outline,
+                    label: l10n.settingsAboutButton,
+                    color: AppPalette.toggleBlue,
+                    onPressed: _showAbout,
                   ),
                 ],
               ),
@@ -253,6 +216,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// Opens the custom, glass-styled About dialog (see [_AboutDialog]). We fetch the version here so
+  /// the dialog itself can stay a plain, synchronous widget.
+  Future<void> _showAbout() async {
+    final info = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (_) => _AboutDialog(version: '${info.version} (${info.buildNumber})'),
     );
   }
 
@@ -379,112 +354,248 @@ class _OptionPicker<T> extends StatelessWidget {
   }
 }
 
-class _SettingRow extends StatelessWidget {
-  const _SettingRow({required this.label, required this.child});
+/// The custom, glass-styled "About" popup that replaces Flutter's stock [showAboutDialog]. Renders
+/// the app identity, credits, source links and trademark legalese on a frosted panel matching the
+/// rest of the app, while a "View licenses" action still opens the framework's auto-generated
+/// [LicensePage] so open-source attribution stays maintenance-free.
+class _AboutDialog extends StatelessWidget {
+  const _AboutDialog({required this.version});
 
-  final String label;
-  final Widget child;
+  final String version;
+
+  void _openLicenses(BuildContext context) {
+    showLicensePage(
+      context: context,
+      applicationName: 'Carnevale',
+      applicationVersion: version,
+      applicationIcon: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Image.asset('assets/images/mask.png', width: 48, height: 48),
+      ),
+      applicationLegalese: AppLocalizations.of(context).aboutLegalese,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.cinzel(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: context.textColor,
+    final l10n = AppLocalizations.of(context);
+    final accent = context.accentColor;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 400,
+          maxHeight: MediaQuery.of(context).size.height * 0.82,
+        ),
+        child: GlassPanel(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Image.asset('assets/images/mask.png', width: 64, height: 64),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Carnevale',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                    letterSpacing: 4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  version,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 12,
+                    color: context.subtleTextColor,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Reuse the home screen's ornamental divider, tinted the same accent per theme.
+                Center(
+                  child: SizedBox(
+                    width: 160,
+                    height: 22,
+                    child: Image.asset(
+                      'assets/images/divider.png',
+                      fit: BoxFit.cover,
+                      color: isLight ? AppPalette.red : AppPalette.mutedGold,
+                      colorBlendMode: BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  l10n.aboutDescription,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 13,
+                    color: context.textColor,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  l10n.aboutCredits,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: context.textColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  l10n.aboutSourceHeading,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: accent,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                _SourceLink(
+                  label: l10n.aboutSourceApp,
+                  url: 'https://github.com/Anachrion/carnevale',
+                ),
+                _SourceLink(
+                  label: l10n.aboutSourceServer,
+                  url: 'https://github.com/Anachrion/carnevale-backend',
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.aboutLegalese,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 11,
+                    color: context.subtleTextColor,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 22),
+                GlassActionButton(
+                  icon: Icons.description_outlined,
+                  label: l10n.aboutViewLicenses,
+                  color: AppPalette.toggleBlue,
+                  onPressed: () => _openLicenses(context),
+                ),
+                const SizedBox(height: 6),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      l10n.actionClose,
+                      style: GoogleFonts.cinzel(
+                        color: accent,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const Spacer(),
-          child,
-        ],
+        ),
       ),
     );
   }
 }
 
-class _AccountButton extends StatelessWidget {
-  const _AccountButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onPressed,
-    this.tintColor,
-    this.loading = false,
-  });
+/// A tappable "open in browser" row used in the About dialog to link out to the source repos.
+class _SourceLink extends StatelessWidget {
+  const _SourceLink({required this.label, required this.url});
 
-  final IconData icon;
   final String label;
-  final Color color;
-  final Color? tintColor;
-  final VoidCallback? onPressed;
-  final bool loading;
+  final String url;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tint = tintColor ?? color;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onPressed,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: isDark
-                      ? [
-                          tint.withValues(alpha: 0.10),
-                          tint.withValues(alpha: 0.30),
-                        ]
-                      : [
-                          tint.withValues(alpha: 0.06),
-                          tint.withValues(alpha: 0.16),
-                        ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.6),
-                  width: 1.2,
-                ),
+    final accent = context.accentColor;
+    return InkWell(
+      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            Icon(Icons.open_in_new, size: 15, color: accent),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.cinzel(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: accent,
+                decoration: TextDecoration.underline,
+                decorationColor: accent,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: loading
-                  ? Center(
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: color,
-                          strokeWidth: 2,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The signed-in entry point in the Settings ACCOUNT section: a tappable glass row showing the
+/// current username and email that pushes [AccountSettingsScreen] where the account is managed.
+class _AccountNavRow extends StatelessWidget {
+  const _AccountNavRow({required this.username, required this.email});
+
+  final String username;
+  final String email;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassPanel(
+      padding: EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AccountSettingsScreen()),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        username,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: context.textColor,
                         ),
                       ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(icon, color: color, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          label,
-                          style: GoogleFonts.cinzel(
-                            color: color,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
-                    ),
+                      const SizedBox(height: 2),
+                      Text(
+                        email,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.chevron_right, color: context.accentColor),
+              ],
             ),
           ),
         ),
@@ -577,7 +688,7 @@ class _CardImageSyncState extends State<_CardImageSync> {
                   ? l10n.settingsSyncCards
                   : l10n.settingsSyncCardsWithCount(
                       '${pending.count}${_formatBytes(pending.bytes)}');
-              return _AccountButton(
+              return GlassActionButton(
                 icon: Icons.cloud_download_outlined,
                 label: label,
                 color: AppPalette.toggleBlue,
@@ -626,105 +737,3 @@ class _SyncProgress extends StatelessWidget {
   }
 }
 
-class _UsernameEditor extends StatefulWidget {
-  const _UsernameEditor({super.key, required this.initialUsername});
-
-  final String initialUsername;
-
-  @override
-  State<_UsernameEditor> createState() => _UsernameEditorState();
-}
-
-class _UsernameEditorState extends State<_UsernameEditor> {
-  late final _controller = TextEditingController(text: widget.initialUsername);
-  bool _saving = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  bool get _changed {
-    final trimmed = _controller.text.trim();
-    return trimmed.isNotEmpty && trimmed != widget.initialUsername;
-  }
-
-  Future<void> _save() async {
-    if (!_changed) return;
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-    try {
-      await authService.updateUsername(_controller.text.trim());
-      if (mounted) showAppToast(context, AppLocalizations.of(context).toastUsernameUpdated);
-    } on AuthException catch (e) {
-      if (mounted) setState(() => _error = e.message);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SettingRow(
-          label: AppLocalizations.of(context).settingsSignedInAs,
-          child: SizedBox(
-            width: 170,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 22,
-                    child: TextField(
-                      controller: _controller,
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => _save(),
-                      textAlign: TextAlign.right,
-                      textAlignVertical: TextAlignVertical.center,
-                      style: GoogleFonts.cinzel(
-                        color: context.textColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                      decoration: const InputDecoration(
-                        isCollapsed: true,
-                        contentPadding: EdgeInsets.zero,
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ),
-                if (_saving) ...[
-                  const SizedBox(width: 6),
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: context.accentColor,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-        if (_error != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
-            child: Text(
-              _error!,
-              style: TextStyle(color: context.dangerColor, fontSize: 12),
-            ),
-          ),
-      ],
-    );
-  }
-}

@@ -39,9 +39,19 @@
   "@settingsSyncedCount": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "settingsAbout": "ABOUT",
+  "settingsAboutButton": "About Carnevale",
+  "aboutDescription": "An unofficial, fan-made companion app for tabletop play.",
+  "aboutCredits": "Created by Anachrion.",
+  "aboutSourceHeading": "Source code",
+  "aboutSourceApp": "App (Flutter)",
+  "aboutSourceServer": "Server (Rails)",
+  "aboutViewLicenses": "View Licenses",
+  "aboutLegalese": "Carnevale is an independent, fan-made application. It is not affiliated with, endorsed by, or sponsored by any official Carnival or Carnevale organization. All third-party names, trademarks, and artwork are the property of their respective owners.\n\n© 2026 Anachrion. Licensed under the Apache License, Version 2.0.",
   "toastUsernameUpdated": "Username updated!",
 
   "actionCancel": "Cancel",
+  "actionClose": "Close",
   "actionDelete": "Delete",
   "actionGotIt": "Got it",
   "actionLogOut": "Log Out",

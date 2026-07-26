@@ -100,10 +100,42 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsAbout => 'ABOUT';
+
+  @override
+  String get settingsAboutButton => 'About Carnevale';
+
+  @override
+  String get aboutDescription =>
+      'An unofficial, fan-made companion app for tabletop play.';
+
+  @override
+  String get aboutCredits => 'Created by Anachrion.';
+
+  @override
+  String get aboutSourceHeading => 'Source code';
+
+  @override
+  String get aboutSourceApp => 'App (Flutter)';
+
+  @override
+  String get aboutSourceServer => 'Server (Rails)';
+
+  @override
+  String get aboutViewLicenses => 'View Licenses';
+
+  @override
+  String get aboutLegalese =>
+      'Carnevale is an independent, fan-made application. It is not affiliated with, endorsed by, or sponsored by any official Carnival or Carnevale organization. All third-party names, trademarks, and artwork are the property of their respective owners.\n\n© 2026 Anachrion. Licensed under the Apache License, Version 2.0.';
+
+  @override
   String get toastUsernameUpdated => 'Username updated!';
 
   @override
   String get actionCancel => 'Cancel';
+
+  @override
+  String get actionClose => 'Close';
 
   @override
   String get actionDelete => 'Delete';

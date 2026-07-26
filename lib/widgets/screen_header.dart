@@ -23,12 +23,22 @@ class ScreenHeader extends StatelessWidget {
   const ScreenHeader({
     super.key,
     required this.title,
-    required this.onMenu,
+    this.onMenu,
+    this.onBack,
     this.trailing,
-  });
+  }) : assert(
+         onMenu != null || onBack != null,
+         'ScreenHeader needs either onMenu (drawer) or onBack (pushed sub-page)',
+       );
 
   final String title;
-  final VoidCallback onMenu;
+
+  /// Opens the drawer on a top-level destination. Mutually exclusive with [onBack]; when [onBack]
+  /// is supplied the leading affordance becomes a back arrow instead of the hamburger.
+  final VoidCallback? onMenu;
+
+  /// Pops the current route on a pushed sub-page. When set, the leading button is a back arrow.
+  final VoidCallback? onBack;
   final Widget? trailing;
 
   @override
@@ -38,8 +48,11 @@ class ScreenHeader extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.menu, color: context.textColor),
-            onPressed: onMenu,
+            icon: Icon(
+              onBack != null ? Icons.arrow_back : Icons.menu,
+              color: context.textColor,
+            ),
+            onPressed: onBack ?? onMenu,
           ),
           const SizedBox(width: 4),
           // Expanded rather than a fixed Text + Spacer: the title takes whatever room is left and

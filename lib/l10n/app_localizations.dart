@@ -254,6 +254,60 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{Synced 1 card image} other{Synced {count} card images}}'**
   String settingsSyncedCount(int count);
 
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'ABOUT'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsAboutButton.
+  ///
+  /// In en, this message translates to:
+  /// **'About Carnevale'**
+  String get settingsAboutButton;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'An unofficial, fan-made companion app for tabletop play.'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Created by Anachrion.'**
+  String get aboutCredits;
+
+  /// No description provided for @aboutSourceHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code'**
+  String get aboutSourceHeading;
+
+  /// No description provided for @aboutSourceApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App (Flutter)'**
+  String get aboutSourceApp;
+
+  /// No description provided for @aboutSourceServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server (Rails)'**
+  String get aboutSourceServer;
+
+  /// No description provided for @aboutViewLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'View Licenses'**
+  String get aboutViewLicenses;
+
+  /// No description provided for @aboutLegalese.
+  ///
+  /// In en, this message translates to:
+  /// **'Carnevale is an independent, fan-made application. It is not affiliated with, endorsed by, or sponsored by any official Carnival or Carnevale organization. All third-party names, trademarks, and artwork are the property of their respective owners.\n\n© 2026 Anachrion. Licensed under the Apache License, Version 2.0.'**
+  String get aboutLegalese;
+
   /// No description provided for @toastUsernameUpdated.
   ///
   /// In en, this message translates to:
@@ -265,6 +319,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get actionCancel;
+
+  /// No description provided for @actionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get actionClose;
 
   /// No description provided for @actionDelete.
   ///

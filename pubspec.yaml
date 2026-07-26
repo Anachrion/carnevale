@@ -57,6 +57,8 @@ dependencies:
   pdfrx: ^2.4.7
   # Detects Wi-Fi vs cellular for the "download card images on Wi-Fi only" setting.
   connectivity_plus: ^7.3.0
+  package_info_plus: ^10.2.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
