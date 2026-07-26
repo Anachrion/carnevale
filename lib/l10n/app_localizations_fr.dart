@@ -48,6 +48,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsCardFlipSwipe => 'Glissement';
 
   @override
+  String get settingsBothFaces => 'Deux faces (paysage)';
+
+  @override
+  String get settingsOn => 'Activé';
+
+  @override
+  String get settingsOff => 'Désactivé';
+
+  @override
   String get settingsDownload => 'Téléchargement';
 
   @override

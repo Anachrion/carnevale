@@ -47,6 +47,7 @@ class SettingsService extends ChangeNotifier {
 
   static const _themeKey = 'theme_mode';
   static const _cardFlipStyleKey = 'card_flip_style';
+  static const _bothFacesLandscapeKey = 'both_faces_landscape';
   static const _cardDownloadModeKey = 'card_download_mode';
   static const _localeKey = 'locale';
 
@@ -61,6 +62,12 @@ class SettingsService extends ChangeNotifier {
 
   CardFlipStyle _cardFlipStyle = CardFlipStyle.flip;
   CardFlipStyle get cardFlipStyle => _cardFlipStyle;
+
+  // When the card viewer has room for it (landscape, wide enough), show a card's front and back
+  // side by side instead of one face at a time. On by default; users on tighter screens or who
+  // prefer the flip animation can turn it off. Portrait always shows a single face regardless.
+  bool _bothFacesLandscape = true;
+  bool get bothFacesLandscape => _bothFacesLandscape;
 
   CardDownloadMode _cardDownloadMode = CardDownloadMode.onDemand;
   CardDownloadMode get cardDownloadMode => _cardDownloadMode;
@@ -77,6 +84,7 @@ class SettingsService extends ChangeNotifier {
       'swipe' => CardFlipStyle.swipe,
       _ => CardFlipStyle.flip,
     };
+    _bothFacesLandscape = prefs.getBool(_bothFacesLandscapeKey) ?? true;
     _cardDownloadMode = switch (prefs.getString(_cardDownloadModeKey)) {
       'always' => CardDownloadMode.always,
       'wifi_only' => CardDownloadMode.wifiOnly,
@@ -106,6 +114,13 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_cardFlipStyleKey, style.name);
+  }
+
+  Future<void> setBothFacesLandscape(bool value) async {
+    _bothFacesLandscape = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_bothFacesLandscapeKey, value);
   }
 
   Future<void> setCardDownloadMode(CardDownloadMode mode) async {

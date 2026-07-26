@@ -176,6 +176,24 @@ abstract class AppLocalizations {
   /// **'Swipe'**
   String get settingsCardFlipSwipe;
 
+  /// No description provided for @settingsBothFaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Both faces (landscape)'**
+  String get settingsBothFaces;
+
+  /// No description provided for @settingsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get settingsOn;
+
+  /// No description provided for @settingsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get settingsOff;
+
   /// No description provided for @settingsDownload.
   ///
   /// In en, this message translates to:

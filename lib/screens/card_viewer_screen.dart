@@ -206,6 +206,31 @@ class _CardViewerScreenState extends State<CardViewerScreen>
     }
   }
 
+  /// Whether the current card should show both faces at once instead of a single, flippable face.
+  /// Gated on the user preference and on there being room: only in landscape, and only when the
+  /// viewport is wide enough (ratio ≥ 1.2) for two portrait faces to sit side by side without
+  /// crowding. Portrait — or a narrow, nearly-square window — keeps the one-face-at-a-time flip.
+  bool _showBothFaces(Size size) {
+    if (!SettingsService().bothFacesLandscape) return false;
+    return size.width >= size.height * 1.2;
+  }
+
+  /// Lays a card's front and back side by side, each scaled to fit its half of the viewport. Shown
+  /// in place of the animated single face when [_showBothFaces] holds; tap/swipe-to-flip is dropped
+  /// here since both faces are already visible. Padding clears the top buttons and bottom bar.
+  Widget _buildDualFaces(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 56, 16, 72),
+      child: Row(
+        children: [
+          Expanded(child: _CardImage(path: _frontOf(index), fill: true)),
+          const SizedBox(width: 12),
+          Expanded(child: _CardImage(path: _backOf(index), fill: true)),
+        ],
+      ),
+    );
+  }
+
   /// Builds the current card with its reveal animation. The flip controller drives a value
   /// `t` from 0 (front) to 1 (back); [_flipSign] carries the swipe direction so the motion
   /// follows the gesture. The animation style is a user preference.
@@ -258,6 +283,9 @@ class _CardViewerScreenState extends State<CardViewerScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Read here (not just in the builder) so a rotation or resize rebuilds the page and swaps
+    // between the dual and single layouts.
+    final showBoth = _showBothFaces(MediaQuery.of(context).size);
     return Scaffold(
       backgroundColor: Colors.black,
       body: Focus(
@@ -272,6 +300,9 @@ class _CardViewerScreenState extends State<CardViewerScreen>
               onPageChanged: _onPageChanged,
               itemBuilder: (context, index) {
                 final isCurrent = index == _currentIndex;
+                if (isCurrent && showBoth) {
+                  return _buildDualFaces(index);
+                }
                 return Center(
                   child: GestureDetector(
                     onTap: isCurrent ? _flip : null,
@@ -544,8 +575,13 @@ class _AbilityEntry extends StatelessWidget {
 }
 
 class _CardImage extends StatelessWidget {
-  const _CardImage({required this.path});
+  const _CardImage({required this.path, this.fill = false});
   final String path;
+
+  /// When true the face fills its parent's constraints (used in the side-by-side layout, where each
+  /// face is boxed into half the width). When false it keeps its own height — 80% of the screen —
+  /// leaving margin around a single centred card.
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
@@ -563,7 +599,7 @@ class _CardImage extends StatelessWidget {
     return Image(
       image: provider,
       fit: BoxFit.contain,
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: fill ? null : MediaQuery.of(context).size.height * 0.8,
       errorBuilder: (_, _, _) => const Center(
         child: Icon(Icons.broken_image, color: Colors.white38, size: 64),
       ),

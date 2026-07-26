@@ -119,6 +119,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: settingsService.setCardFlipStyle,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  SettingRow(
+                    label: l10n.settingsBothFaces,
+                    child: _OptionPicker<bool>(
+                      value: settingsService.bothFacesLandscape,
+                      options: const [true, false],
+                      labelBuilder: (v) =>
+                          v ? l10n.settingsOn : l10n.settingsOff,
+                      onChanged: settingsService.setBothFacesLandscape,
+                    ),
+                  ),
                   // Web streams faces straight from the backend (browser cache), so there is no
                   // local cache to sync — this section is mobile only.
                   if (!kIsWeb) ...[
