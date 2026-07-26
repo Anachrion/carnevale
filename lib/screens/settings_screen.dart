@@ -232,13 +232,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /// Opens the custom, glass-styled About dialog (see [_AboutDialog]). We fetch the version here so
   /// the dialog itself can stay a plain, synchronous widget.
+  ///
+  /// The version is best-effort: package_info_plus is a plugin, and a platform that fails to answer
+  /// (a web build whose plugin registrant went stale, say) used to throw straight out of the button
+  /// handler, so the dialog never opened at all. Losing the version line is a far better failure
+  /// than losing the credits, licences and legal links the dialog exists to show.
   Future<void> _showAbout() async {
-    final info = await PackageInfo.fromPlatform();
+    String? version;
+    try {
+      final info = await PackageInfo.fromPlatform();
+      version = '${info.version} (${info.buildNumber})';
+    } catch (_) {
+      version = null;
+    }
     if (!mounted) return;
     showDialog<void>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.6),
-      builder: (_) => _AboutDialog(version: '${info.version} (${info.buildNumber})'),
+      builder: (_) => _AboutDialog(version: version),
     );
   }
 
@@ -372,7 +383,8 @@ class _OptionPicker<T> extends StatelessWidget {
 class _AboutDialog extends StatelessWidget {
   const _AboutDialog({required this.version});
 
-  final String version;
+  /// Null when the platform could not report it; the version line is then simply omitted.
+  final String? version;
 
   void _openLicenses(BuildContext context) {
     showLicensePage(
@@ -430,15 +442,17 @@ class _AboutDialog extends StatelessWidget {
                     letterSpacing: 4,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  version,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.ebGaramond(
-                    fontSize: 13,
-                    color: context.subtleTextColor,
+                if (version != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    version!,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.ebGaramond(
+                      fontSize: 13,
+                      color: context.subtleTextColor,
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 14),
                 // Reuse the home screen's ornamental divider, tinted the same accent per theme.
                 Center(
