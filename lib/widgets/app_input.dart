@@ -31,7 +31,7 @@ InputDecoration goldInputDecoration(
     hintText: hint,
     labelStyle:
         labelStyle ??
-        GoogleFonts.ebGaramond(
+        GoogleFonts.cinzel(
           color: context.subtleTextColor,
           fontSize: 13,
         ),

@@ -19,6 +19,7 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_background.dart';
+import '../widgets/app_input.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/screen_header.dart';
@@ -255,23 +256,9 @@ class _ChangeUsernameDialogState extends State<_ChangeUsernameDialog> {
                     color: context.textColor,
                     fontSize: 16,
                   ),
-                  decoration: InputDecoration(
-                    labelText: l10n.fieldUsername,
-                    labelStyle: GoogleFonts.cinzel(
-                      color: context.subtleTextColor,
-                      fontSize: 13,
-                    ),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: context.accentColor.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: context.accentColor,
-                        width: 1.5,
-                      ),
-                    ),
+                  decoration: goldInputDecoration(
+                    context,
+                    label: l10n.fieldUsername,
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {

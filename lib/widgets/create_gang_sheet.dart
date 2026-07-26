@@ -105,10 +105,6 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
           decoration: goldInputDecoration(
             context,
             label: l10n.gangNameLabel,
-            labelStyle: GoogleFonts.cinzel(
-              color: context.subtleTextColor,
-              fontSize: 13,
-            ),
           ),
           onSubmitted: (_) => _submit(),
         ),
@@ -120,10 +116,6 @@ class _CreateGangSheetState extends State<CreateGangSheet> {
           decoration: goldInputDecoration(
             context,
             label: l10n.gangPointLimit,
-            labelStyle: GoogleFonts.cinzel(
-              color: context.subtleTextColor,
-              fontSize: 13,
-            ),
           ),
         ),
         const SizedBox(height: 24),

@@ -477,91 +477,111 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(
-        l10n.authResetPassword,
-        style: GoogleFonts.cinzel(color: context.textColor),
-      ),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.authResetPasswordBlurb,
-              style: GoogleFonts.ebGaramond(
-                fontSize: 13,
-                color: context.subtleTextColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _emailController,
-              autofocus: true,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.done,
-              onFieldSubmitted: (_) => _send(),
-              style: GoogleFonts.ebGaramond(
-                color: context.textColor,
-                fontSize: 15,
-              ),
-              decoration: InputDecoration(
-                labelText: l10n.fieldEmail,
-                labelStyle: GoogleFonts.ebGaramond(
-                  color: context.subtleTextColor,
-                  fontSize: 13,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: context.accentColor.withValues(alpha: 0.5),
-                  ),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: context.accentColor,
-                    width: 1.5,
-                  ),
-                ),
-              ),
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return l10n.validationRequired;
-                if (!v.contains('@')) return l10n.validationEmailInvalid;
-                return null;
-              },
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _error!,
-                style: TextStyle(color: context.dangerColor, fontSize: 13),
-              ),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _sending ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.actionCancel),
-        ),
-        TextButton(
-          onPressed: _sending ? null : _send,
-          child: _sending
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  l10n.actionSend,
-                  style: TextStyle(
-                    color: context.accentColor,
+    // Frosted glass surface matching the Settings "About" popup (see _AboutDialog): a transparent
+    // Dialog wrapping a width-capped GlassPanel, rather than a stock Material AlertDialog.
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: GlassPanel(
+          opaque: true,
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.authResetPassword,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                    letterSpacing: 2,
                   ),
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.authResetPasswordBlurb,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.ebGaramond(
+                    fontSize: 13,
+                    color: context.subtleTextColor,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  autofocus: true,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _send(),
+                  style: GoogleFonts.ebGaramond(
+                    color: context.textColor,
+                    fontSize: 16,
+                  ),
+                  decoration: goldInputDecoration(context, label: l10n.fieldEmail),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return l10n.validationRequired;
+                    if (!v.contains('@')) return l10n.validationEmailInvalid;
+                    return null;
+                  },
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _error!,
+                    style: TextStyle(color: context.dangerColor, fontSize: 13),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: _sending ? null : () => Navigator.of(context).pop(),
+                      child: Text(
+                        l10n.actionCancel,
+                        style: GoogleFonts.cinzel(
+                          color: context.subtleTextColor,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: _sending ? null : _send,
+                      child: _sending
+                          ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: context.accentColor,
+                              ),
+                            )
+                          : Text(
+                              l10n.actionSend,
+                              style: GoogleFonts.cinzel(
+                                color: context.accentColor,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-      ],
+      ),
     );
   }
 }
