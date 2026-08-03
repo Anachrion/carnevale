@@ -98,12 +98,30 @@ def main() -> None:
     try:
         edit_id = edits.insert(packageName=args.package, body={}).execute()["id"]
 
+        # Play only rejects a backwards versionCode at commit time, with a 403 whose message
+        # ("does not allow any existing users to upgrade") never mentions version codes at all.
+        # Checking first turns that into an actionable error, and skips a pointless 76MB upload.
+        published = [b["versionCode"] for b in
+                     edits.bundles().list(packageName=args.package, editId=edit_id)
+                     .execute().get("bundles", [])]
+        highest = max(published, default=0)
+
         media = MediaFileUpload(args.aab, mimetype="application/octet-stream", resumable=True)
         bundle = edits.bundles().upload(
             packageName=args.package, editId=edit_id, media_body=media
         ).execute()
         version_code = bundle["versionCode"]
         print(f"==> Uploaded bundle, versionCode {version_code}")
+
+        if version_code <= highest:
+            die(
+                f"versionCode {version_code} is not above the highest already published "
+                f"({highest}).\n"
+                f"       Play will refuse it: no existing tester could upgrade to it.\n"
+                f"       versionCode is the git commit count plus VERSION_CODE_OFFSET in\n"
+                f"       bin/publish-play — raise that offset by at least "
+                f"{highest - version_code + 1}."
+            )
 
         release = {"versionCodes": [str(version_code)], "status": args.status}
         if args.release_name:

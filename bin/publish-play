@@ -16,9 +16,10 @@
 #     --dry-run        build + sign only; skip the upload to Play
 #
 # Version: versionName comes from pubspec.yaml; versionCode is the git commit
-# count, so every commit yields a strictly higher, gap-free code with no manual
-# bookkeeping. The build points at the production backend over TLS by default;
-# override with PLAY_API_HOST / PLAY_API_USE_TLS if you need to.
+# count plus VERSION_CODE_OFFSET (see below), so every commit yields a strictly
+# higher, gap-free code with no manual bookkeeping. The build points at the
+# production backend over TLS by default; override with PLAY_API_HOST /
+# PLAY_API_USE_TLS if you need to.
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -55,8 +56,20 @@ require() {
 require ANDROID_UPLOAD_KEYSTORE_B64 ANDROID_UPLOAD_STORE_PASSWORD ANDROID_UPLOAD_KEY_ALIAS API_KEY
 [ "$DRY_RUN" -eq 1 ] || require ANDROID_PLAY_SERVICE_ACCOUNT_JSON
 
+# The commit count alone was the versionCode until this repository's history was
+# rewritten on 2026-08-03 to purge large files. That dropped ~13 commits and took
+# the count from 283 down to 270 — below the 283 already live on the alpha track.
+# Play rejects a release no existing tester could upgrade to, so the commit fails
+# with a 403 "does not allow any existing users to upgrade to the newly added
+# APKs" *after* a full build and upload. The offset restores a strictly
+# increasing sequence across that rewrite.
+#
+# Only ever raise this. If history is rewritten again, add however many commits
+# the count lost, so the product stays above every versionCode already published.
+VERSION_CODE_OFFSET=12
+
 VERSION_NAME="$(sed -n 's/^version: *\([0-9][0-9.]*\).*/\1/p' pubspec.yaml)"
-VERSION_CODE="$(git rev-list --count HEAD)"
+VERSION_CODE="$(( $(git rev-list --count HEAD) + VERSION_CODE_OFFSET ))"
 [ -n "$VERSION_NAME" ] || { echo "error: could not parse version from pubspec.yaml" >&2; exit 1; }
 echo "==> $PACKAGE  $VERSION_NAME (versionCode $VERSION_CODE)  ->  track '$TRACK'"
 
