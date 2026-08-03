@@ -89,14 +89,20 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    // The stored access token is missing or expired. Rather than forcing a login, mint a fresh one
-    // from the refresh token; only clear the session if that fails (refresh token expired/revoked).
-    if (await _refreshSession() != null) {
-      _currentUser = _userFromJson(rawUser);
-      notifyListeners();
-    } else {
+    // The stored access token is missing or expired — which it always is more than an hour after
+    // the last use, so this path runs on most cold starts. Rather than forcing a login, mint a
+    // fresh token from the refresh token.
+    final outcome = await _refreshSession();
+    if (outcome.status == RefreshStatus.rejected) {
       await _clear();
+      return;
     }
+    // Renewed, or the backend was simply unreachable. Starting offline must not cost the user
+    // their session: restore it and leave the refresh token in storage. No access token is set in
+    // that case, so the first request that needs one 401s and the interceptor retries the refresh
+    // then — by which time the network is usually back.
+    _currentUser = _userFromJson(rawUser);
+    notifyListeners();
   }
 
   Future<void> signUp({
@@ -168,12 +174,15 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Trades the stored refresh token for a fresh access JWT (and a rotated refresh token), updating
-  /// storage and the client, and returns the new access token — or null if there is no refresh
-  /// token or the server rejects it. Wired into [ApiClient.performRefresh] so a 401 recovers
-  /// silently, and used by [load] to resume a session whose access token has expired.
-  Future<String?> _refreshSession() async {
+  /// storage and the client. Wired into [ApiClient.performRefresh] so a 401 recovers silently, and
+  /// used by [load] to resume a session whose access token has expired.
+  ///
+  /// Reports *why* a failure happened, because the callers must react differently: only a server
+  /// that answers and refuses the token means the session is over. A refresh that never got an
+  /// answer must leave the stored token in place — see [RefreshStatus].
+  Future<RefreshOutcome> _refreshSession() async {
     final refresh = await _storage.read(key: _refreshTokenKey);
-    if (refresh == null || refresh.isEmpty) return null;
+    if (refresh == null || refresh.isEmpty) return const RefreshOutcome.rejected();
     try {
       final res = await _client.dio.post<Map<String, dynamic>>(
         '/token',
@@ -181,13 +190,22 @@ class AuthService extends ChangeNotifier {
       );
       final token = _bearer(res.headers.value('authorization'));
       final newRefresh = res.data?['refresh_token'] as String?;
-      if (token == null || newRefresh == null || newRefresh.isEmpty) return null;
+      // A 2xx that carries no usable pair is a broken contract, not a network problem; there is
+      // nothing to retry with, so treat it as a rejection.
+      if (token == null || newRefresh == null || newRefresh.isEmpty) {
+        return const RefreshOutcome.rejected();
+      }
       _client.authToken = token;
       await _storage.write(key: _tokenKey, value: token);
       await _storage.write(key: _refreshTokenKey, value: newRefresh);
-      return token;
-    } on DioException {
-      return null;
+      return RefreshOutcome.renewed(token);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      // 401 is the backend's "invalid or expired refresh token"; 403 covers a rejected client.
+      // Everything else — connection error, timeout, 5xx during a deploy, 429 from rate limiting —
+      // leaves the credential's validity unknown, so keep it and let a later attempt decide.
+      if (status == 401 || status == 403) return const RefreshOutcome.rejected();
+      return const RefreshOutcome.unavailable();
     }
   }
 

@@ -64,7 +64,7 @@ void main() {
     client.performRefresh = () async {
       refreshCalls++;
       client.authToken = 'fresh-jwt';
-      return 'fresh-jwt';
+      return const RefreshOutcome.renewed('fresh-jwt');
     };
     adapter.script('GET', '/lists', [
       () => _json({'errors': {}}, 401),
@@ -86,7 +86,7 @@ void main() {
       refreshCalls++;
       await Future<void>.delayed(const Duration(milliseconds: 10));
       client.authToken = 'fresh-jwt';
-      return 'fresh-jwt';
+      return const RefreshOutcome.renewed('fresh-jwt');
     };
     for (final path in ['/lists', '/games', '/profiles']) {
       adapter.script('GET', path, [() => _json({'errors': {}}, 401), () => _json([], 200)]);
@@ -102,21 +102,34 @@ void main() {
     expect(refreshCalls, 1);
   });
 
-  test('clears the session when refresh is not possible', () async {
+  test('clears the session when the server rejects the refresh token', () async {
     var cleared = false;
     client.onUnauthorized = () => cleared = true;
-    client.performRefresh = () async => null; // e.g. refresh token expired/revoked
+    // e.g. refresh token expired/revoked — the server answered and said no.
+    client.performRefresh = () async => const RefreshOutcome.rejected();
     adapter.script('GET', '/lists', [() => _json({'errors': {}}, 401)]);
 
     await expectLater(client.dio.get('/lists'), throwsA(isA<DioException>()));
     expect(cleared, isTrue);
   });
 
+  test('keeps the session when the refresh could not reach the server', () async {
+    var cleared = false;
+    client.onUnauthorized = () => cleared = true;
+    // No connectivity / timeout / 5xx: the refresh token's validity is still unknown, so
+    // discarding it here would log the user out for good over a transient blip.
+    client.performRefresh = () async => const RefreshOutcome.unavailable();
+    adapter.script('GET', '/lists', [() => _json({'errors': {}}, 401)]);
+
+    await expectLater(client.dio.get('/lists'), throwsA(isA<DioException>()));
+    expect(cleared, isFalse);
+  });
+
   test('does not attempt a refresh when /login itself 401s', () async {
     var refreshCalls = 0;
     client.performRefresh = () async {
       refreshCalls++;
-      return 'fresh-jwt';
+      return const RefreshOutcome.renewed('fresh-jwt');
     };
     adapter.script('POST', '/login', [() => _json({'error': 'bad'}, 401)]);
 

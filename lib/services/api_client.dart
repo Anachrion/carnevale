@@ -21,6 +21,34 @@ import 'package:dio/dio.dart';
 
 import 'settings_service.dart';
 
+/// How a refresh attempt ended.
+///
+/// The distinction between the two failure modes is the whole point of this type. Only
+/// [rejected] — the server answered and refused the refresh token — proves the session is
+/// unrecoverable. [unavailable] means the attempt never reached a verdict (no connectivity, a
+/// timeout, a 5xx while the backend restarts, a 429 from rate limiting); it says nothing about
+/// the credential. Collapsing the two, as this code once did, logs the user out permanently
+/// over a two-second network blip: the stored refresh token is the only way back into the
+/// account, and clearing it cannot be undone once the network returns.
+enum RefreshStatus { renewed, rejected, unavailable }
+
+class RefreshOutcome {
+  const RefreshOutcome.renewed(String this.token) : status = RefreshStatus.renewed;
+
+  const RefreshOutcome.rejected()
+      : status = RefreshStatus.rejected,
+        token = null;
+
+  const RefreshOutcome.unavailable()
+      : status = RefreshStatus.unavailable,
+        token = null;
+
+  final RefreshStatus status;
+
+  /// The new access token — non-null exactly when [status] is [RefreshStatus.renewed].
+  final String? token;
+}
+
 class ApiClient {
   static final ApiClient _instance = ApiClient._();
   factory ApiClient() => _instance;
@@ -83,7 +111,8 @@ class ApiClient {
         // session if the renewal itself fails. The already-retried guard stops a still-401 replay
         // from looping.
         if (error.response?.statusCode == 401 && !isAuthEndpoint && !alreadyRetried) {
-          final newToken = await _refreshOnce();
+          final outcome = await _refreshOnce();
+          final newToken = outcome.token;
           if (newToken != null) {
             options
               ..extra[_retriedKey] = true
@@ -95,7 +124,10 @@ class ApiClient {
               return handler.reject(e);
             }
           }
-          onUnauthorized?.call();
+          // Only tear the session down when the server actually rejected the refresh token. If the
+          // renewal simply couldn't reach the backend, surface the error and leave the stored
+          // credentials alone so the next attempt can still recover.
+          if (outcome.status == RefreshStatus.rejected) onUnauthorized?.call();
         }
         handler.next(error);
       },
@@ -147,23 +179,27 @@ class ApiClient {
   /// can clear the stale session.
   void Function()? onUnauthorized;
 
-  /// Set by [AuthService]: renews the access token from the stored refresh token and returns the
-  /// new token, or null if renewal isn't possible. Invoked on a 401 to recover silently instead of
-  /// logging the user out.
-  Future<String?> Function()? performRefresh;
+  /// Set by [AuthService]: renews the access token from the stored refresh token, reporting both
+  /// the new token and *why* it failed when it didn't. Invoked on a 401 to recover silently
+  /// instead of logging the user out.
+  Future<RefreshOutcome> Function()? performRefresh;
 
   /// Marks a request that has already been replayed after a refresh, so a still-401 replay falls
   /// through to [onUnauthorized] instead of triggering another refresh.
   static const _retriedKey = 'carnevale_retried';
 
-  Future<String?>? _refreshInFlight;
+  Future<RefreshOutcome>? _refreshInFlight;
 
   /// Runs at most one refresh at a time: concurrent 401s (a screen firing several requests at once)
   /// all await the same renewal, so the single-use refresh token is rotated once, not once per
   /// request — which would invalidate all but the first.
-  Future<String?> _refreshOnce() {
+  ///
+  /// With no [performRefresh] wired there is no credential to renew from, which is a genuine
+  /// dead end rather than a transient one — report it as [RefreshStatus.rejected].
+  Future<RefreshOutcome> _refreshOnce() {
     return _refreshInFlight ??=
-        (performRefresh?.call() ?? Future<String?>.value())
+        (performRefresh?.call() ??
+                Future<RefreshOutcome>.value(const RefreshOutcome.rejected()))
             .whenComplete(() => _refreshInFlight = null);
   }
 
