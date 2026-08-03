@@ -147,7 +147,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get aboutLegalese =>
-      'Carnevale est un jeu de figurines créé et publié par TT Combat, qui détient l\'ensemble des droits de propriété intellectuelle associés, y compris le nom, les illustrations et les marques Carnevale. Nous n\'en revendiquons aucune propriété. Ceci est une application compagnon indépendante et amateur — sans caractère officiel. Elle n\'est ni affiliée à TT Combat ni approuvée par elle, et est utilisée avec son aimable autorisation ; elle est fournie gratuitement et n\'est jamais vendue. Tous les noms, marques et illustrations demeurent la propriété de TT Combat et de leurs détenteurs respectifs.\n\n© 2026 Anachrion & Eldrim. Distribué sous licence Apache, version 2.0.';
+      'Carnevale est un jeu de figurines créé et publié par TT Combat, qui détient l\'ensemble des droits de propriété intellectuelle associés, y compris le nom, les illustrations et les marques Carnevale. Nous n\'en revendiquons aucune propriété. Ceci est une application compagnon indépendante et amateur — sans caractère officiel. Elle n\'est ni affiliée à TT Combat ni approuvée par elle, et est utilisée avec son aimable autorisation ; elle est fournie gratuitement et n\'est jamais vendue. Tous les noms, marques et illustrations demeurent la propriété de TT Combat et de leurs détenteurs respectifs.\n\n© 2026 Anachrion & Eldrim. Distribué sous licence publique générale GNU Affero, version 3 ou ultérieure.';
 
   @override
   String get toastUsernameUpdated => 'Nom d\'utilisateur mis à jour !';

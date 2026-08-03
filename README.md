@@ -1,56 +1,136 @@
-# Carnevale
+# Carnevale Companion
 
-A fan-made companion app for [Carnevale](https://ttcombat.com/pages/carnevale), the skirmish wargame by TT Combat set in a dystopian 18th-century Venice.
+A fan-made companion app for [Carnevale](https://ttcombat.com/collections/carnevale), TT Combat's
+tabletop skirmish game set in a flooded, monster-haunted Venice.
 
-> This is an unofficial, community-driven project and is not affiliated with TT Combat.
+The app carries the parts of a game that are tedious on paper: browsing the card catalog,
+building a gang within a Ducat limit, and tracking a live two-player game — hit points, will,
+command points and secret agendas — synchronised between both players' devices in real time.
+The tabletop stays on the table; this handles the bookkeeping.
 
-## What is Carnevale?
+This repository is the **Flutter client** for iOS, Android and web. The Rails server it talks to
+lives in [`carnevale-backend`](https://github.com/Anachrion/carnevale-backend).
 
-Carnevale is a two-player skirmish tabletop game where warbands clash across the rooftops and canals of a dark, supernatural Venice. Factions range from the city's noble families to monsters lurking beneath the lagoon.
+> **Disclaimer:** This is an unofficial fan project, not affiliated with or endorsed by
+> TT Combat.
 
-## What does this app do?
+---
 
-This app is a gaming tool designed to be used before and during a game. The planned MVP features are:
+## Links
 
-- **Cards browser** — browse all in-game cards and references
-- **Crew builder** — build and save your warband list before a game
-- **Live game session** — connect with your opponent to share lists, pick the scenario, and choose secondary objectives (the Agenda)
-- **Settings & options** — utility options for a smoother game experience
+| | |
+|---|---|
+| 🎬 **Walkthrough video** | [Carnevale App Walkthrough](https://www.youtube.com/watch?v=z1iAEC28lCA) — the fastest way to see what it does |
+| 🌐 **Web app** | [carnevale-app.com](https://carnevale-app.com) |
+| 📱 **Android** | [Google Play](https://play.google.com/store/apps/details?id=app.carnevale.mobile) — currently in **closed testing**, so the listing isn't public yet |
+| ⚙️ **Backend repo** | [Anachrion/carnevale-backend](https://github.com/Anachrion/carnevale-backend) — Rails API, WebSockets, card catalog |
+| 🎲 **The game itself** | [Carnevale by TT Combat](https://ttcombat.com/collections/carnevale) |
 
-## Platforms
+---
 
-Available on iOS, Android, and Web.
+## What it does
 
-## Getting Started
+**Cards browser** — every profile, weapon, special rule and spell, filterable by faction, with
+full card faces front and back.
+
+**Gang builder** — build a gang against a faction and a Ducat limit, with the list validated as
+you go. Gangs sync across all your devices through the backend.
+
+**Live game session** — one player creates a game and shares a join code. Both pick a gang, draw
+their agendas privately, and play. State changes are pushed over WebSocket to both devices, so
+neither player has to relay numbers to the other. Close the app or switch devices mid-game and
+sign back in — the server holds the state, so you resume exactly where you were.
+
+---
+
+## Getting started
+
+**Requirements:** the Flutter SDK, and a running backend (see the
+[backend README](https://github.com/Anachrion/carnevale-backend) to bring one up locally).
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-## Testing
-
-### Two-player login helper
-
-Manually testing the two-player game flow normally means logging into two separate browsers by hand each time. `scripts/two_player_login.py` automates that: it drives the real login form in two isolated Chrome windows (no auth bypass, no app changes) and leaves both logged in and open for you to test with.
-
-Requirements:
-- The backend seeded with the dev test accounts (`player1@dev.local` / `player2@dev.local`, password `password123`) — from `carnevale-backend`, run `rails db:seed`.
-- The Flutter web dev server running: `./dev.sh` (serves on `http://localhost:56569`).
-- Python 3 with Selenium: `pip install selenium`.
-
-Run it:
+By default the app talks to `localhost:3000`. Point it elsewhere with `--dart-define`:
 
 ```bash
-python3 scripts/two_player_login.py
+flutter run \
+  --dart-define=API_HOST=carnevale-app.com \
+  --dart-define=API_USE_TLS=true \
+  --dart-define=API_KEY=<key>
 ```
 
-Pass `--url` if your dev server runs on a different port.
+`API_KEY` identifies a build as an official client. The production backend rejects requests
+without an `X-Api-Key` header, so a build made without it gets 401 on every request. It is not
+per-user auth — that's the JWT the app obtains at sign-in.
+
+### Development
+
+```bash
+flutter analyze      # static analysis
+dart format .        # formatting
+flutter test         # test suite
+./dev.sh             # web dev server on http://localhost:56569
+```
+
+`lib/api_client/` is **generated** from the backend's OpenAPI schema by
+`scripts/generate_api.sh` — change the schema in the backend and regenerate, rather than editing
+those files by hand.
+
+#### Two-player login helper
+
+Testing the two-player flow normally means logging into two browsers by hand.
+`scripts/two_player_login.py` drives the real login form in two isolated Chrome windows (no auth
+bypass, no app changes) and leaves both signed in.
+
+Requires the backend seeded with dev accounts (`rails db:seed` there), `./dev.sh` running, and
+`pip install selenium`. Then:
+
+```bash
+python3 scripts/two_player_login.py       # --url if your dev server is on another port
+```
+
+---
+
+## Releasing
+
+Android builds are signed and published through `bin/publish-play`, which pulls the upload
+keystore and the Play service account from Infisical, builds a release App Bundle pointed at
+production, and uploads it to a Play track:
+
+```bash
+infisical run --env=prod --recursive -- bin/publish-play
+# --track NAME   Play track (default: alpha = closed testing)
+# --dry-run      build and sign only, no upload
+```
+
+`--recursive` matters — the script needs both the `/android` secrets and the root `API_KEY`.
+`versionCode` comes from the git commit count, so every commit yields a strictly higher, gap-free
+code with no manual bookkeeping.
+
+The **web** build is released from the backend repo (`bin/release-web`), which compiles this app
+with the production API baked in and ships it inside the backend's Docker image.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) — in particular the section on third-party intellectual
+property, which is the rule that matters most here.
+
+---
 
 ## License
 
-The **source code** in this repository is licensed under the [Apache License 2.0](LICENSE).
+The **source code** in this repository is licensed under the
+[GNU Affero General Public License v3.0](LICENSE), matching the backend.
 
-This app bundles faction symbols, iconography, and other content that is the intellectual property of **TT Combat** ("Carnevale"). That content is **not** covered by the Apache License — it is included with TT Combat's permission and remains © TT Combat, all rights reserved. See [NOTICE](NOTICE) for the full carve-out. If you reuse this code, you are responsible for removing that content or obtaining your own permission from TT Combat.
+This app bundles faction symbols, iconography, and other content that is the intellectual
+property of **TT Combat** ("Carnevale"). That content is **not** covered by the AGPL — it is
+included with TT Combat's permission and remains © TT Combat, all rights reserved. See
+[NOTICE](NOTICE) for the full carve-out. If you reuse this code, you are responsible for removing
+that content or obtaining your own permission from TT Combat.
 
-This is an unofficial, community-driven project and is not affiliated with TT Combat.
+This is an unofficial fan project, not affiliated with or endorsed by TT Combat.

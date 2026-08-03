@@ -4,10 +4,15 @@ Thanks for your interest in contributing to the Carnevale Companion app!
 
 ## License of contributions
 
-This project is licensed under the [Apache License 2.0](LICENSE). By submitting a
-contribution (a pull request, patch, or any other change), you agree that your
-contribution is licensed under the same Apache License 2.0, as described in
-Section 5 of that license ("inbound = outbound").
+This project is licensed under the
+[GNU Affero General Public License v3.0](LICENSE). By submitting a contribution
+(a pull request, patch, or any other change), you agree that your contribution is
+licensed under the same AGPL-3.0 — "inbound = outbound". You also confirm that the
+contribution is your own work, or that you have the right to submit it under that
+licence.
+
+The app talks to a backend licensed under the same terms; the AGPL's network
+clause is why both sides match.
 
 ## Do not contribute third-party intellectual property
 
@@ -18,7 +23,7 @@ extend to contributors.**
 
 Please do **not** add, or base your contribution on, any third-party intellectual
 property — including TT Combat material beyond what is already present, artwork,
-text, data, or code — unless you have the right to submit it under Apache 2.0. If
+text, data, or code — unless you have the right to submit it under AGPL-3.0. If
 in doubt, open an issue first.
 
 ## Developer Certificate of Origin (sign-off)
@@ -50,7 +55,7 @@ See the [README](README.md) for setup. Before opening a pull request:
 - Test: `flutter test`
 - Keep changes focused, and match the style of the surrounding code.
 
-New Dart source files should carry the standard Apache license header (see any
+New Dart source files should carry the standard AGPL license header (see any
 existing file under `lib/` for the exact text). Generated files (`lib/api_client/`,
 `*.g.dart`, `*.freezed.dart`) are intentionally left without headers — do not add
 them there.

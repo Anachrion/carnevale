@@ -347,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutLegalese.
   ///
   /// In en, this message translates to:
-  /// **'Carnevale is a tabletop miniatures game created and published by TT Combat, which owns all associated intellectual property, including the Carnevale name, artwork, and trademarks. We claim no ownership of it. This is an independent, fan-made companion app — not an official product. It is not affiliated with or endorsed by TT Combat, and is used with their kind permission; it is provided free of charge and is never sold. All names, trademarks, and artwork remain the property of TT Combat and their respective owners.\n\n© 2026 Anachrion & Eldrim. Licensed under the Apache License, Version 2.0.'**
+  /// **'Carnevale is a tabletop miniatures game created and published by TT Combat, which owns all associated intellectual property, including the Carnevale name, artwork, and trademarks. We claim no ownership of it. This is an independent, fan-made companion app — not an official product. It is not affiliated with or endorsed by TT Combat, and is used with their kind permission; it is provided free of charge and is never sold. All names, trademarks, and artwork remain the property of TT Combat and their respective owners.\n\n© 2026 Anachrion & Eldrim. Licensed under the GNU Affero General Public License, version 3 or later.'**
   String get aboutLegalese;
 
   /// No description provided for @toastUsernameUpdated.

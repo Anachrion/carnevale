@@ -50,3 +50,11 @@ app.*.map.json
 
 # gen-l10n untranslated-messages report (regenerated each build; not source)
 lib/l10n/untranslated.txt
+
+# Local environment overrides — never commit real values
+.env
+.env.*
+!.env.example
+
+# Python bytecode from scripts/
+__pycache__/
