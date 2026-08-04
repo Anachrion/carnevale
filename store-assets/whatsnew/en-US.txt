@@ -1,0 +1,5 @@
+Password reset fixes:
+
+- Resetting your password now works properly. It used to report an error even when the reset had succeeded, and trying again then said the link was invalid.
+- You are signed in automatically once the reset completes, instead of having to log in again with the password you just chose.
+- Fixed the home screen getting stuck on your account details after a reset.
