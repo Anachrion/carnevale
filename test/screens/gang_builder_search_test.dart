@@ -1,6 +1,8 @@
 import 'package:built_value/serializer.dart';
 import 'package:carnevale/screens/gang_builder_screen.dart';
+import 'package:carnevale/widgets/profile_search.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -112,6 +114,55 @@ void main() {
       expect(find.text('Barnabotti'), findsNothing);
       // The strigoi Leader is Brave, but belongs to another faction: never hireable, never shown.
       expect(find.text('Nemico'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'picking a suggestion survives the field losing focus on pointer-down',
+    (tester) async {
+      // The bug this covers: EditableText's default tap-outside action unfocuses the search field
+      // the instant a pointer goes down anywhere outside it — the suggestions panel included — and
+      // the panel only shows while the field has focus, so it was torn down mid-tap and the row
+      // never saw the pointer-up. Tapping a suggestion did nothing at all.
+      //
+      // Two things make it reproduce here. The platform override: that action leaves focus alone
+      // for a touch on native Android/iOS (which is why the installed app was fine) and drops it
+      // everywhere else, kIsWeb included — kIsWeb cannot be faked in a test, so a desktop platform
+      // stands in for mobile web and runs the identical code path. And the pump between down and
+      // up: a real tap spans frames, so the rebuild that removed the panel landed inside the
+      // gesture, whereas tester.tap sends both events with no frame in between and never saw it.
+      // Restored in a finally rather than an addTearDown: the framework's "no debug variable was
+      // left set" check runs before tear-downs do, so a leaked override fails the test on its way
+      // out and hides whatever the assertions actually said.
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      try {
+        await pumpHireTab(tester);
+
+        await tester.enterText(find.byType(TextField), 'brav');
+        await tester.pump();
+        expect(find.text('Brave'), findsOneWidget);
+
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.text('Brave')),
+        );
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // Assert on the chip and the cleared field, not on who is left in the list: "brav" as free
+        // text already filters out everything that isn't Brave, so the list looks identical whether
+        // the tap landed or not — which is what let this reach production.
+        expect(find.byType(FacetChip), findsOneWidget);
+        expect(
+          tester.widget<TextField>(find.byType(TextField)).controller!.text,
+          isEmpty,
+        );
+        // With the text gone, the chip alone is doing the filtering.
+        expect(find.text('Capodecina'), findsOneWidget);
+        expect(find.text('Barnabotti'), findsNothing);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
     },
   );
 

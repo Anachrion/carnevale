@@ -53,6 +53,16 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
   /// only hidden, not cleared, so tapping back into the field brings them straight back.
   late final FocusNode searchFocusNode = FocusNode()..addListener(() => setState(() {}));
 
+  /// Ties the suggestions panel to the search field as one tap region, so a tap on a suggestion
+  /// does not count as a tap *outside* the field.
+  ///
+  /// Without it the panel is unreachable on web. EditableText's default tap-outside action drops
+  /// focus the moment a pointer goes down anywhere outside the field — for a touch it spares
+  /// native Android and iOS, but not kIsWeb — and this panel is shown only while the field has
+  /// focus ([hasSuggestions]), so it was torn down between the pointer going down and coming back
+  /// up. The row never completed its tap, and tapping a suggestion did nothing at all.
+  final Object _searchTapGroup = Object();
+
   /// Exact filters picked from the autocomplete, ANDed together: Leader + Brave finds brave leaders.
   final Set<Facet> pickedFacets = {};
 
@@ -190,6 +200,8 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
         child: TextField(
           controller: searchController,
           focusNode: searchFocusNode,
+          // Grouped with the suggestions panel; see [_searchTapGroup].
+          groupId: _searchTapGroup,
           onChanged: (_) => applySearch(),
           style: TextStyle(color: context.textColor, fontSize: 15),
           decoration: InputDecoration(
@@ -243,35 +255,40 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
   /// Tapping one promotes it from free text to an exact filter (a chip), which is how you ask for
   /// "Leader AND Brave" — a question plain text can't express.
   Widget buildSuggestions() {
-    return DecoratedBox(
-      // Lifts the panel off the content it now floats over.
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.28),
-            blurRadius: 28,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: GlassPanel(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 232),
-          child: ListView.builder(
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            itemCount: _suggestions.length,
-            itemBuilder: (_, i) {
-              final suggestion = _suggestions[i];
-              return SuggestionRow(
-                key: _suggestionKeys.putIfAbsent(i, GlobalKey.new),
-                suggestion: suggestion,
-                selected: i == _highlighted,
-                onTap: () => addFacet(suggestion.facet),
-              );
-            },
+    return TapRegion(
+      // Same group as the search field, so pressing a row is "inside" it and the field keeps focus
+      // long enough for the tap to complete. See [_searchTapGroup].
+      groupId: _searchTapGroup,
+      child: DecoratedBox(
+        // Lifts the panel off the content it now floats over.
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.28),
+              blurRadius: 28,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: GlassPanel(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 232),
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: _suggestions.length,
+              itemBuilder: (_, i) {
+                final suggestion = _suggestions[i];
+                return SuggestionRow(
+                  key: _suggestionKeys.putIfAbsent(i, GlobalKey.new),
+                  suggestion: suggestion,
+                  selected: i == _highlighted,
+                  onTap: () => addFacet(suggestion.facet),
+                );
+              },
+            ),
           ),
         ),
       ),
