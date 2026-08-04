@@ -66,9 +66,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       );
       if (!mounted) return;
       showAppToast(context, AppLocalizations.of(context).toastPasswordReset);
+      // Drop this screen (its token is spent — going back to it would only offer a form that can no
+      // longer succeed) but keep the root below it, which is the home screen the deep link pushed
+      // us on top of. Clearing the whole stack instead made the account screen the root, and the
+      // drawer reaches home with popUntil(isFirst) — so "Home" landed on the account screen for the
+      // rest of the session, with no way back.
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const AccountScreen()),
-        (route) => false,
+        (route) => route.isFirst,
       );
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
