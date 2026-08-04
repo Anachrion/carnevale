@@ -234,23 +234,57 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  /// Completes a password reset and signs the user in with the session the backend returns, so the
+  /// caller can go straight to the account screen instead of asking for the password just chosen.
+  ///
+  /// Called through the raw Dio rather than the generated client for the same reason as [logIn]:
+  /// the JWT arrives in the `Authorization` header and the `refresh_token` in the body, and both
+  /// have to be read together. Going through the generated client here was also what made a
+  /// *successful* reset look like a failure — it deserializes into `Session`, whose `refreshToken`
+  /// is non-nullable, so the old `{user: …}`-only response threw and surfaced as a generic error.
+  /// The user then retried and got "token is invalid", the first attempt having actually worked.
   Future<void> resetPassword({
     required String token,
     required String password,
     required String passwordConfirmation,
   }) async {
     try {
-      await _client.session.resetPassword(
-        resetPasswordInput: api.ResetPasswordInput(
-          (b) => b
-            ..user = api.ResetPasswordInputUser(
-              (ub) => ub
-                ..resetPasswordToken = token
-                ..password = password
-                ..passwordConfirmation = passwordConfirmation,
-            ).toBuilder(),
-        ),
+      final res = await _client.dio.patch<Map<String, dynamic>>(
+        '/password',
+        data: {
+          'user': {
+            'reset_password_token': token,
+            'password': password,
+            'password_confirmation': passwordConfirmation,
+          },
+        },
       );
+      final accessToken = _bearer(res.headers.value('authorization'));
+      final refresh = res.data?['refresh_token'] as String?;
+      final userMap = res.data?['user'] as Map<String, dynamic>?;
+      // The password *was* changed by the time we get here — a 2xx says so. If the session is
+      // unusable we must not report a plain failure, or the user retries and burns the now-spent
+      // token on a confusing "token is invalid". Say what actually happened instead.
+      if (accessToken == null ||
+          refresh == null ||
+          refresh.isEmpty ||
+          userMap == null) {
+        throw AuthException(
+          'Your password was changed, but signing you in failed. Please log in with your new password.',
+        );
+      }
+      final authUser = AuthUser(
+        id: userMap['id'] as int,
+        email: userMap['email'] as String,
+        username: userMap['username'] as String,
+      );
+
+      _client.authToken = accessToken;
+      _currentUser = authUser;
+      await _storage.write(key: _tokenKey, value: accessToken);
+      await _storage.write(key: _refreshTokenKey, value: refresh);
+      await _storage.write(key: _userKey, value: _userToJson(authUser));
+      notifyListeners();
     } on DioException catch (e) {
       throw AuthException(parseAuthError(e));
     }

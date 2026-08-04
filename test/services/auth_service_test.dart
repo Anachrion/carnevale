@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:carnevale/services/auth_service.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_api.dart';
 
 String _fakeToken(Map<String, dynamic> payload) {
   String encode(Object o) =>
@@ -107,6 +110,94 @@ void main() {
     test('falls back to a generic message when none is provided', () {
       final e = _errorResponse(null, statusCode: 500);
       expect(auth.parseAuthError(e), 'Something went wrong. Please try again.');
+    });
+  });
+
+  group('resetPassword', () {
+    setUp(() => FlutterSecureStorage.setMockInitialValues({}));
+
+    // Completing a reset signs the user in, so the screen can land on the account without asking
+    // for the password just chosen. Reading the response used to go through the generated client,
+    // which deserializes into `Session` — whose `refreshToken` is non-nullable — while the backend
+    // returned `{user: …}` alone. Every *successful* reset therefore threw and was reported as a
+    // generic failure; the user retried and hit "token is invalid", the first attempt having
+    // actually worked. This pins the whole session down.
+    test('stores the session returned with a completed reset', () async {
+      final adapter = installFakeApi();
+      final jwt = _fakeToken({
+        'exp':
+            DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/
+                1000,
+      });
+      adapter.stub(
+        'PATCH',
+        '/password',
+        {
+          'user': {'id': 4, 'email': 'reset@example.com', 'username': 'Sechs'},
+          'refresh_token': 'refresh-abc',
+        },
+        headers: {'authorization': 'Bearer $jwt'},
+      );
+
+      await auth.resetPassword(
+        token: 'reset-token',
+        password: 'NewSecret123!',
+        passwordConfirmation: 'NewSecret123!',
+      );
+
+      expect(auth.currentUser?.id, 4);
+      expect(auth.currentUser?.username, 'Sechs');
+      expect(
+        await const FlutterSecureStorage().read(key: 'refresh_token'),
+        'refresh-abc',
+      );
+      expect(await const FlutterSecureStorage().read(key: 'auth_token'), jwt);
+    });
+
+    // A 2xx means the password was changed even if the session is unusable. Saying so matters:
+    // a plain "failed" invites the retry that spends the single-use token and produces the
+    // misleading "token is invalid".
+    test('reports the password as changed when the session is missing', () async {
+      final adapter = installFakeApi();
+      adapter.stub('PATCH', '/password', {
+        'user': {'id': 4, 'email': 'reset@example.com', 'username': 'Sechs'},
+      });
+
+      await expectLater(
+        auth.resetPassword(
+          token: 'reset-token',
+          password: 'NewSecret123!',
+          passwordConfirmation: 'NewSecret123!',
+        ),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.message,
+            'message',
+            contains('password was changed'),
+          ),
+        ),
+      );
+    });
+
+    test('sends the token and both password fields under `user`', () async {
+      final adapter = installFakeApi();
+      adapter.stub('PATCH', '/password', {
+        'user': {'id': 4, 'email': 'reset@example.com', 'username': 'Sechs'},
+        'refresh_token': 'refresh-abc',
+      }, headers: {'authorization': 'Bearer token'});
+
+      await auth.resetPassword(
+        token: 'reset-token',
+        password: 'NewSecret123!',
+        passwordConfirmation: 'NewSecret123!',
+      );
+
+      final sent = adapter.requests.single.data as Map<String, dynamic>;
+      expect(sent['user'], {
+        'reset_password_token': 'reset-token',
+        'password': 'NewSecret123!',
+        'password_confirmation': 'NewSecret123!',
+      });
     });
   });
 }

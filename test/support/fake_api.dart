@@ -13,11 +13,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// shared ApiClient's Dio via [installFakeApi].
 class FakeApiAdapter implements HttpClientAdapter {
   final Map<String, Object?> _routes = {};
+  final Map<String, Map<String, List<String>>> _headers = {};
+  final List<RequestOptions> requests = [];
 
   /// Registers a response body (a JSON-encodable Map/List) for a request. Build [body] with the
   /// generated serializers (see the fixtures below) so it matches the client's expected schema.
-  void stub(String method, String path, Object? body) {
+  ///
+  /// [headers] adds response headers, for the endpoints whose answer is not carried by the body
+  /// alone — login, token refresh and password reset return the JWT in `Authorization`.
+  void stub(
+    String method,
+    String path,
+    Object? body, {
+    Map<String, String> headers = const {},
+  }) {
     _routes['$method $path'] = body;
+    _headers['$method $path'] = {
+      for (final entry in headers.entries) entry.key: [entry.value],
+    };
   }
 
   @override
@@ -26,6 +39,7 @@ class FakeApiAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    requests.add(options);
     final key = '${options.method} ${options.path}';
     final has = _routes.containsKey(key);
     final body = has
@@ -40,6 +54,7 @@ class FakeApiAdapter implements HttpClientAdapter {
       has ? 200 : 404,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
+        ...?_headers[key],
       },
     );
   }
