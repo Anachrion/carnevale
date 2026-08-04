@@ -64,6 +64,11 @@ class ApiClient {
   static const _httpScheme = _useTls ? 'https' : 'http';
   static const _wsScheme = _useTls ? 'wss' : 'ws';
 
+  /// Backend origin (scheme + host, no trailing slash). The REST base URL is built on it, and
+  /// anything that needs a plain web URL off the same server — the printable card sheets page, say
+  /// — can link against it instead of re-deriving the host.
+  static const origin = '$_httpScheme://$_host';
+
   /// Base URL for the ActionCable WebSocket endpoint, shared with [GameService].
   static const cableUrl = '$_wsScheme://$_host/cable';
 
@@ -75,7 +80,7 @@ class ApiClient {
 
   ApiClient._() {
     _dio = Dio(BaseOptions(
-      baseUrl: '$_httpScheme://$_host/api/v1',
+      baseUrl: '$origin/api/v1',
       // Bound every request so a black-hole network (captive portal, dead wifi that still accepts
       // SYNs) surfaces as a timeout the caller can show, instead of an indefinite hang / spinner.
       connectTimeout: const Duration(seconds: 10),

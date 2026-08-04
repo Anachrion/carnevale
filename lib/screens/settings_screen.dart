@@ -23,6 +23,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/ability_service.dart';
+import '../services/api_client.dart';
 import '../services/card_image_service.dart';
 import '../services/equipment_service.dart';
 import '../services/profile_service.dart';
@@ -162,6 +163,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 12),
                     const _CardImageSync(),
                   ],
+                  const SizedBox(height: 28),
+                  Text(
+                    l10n.settingsPrinting,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: context.accentColor,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const _PrintableSheets(),
                   const SizedBox(height: 28),
                   Text(
                     l10n.settingsAccount,
@@ -653,6 +666,46 @@ class _AccountNavRow extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Settings entry for the printable card sheets: a blurb plus a button opening the backend's
+/// `/cards` page in the browser, where the newest per-faction PDF can be downloaded.
+///
+/// Deliberately a link out rather than an in-app download — the sheets are print-shop A4/Letter
+/// PDFs, so the browser (and the OS print dialog behind it) is where they are actually useful, and
+/// it saves the app a file-picker/share flow it needs nowhere else.
+class _PrintableSheets extends StatelessWidget {
+  const _PrintableSheets();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return GlassPanel(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.settingsPrintBlurb,
+            style: GoogleFonts.cinzel(
+              fontSize: 12,
+              color: context.subtleTextColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GlassActionButton(
+            icon: Icons.picture_as_pdf_outlined,
+            label: l10n.settingsPrintButton,
+            color: AppPalette.toggleBlue,
+            onPressed: () => launchUrl(
+              Uri.parse('${ApiClient.origin}/cards'),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+        ],
       ),
     );
   }

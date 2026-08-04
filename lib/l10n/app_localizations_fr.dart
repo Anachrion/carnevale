@@ -36,6 +36,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsCardImages => 'IMAGES DES CARTES';
 
   @override
+  String get settingsPrinting => 'IMPRESSION';
+
+  @override
   String get settingsAccount => 'COMPTE';
 
   @override
@@ -96,6 +99,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String settingsSyncDownloading(int done, int total) {
     return 'Téléchargement $done / $total';
   }
+
+  @override
+  String get settingsPrintBlurb =>
+      'Des planches de cartes prêtes à imprimer, un PDF par faction, mises à jour à chaque modification des cartes.';
+
+  @override
+  String get settingsPrintButton => 'Planches de cartes (PDF)';
 
   @override
   String get settingsSyncUpToDate => 'Toutes les cartes sont déjà à jour';

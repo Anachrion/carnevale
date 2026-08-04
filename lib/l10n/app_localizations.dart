@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'CARD IMAGES'**
   String get settingsCardImages;
 
+  /// No description provided for @settingsPrinting.
+  ///
+  /// In en, this message translates to:
+  /// **'PRINTING'**
+  String get settingsPrinting;
+
   /// No description provided for @settingsAccount.
   ///
   /// In en, this message translates to:
@@ -265,6 +271,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downloading {done} / {total}'**
   String settingsSyncDownloading(int done, int total);
+
+  /// No description provided for @settingsPrintBlurb.
+  ///
+  /// In en, this message translates to:
+  /// **'Print-ready card sheets, one PDF per faction, updated whenever the cards change.'**
+  String get settingsPrintBlurb;
+
+  /// Button opening the backend's /cards page in a browser to download printable sheets
+  ///
+  /// In en, this message translates to:
+  /// **'Card Sheets (PDF)'**
+  String get settingsPrintButton;
 
   /// No description provided for @settingsSyncUpToDate.
   ///

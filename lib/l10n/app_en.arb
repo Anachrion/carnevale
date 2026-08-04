@@ -13,6 +13,7 @@
   "settingsThemeDark": "Dark",
   "settingsAppearance": "APPEARANCE",
   "settingsCardImages": "CARD IMAGES",
+  "settingsPrinting": "PRINTING",
   "settingsAccount": "ACCOUNT",
   "settingsCardFlip": "Card flip",
   "settingsCardFlipFlip": "Flip",
@@ -37,6 +38,11 @@
   "settingsSyncDownloading": "Downloading {done} / {total}",
   "@settingsSyncDownloading": {
     "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "settingsPrintBlurb": "Print-ready card sheets, one PDF per faction, updated whenever the cards change.",
+  "settingsPrintButton": "Card Sheets (PDF)",
+  "@settingsPrintButton": {
+    "description": "Button opening the backend's /cards page in a browser to download printable sheets"
   },
   "settingsSyncUpToDate": "All cards are already up to date",
   "settingsSyncedCount": "{count, plural, =1{Synced 1 card image} other{Synced {count} card images}}",
