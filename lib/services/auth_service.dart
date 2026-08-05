@@ -317,11 +317,41 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  /// Signs this device out. Other devices the user is signed in on keep their sessions — see
+  /// [logOutEverywhere] for the deliberate opposite.
   Future<void> logOut() async {
+    String? refresh;
     try {
-      await _client.session.logout();
+      refresh = await _storage.read(key: _refreshTokenKey);
+    } catch (_) {
+      // Unreadable storage must never block signing out. Without a token the backend falls back
+      // to revoking every session, which is the safe direction to fail in here.
+    }
+    try {
+      // Raw Dio rather than the generated client: `SessionApi.logout` sends no body, and the
+      // backend needs this device's refresh token to know which session to end. Sending nothing
+      // makes it revoke all of them — which is what used to sign the phone out hours after a
+      // logout in the browser. Same raw-endpoint approach as logIn and _refreshSession.
+      await _client.dio.delete<void>(
+        '/logout',
+        data: refresh == null ? null : {'refresh_token': refresh},
+      );
     } on DioException {
       // Clear the local session regardless of whether the server call succeeds.
+    }
+    await _clear();
+  }
+
+  /// Signs the user out on every device at once, revoking all refresh tokens. Distinct endpoint
+  /// from [logOut] on purpose: this is destructive across devices and has to be asked for.
+  ///
+  /// Other devices' access tokens stay valid until they expire (an hour at most); they lose the
+  /// ability to renew immediately.
+  Future<void> logOutEverywhere() async {
+    try {
+      await _client.dio.delete<void>('/logout_all');
+    } on DioException {
+      // As above: the local session goes regardless.
     }
     await _clear();
   }
