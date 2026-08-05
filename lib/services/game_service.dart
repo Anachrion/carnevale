@@ -30,6 +30,26 @@ class AvailableGang {
   const AvailableGang({required this.gang, required this.selectable});
 }
 
+/// One model's state as an `entry_state` broadcast delivers it — the payload the five entry
+/// endpoints push instead of a whole `game_state` (B-37).
+///
+/// [spellCasts] maps each of the model's spell keys (see `KnownSpell.key`) to its current `cast`
+/// flag. It travels beside [state] rather than inside it because deriving `cast` needs each spell's
+/// `resetsEachRound`, which lives on the pool/grant, not on the entry state.
+class EntryStateUpdate {
+  final int playerId;
+  final int listEntryId;
+  final api.EntryState state;
+  final Map<String, bool> spellCasts;
+
+  const EntryStateUpdate({
+    required this.playerId,
+    required this.listEntryId,
+    required this.state,
+    required this.spellCasts,
+  });
+}
+
 /// Owns both REST calls for the game-setup flow and the live ActionCable
 /// subscription for whichever game is currently open. [currentGame] is always
 /// the latest full snapshot from the server — every update, REST or
@@ -59,6 +79,18 @@ class GameService extends ChangeNotifier {
   /// Fired when the live connection hits an unrecoverable auth failure (the session expired while
   /// watching). The UI listens so it can route to re-login rather than spin on a dead credential.
   void Function()? onSessionExpired;
+
+  // Kept apart from ChangeNotifier's listeners: an entry_state broadcast carries a payload rather
+  // than just signalling "currentGame changed", and only the gang tabs care about it.
+  final _entryStateListeners = <void Function(EntryStateUpdate)>[];
+
+  /// Subscribes to `entry_state` broadcasts — one model's counters/stats/tokens/spell casts
+  /// changing, on either player's gang. Pair with [removeEntryStateListener] in `dispose`.
+  void addEntryStateListener(void Function(EntryStateUpdate) listener) =>
+      _entryStateListeners.add(listener);
+
+  void removeEntryStateListener(void Function(EntryStateUpdate) listener) =>
+      _entryStateListeners.remove(listener);
 
   /// Test seam: overrides the WebSocket transport the live cable opens, so tests can drive the
   /// connection with a fake channel instead of a real socket. Null in production.
@@ -351,7 +383,7 @@ class GameService extends ChangeNotifier {
 
   /// Updates status counters on one of the current player's own models — only the values
   /// passed change, the rest keep their current state. Returns the model's full updated
-  /// state; the server also broadcasts a game_state event to both players.
+  /// state; the server also broadcasts an entry_state event to both players.
   ///
   /// [activated] marks the model as having activated this turn. The server records *which* turn
   /// it activated on, so the flag clears itself when this player advances the turn — nothing here
@@ -384,7 +416,7 @@ class GameService extends ChangeNotifier {
 
   /// Sets current HP/WP/CP on one of the current player's own models — only the stats passed
   /// change (absolute values, not deltas), the rest keep their current value. Returns the
-  /// model's full updated state; the server also broadcasts a game_state event to both players.
+  /// model's full updated state; the server also broadcasts an entry_state event to both players.
   Future<api.EntryState> updateStats(
     int gameId,
     int listEntryId, {
@@ -408,7 +440,7 @@ class GameService extends ChangeNotifier {
   /// Adds or updates a player token on one of the current player's own models (CARNEVALEB-16).
   /// Keyed by [tokenId] (client-generated): re-sending the same id updates that token — an edit, or
   /// a flip of its `active` state — rather than adding a duplicate, so a retry is safe. Returns the
-  /// model's full updated state; the server also broadcasts a game_state event to both players.
+  /// model's full updated state; the server also broadcasts an entry_state event to both players.
   Future<api.EntryState> upsertToken(
     int gameId,
     int listEntryId, {
@@ -436,7 +468,7 @@ class GameService extends ChangeNotifier {
   });
 
   /// Removes the token with [tokenId] from one of the current player's own models. Returns the
-  /// model's full updated state; broadcast to both players.
+  /// model's full updated state; broadcast to both players as an entry_state event.
   Future<api.EntryState> removeToken(int gameId, int listEntryId, String tokenId) =>
       _guard(() async {
         final res = await _client.games.removeToken(
@@ -452,7 +484,8 @@ class GameService extends ChangeNotifier {
   /// KnownSpell.key) — `cast` is the desired state rather than a blind toggle. Returns the
   /// model's full updated state (HP/WP/CP/counters); the spell's own new `cast` flag isn't in
   /// that payload (it lives on ListEntry.pools/grantedSpells, not EntryState), so the caller
-  /// applies the flip to its own local copy instead of waiting for a re-fetch.
+  /// applies the flip to its own local copy. Both players also get an entry_state event, whose
+  /// `spellCasts` map does carry the new flag — that's how the change reaches the opponent.
   Future<api.EntryState> updateSpellCast(
     int gameId,
     int listEntryId, {
@@ -536,6 +569,10 @@ class GameService extends ChangeNotifier {
   }
 
   void _onChannelMessage(Map<String, dynamic> message) {
+    if (message['event'] == 'entry_state') {
+      _onEntryStateMessage(message);
+      return;
+    }
     if (message['event'] != 'game_state') return;
     try {
       // A malformed or schema-drifted payload makes deserializeWith throw; that would escape the
@@ -555,6 +592,41 @@ class GameService extends ChangeNotifier {
     } catch (e, st) {
       debugPrint(
         'GameService: ignoring malformed game_state broadcast: $e\n$st',
+      );
+    }
+  }
+
+  // One model changed (counters/stats/tokens/spell casts). Nothing in currentGame is derived from a
+  // model's state, so this doesn't touch the snapshot — it hands the change to the gang tabs, which
+  // patch that one entry instead of re-fetching both player lists (B-37).
+  void _onEntryStateMessage(Map<String, dynamic> message) {
+    try {
+      // Same reasoning as the game_state path: a malformed payload must not escape the listen
+      // callback and kill live updates. Losing one entry_state is survivable — the next player-list
+      // fetch (a turn change, a refresh) resyncs that model.
+      final state = api.standardSerializers.deserializeWith(
+        api.EntryState.serializer,
+        message['state'],
+      );
+      if (state == null) return;
+      final spellCasts = <String, bool>{
+        for (final entry in (message['spell_casts'] as Map).entries)
+          entry.key as String: entry.value as bool,
+      };
+      final update = EntryStateUpdate(
+        playerId: message['player_id'] as int,
+        listEntryId: message['list_entry_id'] as int,
+        state: state,
+        spellCasts: spellCasts,
+      );
+      // Iterate a copy: a listener that unsubscribes on delivery (a tab disposing) would otherwise
+      // mutate the list mid-iteration.
+      for (final listener in List.of(_entryStateListeners)) {
+        listener(update);
+      }
+    } catch (e, st) {
+      debugPrint(
+        'GameService: ignoring malformed entry_state broadcast: $e\n$st',
       );
     }
   }
