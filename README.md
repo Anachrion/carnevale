@@ -113,6 +113,26 @@ code with no manual bookkeeping.
 The **web** build is released from the backend repo (`bin/release-web`), which compiles this app
 with the production API baked in and ships it inside the backend's Docker image.
 
+### Android App Links
+
+The Android build claims `https://carnevale-app.com/join` and `/reset-password` (see the
+`autoVerify` intent-filter in `AndroidManifest.xml`), so a shared game link or a password-reset
+email opens the app instead of the browser. Android only honours that claim if the backend serves
+a matching certificate fingerprint at `/.well-known/assetlinks.json`.
+
+Two things worth knowing before a release:
+
+- The fingerprint is the one from Play Console → *App integrity* → **App signing** — **not** the
+  upload key. Releases go up as an `.aab`, so Google re-signs them and the certificate on a user's
+  phone is Google's. Using the upload fingerprint fails silently: the file serves fine and the
+  links simply keep opening the browser.
+- **Deploy the backend before publishing the app.** Verification runs at install time, so anyone
+  installing while the backend serves no fingerprint stays unverified until they reinstall.
+
+Setup is one-time — the app signing key does not change between releases. Full procedure, including
+how to verify it worked, is in the backend repo: `docs/DEPLOYMENT.md` → *Enabling Android App
+Links*.
+
 ---
 
 ## Contributing
