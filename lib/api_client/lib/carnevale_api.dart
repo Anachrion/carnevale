@@ -59,6 +59,7 @@ export 'package:carnevale_api/src/model/list_input.dart';
 export 'package:carnevale_api/src/model/list_input_list.dart';
 export 'package:carnevale_api/src/model/login_input.dart';
 export 'package:carnevale_api/src/model/login_input_user.dart';
+export 'package:carnevale_api/src/model/logout_request.dart';
 export 'package:carnevale_api/src/model/model_list.dart';
 export 'package:carnevale_api/src/model/pool_spell.dart';
 export 'package:carnevale_api/src/model/profile.dart';

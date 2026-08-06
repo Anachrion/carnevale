@@ -12,6 +12,7 @@ import 'package:carnevale_api/src/model/account.dart';
 import 'package:carnevale_api/src/model/create_cable_ticket201_response.dart';
 import 'package:carnevale_api/src/model/forgot_password_input.dart';
 import 'package:carnevale_api/src/model/login_input.dart';
+import 'package:carnevale_api/src/model/logout_request.dart';
 import 'package:carnevale_api/src/model/refresh_input.dart';
 import 'package:carnevale_api/src/model/registration_input.dart';
 import 'package:carnevale_api/src/model/reset_password_input.dart';
@@ -287,8 +288,86 @@ class SessionApi {
     );
   }
 
-  /// Revoke the current JWT and all refresh tokens
-  /// Denylists the current JWT and revokes every refresh token the user holds (signs out everywhere).
+  /// Sign out this device
+  /// Denylists the current JWT and revokes the refresh token supplied in the body — this device only. Other devices keep their sessions. Clients should always send &#x60;refresh_token&#x60;; when it is omitted the endpoint falls back to revoking every refresh token the user holds, which is the pre-existing behaviour retained for older builds that cannot name their token. To sign out everywhere on purpose, use &#x60;/logout_all&#x60;. 
+  ///
+  /// Parameters:
+  /// * [logoutRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> logout({ 
+    LogoutRequest? logoutRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/logout';
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(LogoutRequest);
+      _bodyData = logoutRequest == null ? null : _serializers.serialize(logoutRequest, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// Sign out every device
+  /// Denylists the current JWT and revokes every refresh token the user holds. Other devices lose the ability to renew immediately, but their existing access JWTs remain valid until they expire (at most one hour), after which the refresh they attempt fails. 
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -300,7 +379,7 @@ class SessionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> logout({ 
+  Future<Response<void>> logoutAll({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -308,7 +387,7 @@ class SessionApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/logout';
+    final _path = r'/logout_all';
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -446,7 +525,7 @@ class SessionApi {
   }
 
   /// Set a new password using a reset token
-  /// 
+  /// Completing a reset signs the user in: the caller proved control of the account&#39;s inbox and has just chosen the password, so a short-lived JWT is returned in the &#x60;Authorization&#x60; response header and a long-lived &#x60;refresh_token&#x60; in the body, exactly as POST /login does. The reset token is single-use — replaying it answers 422. 
   ///
   /// Parameters:
   /// * [resetPasswordInput] 

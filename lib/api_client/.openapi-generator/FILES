@@ -44,6 +44,7 @@ doc/ListInputList.md
 doc/ListsApi.md
 doc/LoginInput.md
 doc/LoginInputUser.md
+doc/LogoutRequest.md
 doc/ModelList.md
 doc/PoolSpell.md
 doc/Profile.md
@@ -141,6 +142,7 @@ lib/src/model/list_input.dart
 lib/src/model/list_input_list.dart
 lib/src/model/login_input.dart
 lib/src/model/login_input_user.dart
+lib/src/model/logout_request.dart
 lib/src/model/model_list.dart
 lib/src/model/pool_spell.dart
 lib/src/model/profile.dart
@@ -177,4 +179,4 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/account_test.dart
+test/logout_request_test.dart

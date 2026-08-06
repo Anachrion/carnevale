@@ -328,10 +328,11 @@ class AuthService extends ChangeNotifier {
       // to revoking every session, which is the safe direction to fail in here.
     }
     try {
-      // Raw Dio rather than the generated client: `SessionApi.logout` sends no body, and the
-      // backend needs this device's refresh token to know which session to end. Sending nothing
-      // makes it revoke all of them — which is what used to sign the phone out hours after a
-      // logout in the browser. Same raw-endpoint approach as logIn and _refreshSession.
+      // The backend needs this device's refresh token to know which session to end; sending
+      // nothing makes it revoke all of them — which is what used to sign the phone out hours
+      // after a logout in the browser. `SessionApi.logout` now takes that body too (it didn't
+      // when this was written), so this could move onto the generated client; it stays on raw
+      // Dio for consistency with the rest of AuthService.
       await _client.dio.delete<void>(
         '/logout',
         data: refresh == null ? null : {'refresh_token': refresh},

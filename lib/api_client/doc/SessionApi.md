@@ -12,7 +12,8 @@ Method | HTTP request | Description
 [**createCableTicket**](SessionApi.md#createcableticket) | **POST** /cable_tickets | Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
 [**forgotPassword**](SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [**login**](SessionApi.md#login) | **POST** /login | Log in and receive a JWT
-[**logout**](SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT and all refresh tokens
+[**logout**](SessionApi.md#logout) | **DELETE** /logout | Sign out this device
+[**logoutAll**](SessionApi.md#logoutall) | **DELETE** /logout_all | Sign out every device
 [**refreshToken**](SessionApi.md#refreshtoken) | **POST** /token | Exchange a refresh token for a fresh JWT
 [**resetPassword**](SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [**signup**](SessionApi.md#signup) | **POST** /signup | Register a new user
@@ -154,11 +155,57 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **logout**
-> logout()
+> logout(logoutRequest)
 
-Revoke the current JWT and all refresh tokens
+Sign out this device
 
-Denylists the current JWT and revokes every refresh token the user holds (signs out everywhere).
+Denylists the current JWT and revokes the refresh token supplied in the body — this device only. Other devices keep their sessions. Clients should always send `refresh_token`; when it is omitted the endpoint falls back to revoking every refresh token the user holds, which is the pre-existing behaviour retained for older builds that cannot name their token. To sign out everywhere on purpose, use `/logout_all`. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getSessionApi();
+final LogoutRequest logoutRequest = ; // LogoutRequest | 
+
+try {
+    api.logout(logoutRequest);
+} on DioException catch (e) {
+    print('Exception when calling SessionApi->logout: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **logoutRequest** | [**LogoutRequest**](LogoutRequest.md)|  | [optional] 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **logoutAll**
+> logoutAll()
+
+Sign out every device
+
+Denylists the current JWT and revokes every refresh token the user holds. Other devices lose the ability to renew immediately, but their existing access JWTs remain valid until they expire (at most one hour), after which the refresh they attempt fails. 
 
 ### Example
 ```dart
@@ -171,9 +218,9 @@ import 'package:carnevale_api/api.dart';
 final api = CarnevaleApi().getSessionApi();
 
 try {
-    api.logout();
+    api.logoutAll();
 } on DioException catch (e) {
-    print('Exception when calling SessionApi->logout: $e\n');
+    print('Exception when calling SessionApi->logoutAll: $e\n');
 }
 ```
 
@@ -246,6 +293,8 @@ Name | Type | Description  | Notes
 > Session resetPassword(resetPasswordInput)
 
 Set a new password using a reset token
+
+Completing a reset signs the user in: the caller proved control of the account's inbox and has just chosen the password, so a short-lived JWT is returned in the `Authorization` response header and a long-lived `refresh_token` in the body, exactly as POST /login does. The reset token is single-use — replaying it answers 422. 
 
 ### Example
 ```dart
