@@ -1058,6 +1058,42 @@ abstract class AppLocalizations {
   /// **'Join code copied'**
   String get toastJoinCodeCopied;
 
+  /// No description provided for @lobbyShareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get lobbyShareLink;
+
+  /// No description provided for @lobbyShowQr.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code'**
+  String get lobbyShowQr;
+
+  /// No description provided for @lobbyQrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to join'**
+  String get lobbyQrTitle;
+
+  /// No description provided for @lobbyQrHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the other player\'s camera at this code.'**
+  String get lobbyQrHint;
+
+  /// No description provided for @lobbyShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Join my Carnevale game: {url}'**
+  String lobbyShareMessage(String url);
+
+  /// No description provided for @toastShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the share sheet'**
+  String get toastShareFailed;
+
   /// No description provided for @rolloffWonTitle.
   ///
   /// In en, this message translates to:

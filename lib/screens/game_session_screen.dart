@@ -17,11 +17,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import '../app_colors.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart';
+import '../services/api_client.dart';
 import '../services/api_exception.dart';
 import '../services/game_service.dart';
 import '../services/gang_service.dart';
@@ -34,6 +37,7 @@ import '../widgets/glass_panel.dart';
 import '../widgets/spell_chips.dart';
 import '../widgets/spell_picker_dialog.dart';
 import '../widgets/status_views.dart';
+import '../widgets/themed_dialog_card.dart';
 import 'account_screen.dart';
 import 'gang_builder_screen.dart';
 import 'gang_viewer_screen.dart';
@@ -398,9 +402,90 @@ class _GameSessionScreenState extends State<GameSessionScreen>
             ),
           ),
         ),
+        const SizedBox(height: 16),
+        // Two ways to hand the game over, for the two situations it happens in: a link to send to
+        // someone who isn't here, and a QR for someone sitting across the table (CARNEVALEB-74).
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _LobbyShareAction(
+              icon: Icons.ios_share,
+              label: l10n.lobbyShareLink,
+              onTap: () => _shareJoinLink(game.joinCode),
+            ),
+            const SizedBox(width: 12),
+            _LobbyShareAction(
+              icon: Icons.qr_code_2,
+              label: l10n.lobbyShowQr,
+              onTap: () => _showJoinQr(game.joinCode),
+            ),
+          ],
+        ),
         const SizedBox(height: 20),
         CircularProgressIndicator(color: context.accentColor),
       ],
+    );
+  }
+
+  Future<void> _shareJoinLink(String joinCode) async {
+    final l10n = AppLocalizations.of(context);
+    final url = joinUrlFor(joinCode);
+    try {
+      await SharePlus.instance.share(
+        ShareParams(uri: Uri.parse(url), text: l10n.lobbyShareMessage(url)),
+      );
+    } catch (_) {
+      // No share sheet (a desktop or web target without one), or the user's chooser failed. The
+      // code above is still tappable to copy, so fall back to saying so rather than swallowing it.
+      if (mounted) showAppToast(context, l10n.toastShareFailed);
+    }
+  }
+
+  void _showJoinQr(String joinCode) {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (_) => ThemedDialogCard(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.lobbyQrTitle,
+              style: GoogleFonts.cinzel(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: context.textColor,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // On a white plate whatever the theme: scanners need the light-on-dark contrast the
+            // spec assumes, and a dark-theme QR drawn in the accent colour reads poorly or not at all.
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: QrImageView(
+                data: joinUrlFor(joinCode),
+                version: QrVersions.auto,
+                size: 220,
+                backgroundColor: Colors.white,
+                // Higher than the default so the code still scans off a screen at an angle, or
+                // partly glared — the table case this exists for.
+                errorCorrectionLevel: QrErrorCorrectLevel.Q,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              l10n.lobbyQrHint,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1211,6 +1296,56 @@ class _ActionButton extends StatelessWidget {
               ),
             )
           : Text(label, style: GoogleFonts.cinzel(fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
+/// A small outlined action under the lobby's join code — sharing the link, or showing it as a QR.
+///
+/// Deliberately understated next to the code itself: the code stays the headline, these are the
+/// two shortcuts for handing it over (CARNEVALEB-74).
+/// The URL that opens a game for someone else, from its [joinCode].
+///
+/// Its shape is a three-way contract: Rails routes `/join`, the Android manifest claims that exact
+/// path as a verified App Link, and main.dart reads the game out of `?code=` (CARNEVALEB-74). Moving
+/// any part of it breaks the link on every surface at once, silently — hence the test.
+///
+/// Built from the host this build points at, so a dev build shares a dev link rather than quietly
+/// advertising production.
+@visibleForTesting
+String joinUrlFor(String joinCode) => '${ApiClient.origin}/join?code=$joinCode';
+
+class _LobbyShareAction extends StatelessWidget {
+  const _LobbyShareAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18, color: context.accentColor),
+      label: Text(
+        label,
+        style: GoogleFonts.cinzel(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: context.textColor,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: context.accentColor.withValues(alpha: 0.5)),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
     );
   }
 }

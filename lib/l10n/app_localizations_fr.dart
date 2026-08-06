@@ -545,6 +545,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toastJoinCodeCopied => 'Code de partie copié';
 
   @override
+  String get lobbyShareLink => 'Partager le lien';
+
+  @override
+  String get lobbyShowQr => 'QR code';
+
+  @override
+  String get lobbyQrTitle => 'Scannez pour rejoindre';
+
+  @override
+  String get lobbyQrHint =>
+      'Dirigez l\'appareil photo de l\'autre joueur vers ce code.';
+
+  @override
+  String lobbyShareMessage(String url) {
+    return 'Rejoignez ma partie Carnevale : $url';
+  }
+
+  @override
+  String get toastShareFailed => 'Impossible d\'ouvrir le partage';
+
+  @override
   String get rolloffWonTitle => 'Vous avez gagné le jet !';
 
   @override
