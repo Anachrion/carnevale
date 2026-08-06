@@ -253,12 +253,14 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   List<api.Profile>? _opponentProfiles;
   String _opponentFaction = '';
 
-  // game_state broadcasts don't carry entry states, so each one triggers a player-list refetch.
-  // This timer coalesces a burst of broadcasts into a single fetch instead of one per frame.
+  // A game_state broadcast carries no entry states, so what it changes here (a turn advance
+  // clearing every activation, the opponent summoning a model) can only be picked up by refetching
+  // the player list. This timer coalesces a burst of them into a single fetch. Per-model changes
+  // arrive as entry_state events instead and never come through here (CARNEVALEB-37).
   Timer? _refetchTimer;
 
-  // Bumped on every local optimistic update. A refetch captures it at the start and refuses to
-  // apply its (now staler) result if a newer optimistic update landed while it was in flight, so
+  // Bumped on every local update, optimistic or broadcast. A refetch captures it at the start and
+  // refuses to apply its (now staler) result if a newer update landed while it was in flight, so
   // the just-tapped counter never flickers back to a stale server value.
   int _mutationSeq = 0;
 
@@ -269,6 +271,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     _gameService.addListener(_onGameUpdate);
+    _gameService.addEntryStateListener(_onEntryStateUpdate);
     _load();
   }
 
@@ -276,6 +279,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   void dispose() {
     _refetchTimer?.cancel();
     _gameService.removeListener(_onGameUpdate);
+    _gameService.removeEntryStateListener(_onEntryStateUpdate);
     super.dispose();
   }
 
@@ -343,12 +347,44 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  // game_state broadcasts don't carry entry states (those live in the player-list payload), so any
-  // broadcast — e.g. the opponent toggling a counter — needs a refetch. Debounce it so a chatty
-  // game doesn't trigger a continuous stream of full player-list fetches.
+  // A game_state broadcast is now only sent for things that don't live on a model — but two of them
+  // still change how this gang renders: the owning player advancing/rewinding their turn (which
+  // re-derives every model's `activated` and spell `cast` flags) and either player summoning or
+  // dismissing a model (which changes the roster). Neither travels in the payload, so this still
+  // refetches; it's debounced in case two land together.
   void _onGameUpdate() {
     _refetchTimer?.cancel();
     _refetchTimer = Timer(const Duration(milliseconds: 300), _load);
+  }
+
+  // One of this gang's models changed — the opponent toggling a counter, or this player acting from
+  // another device. The change travels in the broadcast, so it's patched onto that one entry rather
+  // than costing a full player-list refetch per tab per client, which is what every model change
+  // used to cost (CARNEVALEB-37).
+  void _onEntryStateUpdate(EntryStateUpdate update) {
+    final data = _data;
+    if (update.playerId != widget.playerId || data == null) return;
+    final gang = data.gang;
+    if (!gang.entries.any((e) => e.id == update.listEntryId)) return;
+    _mutationSeq++;
+    setState(() {
+      _data = _GangTabData(
+        gang: gang.rebuild(
+          (b) => b.entries.replace(
+            gang.entries.map(
+              (e) => e.id == update.listEntryId
+                  ? _withSpellCasts(
+                      e,
+                      update.spellCasts,
+                    ).rebuild((eb) => eb..state.replace(update.state))
+                  : e,
+            ),
+          ),
+        ),
+        profiles: data.profiles,
+        equipment: data.equipment,
+      );
+    });
   }
 
   // Opens the −/+ stepper for a counter token, mirroring the stat stepper: optimistic + debounced,
@@ -679,7 +715,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
         gang: gang.rebuild(
           (b) => b.entries.replace(
             gang.entries.map(
-              (e) => e.id == listEntryId ? _withSpellCast(e, key, cast) : e,
+              (e) => e.id == listEntryId ? _withSpellCasts(e, {key: cast}) : e,
             ),
           ),
         ),
@@ -689,30 +725,31 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  api.ListEntry _withSpellCast(api.ListEntry entry, String key, bool cast) {
+  // Stamps new `cast` flags onto an entry's pooled and granted spells. Keyed by spell key, so it
+  // takes either a single local flip or the whole `spellCasts` map an entry_state broadcast carries;
+  // a spell missing from [casts] keeps the flag it already had.
+  api.ListEntry _withSpellCasts(api.ListEntry entry, Map<String, bool> casts) {
+    api.PoolSpell withCast(api.PoolSpell spell) {
+      final cast = casts[spell.key];
+      return cast == null ? spell : spell.rebuild((sb) => sb.cast = cast);
+    }
+
     return entry.rebuild(
       (b) => b
         ..pools.replace(
           entry.pools.map(
             (pool) => pool.rebuild(
               (pb) => pb
-                ..cantrips.replace(
-                  pool.cantrips.map(
-                    (s) => s.key == key ? s.rebuild((sb) => sb.cast = cast) : s,
-                  ),
-                )
-                ..spells.replace(
-                  pool.spells.map(
-                    (s) => s.key == key ? s.rebuild((sb) => sb.cast = cast) : s,
-                  ),
-                ),
+                ..cantrips.replace(pool.cantrips.map(withCast))
+                ..spells.replace(pool.spells.map(withCast)),
             ),
           ),
         )
         ..grantedSpells.replace(
-          entry.grantedSpells.map(
-            (g) => g.key == key ? g.rebuild((gb) => gb.cast = cast) : g,
-          ),
+          entry.grantedSpells.map((g) {
+            final cast = casts[g.key];
+            return cast == null ? g : g.rebuild((gb) => gb.cast = cast);
+          }),
         ),
     );
   }
