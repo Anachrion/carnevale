@@ -200,4 +200,93 @@ void main() {
       });
     });
   });
+
+  group('logOut', () {
+    void signIn({String? refreshToken = 'refresh-abc'}) {
+      FlutterSecureStorage.setMockInitialValues({
+        'auth_token': 'jwt-abc',
+        'auth_user': json.encode({
+          'id': 4,
+          'email': 'a@b.c',
+          'username': 'Sechs',
+        }),
+        'refresh_token': ?refreshToken,
+      });
+      auth.debugLogin(const AuthUser(id: 4, email: 'a@b.c', username: 'Sechs'));
+    }
+
+    // The whole reason logOut sends a body: without this device's refresh token the backend
+    // revokes every one the user holds, which is what used to sign the phone out hours after a
+    // logout in the browser. Pinned here because it's invisible from the UI — both shapes look
+    // like a successful sign-out on the device that asked for it.
+    test('names this device\'s refresh token so other devices stay signed in', () async {
+      final adapter = installFakeApi();
+      adapter.stub('DELETE', '/logout', null);
+      signIn();
+
+      await auth.logOut();
+
+      final request = adapter.requests.single;
+      expect(request.path, '/logout');
+      expect(request.data, {'refresh_token': 'refresh-abc'});
+    });
+
+    // No stored token means nothing to name, and the backend's documented fallback is to revoke
+    // everything. Signing out too widely is the safe direction to fail in, so this sends no body
+    // rather than refusing to sign out at all.
+    test('sends no body when this device has no stored refresh token', () async {
+      final adapter = installFakeApi();
+      adapter.stub('DELETE', '/logout', null);
+      signIn(refreshToken: null);
+
+      await auth.logOut();
+
+      expect(adapter.requests.single.data, isNull);
+    });
+
+    test('clears the local session', () async {
+      final adapter = installFakeApi();
+      adapter.stub('DELETE', '/logout', null);
+      signIn();
+
+      await auth.logOut();
+
+      expect(auth.currentUser, isNull);
+      expect(auth.isLoggedIn, isFalse);
+      const storage = FlutterSecureStorage();
+      expect(await storage.read(key: 'auth_token'), isNull);
+      expect(await storage.read(key: 'refresh_token'), isNull);
+      expect(await storage.read(key: 'auth_user'), isNull);
+    });
+
+    // A user who taps sign out must end up signed out on the device whatever the server says —
+    // otherwise a flaky connection strands them in a session they asked to end. The route is left
+    // unstubbed here, so the adapter answers 404.
+    test('clears the local session even when the server call fails', () async {
+      installFakeApi();
+      signIn();
+
+      await auth.logOut();
+
+      expect(auth.currentUser, isNull);
+      expect(
+        await const FlutterSecureStorage().read(key: 'refresh_token'),
+        isNull,
+      );
+    });
+
+    // The destructive sibling: a distinct endpoint, and no token named, because revoking all of
+    // them is the point rather than the fallback.
+    test('logOutEverywhere hits /logout_all with no body', () async {
+      final adapter = installFakeApi();
+      adapter.stub('DELETE', '/logout_all', null);
+      signIn();
+
+      await auth.logOutEverywhere();
+
+      expect(adapter.requests.single.path, '/logout_all');
+      expect(adapter.requests.single.data, isNull);
+      expect(auth.currentUser, isNull);
+    });
+  });
 }

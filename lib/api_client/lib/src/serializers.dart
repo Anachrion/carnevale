@@ -51,6 +51,7 @@ import 'package:carnevale_api/src/model/list_input.dart';
 import 'package:carnevale_api/src/model/list_input_list.dart';
 import 'package:carnevale_api/src/model/login_input.dart';
 import 'package:carnevale_api/src/model/login_input_user.dart';
+import 'package:carnevale_api/src/model/logout_request.dart';
 import 'package:carnevale_api/src/model/model_list.dart';
 import 'package:carnevale_api/src/model/pool_spell.dart';
 import 'package:carnevale_api/src/model/profile.dart';
@@ -126,6 +127,7 @@ part 'serializers.g.dart';
   ListInputList,
   LoginInput,
   LoginInputUser,
+  LogoutRequest,
   ModelList,
   PoolSpell,
   Profile,

@@ -56,6 +56,7 @@ Serializers _$serializers =
           ..add(ListInputList.serializer)
           ..add(LoginInput.serializer)
           ..add(LoginInputUser.serializer)
+          ..add(LogoutRequest.serializer)
           ..add(ModelList.serializer)
           ..add(PoolSpell.serializer)
           ..add(PoolSpellDisciplineEnum.serializer)

@@ -113,7 +113,8 @@ Class | Method | HTTP request | Description
 [*SessionApi*](doc/SessionApi.md) | [**createCableTicket**](doc/SessionApi.md#createcableticket) | **POST** /cable_tickets | Mint a short-lived, single-use ticket for opening the ActionCable WebSocket
 [*SessionApi*](doc/SessionApi.md) | [**forgotPassword**](doc/SessionApi.md#forgotpassword) | **POST** /password | Request a password reset email
 [*SessionApi*](doc/SessionApi.md) | [**login**](doc/SessionApi.md#login) | **POST** /login | Log in and receive a JWT
-[*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Revoke the current JWT and all refresh tokens
+[*SessionApi*](doc/SessionApi.md) | [**logout**](doc/SessionApi.md#logout) | **DELETE** /logout | Sign out this device
+[*SessionApi*](doc/SessionApi.md) | [**logoutAll**](doc/SessionApi.md#logoutall) | **DELETE** /logout_all | Sign out every device
 [*SessionApi*](doc/SessionApi.md) | [**refreshToken**](doc/SessionApi.md#refreshtoken) | **POST** /token | Exchange a refresh token for a fresh JWT
 [*SessionApi*](doc/SessionApi.md) | [**resetPassword**](doc/SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [*SessionApi*](doc/SessionApi.md) | [**signup**](doc/SessionApi.md#signup) | **POST** /signup | Register a new user
@@ -160,6 +161,7 @@ Class | Method | HTTP request | Description
  - [ListInputList](doc/ListInputList.md)
  - [LoginInput](doc/LoginInput.md)
  - [LoginInputUser](doc/LoginInputUser.md)
+ - [LogoutRequest](doc/LogoutRequest.md)
  - [ModelList](doc/ModelList.md)
  - [PoolSpell](doc/PoolSpell.md)
  - [Profile](doc/Profile.md)
