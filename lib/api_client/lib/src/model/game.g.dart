@@ -158,6 +158,8 @@ class _$Game extends Game {
   @override
   final int id;
   @override
+  final int stateVersion;
+  @override
   final String name;
   @override
   final String joinCode;
@@ -179,6 +181,7 @@ class _$Game extends Game {
 
   _$Game._({
     required this.id,
+    required this.stateVersion,
     required this.name,
     required this.joinCode,
     required this.status,
@@ -200,6 +203,7 @@ class _$Game extends Game {
     if (identical(other, this)) return true;
     return other is Game &&
         id == other.id &&
+        stateVersion == other.stateVersion &&
         name == other.name &&
         joinCode == other.joinCode &&
         status == other.status &&
@@ -214,6 +218,7 @@ class _$Game extends Game {
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, id.hashCode);
+    _$hash = $jc(_$hash, stateVersion.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
     _$hash = $jc(_$hash, joinCode.hashCode);
     _$hash = $jc(_$hash, status.hashCode);
@@ -230,6 +235,7 @@ class _$Game extends Game {
   String toString() {
     return (newBuiltValueToStringHelper(r'Game')
           ..add('id', id)
+          ..add('stateVersion', stateVersion)
           ..add('name', name)
           ..add('joinCode', joinCode)
           ..add('status', status)
@@ -248,6 +254,10 @@ class GameBuilder implements Builder<Game, GameBuilder> {
   int? _id;
   int? get id => _$this._id;
   set id(int? id) => _$this._id = id;
+
+  int? _stateVersion;
+  int? get stateVersion => _$this._stateVersion;
+  set stateVersion(int? stateVersion) => _$this._stateVersion = stateVersion;
 
   String? _name;
   String? get name => _$this._name;
@@ -291,6 +301,7 @@ class GameBuilder implements Builder<Game, GameBuilder> {
     final $v = _$v;
     if ($v != null) {
       _id = $v.id;
+      _stateVersion = $v.stateVersion;
       _name = $v.name;
       _joinCode = $v.joinCode;
       _status = $v.status;
@@ -324,6 +335,11 @@ class GameBuilder implements Builder<Game, GameBuilder> {
           _$v ??
           _$Game._(
             id: BuiltValueNullFieldError.checkNotNull(id, r'Game', 'id'),
+            stateVersion: BuiltValueNullFieldError.checkNotNull(
+              stateVersion,
+              r'Game',
+              'stateVersion',
+            ),
             name: BuiltValueNullFieldError.checkNotNull(name, r'Game', 'name'),
             joinCode: BuiltValueNullFieldError.checkNotNull(
               joinCode,

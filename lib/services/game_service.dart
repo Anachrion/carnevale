@@ -34,6 +34,9 @@ class AvailableGang {
 /// subscription for whichever game is currently open. [currentGame] is always
 /// the latest full snapshot from the server — every update, REST or
 /// broadcast, fully replaces it rather than patching fields locally.
+///
+/// "Latest" means highest `stateVersion`, not last to arrive: neither Action Cable delivery nor
+/// HTTP responses guarantee ordering, so every write goes through [_applySnapshot] (A-3).
 class GameService extends ChangeNotifier {
   static final GameService _instance = GameService._();
   factory GameService() => _instance;
@@ -74,12 +77,38 @@ class GameService extends ChangeNotifier {
   // Applies a mutation's REST response to the live snapshot immediately, so the acting player's UI
   // updates without waiting for (or depending on) the ActionCable echo (A-1). Guarded by the
   // watched-game id so a response for a game we're no longer watching can't clobber currentGame.
+  //
+  // The response still has to pass the freshness check: it was serialized when the request reached
+  // the server, so a broadcast carrying the opponent's later change can easily arrive first, and
+  // applying this on top would drop their change off the screen until something else refreshed it.
   api.Game _applyGame(int gameId, api.Game game) {
-    if (_watchedGameId == gameId) {
-      currentGame = game;
-      notifyListeners();
-    }
+    if (_watchedGameId == gameId) _applySnapshot(game);
     return game;
+  }
+
+  /// Installs [game] as the live snapshot, unless a newer one is already displayed.
+  ///
+  /// Every write to [currentGame] goes through here. Snapshots are ordered by the server's
+  /// `stateVersion` rather than by arrival, because nothing about the transport orders them: two
+  /// broadcasts from different Puma workers race each other, and a mutation response races the
+  /// broadcasts that overtake it. Applying a stale one silently reverts the screen — the opponent's
+  /// score disappears, a turn counter walks backwards — and it stays wrong until the next
+  /// broadcast (A-3).
+  ///
+  /// Returns whether the snapshot was applied.
+  bool _applySnapshot(api.Game game) {
+    final current = currentGame;
+    // Versions are per game and start over for each one, so they only order snapshots of the same
+    // game. Callers guard on the id; this re-checks rather than trusting it, since comparing across
+    // games would drop perfectly good state.
+    if (current != null &&
+        current.id == game.id &&
+        game.stateVersion <= current.stateVersion) {
+      return false;
+    }
+    currentGame = game;
+    notifyListeners();
+    return true;
   }
 
   Future<List<api.Scenario>> loadScenarios() => _guard(() async {
@@ -455,9 +484,10 @@ class GameService extends ChangeNotifier {
     final game = await getGame(gameId);
     if (myGeneration != _watchGeneration) return game; // superseded while fetching
 
-    currentGame = game;
+    // Id first, so a listener woken by the snapshot already sees isWatching() as true. stopWatching()
+    // above cleared currentGame, so this snapshot always installs — there is nothing newer to keep.
     _watchedGameId = gameId;
-    notifyListeners();
+    _applySnapshot(game);
 
     // The client mints a fresh single-use cable ticket for every connection attempt. On reconnect
     // the resubscribe transmits a fresh snapshot, so there's no separate REST resync to race it.
@@ -519,8 +549,9 @@ class GameService extends ChangeNotifier {
       // Ignore a broadcast for a game we're no longer watching (a stale cable that outlived its
       // watch, or a payload that arrived mid-switch), so it can't clobber the current game (C-5).
       if (_watchedGameId != null && decoded.id != _watchedGameId) return;
-      currentGame = decoded;
-      notifyListeners();
+      // Two broadcasts can be produced by different Puma workers and reach us in the opposite
+      // order; _applySnapshot drops the older one rather than letting it revert the screen (A-3).
+      _applySnapshot(decoded);
     } catch (e, st) {
       debugPrint(
         'GameService: ignoring malformed game_state broadcast: $e\n$st',
