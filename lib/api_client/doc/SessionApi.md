@@ -337,9 +337,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **signup**
-> Session signup(registrationInput)
+> Account signup(registrationInput)
 
 Register a new user
+
+Creates the account and returns it. Registering does **not** sign the new user in: no JWT is issued and no `refresh_token` is returned, so the client follows this with POST /login to obtain a session.  This used to be documented as returning a `Session`, which the controller never did (CARNEVALEB-73). The generated client took the document at its word and failed to deserialize every *successful* registration — reporting the account creation as an error while the account was in fact created. 
 
 ### Example
 ```dart
@@ -368,7 +370,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Session**](Session.md)
+[**Account**](Account.md)
 
 ### Authorization
 

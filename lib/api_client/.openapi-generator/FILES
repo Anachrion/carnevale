@@ -179,4 +179,3 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/logout_request_test.dart
