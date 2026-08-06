@@ -31,7 +31,7 @@ class AvailableGang {
 }
 
 /// One model's state as an `entry_state` broadcast delivers it — the payload the five entry
-/// endpoints push instead of a whole `game_state` (B-37).
+/// endpoints push instead of a whole `game_state` (CARNEVALEB-37).
 ///
 /// [spellCasts] maps each of the model's spell keys (see `KnownSpell.key`) to its current `cast`
 /// flag. It travels beside [state] rather than inside it because deriving `cast` needs each spell's
@@ -598,7 +598,7 @@ class GameService extends ChangeNotifier {
 
   // One model changed (counters/stats/tokens/spell casts). Nothing in currentGame is derived from a
   // model's state, so this doesn't touch the snapshot — it hands the change to the gang tabs, which
-  // patch that one entry instead of re-fetching both player lists (B-37).
+  // patch that one entry instead of re-fetching both player lists (CARNEVALEB-37).
   void _onEntryStateMessage(Map<String, dynamic> message) {
     try {
       // Same reasoning as the game_state path: a malformed payload must not escape the listen

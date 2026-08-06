@@ -119,8 +119,8 @@ void main() {
       expect(service.currentGame!.name, 'One!');
     });
 
-    // B-37: a model change travels in its own slim event rather than a game_state the client would
-    // have had to answer with a full player-list refetch.
+    // CARNEVALEB-37: a model change travels in its own slim event rather than a game_state
+    // the client would have had to answer with a full player-list refetch.
     group('entry_state broadcasts', () {
       Object entryState(
         api.EntryState state, {

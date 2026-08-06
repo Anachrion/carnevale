@@ -256,7 +256,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   // A game_state broadcast carries no entry states, so what it changes here (a turn advance
   // clearing every activation, the opponent summoning a model) can only be picked up by refetching
   // the player list. This timer coalesces a burst of them into a single fetch. Per-model changes
-  // arrive as entry_state events instead and never come through here (B-37).
+  // arrive as entry_state events instead and never come through here (CARNEVALEB-37).
   Timer? _refetchTimer;
 
   // Bumped on every local update, optimistic or broadcast. A refetch captures it at the start and
@@ -360,7 +360,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
   // One of this gang's models changed — the opponent toggling a counter, or this player acting from
   // another device. The change travels in the broadcast, so it's patched onto that one entry rather
   // than costing a full player-list refetch per tab per client, which is what every model change
-  // used to cost (B-37).
+  // used to cost (CARNEVALEB-37).
   void _onEntryStateUpdate(EntryStateUpdate update) {
     final data = _data;
     if (update.playerId != widget.playerId || data == null) return;
