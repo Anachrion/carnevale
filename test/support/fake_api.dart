@@ -390,9 +390,13 @@ api.Game fakeGame({
   api.GameStatusEnum status = api.GameStatusEnum.pending,
   api.Scenario? scenario,
   List<api.GamePlayer> players = const [],
+  // The server's ordering stamp (A-3). Defaults high enough that a test wanting to model a *stale*
+  // snapshot can pass a lower one without having to bump every other fixture.
+  int stateVersion = 100,
 }) => api.Game(
   (b) => b
     ..id = id
+    ..stateVersion = stateVersion
     ..name = name
     ..joinCode = joinCode
     ..status = status

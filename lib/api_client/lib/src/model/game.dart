@@ -15,6 +15,7 @@ part 'game.g.dart';
 ///
 /// Properties:
 /// * [id] 
+/// * [stateVersion] - Monotonic counter for this game, bumped every time its state is broadcast. Present on every `Game` the API returns — broadcasts, mutation responses and GET /games/{id} alike.  Neither Action Cable delivery nor HTTP responses guarantee ordering, so a client must apply a snapshot only when this is greater than the one it is currently displaying, and drop it otherwise. Without that, a mutation response serialized before the opponent's change committed can land after the broadcast carrying it and silently revert the screen. Only comparable within one game — it is not a global clock. 
 /// * [name] 
 /// * [joinCode] 
 /// * [status] - `completed` is derived: reached only once both players have `finished`, and reverts to `in_progress` if either undoes.
@@ -27,6 +28,10 @@ part 'game.g.dart';
 abstract class Game implements Built<Game, GameBuilder> {
   @BuiltValueField(wireName: r'id')
   int get id;
+
+  /// Monotonic counter for this game, bumped every time its state is broadcast. Present on every `Game` the API returns — broadcasts, mutation responses and GET /games/{id} alike.  Neither Action Cable delivery nor HTTP responses guarantee ordering, so a client must apply a snapshot only when this is greater than the one it is currently displaying, and drop it otherwise. Without that, a mutation response serialized before the opponent's change committed can land after the broadcast carrying it and silently revert the screen. Only comparable within one game — it is not a global clock. 
+  @BuiltValueField(wireName: r'state_version')
+  int get stateVersion;
 
   @BuiltValueField(wireName: r'name')
   String get name;
@@ -82,6 +87,11 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
     yield r'id';
     yield serializers.serialize(
       object.id,
+      specifiedType: const FullType(int),
+    );
+    yield r'state_version';
+    yield serializers.serialize(
+      object.stateVersion,
       specifiedType: const FullType(int),
     );
     yield r'name';
@@ -153,6 +163,13 @@ class _$GameSerializer implements PrimitiveSerializer<Game> {
             specifiedType: const FullType(int),
           ) as int;
           result.id = valueDes;
+          break;
+        case r'state_version':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.stateVersion = valueDes;
           break;
         case r'name':
           final valueDes = serializers.deserialize(
