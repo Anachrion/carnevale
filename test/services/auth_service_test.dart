@@ -201,6 +201,121 @@ void main() {
     });
   });
 
+  group('signUp', () {
+    // AuthService is a singleton, so a test that signs in leaves the next one signed in. Start
+    // each from a clean signed-out state — `logOut` clears locally even when the call fails, and
+    // the route is deliberately unstubbed here.
+    setUp(() async {
+      FlutterSecureStorage.setMockInitialValues({});
+      installFakeApi();
+      await auth.logOut();
+    });
+
+    // The exact body the backend returns from POST /signup: the created account, no credentials.
+    const createdAccount = {
+      'user': {'id': 9, 'email': 'new@example.com', 'username': 'Neun'},
+    };
+
+    Future<void> signUp() => auth.signUp(
+      username: 'Neun',
+      email: 'new@example.com',
+      password: 'Secret123!',
+      passwordConfirmation: 'Secret123!',
+    );
+
+    // CARNEVALEB-73. `/signup` was documented as returning a `Session`, whose `refresh_token` is
+    // non-nullable, while the controller has always returned `{user: …}` alone. The generated
+    // client threw on every *successful* registration, `signUp` reported it as a failure, and the
+    // account had in fact been created — so the user retried and was told their email was already
+    // taken. Nothing below the client saw the problem: the backend request spec asserts the HTTP
+    // status, not what the Dart client can do with the body. This is that boundary.
+    test('succeeds on the account-shaped body the backend actually returns', () async {
+      final adapter = installFakeApi();
+      adapter.stub('POST', '/signup', createdAccount);
+      final jwt = _fakeToken({
+        'exp':
+            DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/
+                1000,
+      });
+      adapter.stub('POST', '/login', {
+        'user': {'id': 9, 'email': 'new@example.com', 'username': 'Neun'},
+        'refresh_token': 'refresh-neun',
+      }, headers: {'authorization': 'Bearer $jwt'});
+
+      await expectLater(signUp(), completes);
+    });
+
+    // Registering doesn't issue a session, so the UI's "Account created!" -> home screen would
+    // land a brand-new user there signed out.
+    test('signs the new user in', () async {
+      final adapter = installFakeApi();
+      adapter.stub('POST', '/signup', createdAccount);
+      final jwt = _fakeToken({
+        'exp':
+            DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/
+                1000,
+      });
+      adapter.stub('POST', '/login', {
+        'user': {'id': 9, 'email': 'new@example.com', 'username': 'Neun'},
+        'refresh_token': 'refresh-neun',
+      }, headers: {'authorization': 'Bearer $jwt'});
+
+      await signUp();
+
+      expect(auth.isLoggedIn, isTrue);
+      expect(auth.currentUser?.id, 9);
+      expect(auth.currentUser?.username, 'Neun');
+      expect(
+        await const FlutterSecureStorage().read(key: 'refresh_token'),
+        'refresh-neun',
+      );
+      // The sign-in reuses the credentials just registered, under the login key the backend reads.
+      final login = adapter.requests.last.data as Map<String, dynamic>;
+      expect(login['user'], {
+        'email': 'new@example.com',
+        'password': 'Secret123!',
+      });
+    });
+
+    // A genuine rejection must still reach the user verbatim — this is the path that tells them
+    // the email is taken or the password is too short.
+    test('surfaces a validation error from the server', () async {
+      installFakeApi(); // unstubbed: the adapter answers 404 with an errors map
+
+      await expectLater(
+        signUp(),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.message,
+            'message',
+            contains('not stubbed'),
+          ),
+        ),
+      );
+      expect(auth.isLoggedIn, isFalse);
+    });
+
+    // If registration worked but the follow-up sign-in didn't, saying "signup failed" is what
+    // sends the user back to the form to be told their email is already taken — the original bug.
+    test('reports a created account when only the sign-in fails', () async {
+      final adapter = installFakeApi();
+      adapter.stub('POST', '/signup', createdAccount);
+      // /login left unstubbed, so the sign-in fails after the account exists.
+
+      await expectLater(
+        signUp(),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.message,
+            'message',
+            allOf(contains('account was created'), contains('log in')),
+          ),
+        ),
+      );
+      expect(adapter.requests.map((r) => r.path), ['/signup', '/login']);
+    });
+  });
+
   group('logOut', () {
     void signIn({String? refreshToken = 'refresh-abc'}) {
       FlutterSecureStorage.setMockInitialValues({

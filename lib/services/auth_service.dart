@@ -127,6 +127,19 @@ class AuthService extends ChangeNotifier {
     } on DioException catch (e) {
       throw AuthException(parseAuthError(e));
     }
+    // Registering doesn't issue a session (POST /signup returns the account alone), so sign in
+    // with the credentials just used — the UI reports "Account created!" and lands on the home
+    // screen, which would otherwise be reached signed out.
+    try {
+      await logIn(login: email, password: password);
+    } on AuthException {
+      // The account exists from here on. Reporting this as a failed *registration* is what sends
+      // the user back to the signup form, only to be told their email is already taken — the
+      // confusion CARNEVALEB-73 was about. Say what actually happened instead.
+      throw AuthException(
+        'Your account was created, but signing you in failed. Please log in.',
+      );
+    }
   }
 
   Future<void> logIn({required String login, required String password}) async {

@@ -627,7 +627,7 @@ class SessionApi {
   }
 
   /// Register a new user
-  /// 
+  /// Creates the account and returns it. Registering does **not** sign the new user in: no JWT is issued and no &#x60;refresh_token&#x60; is returned, so the client follows this with POST /login to obtain a session.  This used to be documented as returning a &#x60;Session&#x60;, which the controller never did (CARNEVALEB-73). The generated client took the document at its word and failed to deserialize every *successful* registration — reporting the account creation as an error while the account was in fact created. 
   ///
   /// Parameters:
   /// * [registrationInput] 
@@ -638,9 +638,9 @@ class SessionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [Session] as data
+  /// Returns a [Future] containing a [Response] with a [Account] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<Session>> signup({ 
+  Future<Response<Account>> signup({ 
     required RegistrationInput registrationInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -697,14 +697,14 @@ class SessionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    Session? _responseData;
+    Account? _responseData;
 
     try {
       final rawResponse = _response.data;
       _responseData = rawResponse == null ? null : _serializers.deserialize(
         rawResponse,
-        specifiedType: const FullType(Session),
-      ) as Session;
+        specifiedType: const FullType(Account),
+      ) as Account;
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -716,7 +716,7 @@ class SessionApi {
       );
     }
 
-    return Response<Session>(
+    return Response<Account>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
