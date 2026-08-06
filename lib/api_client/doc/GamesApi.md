@@ -802,7 +802,7 @@ Name | Type | Description  | Notes
 
 Remove a player token from one of the current player's own models
 
-Removes the token with this client-generated id. Only available while the game is in_progress, and only for the requesting player's own models. Broadcast to both players. 
+Removes the token with this client-generated id. Only available while the game is in_progress, and only for the requesting player's own models. Broadcast to both players as an `entry_state` event. 
 
 ### Example
 ```dart
@@ -1141,7 +1141,7 @@ Name | Type | Description  | Notes
 
 Update status counters on one of the current player's own models
 
-Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. Send just the counters to change; omitted ones keep their current values. The change is broadcast to both players as a `game_state` event (re-fetch the player list to see the new counters). 
+Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. Send just the counters to change; omitted ones keep their current values. The change is broadcast to both players as an `entry_state` event carrying the new counters — no re-fetch needed. 
 
 ### Example
 ```dart
@@ -1192,7 +1192,7 @@ Name | Type | Description  | Notes
 
 Mark (or unmark) one known/granted spell as cast, on one of the current player's own models
 
-Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. `cast` is the desired state rather than a blind toggle, so a retried request from a flaky connection can't accidentally flip it back. Stamped against the requesting player's own turn cursor: for a pool/grant with resets_each_round true (almost every one), the mark clears automatically once that player advances to a new turn; for the rare resets_each_round: false case (Adventuring Noble's Arcane Totem pool), it persists for the rest of the game but stays manually toggleable, so a misclick is always correctable. The change is broadcast to both players as a `game_state` event (re-fetch the player list to see each spell's updated `cast` flag). 
+Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. `cast` is the desired state rather than a blind toggle, so a retried request from a flaky connection can't accidentally flip it back. Stamped against the requesting player's own turn cursor: for a pool/grant with resets_each_round true (almost every one), the mark clears automatically once that player advances to a new turn; for the rare resets_each_round: false case (Adventuring Noble's Arcane Totem pool), it persists for the rest of the game but stays manually toggleable, so a misclick is always correctable. The change is broadcast to both players as an `entry_state` event, whose `spell_casts` map carries every known spell's updated `cast` flag. 
 
 ### Example
 ```dart
@@ -1243,7 +1243,7 @@ Name | Type | Description  | Notes
 
 Update current HP/WP/CP on one of the current player's own models
 
-Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. Send just the stats to change (absolute values, not deltas); omitted ones keep their current values and none may go below 0. The change is broadcast to both players as a `game_state` event. 
+Only available while the game is in_progress, and only for entries in the requesting player's own gang — the opponent's models 404. Send just the stats to change (absolute values, not deltas); omitted ones keep their current values and none may go below 0. The change is broadcast to both players as an `entry_state` event. 
 
 ### Example
 ```dart
@@ -1294,7 +1294,7 @@ Name | Type | Description  | Notes
 
 Add or update a player token on one of the current player's own models
 
-Player tokens are free-form markers (a colour + optional label, optionally toggleable) the player uses to track an in-game effect a rule granted. Only available while the game is in_progress, and only for the requesting player's own models — the opponent's 404. Each token is keyed by a client-generated `id`: sending the same id again updates that token (edit it / flip its `active`) instead of adding a duplicate, so a retried request is safe. Broadcast to both players as a `game_state` event. 
+Player tokens are free-form markers (a colour + optional label, optionally toggleable) the player uses to track an in-game effect a rule granted. Only available while the game is in_progress, and only for the requesting player's own models — the opponent's 404. Each token is keyed by a client-generated `id`: sending the same id again updates that token (edit it / flip its `active`) instead of adding a duplicate, so a retried request is safe. Broadcast to both players as an `entry_state` event. 
 
 ### Example
 ```dart
