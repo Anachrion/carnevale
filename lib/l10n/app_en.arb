@@ -204,11 +204,13 @@
   "lobbyTitle": "Waiting for an opponent",
   "lobbyShareCode": "Share this code with the other player:",
   "toastJoinCodeCopied": "Join code copied",
-  "lobbyShareLink": "Share link",
+  "lobbyShareLink": "Share",
+  "lobbyCopyLink": "Copy link",
   "lobbyShowQr": "QR code",
   "lobbyQrTitle": "Scan to join",
   "lobbyQrHint": "Point the other player's camera at this code.",
   "lobbyShareMessage": "Join my Carnevale game: {url}",
+  "toastJoinLinkCopied": "Link copied",
   "toastShareFailed": "Could not open the share sheet",
   "@lobbyShareMessage": {
     "placeholders": { "url": { "type": "String" } }

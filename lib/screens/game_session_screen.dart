@@ -403,17 +403,25 @@ class _GameSessionScreenState extends State<GameSessionScreen>
           ),
         ),
         const SizedBox(height: 16),
-        // Two ways to hand the game over, for the two situations it happens in: a link to send to
-        // someone who isn't here, and a QR for someone sitting across the table (CARNEVALEB-74).
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        // Three ways to hand the game over, for the three situations it happens in: paste it
+        // wherever you like, send it through another app, or hold the screen up to the player
+        // across the table (CARNEVALEB-74). Wrap rather than Row so a narrow screen or a long
+        // translation drops to a second line instead of overflowing.
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 10,
+          runSpacing: 10,
           children: [
+            _LobbyShareAction(
+              icon: Icons.link,
+              label: l10n.lobbyCopyLink,
+              onTap: () => _copyJoinLink(game.joinCode),
+            ),
             _LobbyShareAction(
               icon: Icons.ios_share,
               label: l10n.lobbyShareLink,
               onTap: () => _shareJoinLink(game.joinCode),
             ),
-            const SizedBox(width: 12),
             _LobbyShareAction(
               icon: Icons.qr_code_2,
               label: l10n.lobbyShowQr,
@@ -427,6 +435,12 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     );
   }
 
+  Future<void> _copyJoinLink(String joinCode) async {
+    await Clipboard.setData(ClipboardData(text: joinUrlFor(joinCode)));
+    if (!mounted) return;
+    showAppToast(context, AppLocalizations.of(context).toastJoinLinkCopied);
+  }
+
   Future<void> _shareJoinLink(String joinCode) async {
     final l10n = AppLocalizations.of(context);
     final url = joinUrlFor(joinCode);
@@ -435,9 +449,12 @@ class _GameSessionScreenState extends State<GameSessionScreen>
         ShareParams(uri: Uri.parse(url), text: l10n.lobbyShareMessage(url)),
       );
     } catch (_) {
-      // No share sheet (a desktop or web target without one), or the user's chooser failed. The
-      // code above is still tappable to copy, so fall back to saying so rather than swallowing it.
-      if (mounted) showAppToast(context, l10n.toastShareFailed);
+      // Nowhere to share to — a device with no messaging app installed (every bare emulator image
+      // is one), a desktop or web target without a share sheet. Telling the user that leaves them
+      // stuck, so put the link on the clipboard instead: the action still does something useful,
+      // and pasting it is exactly what the share sheet would have led to anyway.
+      await Clipboard.setData(ClipboardData(text: url));
+      if (mounted) showAppToast(context, l10n.toastJoinLinkCopied);
     }
   }
 

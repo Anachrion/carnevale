@@ -143,10 +143,11 @@ class _GangExportDialogState extends State<_GangExportDialog> {
     try {
       await SharePlus.instance.share(ShareParams(text: text));
     } catch (_) {
-      // No share sheet on this target. Copy sits right beside it and still works, so say so rather
-      // than failing silently.
+      // Nowhere to share to (a device with no messaging app, a desktop target). Fall back to the
+      // clipboard rather than reporting a dead end — the same thing the Copy button beside it does.
+      await Clipboard.setData(ClipboardData(text: text));
       if (mounted) {
-        showAppToast(context, AppLocalizations.of(context).toastShareFailed);
+        showAppToast(context, AppLocalizations.of(context).toastGangCopied);
       }
     }
   }

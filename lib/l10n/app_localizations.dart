@@ -1061,8 +1061,14 @@ abstract class AppLocalizations {
   /// No description provided for @lobbyShareLink.
   ///
   /// In en, this message translates to:
-  /// **'Share link'**
+  /// **'Share'**
   String get lobbyShareLink;
+
+  /// No description provided for @lobbyCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get lobbyCopyLink;
 
   /// No description provided for @lobbyShowQr.
   ///
@@ -1087,6 +1093,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Join my Carnevale game: {url}'**
   String lobbyShareMessage(String url);
+
+  /// No description provided for @toastJoinLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get toastJoinLinkCopied;
 
   /// No description provided for @toastShareFailed.
   ///

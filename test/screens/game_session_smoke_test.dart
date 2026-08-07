@@ -224,7 +224,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.text('Share link'), findsOneWidget);
+    // Three ways out of the lobby, for the three situations: paste it anywhere, send it through
+    // another app, or hold the screen up to the player opposite.
+    expect(find.text('Copy link'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
     expect(find.text('QR code'), findsOneWidget);
 
     await tester.tap(find.text('QR code'));

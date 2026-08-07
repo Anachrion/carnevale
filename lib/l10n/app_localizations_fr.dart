@@ -545,7 +545,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toastJoinCodeCopied => 'Code de partie copié';
 
   @override
-  String get lobbyShareLink => 'Partager le lien';
+  String get lobbyShareLink => 'Partager';
+
+  @override
+  String get lobbyCopyLink => 'Copier le lien';
 
   @override
   String get lobbyShowQr => 'QR code';
@@ -561,6 +564,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String lobbyShareMessage(String url) {
     return 'Rejoignez ma partie Carnevale : $url';
   }
+
+  @override
+  String get toastJoinLinkCopied => 'Lien copié';
 
   @override
   String get toastShareFailed => 'Impossible d\'ouvrir le partage';

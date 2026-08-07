@@ -174,11 +174,13 @@
   "lobbyTitle": "En attente d'un adversaire",
   "lobbyShareCode": "Partagez ce code avec l'autre joueur :",
   "toastJoinCodeCopied": "Code de partie copié",
-  "lobbyShareLink": "Partager le lien",
+  "lobbyShareLink": "Partager",
+  "lobbyCopyLink": "Copier le lien",
   "lobbyShowQr": "QR code",
   "lobbyQrTitle": "Scannez pour rejoindre",
   "lobbyQrHint": "Dirigez l'appareil photo de l'autre joueur vers ce code.",
   "lobbyShareMessage": "Rejoignez ma partie Carnevale : {url}",
+  "toastJoinLinkCopied": "Lien copié",
   "toastShareFailed": "Impossible d'ouvrir le partage",
   "@lobbyShareMessage": {
     "placeholders": { "url": { "type": "String" } }
