@@ -199,7 +199,9 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       await _service.watch(widget.gameId);
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = AppLocalizations.of(context).toastSessionLoadFailed);
+      setState(
+        () => _error = AppLocalizations.of(context).toastSessionLoadFailed,
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -216,7 +218,9 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       if (mounted) {
         showAppToast(
           context,
-          e is ApiException ? e.message : AppLocalizations.of(context).errorGeneric,
+          e is ApiException
+              ? e.message
+              : AppLocalizations.of(context).errorGeneric,
         );
       }
     } finally {
@@ -367,67 +371,82 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     return _PhaseCard(
       title: l10n.lobbyTitle,
       children: [
-        Text(
-          l10n.lobbyShareCode,
-          style: TextStyle(color: context.subtleTextColor, fontSize: 13),
-        ),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: () {
-            Clipboard.setData(ClipboardData(text: game.joinCode));
-            showAppToast(context, l10n.toastJoinCodeCopied);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: context.accentColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.accentColor),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  game.joinCode,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 6,
-                    color: context.textColor,
+        // The whole hand-it-over block is centred on itself: the code is the one thing on this
+        // screen the other player needs, and left-aligning it under a full-width row of actions
+        // read as an accident. The card *title* stays start-aligned like every other phase.
+        SizedBox(
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                l10n.lobbyShareCode,
+                style: TextStyle(color: context.subtleTextColor, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: game.joinCode));
+                  showAppToast(context, l10n.toastJoinCodeCopied);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.accentColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: context.accentColor),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        game.joinCode,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 6,
+                          color: context.textColor,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Icon(Icons.copy, color: context.accentColor, size: 18),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Icon(Icons.copy, color: context.accentColor, size: 18),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              // Three ways to hand the game over, for the three situations it happens in: paste
+              // it wherever you like, send it through another app, or hold the screen up to the
+              // player across the table (CARNEVALEB-74). Wrap rather than Row so a narrow screen
+              // or a long translation drops to a second line instead of overflowing.
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  _LobbyShareAction(
+                    icon: Icons.link,
+                    label: l10n.lobbyCopyLink,
+                    onTap: () => _copyJoinLink(game.joinCode),
+                  ),
+                  _LobbyShareAction(
+                    icon: Icons.ios_share,
+                    label: l10n.lobbyShareLink,
+                    onTap: () => _shareJoinLink(game.joinCode),
+                  ),
+                  _LobbyShareAction(
+                    icon: Icons.qr_code_2,
+                    label: l10n.lobbyShowQr,
+                    onTap: () => _showJoinQr(game.joinCode),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 16),
-        // Three ways to hand the game over, for the three situations it happens in: paste it
-        // wherever you like, send it through another app, or hold the screen up to the player
-        // across the table (CARNEVALEB-74). Wrap rather than Row so a narrow screen or a long
-        // translation drops to a second line instead of overflowing.
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            _LobbyShareAction(
-              icon: Icons.link,
-              label: l10n.lobbyCopyLink,
-              onTap: () => _copyJoinLink(game.joinCode),
-            ),
-            _LobbyShareAction(
-              icon: Icons.ios_share,
-              label: l10n.lobbyShareLink,
-              onTap: () => _shareJoinLink(game.joinCode),
-            ),
-            _LobbyShareAction(
-              icon: Icons.qr_code_2,
-              label: l10n.lobbyShowQr,
-              onTap: () => _showJoinQr(game.joinCode),
-            ),
-          ],
         ),
       ],
     );
@@ -772,7 +791,9 @@ class _GameSessionScreenState extends State<GameSessionScreen>
     try {
       gang = await _gangService.loadOne(listId);
     } catch (_) {
-      if (mounted) showAppToast(context, AppLocalizations.of(context).toastCouldNotOpenGang);
+      if (mounted) {
+        showAppToast(context, AppLocalizations.of(context).toastCouldNotOpenGang);
+      }
       return;
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -881,9 +902,7 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       0,
       (sum, p) => sum + (p.unlimited ? 0 : p.slotCount),
     );
-    final disciplines = entry.pools
-        .expand((p) => p.chosenDisciplines)
-        .toSet();
+    final disciplines = entry.pools.expand((p) => p.chosenDisciplines).toSet();
     final l10n = AppLocalizations.of(context);
     final summary = needsMentor
         ? l10n.spellsNoMentor
@@ -898,7 +917,9 @@ class _GameSessionScreenState extends State<GameSessionScreen>
       decoration: BoxDecoration(
         color: context.cardBgColor.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: context.subtleTextColor.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.subtleTextColor.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         children: [
@@ -1062,7 +1083,9 @@ class _GameSessionScreenState extends State<GameSessionScreen>
               child: OutlinedButton.icon(
                 onPressed: _busy ? null : () => _mulligan(game.id, a),
                 icon: const Icon(Icons.autorenew, size: 16),
-                label: Text(AppLocalizations.of(context).agendaUnachievableRedraw),
+                label: Text(
+                  AppLocalizations.of(context).agendaUnachievableRedraw,
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: context.secondaryAccentColor,
                   side: BorderSide(color: context.secondaryAccentColor),
@@ -1357,9 +1380,7 @@ class _LobbyShareAction extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         side: BorderSide(color: context.accentColor.withValues(alpha: 0.5)),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
