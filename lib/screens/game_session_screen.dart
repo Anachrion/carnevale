@@ -429,8 +429,6 @@ class _GameSessionScreenState extends State<GameSessionScreen>
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        CircularProgressIndicator(color: context.accentColor),
       ],
     );
   }

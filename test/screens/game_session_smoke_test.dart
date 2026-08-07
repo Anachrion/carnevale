@@ -231,10 +231,7 @@ void main() {
     expect(find.text('QR code'), findsOneWidget);
 
     await tester.tap(find.text('QR code'));
-    // Not pumpAndSettle: the lobby's "waiting for an opponent" spinner never stops animating, so
-    // there is no settled frame to wait for. Fixed pumps let the dialog's transition finish.
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
 
     expect(find.text('Scan to join'), findsOneWidget);
     expect(find.byType(QrImageView), findsOneWidget);
