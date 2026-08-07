@@ -22,6 +22,17 @@ import 'api_client.dart';
 import 'api_exception.dart';
 import 'idempotency.dart';
 
+/// What POST /lists/import gave back: the gang it built, and what it could not resolve.
+///
+/// The two travel together on purpose — import succeeds partially by design, so a caller holding
+/// the gang without the warnings would show a quietly incomplete roster (CARNEVALEB-74).
+class GangImport {
+  final api.ModelList gang;
+  final List<String> warnings;
+
+  const GangImport({required this.gang, required this.warnings});
+}
+
 class GangService {
   static final GangService _instance = GangService._();
   factory GangService() => _instance;
@@ -83,6 +94,30 @@ class GangService {
 
   Future<void> delete(int id) => _guard(() async {
     await _client.lists.deleteList(id: id);
+  });
+
+  /// The gang as shareable plain text (CARNEVALEB-74). The format is the server's — see
+  /// `Gang::TextFormat` — so the app never builds or parses it: both directions would otherwise be
+  /// two implementations of one grammar, and they would drift.
+  Future<String> exportText(int id) => _guard(() async {
+    final res = await _client.lists.exportList(id: id);
+    return res.data!.text;
+  });
+
+  /// Builds a *new* gang from exported text. Never edits an existing one, so a bad paste costs
+  /// nothing.
+  ///
+  /// The returned warnings name what the server could not resolve — a model this build's catalog
+  /// doesn't know, a renamed spell. Import succeeds partially by design, so a caller that drops
+  /// these leaves the user with a quietly incomplete gang: show them.
+  Future<GangImport> importText(String text) => _guard(() async {
+    final res = await _client.lists.importList(
+      gangText: api.GangText((b) => b..text = text),
+    );
+    return GangImport(
+      gang: res.data!.list,
+      warnings: res.data!.warnings.toList(),
+    );
   });
 
   /// [requestKey], when set, rides as the Idempotency-Key header so a re-sent hire (the optimistic

@@ -120,8 +120,10 @@ Class | Method | HTTP request | Description
 [*ListEntriesApi*](doc/ListEntriesApi.md) | [**updateListEntryPosition**](doc/ListEntriesApi.md#updatelistentryposition) | **PATCH** /list_entries/{id} | Move a card to a new position in the list
 [*ListsApi*](doc/ListsApi.md) | [**createList**](doc/ListsApi.md#createlist) | **POST** /lists | Create a list owned by the current user
 [*ListsApi*](doc/ListsApi.md) | [**deleteList**](doc/ListsApi.md#deletelist) | **DELETE** /lists/{id} | Delete a list
+[*ListsApi*](doc/ListsApi.md) | [**exportList**](doc/ListsApi.md#exportlist) | **GET** /lists/{id}/export | Export a gang as shareable plain text
 [*ListsApi*](doc/ListsApi.md) | [**getList**](doc/ListsApi.md#getlist) | **GET** /lists/{id} | Get a list
 [*ListsApi*](doc/ListsApi.md) | [**getLists**](doc/ListsApi.md#getlists) | **GET** /lists | List the current user&#39;s lists
+[*ListsApi*](doc/ListsApi.md) | [**importList**](doc/ListsApi.md#importlist) | **POST** /lists/import | Build a new gang from exported text
 [*ListsApi*](doc/ListsApi.md) | [**updateList**](doc/ListsApi.md#updatelist) | **PATCH** /lists/{id} | Update a list
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfile**](doc/ProfilesApi.md#getprofile) | **GET** /profiles/{id} | Get a profile
 [*ProfilesApi*](doc/ProfilesApi.md) | [**getProfiles**](doc/ProfilesApi.md#getprofiles) | **GET** /profiles | List all profiles
@@ -169,7 +171,9 @@ Class | Method | HTTP request | Description
  - [ForgotPasswordInputUser](doc/ForgotPasswordInputUser.md)
  - [Game](doc/Game.md)
  - [GamePlayer](doc/GamePlayer.md)
+ - [GangImportResult](doc/GangImportResult.md)
  - [GangSummary](doc/GangSummary.md)
+ - [GangText](doc/GangText.md)
  - [GetCardsManifest200Response](doc/GetCardsManifest200Response.md)
  - [GrantedSpell](doc/GrantedSpell.md)
  - [JoinGameInput](doc/JoinGameInput.md)

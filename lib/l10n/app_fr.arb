@@ -183,6 +183,25 @@
   "@lobbyShareMessage": {
     "placeholders": { "url": { "type": "String" } }
   },
+  "gangExportTitle": "Exporter le gang",
+  "gangExportCopy": "Copier",
+  "gangExportShare": "Partager",
+  "gangExportFailed": "Impossible d'exporter ce gang",
+  "toastGangCopied": "Gang copié",
+  "gangImportTitle": "Importer un gang",
+  "gangImportHint": "Collez ici un gang exporté",
+  "gangImportPaste": "Coller",
+  "gangImportAction": "Importer",
+  "gangImportEmpty": "Collez d'abord un gang exporté",
+  "gangImportFailed": "Ce texte n'a pas pu être lu comme un gang",
+  "gangImportSkipped": "{count, plural, =1{1 ligne ignorée} other{{count} lignes ignorées}}",
+  "toastGangImported": "{name} importé",
+  "@gangImportSkipped": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@toastGangImported": {
+    "placeholders": { "name": { "type": "String" } }
+  },
   "rolloffWonTitle": "Vous avez gagné le jet !",
   "rolloffChooseRole": "Choisissez votre rôle :",
   "rolloffTitle": "Jet pour les rôles",

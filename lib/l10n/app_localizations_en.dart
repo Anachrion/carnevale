@@ -558,6 +558,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toastShareFailed => 'Could not open the share sheet';
 
   @override
+  String get gangExportTitle => 'Export gang';
+
+  @override
+  String get gangExportCopy => 'Copy';
+
+  @override
+  String get gangExportShare => 'Share';
+
+  @override
+  String get gangExportFailed => 'Could not export this gang';
+
+  @override
+  String get toastGangCopied => 'Gang copied';
+
+  @override
+  String get gangImportTitle => 'Import a gang';
+
+  @override
+  String get gangImportHint => 'Paste an exported gang here';
+
+  @override
+  String get gangImportPaste => 'Paste';
+
+  @override
+  String get gangImportAction => 'Import';
+
+  @override
+  String get gangImportEmpty => 'Paste an exported gang first';
+
+  @override
+  String get gangImportFailed => 'Could not read that text as a gang';
+
+  @override
+  String gangImportSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines skipped',
+      one: '1 line skipped',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String toastGangImported(String name) {
+    return 'Imported $name';
+  }
+
+  @override
   String get rolloffWonTitle => 'You won the roll-off!';
 
   @override

@@ -45,7 +45,9 @@ Serializers _$serializers =
           ..add(GamePlayerRoleEnum.serializer)
           ..add(GameStatusEnum.serializer)
           ..add(GameViewerVisibilityEnum.serializer)
+          ..add(GangImportResult.serializer)
           ..add(GangSummary.serializer)
+          ..add(GangText.serializer)
           ..add(GetCardsManifest200Response.serializer)
           ..add(GrantedSpell.serializer)
           ..add(GrantedSpellDisciplineEnum.serializer)
@@ -144,6 +146,10 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(int)]),
             () => ListBuilder<int>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),

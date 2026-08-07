@@ -33,7 +33,9 @@ doc/ForgotPasswordInputUser.md
 doc/Game.md
 doc/GamePlayer.md
 doc/GamesApi.md
+doc/GangImportResult.md
 doc/GangSummary.md
+doc/GangText.md
 doc/GetCardsManifest200Response.md
 doc/GrantedSpell.md
 doc/JoinGameInput.md
@@ -133,7 +135,9 @@ lib/src/model/forgot_password_input.dart
 lib/src/model/forgot_password_input_user.dart
 lib/src/model/game.dart
 lib/src/model/game_player.dart
+lib/src/model/gang_import_result.dart
 lib/src/model/gang_summary.dart
+lib/src/model/gang_text.dart
 lib/src/model/get_cards_manifest200_response.dart
 lib/src/model/granted_spell.dart
 lib/src/model/join_game_input.dart

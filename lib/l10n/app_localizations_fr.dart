@@ -566,6 +566,55 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toastShareFailed => 'Impossible d\'ouvrir le partage';
 
   @override
+  String get gangExportTitle => 'Exporter le gang';
+
+  @override
+  String get gangExportCopy => 'Copier';
+
+  @override
+  String get gangExportShare => 'Partager';
+
+  @override
+  String get gangExportFailed => 'Impossible d\'exporter ce gang';
+
+  @override
+  String get toastGangCopied => 'Gang copié';
+
+  @override
+  String get gangImportTitle => 'Importer un gang';
+
+  @override
+  String get gangImportHint => 'Collez ici un gang exporté';
+
+  @override
+  String get gangImportPaste => 'Coller';
+
+  @override
+  String get gangImportAction => 'Importer';
+
+  @override
+  String get gangImportEmpty => 'Collez d\'abord un gang exporté';
+
+  @override
+  String get gangImportFailed => 'Ce texte n\'a pas pu être lu comme un gang';
+
+  @override
+  String gangImportSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lignes ignorées',
+      one: '1 ligne ignorée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String toastGangImported(String name) {
+    return '$name importé';
+  }
+
+  @override
   String get rolloffWonTitle => 'Vous avez gagné le jet !';
 
   @override

@@ -213,6 +213,25 @@
   "@lobbyShareMessage": {
     "placeholders": { "url": { "type": "String" } }
   },
+  "gangExportTitle": "Export gang",
+  "gangExportCopy": "Copy",
+  "gangExportShare": "Share",
+  "gangExportFailed": "Could not export this gang",
+  "toastGangCopied": "Gang copied",
+  "gangImportTitle": "Import a gang",
+  "gangImportHint": "Paste an exported gang here",
+  "gangImportPaste": "Paste",
+  "gangImportAction": "Import",
+  "gangImportEmpty": "Paste an exported gang first",
+  "gangImportFailed": "Could not read that text as a gang",
+  "gangImportSkipped": "{count, plural, =1{1 line skipped} other{{count} lines skipped}}",
+  "toastGangImported": "Imported {name}",
+  "@gangImportSkipped": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@toastGangImported": {
+    "placeholders": { "name": { "type": "String" } }
+  },
   "rolloffWonTitle": "You won the roll-off!",
   "rolloffChooseRole": "Choose your role:",
   "rolloffTitle": "Role roll-off",

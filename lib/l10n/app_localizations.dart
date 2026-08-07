@@ -1094,6 +1094,84 @@ abstract class AppLocalizations {
   /// **'Could not open the share sheet'**
   String get toastShareFailed;
 
+  /// No description provided for @gangExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export gang'**
+  String get gangExportTitle;
+
+  /// No description provided for @gangExportCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get gangExportCopy;
+
+  /// No description provided for @gangExportShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get gangExportShare;
+
+  /// No description provided for @gangExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export this gang'**
+  String get gangExportFailed;
+
+  /// No description provided for @toastGangCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Gang copied'**
+  String get toastGangCopied;
+
+  /// No description provided for @gangImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a gang'**
+  String get gangImportTitle;
+
+  /// No description provided for @gangImportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an exported gang here'**
+  String get gangImportHint;
+
+  /// No description provided for @gangImportPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get gangImportPaste;
+
+  /// No description provided for @gangImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get gangImportAction;
+
+  /// No description provided for @gangImportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an exported gang first'**
+  String get gangImportEmpty;
+
+  /// No description provided for @gangImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read that text as a gang'**
+  String get gangImportFailed;
+
+  /// No description provided for @gangImportSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 line skipped} other{{count} lines skipped}}'**
+  String gangImportSkipped(int count);
+
+  /// No description provided for @toastGangImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {name}'**
+  String toastGangImported(String name);
+
   /// No description provided for @rolloffWonTitle.
   ///
   /// In en, this message translates to:
