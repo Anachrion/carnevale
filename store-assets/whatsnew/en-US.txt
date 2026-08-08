@@ -1,4 +1,5 @@
-Sign-out fixes:
+Sharing:
 
-- Logging out in one place no longer signs you out everywhere else. Signing out in your browser used to end the session on your phone too, often hours later, so the app asked for your password again for no apparent reason.
-- Changing your password now ends the sessions that were opened with the old one.
+- Share a game from the lobby as a link or a QR code, so someone can join without typing a code in.
+- Join links and password-reset links now open the app directly instead of the browser.
+- Copy a gang out as plain text to paste into a chat, and build one back from text someone sends you.
