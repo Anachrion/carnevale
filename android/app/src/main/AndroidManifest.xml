@@ -27,6 +27,32 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Android App Links (CARNEVALEB-74). Without this, the https links the backend already
+                 serves — the password-reset email and a shared game-join link — open the phone's
+                 browser rather than this app, which is where they are least useful.
+
+                 autoVerify makes Android fetch https://<host>/.well-known/assetlinks.json for every
+                 host below at install time, and enable the association only where a fingerprint
+                 there matches this build's signing certificate. Verification is all-or-nothing
+                 across the hosts in one filter, so only domains that actually serve that file
+                 belong here — the sslip.io host is deliberately left out.
+
+                 The data elements combine, so this claims {,www.}carnevale-app.com × {/join,
+                 /reset-password} — not a catch-all, which would swallow every other URL on the
+                 domain including the card pages. Query strings play no part in path matching, so
+                 "/join?code=…" matches "/join". Handled in lib/main.dart via app_links; the
+                 activity is already singleTop, so a link arriving while the app runs is delivered
+                 to the existing instance rather than starting a second one. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="carnevale-app.com"/>
+                <data android:host="www.carnevale-app.com"/>
+                <data android:path="/join"/>
+                <data android:path="/reset-password"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

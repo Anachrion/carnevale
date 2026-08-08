@@ -62,5 +62,18 @@ sedi 's/Response<BuiltList>(/Response<ModelList>(/g' "$GAMES_API"
 sedi 's/FullType(BuiltList, \[FullType(BuiltList)\])/FullType(BuiltList, [FullType(ModelList)])/g' "$SERIALIZERS"
 sedi 's/ListBuilder<BuiltList>()/ListBuilder<ModelList>()/g' "$SERIALIZERS"
 
+# gang_import_result.dart — the same "List" collision. POST /lists/import answers { list, warnings },
+# and the generator types that `list` as Dart's BuiltList instead of the ModelList schema, so the
+# gang comes back untyped and unusable.
+#
+# Only the *bare* `FullType(BuiltList)` is the gang; `warnings` is a genuine BuiltList<String> and
+# its `FullType(BuiltList, [FullType(String)])` must survive untouched — hence matching the trailing
+# comma rather than the bare name.
+IMPORT_RESPONSE="$OUT/lib/src/model/gang_import_result.dart"
+sedi "s|import 'package:built_collection/built_collection.dart';|import 'package:built_collection/built_collection.dart';\nimport 'package:carnevale_api/src/model/model_list.dart';|" "$IMPORT_RESPONSE"
+sedi 's/  BuiltList get list;/  ModelList get list;/' "$IMPORT_RESPONSE"
+sedi 's/const FullType(BuiltList),/const FullType(ModelList),/g' "$IMPORT_RESPONSE"
+sedi 's/) as BuiltList;/) as ModelList;/g' "$IMPORT_RESPONSE"
+
 echo "✓ API generated and patched. Now run:"
 echo "  dart run build_runner build --delete-conflicting-outputs"

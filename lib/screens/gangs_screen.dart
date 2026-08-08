@@ -25,6 +25,8 @@ import '../main.dart';
 import '../services/gang_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_toast.dart';
+import '../widgets/gang_text_dialogs.dart';
 import '../widgets/create_gang_sheet.dart';
 import '../widgets/gang_tile.dart';
 import '../widgets/guarded_action.dart';
@@ -154,6 +156,19 @@ class _GangsScreenState extends State<GangsScreen> {
     }
   }
 
+  /// Builds a gang from pasted text (CARNEVALEB-74). Unlike create, this does not push into the
+  /// builder: an imported gang already has its models, so it belongs in the list straight away —
+  /// and the sheet has already shown anything the server could not resolve.
+  void _showImportSheet() async {
+    final gang = await showGangImportSheet(context);
+    if (gang == null || !mounted) return;
+    _upsertGang(gang);
+    showAppToast(
+      context,
+      AppLocalizations.of(context).toastGangImported(gang.name ?? ''),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,10 +200,26 @@ class _GangsScreenState extends State<GangsScreen> {
     return ScreenHeader(
       title: AppLocalizations.of(context).navGangs,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      // Count plus the way in for a gang somebody sent you. Import sits here rather than beside the
+      // create button: creating is the primary action and keeps the floating button to itself.
       trailing: authService.isLoggedIn && !_loading && _error == null
-          ? Text(
-              AppLocalizations.of(context).gangCount(_gangs.length),
-              style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppLocalizations.of(context).gangCount(_gangs.length),
+                  style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.file_download,
+                    color: context.accentColor,
+                    size: 20,
+                  ),
+                  tooltip: AppLocalizations.of(context).gangImportTitle,
+                  onPressed: _showImportSheet,
+                ),
+              ],
             )
           : null,
     );

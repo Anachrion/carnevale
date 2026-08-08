@@ -29,6 +29,7 @@ import '../services/profile_service.dart';
 import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/gang_text_dialogs.dart';
 import '../widgets/apprenticeship_dialog.dart';
 import '../widgets/equipment_detail.dart';
 import '../widgets/faction_badge.dart';
@@ -845,7 +846,15 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
+          // Hands this gang over as plain text (CARNEVALEB-74) — the one action that belongs to the
+          // gang as a whole rather than to a model, so it sits with the title rather than in the list.
+          IconButton(
+            icon: Icon(Icons.ios_share, color: context.accentColor, size: 20),
+            tooltip: AppLocalizations.of(context).gangExportTitle,
+            onPressed: () => showGangExportDialog(context, _gang.id),
+          ),
+          const SizedBox(width: 4),
           // The faction emblem doubles as the way into the faction's Command Ability — tap it to
           // read the rule. Only made tappable when we have that faction's rule on file.
           if (factionSpecialRules.containsKey(_gang.faction))

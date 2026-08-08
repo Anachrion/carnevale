@@ -3,7 +3,9 @@ import 'package:carnevale/screens/game_session_screen.dart';
 import 'package:carnevale/services/auth_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:flutter/material.dart';
+import 'package:carnevale/services/api_client.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../support/fake_api.dart';
 import '../support/l10n.dart';
@@ -196,4 +198,52 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+
+  // CARNEVALEB-74. The URL shape is a three-way contract: Rails routes `/join`, the Android
+  // manifest claims that exact path, and main.dart reads `?code=`. Nothing else pins it, and a
+  // drift to e.g. `/join/CODE` would break the link silently on every surface at once.
+  testWidgets('the lobby offers the join link as a QR carrying the /join URL', (
+    tester,
+  ) async {
+    AuthService().debugLogin(
+      const AuthUser(id: 1, email: 'a@b.c', username: 'tester'),
+    );
+    final adapter = installFakeApi();
+    adapter.stub(
+      'GET',
+      '/games/1',
+      gameBody(
+        fakeGame(id: 1, joinCode: 'XYZ789', status: api.GameStatusEnum.pending),
+      ),
+    );
+    adapter.stub('POST', '/cable_tickets', {'ticket': 'test-ticket'});
+
+    await tester.pumpWidget(
+      localizedApp(home: const GameSessionScreen(gameId: 1)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Three ways out of the lobby, for the three situations: paste it anywhere, send it through
+    // another app, or hold the screen up to the player opposite.
+    expect(find.text('Copy link'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
+    expect(find.text('QR code'), findsOneWidget);
+
+    await tester.tap(find.text('QR code'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Scan to join'), findsOneWidget);
+    expect(find.byType(QrImageView), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  // The URL shape itself, asserted directly: QrImageView keeps its payload private, so the widget
+  // test above can only prove a QR is shown, not what it encodes.
+  test('joinUrlFor builds the path Rails routes and the manifest claims', () {
+    expect(joinUrlFor('XYZ789'), '${ApiClient.origin}/join?code=XYZ789');
+    expect(Uri.parse(joinUrlFor('ABC123')).path, '/join');
+    expect(Uri.parse(joinUrlFor('ABC123')).queryParameters['code'], 'ABC123');
+  });
 }
