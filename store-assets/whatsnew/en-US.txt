@@ -1,5 +1,5 @@
-Sharing:
+Violent Transformation:
 
-- Share a game from the lobby as a link or a QR code, so someone can join without typing a code in.
-- Join links and password-reset links now open the app directly instead of the browser.
-- Copy a gang out as plain text to paste into a chat, and build one back from text someone sends you.
+- Two new Strigoi models: Yune Lobravym and The Beast Within.
+- In a game, swap Yune between her two forms with one tap. Her wounds, Will and Command Points come with her, and her card and stats change to match.
+- In the gang builder, open her other form's card to read it. She is still hired, and still costs, as Yune.
