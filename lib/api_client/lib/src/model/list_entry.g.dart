@@ -106,6 +106,18 @@ class _$ListEntry extends ListEntry {
   @override
   final int upgradeDucats;
   @override
+  final bool transformable;
+  @override
+  final bool transformed;
+  @override
+  final String? alternateIdentifier;
+  @override
+  final String? alternateName;
+  @override
+  final String? alternateCardFront;
+  @override
+  final String? alternateCardBack;
+  @override
   final EntryState? state;
   @override
   final bool mage;
@@ -141,6 +153,12 @@ class _$ListEntry extends ListEntry {
     required this.upgradeSelected,
     required this.upgradeAvailable,
     required this.upgradeDucats,
+    required this.transformable,
+    required this.transformed,
+    this.alternateIdentifier,
+    this.alternateName,
+    this.alternateCardFront,
+    this.alternateCardBack,
     this.state,
     required this.mage,
     this.mentoredByEntryId,
@@ -178,6 +196,12 @@ class _$ListEntry extends ListEntry {
         upgradeSelected == other.upgradeSelected &&
         upgradeAvailable == other.upgradeAvailable &&
         upgradeDucats == other.upgradeDucats &&
+        transformable == other.transformable &&
+        transformed == other.transformed &&
+        alternateIdentifier == other.alternateIdentifier &&
+        alternateName == other.alternateName &&
+        alternateCardFront == other.alternateCardFront &&
+        alternateCardBack == other.alternateCardBack &&
         state == other.state &&
         mage == other.mage &&
         mentoredByEntryId == other.mentoredByEntryId &&
@@ -208,6 +232,12 @@ class _$ListEntry extends ListEntry {
     _$hash = $jc(_$hash, upgradeSelected.hashCode);
     _$hash = $jc(_$hash, upgradeAvailable.hashCode);
     _$hash = $jc(_$hash, upgradeDucats.hashCode);
+    _$hash = $jc(_$hash, transformable.hashCode);
+    _$hash = $jc(_$hash, transformed.hashCode);
+    _$hash = $jc(_$hash, alternateIdentifier.hashCode);
+    _$hash = $jc(_$hash, alternateName.hashCode);
+    _$hash = $jc(_$hash, alternateCardFront.hashCode);
+    _$hash = $jc(_$hash, alternateCardBack.hashCode);
     _$hash = $jc(_$hash, state.hashCode);
     _$hash = $jc(_$hash, mage.hashCode);
     _$hash = $jc(_$hash, mentoredByEntryId.hashCode);
@@ -240,6 +270,12 @@ class _$ListEntry extends ListEntry {
           ..add('upgradeSelected', upgradeSelected)
           ..add('upgradeAvailable', upgradeAvailable)
           ..add('upgradeDucats', upgradeDucats)
+          ..add('transformable', transformable)
+          ..add('transformed', transformed)
+          ..add('alternateIdentifier', alternateIdentifier)
+          ..add('alternateName', alternateName)
+          ..add('alternateCardFront', alternateCardFront)
+          ..add('alternateCardBack', alternateCardBack)
           ..add('state', state)
           ..add('mage', mage)
           ..add('mentoredByEntryId', mentoredByEntryId)
@@ -338,6 +374,35 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
   set upgradeDucats(int? upgradeDucats) =>
       _$this._upgradeDucats = upgradeDucats;
 
+  bool? _transformable;
+  bool? get transformable => _$this._transformable;
+  set transformable(bool? transformable) =>
+      _$this._transformable = transformable;
+
+  bool? _transformed;
+  bool? get transformed => _$this._transformed;
+  set transformed(bool? transformed) => _$this._transformed = transformed;
+
+  String? _alternateIdentifier;
+  String? get alternateIdentifier => _$this._alternateIdentifier;
+  set alternateIdentifier(String? alternateIdentifier) =>
+      _$this._alternateIdentifier = alternateIdentifier;
+
+  String? _alternateName;
+  String? get alternateName => _$this._alternateName;
+  set alternateName(String? alternateName) =>
+      _$this._alternateName = alternateName;
+
+  String? _alternateCardFront;
+  String? get alternateCardFront => _$this._alternateCardFront;
+  set alternateCardFront(String? alternateCardFront) =>
+      _$this._alternateCardFront = alternateCardFront;
+
+  String? _alternateCardBack;
+  String? get alternateCardBack => _$this._alternateCardBack;
+  set alternateCardBack(String? alternateCardBack) =>
+      _$this._alternateCardBack = alternateCardBack;
+
   EntryStateBuilder? _state;
   EntryStateBuilder get state => _$this._state ??= EntryStateBuilder();
   set state(EntryStateBuilder? state) => _$this._state = state;
@@ -393,6 +458,12 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
       _upgradeSelected = $v.upgradeSelected;
       _upgradeAvailable = $v.upgradeAvailable;
       _upgradeDucats = $v.upgradeDucats;
+      _transformable = $v.transformable;
+      _transformed = $v.transformed;
+      _alternateIdentifier = $v.alternateIdentifier;
+      _alternateName = $v.alternateName;
+      _alternateCardFront = $v.alternateCardFront;
+      _alternateCardBack = $v.alternateCardBack;
       _state = $v.state?.toBuilder();
       _mage = $v.mage;
       _mentoredByEntryId = $v.mentoredByEntryId;
@@ -490,6 +561,20 @@ class ListEntryBuilder implements Builder<ListEntry, ListEntryBuilder> {
               r'ListEntry',
               'upgradeDucats',
             ),
+            transformable: BuiltValueNullFieldError.checkNotNull(
+              transformable,
+              r'ListEntry',
+              'transformable',
+            ),
+            transformed: BuiltValueNullFieldError.checkNotNull(
+              transformed,
+              r'ListEntry',
+              'transformed',
+            ),
+            alternateIdentifier: alternateIdentifier,
+            alternateName: alternateName,
+            alternateCardFront: alternateCardFront,
+            alternateCardBack: alternateCardBack,
             state: _state?.build(),
             mage: BuiltValueNullFieldError.checkNotNull(
               mage,

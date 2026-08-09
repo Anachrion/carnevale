@@ -381,6 +381,29 @@ class GameService extends ChangeNotifier {
         return res.data!;
       });
 
+  /// Violent Transformation (Yune Lobravym ⇄ The Beast Within): swaps one of the current player's
+  /// own models between its two printed cards. Only offered on entries whose `transformable` is
+  /// true; the server refuses anything else.
+  ///
+  /// [transformed] is the desired form rather than a toggle, so a retried request from a flaky
+  /// connection can't flip the model back. One entry changes form — it does not become a second
+  /// model — so the two cards keep the single entry state between them, and Life/Will/Command
+  /// Points carry across untouched. Returns the player's updated gang.
+  Future<api.ModelList> transformEntry(
+    int gameId,
+    int listEntryId, {
+    required bool transformed,
+  }) => _guard(() async {
+    final res = await _client.games.transformEntry(
+      id: gameId,
+      listEntryId: listEntryId,
+      transformEntryInput: api.TransformEntryInput(
+        (b) => b..transformed = transformed,
+      ),
+    );
+    return res.data!;
+  });
+
   /// Updates status counters on one of the current player's own models — only the values
   /// passed change, the rest keep their current state. Returns the model's full updated
   /// state; the server also broadcasts an entry_state event to both players.

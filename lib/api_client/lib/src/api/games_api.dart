@@ -22,6 +22,7 @@ import 'package:carnevale_api/src/model/join_game_input.dart';
 import 'package:carnevale_api/src/model/role_input.dart';
 import 'package:carnevale_api/src/model/select_gang_input.dart';
 import 'package:carnevale_api/src/model/summon_model_request.dart';
+import 'package:carnevale_api/src/model/transform_entry_input.dart';
 import 'package:carnevale_api/src/model/update_counters_input.dart';
 import 'package:carnevale_api/src/model/update_spell_cast_input.dart';
 import 'package:carnevale_api/src/model/update_stats_input.dart';
@@ -1931,6 +1932,116 @@ class GamesApi {
     try {
       const _type = FullType(SummonModelRequest);
       _bodyData = _serializers.serialize(summonModelRequest, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ModelList? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(ModelList),
+      ) as ModelList;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ModelList>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Swap one of the current player&#39;s own models between its two printed cards
+  /// Violent Transformation (Yune Lobravym ⇄ The Beast Within). Only available while the game is in_progress, only for entries in the requesting player&#39;s own gang (the opponent&#39;s models 404), and only for entries whose &#x60;transformable&#x60; is true — anything else is a 422.  &#x60;transformed&#x60; is the desired state rather than a blind toggle, so a retried request from a flaky connection can&#39;t accidentally flip the model back.  One entry changes form; it does not become a second model. The two cards share their Life, Will and Command Points \&quot;including any that have been lost\&quot;, so the model keeps its single EntryState and its current/starting points carry across untouched. &#x60;cost&#x60; also stays that of the hire, so transforming can never move a gang&#39;s total or flip its validity.  The rule says this happens \&quot;at the start of this character&#39;s turn\&quot;. That is not enforced: the app tracks what the players do rather than adjudicating it, and the turn cursor is rewindable, so there is no single moment to check against. Likewise The Beast Within&#39;s inability to spend Will or Command Points is shown, not blocked — but its lack of magic disciplines is reflected, so while transformed the model reports &#x60;mage: false&#x60; and empty pools/granted_spells. The spell picks themselves are untouched and reappear on transforming back.  Changes the roster&#39;s presentation rather than an entry state, so it is broadcast to both players as a full &#x60;game_state&#x60; event, exactly like summon/dismiss. 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [listEntryId] 
+  /// * [transformEntryInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [BuiltList] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ModelList>> transformEntry({ 
+    required int id,
+    required int listEntryId,
+    required TransformEntryInput transformEntryInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/games/{id}/entries/{list_entry_id}/transform'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(int)).toString()).replaceAll('{' r'list_entry_id' '}', encodeQueryParameter(_serializers, listEntryId, const FullType(int)).toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'ApiKeyAuth',
+            'keyName': 'X-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(TransformEntryInput);
+      _bodyData = _serializers.serialize(transformEntryInput, specifiedType: _type);
 
     } catch(error, stackTrace) {
       throw DioException(

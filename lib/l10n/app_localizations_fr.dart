@@ -936,7 +936,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tooltipRemoveSummoned => 'Retirer cette figurine invoquée';
 
   @override
+  String tooltipTransformInto(String name) {
+    return 'Se transformer en $name';
+  }
+
+  @override
   String get tooltipEditCounters => 'Modifier les marqueurs';
+
+  @override
+  String get transformFailed =>
+      'Impossible de transformer ce modèle. Veuillez réessayer.';
 
   @override
   String get counterToggleFailed =>
@@ -1087,6 +1096,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get labelApprenticeship => 'Apprentissage';
+
+  @override
+  String get labelOtherForm => 'Autre forme';
 
   @override
   String get gangRoleLeader => 'chef';

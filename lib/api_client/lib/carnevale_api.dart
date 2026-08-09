@@ -85,6 +85,7 @@ export 'package:carnevale_api/src/model/spell_pool.dart';
 export 'package:carnevale_api/src/model/spell_rule_ref.dart';
 export 'package:carnevale_api/src/model/summon_model_request.dart';
 export 'package:carnevale_api/src/model/token.dart';
+export 'package:carnevale_api/src/model/transform_entry_input.dart';
 export 'package:carnevale_api/src/model/update_account_input.dart';
 export 'package:carnevale_api/src/model/update_account_input_user.dart';
 export 'package:carnevale_api/src/model/update_counters_input.dart';

@@ -30,6 +30,7 @@ Method | HTTP request | Description
 [**scoreAgenda**](GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [**selectGang**](GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [**summonModel**](GamesApi.md#summonmodel) | **POST** /games/{id}/summons | Conjure a model onto the board and add it to the current player&#39;s gang
+[**transformEntry**](GamesApi.md#transformentry) | **PATCH** /games/{id}/entries/{list_entry_id}/transform | Swap one of the current player&#39;s own models between its two printed cards
 [**unarchiveGame**](GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [**unfinishGame**](GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [**updateCounters**](GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
@@ -1026,6 +1027,57 @@ Name | Type | Description  | Notes
  **id** | **int**|  | 
  **summonModelRequest** | [**SummonModelRequest**](SummonModelRequest.md)|  | 
  **idempotencyKey** | **String**| Optional client-generated opaque token that makes this additive create idempotent: a request re-sent after a lost response (e.g. the app's optimistic sync queue retrying a timed-out hire) replays the original result instead of creating a duplicate. Mint one token per logical action and reuse it across that action's retries. Bounded to `[A-Za-z0-9._-]{16,128}`; a value outside that is ignored (the create proceeds non-idempotently).  | [optional] 
+
+### Return type
+
+[**BuiltList**](BuiltList.md)
+
+### Authorization
+
+[ApiKeyAuth](../README.md#ApiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **transformEntry**
+> BuiltList transformEntry(id, listEntryId, transformEntryInput)
+
+Swap one of the current player's own models between its two printed cards
+
+Violent Transformation (Yune Lobravym ⇄ The Beast Within). Only available while the game is in_progress, only for entries in the requesting player's own gang (the opponent's models 404), and only for entries whose `transformable` is true — anything else is a 422.  `transformed` is the desired state rather than a blind toggle, so a retried request from a flaky connection can't accidentally flip the model back.  One entry changes form; it does not become a second model. The two cards share their Life, Will and Command Points \"including any that have been lost\", so the model keeps its single EntryState and its current/starting points carry across untouched. `cost` also stays that of the hire, so transforming can never move a gang's total or flip its validity.  The rule says this happens \"at the start of this character's turn\". That is not enforced: the app tracks what the players do rather than adjudicating it, and the turn cursor is rewindable, so there is no single moment to check against. Likewise The Beast Within's inability to spend Will or Command Points is shown, not blocked — but its lack of magic disciplines is reflected, so while transformed the model reports `mage: false` and empty pools/granted_spells. The spell picks themselves are untouched and reappear on transforming back.  Changes the roster's presentation rather than an entry state, so it is broadcast to both players as a full `game_state` event, exactly like summon/dismiss. 
+
+### Example
+```dart
+import 'package:carnevale_api/api.dart';
+// TODO Configure API key authorization: ApiKeyAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('ApiKeyAuth').apiKeyPrefix = 'Bearer';
+
+final api = CarnevaleApi().getGamesApi();
+final int id = 56; // int | 
+final int listEntryId = 56; // int | 
+final TransformEntryInput transformEntryInput = ; // TransformEntryInput | 
+
+try {
+    final response = api.transformEntry(id, listEntryId, transformEntryInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling GamesApi->transformEntry: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **listEntryId** | **int**|  | 
+ **transformEntryInput** | [**TransformEntryInput**](TransformEntryInput.md)|  | 
 
 ### Return type
 

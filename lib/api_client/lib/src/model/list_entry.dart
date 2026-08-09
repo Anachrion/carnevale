@@ -34,6 +34,12 @@ part 'list_entry.g.dart';
 /// * [upgradeSelected] - Whether this model's optional paid upgrade has been bought — the Emissary's +12 Ducats for a second set of Tentacles. Its Ducat cost is already included in `cost`. Toggle via PATCH /list_entries/{id}/upgrade. 
 /// * [upgradeAvailable] - Whether this model offers an optional paid upgrade at all. The client shows the upgrade toggle only when true. False for models with no upgrade and for Equipment. 
 /// * [upgradeDucats] - The Ducat cost of this model's optional upgrade (0 when none is offered).
+/// * [transformable] - Whether this model has a second printed card it swaps between mid-game — Violent Transformation (Yune Lobravym ⇄ The Beast Within). The client offers the transform button only when true. False for every other model and for Equipment. 
+/// * [transformed] - Which of its two cards this model is currently on the table as: false for the one it was hired as, true for its alternate form. Only ever true during a game — a hired gang always holds the model in its printed form. While true, `identifier`, `name`, `profile_name`, `keywords`, `card_front`, `card_back` and `mage` all describe the alternate form, but `cost` stays that of the hire, and the model keeps its one EntryState, so Life/Will/ Command Points carry across the change untouched. Toggle via PATCH /games/{id}/entries/{list_entry_id}/transform. 
+/// * [alternateIdentifier] - The card identifier of this model's other form, or null when it has none. Lets the gang builder preview the other card without a round trip — in the builder the button only flips the card being shown, because the rule transforms a model in play, not at hiring. 
+/// * [alternateName] - The name printed on the other form's card, or null when there is no other form.
+/// * [alternateCardFront] - Front face filename of the other form's card, resolved like `card_front`. Null when there is no other form.
+/// * [alternateCardBack] - Back face filename of the other form's card, resolved like `card_back`. Null when there is no other form.
 /// * [state] - Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
 /// * [mage] - Whether this model is a Mage and can therefore be given spells. Always false for Equipment; non-Mage models carry empty pools/granted_spells.
 /// * [mentoredByEntryId] - Apprentice Doctor's Apprenticeship: the id of another ListEntry in the same list whose resolved Mage pool this model's mentor_derived pool borrows its disciplines/slot_count from. Null for every other profile, and null until a mentor is chosen. Set it via PATCH /list_entries/{id}/spells (SetEntrySpellsInput.entry.mentored_by_entry_id). 
@@ -112,6 +118,30 @@ abstract class ListEntry implements Built<ListEntry, ListEntryBuilder> {
   /// The Ducat cost of this model's optional upgrade (0 when none is offered).
   @BuiltValueField(wireName: r'upgrade_ducats')
   int get upgradeDucats;
+
+  /// Whether this model has a second printed card it swaps between mid-game — Violent Transformation (Yune Lobravym ⇄ The Beast Within). The client offers the transform button only when true. False for every other model and for Equipment. 
+  @BuiltValueField(wireName: r'transformable')
+  bool get transformable;
+
+  /// Which of its two cards this model is currently on the table as: false for the one it was hired as, true for its alternate form. Only ever true during a game — a hired gang always holds the model in its printed form. While true, `identifier`, `name`, `profile_name`, `keywords`, `card_front`, `card_back` and `mage` all describe the alternate form, but `cost` stays that of the hire, and the model keeps its one EntryState, so Life/Will/ Command Points carry across the change untouched. Toggle via PATCH /games/{id}/entries/{list_entry_id}/transform. 
+  @BuiltValueField(wireName: r'transformed')
+  bool get transformed;
+
+  /// The card identifier of this model's other form, or null when it has none. Lets the gang builder preview the other card without a round trip — in the builder the button only flips the card being shown, because the rule transforms a model in play, not at hiring. 
+  @BuiltValueField(wireName: r'alternate_identifier')
+  String? get alternateIdentifier;
+
+  /// The name printed on the other form's card, or null when there is no other form.
+  @BuiltValueField(wireName: r'alternate_name')
+  String? get alternateName;
+
+  /// Front face filename of the other form's card, resolved like `card_front`. Null when there is no other form.
+  @BuiltValueField(wireName: r'alternate_card_front')
+  String? get alternateCardFront;
+
+  /// Back face filename of the other form's card, resolved like `card_back`. Null when there is no other form.
+  @BuiltValueField(wireName: r'alternate_card_back')
+  String? get alternateCardBack;
 
   /// Present once the game has started (both players confirming their Agenda hand flips it to in_progress); null beforehand and for Catalog::Equipment entries, which have no HP/WP/CP to track.
   @BuiltValueField(wireName: r'state')
@@ -265,6 +295,44 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
       object.upgradeDucats,
       specifiedType: const FullType(int),
     );
+    yield r'transformable';
+    yield serializers.serialize(
+      object.transformable,
+      specifiedType: const FullType(bool),
+    );
+    yield r'transformed';
+    yield serializers.serialize(
+      object.transformed,
+      specifiedType: const FullType(bool),
+    );
+    if (object.alternateIdentifier != null) {
+      yield r'alternate_identifier';
+      yield serializers.serialize(
+        object.alternateIdentifier,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.alternateName != null) {
+      yield r'alternate_name';
+      yield serializers.serialize(
+        object.alternateName,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.alternateCardFront != null) {
+      yield r'alternate_card_front';
+      yield serializers.serialize(
+        object.alternateCardFront,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.alternateCardBack != null) {
+      yield r'alternate_card_back';
+      yield serializers.serialize(
+        object.alternateCardBack,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
     if (object.state != null) {
       yield r'state';
       yield serializers.serialize(
@@ -459,6 +527,52 @@ class _$ListEntrySerializer implements PrimitiveSerializer<ListEntry> {
             specifiedType: const FullType(int),
           ) as int;
           result.upgradeDucats = valueDes;
+          break;
+        case r'transformable':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.transformable = valueDes;
+          break;
+        case r'transformed':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.transformed = valueDes;
+          break;
+        case r'alternate_identifier':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.alternateIdentifier = valueDes;
+          break;
+        case r'alternate_name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.alternateName = valueDes;
+          break;
+        case r'alternate_card_front':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.alternateCardFront = valueDes;
+          break;
+        case r'alternate_card_back':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.alternateCardBack = valueDes;
           break;
         case r'state':
           final valueDes = serializers.deserialize(

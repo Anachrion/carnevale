@@ -1730,11 +1730,23 @@ abstract class AppLocalizations {
   /// **'Remove this summoned model'**
   String get tooltipRemoveSummoned;
 
+  /// Violent Transformation: swaps a model to its other printed card mid-game.
+  ///
+  /// In en, this message translates to:
+  /// **'Transform into {name}'**
+  String tooltipTransformInto(String name);
+
   /// No description provided for @tooltipEditCounters.
   ///
   /// In en, this message translates to:
   /// **'Edit counters'**
   String get tooltipEditCounters;
+
+  /// No description provided for @transformFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not transform that model. Please try again.'**
+  String get transformFailed;
 
   /// No description provided for @counterToggleFailed.
   ///
@@ -2011,6 +2023,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Apprenticeship'**
   String get labelApprenticeship;
+
+  /// Gang builder: opens the card of a transforming model's alternate form. Preview only — the gang always holds the model as hired.
+  ///
+  /// In en, this message translates to:
+  /// **'Other form'**
+  String get labelOtherForm;
 
   /// No description provided for @gangRoleLeader.
   ///

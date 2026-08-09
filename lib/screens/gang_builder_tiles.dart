@@ -93,6 +93,7 @@ class _EntryTile extends StatefulWidget {
     this.onPromote,
     this.isCompanion = false,
     this.onToggleUpgrade,
+    this.onPreviewOtherForm,
   });
 
   final api.ListEntry entry;
@@ -122,6 +123,10 @@ class _EntryTile extends StatefulWidget {
   // Non-null only for a demoted flex Leader the player may crown instead (ambiguous multi-flex case);
   // promotes it to the gang's Leader, demoting whoever holds the slot.
   final VoidCallback? onPromote;
+  // Non-null only for a model with a second printed card (Violent Transformation: Yune Lobravym ⇄
+  // The Beast Within); opens that card. Preview only — the gang always holds the model as hired,
+  // because the rule transforms it in play, not at hiring. The real swap lives in the game screen.
+  final VoidCallback? onPreviewOtherForm;
 
   @override
   State<_EntryTile> createState() => _EntryTileState();
@@ -285,6 +290,7 @@ class _EntryTileState extends State<_EntryTile>
                       if (widget.onToggleUpgrade != null) _buildUpgradeRow(),
                       if (widget.onEditSpells != null || widget.onEditApprenticeship != null)
                         _buildSpellRow(),
+                      if (widget.onPreviewOtherForm != null) _buildOtherFormRow(),
                       if (widget.onPromote != null) _buildPromoteRow(),
                     ],
                   ),
@@ -418,6 +424,27 @@ class _EntryTileState extends State<_EntryTile>
           onTap: widget.onPromote,
           child: _pillButton(icon: Icons.military_tech, label: 'Promote leader'),
         ),
+      ),
+    );
+  }
+
+  // Violent Transformation, in the builder: a pill that opens the model's other card. It changes
+  // nothing about the gang — the model is hired in its printed form and stays that way, and the
+  // ducats never move — so this is a reading aid, labelled with the form it opens.
+  Widget _buildOtherFormRow() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: widget.onPreviewOtherForm,
+            child: _pillButton(
+              icon: Icons.sync_alt,
+              label: widget.entry.alternateName ??
+                  AppLocalizations.of(context).labelOtherForm,
+            ),
+          ),
+        ],
       ),
     );
   }

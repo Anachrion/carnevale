@@ -122,6 +122,10 @@ api.ListEntry fakeListEntry({
   bool upgradeSelected = false,
   bool upgradeAvailable = false,
   int upgradeDucats = 0,
+  bool transformable = false,
+  bool transformed = false,
+  String? alternateIdentifier,
+  String? alternateName,
 }) => api.ListEntry(
   (b) => b
     ..id = id
@@ -141,6 +145,12 @@ api.ListEntry fakeListEntry({
     ..upgradeSelected = upgradeSelected
     ..upgradeAvailable = upgradeAvailable
     ..upgradeDucats = upgradeDucats
+    // An ordinary model has one printed card. Pass these to build a Violent Transformation model
+    // (Yune Lobravym ⇄ The Beast Within).
+    ..transformable = transformable
+    ..transformed = transformed
+    ..alternateIdentifier = alternateIdentifier
+    ..alternateName = alternateName
     ..mage = false
     ..distinctDisciplinePerCopy = false
     ..pools = ListBuilder<api.SpellPool>()

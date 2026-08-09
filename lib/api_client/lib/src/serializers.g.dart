@@ -91,6 +91,7 @@ Serializers _$serializers =
           ..add(SummonModelRequest.serializer)
           ..add(Token.serializer)
           ..add(TokenColorEnum.serializer)
+          ..add(TransformEntryInput.serializer)
           ..add(UpdateAccountInput.serializer)
           ..add(UpdateAccountInputUser.serializer)
           ..add(UpdateCountersInput.serializer)

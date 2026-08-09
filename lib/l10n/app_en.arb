@@ -341,8 +341,14 @@
   "tooltipActivatedThisTurn": "Activated this turn",
   "tooltipMarkActivated": "Mark as activated",
   "tooltipRemoveSummoned": "Remove this summoned model",
+  "tooltipTransformInto": "Transform into {name}",
+  "@tooltipTransformInto": {
+    "description": "Violent Transformation: swaps a model to its other printed card mid-game.",
+    "placeholders": { "name": { "type": "String" } }
+  },
   "tooltipEditCounters": "Edit counters",
 
+  "transformFailed": "Could not transform that model. Please try again.",
   "counterToggleFailed": "Could not update the counter. Please try again.",
   "counterTapToToggle": "Tap a counter to toggle it.",
   "tooltipEditModel": "Edit counters and tokens",
@@ -407,6 +413,10 @@
   "gangNoSpells": "No spells",
   "labelSpells": "Spells",
   "labelApprenticeship": "Apprenticeship",
+  "labelOtherForm": "Other form",
+  "@labelOtherForm": {
+    "description": "Gang builder: opens the card of a transforming model's alternate form. Preview only — the gang always holds the model as hired."
+  },
   "gangRoleLeader": "leader",
   "gangRoleHero": "hero",
   "gangHired": "Hired",

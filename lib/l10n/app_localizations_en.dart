@@ -925,7 +925,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tooltipRemoveSummoned => 'Remove this summoned model';
 
   @override
+  String tooltipTransformInto(String name) {
+    return 'Transform into $name';
+  }
+
+  @override
   String get tooltipEditCounters => 'Edit counters';
+
+  @override
+  String get transformFailed =>
+      'Could not transform that model. Please try again.';
 
   @override
   String get counterToggleFailed =>
@@ -1074,6 +1083,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labelApprenticeship => 'Apprenticeship';
+
+  @override
+  String get labelOtherForm => 'Other form';
 
   @override
   String get gangRoleLeader => 'leader';

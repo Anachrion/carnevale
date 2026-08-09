@@ -794,6 +794,25 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  /// Violent Transformation: swaps a model to its other printed card. Sends the desired form rather
+  /// than a toggle, so a retried request can't flip it back. Unconfirmed, unlike dismissing a
+  /// summon: this is a per-turn move that undoes itself with a second tap, not a removal.
+  Future<void> _transform(api.ListEntry entry) async {
+    try {
+      _applyGang(
+        await GameService().transformEntry(
+          widget.gameId,
+          entry.id,
+          transformed: !entry.transformed,
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        showAppToast(context, AppLocalizations.of(context).transformFailed);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -827,6 +846,7 @@ class _GangTabState extends State<_GangTab> with AutomaticKeepAliveClientMixin {
       onToggleSpellCast: widget.editable ? _toggleSpellCast : null,
       onSummon: widget.editable ? _summon : null,
       onDismissSummon: widget.editable ? _dismissSummon : null,
+      onTransform: widget.editable ? _transform : null,
     );
   }
 }

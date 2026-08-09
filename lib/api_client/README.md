@@ -106,6 +106,7 @@ Class | Method | HTTP request | Description
 [*GamesApi*](doc/GamesApi.md) | [**scoreAgenda**](doc/GamesApi.md#scoreagenda) | **POST** /games/{id}/agendas/{agenda_id}/score | Score an Agenda from this player&#39;s hand (flat 1 Victory Point)
 [*GamesApi*](doc/GamesApi.md) | [**selectGang**](doc/GamesApi.md#selectgang) | **PATCH** /games/{id}/select_gang | Select a list as the current user&#39;s gang for this game
 [*GamesApi*](doc/GamesApi.md) | [**summonModel**](doc/GamesApi.md#summonmodel) | **POST** /games/{id}/summons | Conjure a model onto the board and add it to the current player&#39;s gang
+[*GamesApi*](doc/GamesApi.md) | [**transformEntry**](doc/GamesApi.md#transformentry) | **PATCH** /games/{id}/entries/{list_entry_id}/transform | Swap one of the current player&#39;s own models between its two printed cards
 [*GamesApi*](doc/GamesApi.md) | [**unarchiveGame**](doc/GamesApi.md#unarchivegame) | **PATCH** /games/{id}/unarchive | Restore this game to the current user&#39;s default game list
 [*GamesApi*](doc/GamesApi.md) | [**unfinishGame**](doc/GamesApi.md#unfinishgame) | **POST** /games/{id}/unfinish | Undo ending the game for the requesting player
 [*GamesApi*](doc/GamesApi.md) | [**updateCounters**](doc/GamesApi.md#updatecounters) | **PATCH** /games/{id}/entries/{list_entry_id}/counters | Update status counters on one of the current player&#39;s own models
@@ -206,6 +207,7 @@ Class | Method | HTTP request | Description
  - [SpellRuleRef](doc/SpellRuleRef.md)
  - [SummonModelRequest](doc/SummonModelRequest.md)
  - [Token](doc/Token.md)
+ - [TransformEntryInput](doc/TransformEntryInput.md)
  - [UpdateAccountInput](doc/UpdateAccountInput.md)
  - [UpdateAccountInputUser](doc/UpdateAccountInputUser.md)
  - [UpdateCountersInput](doc/UpdateCountersInput.md)

@@ -32,6 +32,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
     this.onToggleSpellCast,
     this.onSummon,
     this.onDismissSummon,
+    this.onTransform,
   });
 
   final api.ModelList gang;
@@ -76,6 +77,11 @@ class _ReadOnlyGangBody extends StatelessWidget {
 
   /// Removes a summoned model. Offered only on summoned ones: the hired roster is frozen.
   final void Function(api.ListEntry entry)? onDismissSummon;
+
+  /// Violent Transformation: swaps a model between its two printed cards. Offered only on entries
+  /// the server marked `transformable`, and only in your own gang — the opponent's models are
+  /// read-only here, the same reasoning as onToggleActivated.
+  final void Function(api.ListEntry entry)? onTransform;
 
   @override
   Widget build(BuildContext context) {
@@ -322,6 +328,11 @@ class _ReadOnlyGangBody extends StatelessWidget {
           onDismiss: onDismissSummon != null && entry.summoned
               ? () => onDismissSummon!(entry)
               : null,
+          // Only a model with a second printed card can change form, and only once the game is
+          // live — a transformation happens on the table, not in the roster.
+          onTransform: onTransform != null && entry.transformable && entry.state != null
+              ? () => onTransform!(entry)
+              : null,
         );
       },
     );
@@ -521,6 +532,7 @@ class _ReadOnlyEntryTile extends StatelessWidget {
     this.onEditTokenCount,
     this.onToggleSpellCast,
     this.onDismiss,
+    this.onTransform,
   });
 
   final api.ListEntry entry;
@@ -556,6 +568,10 @@ class _ReadOnlyEntryTile extends StatelessWidget {
 
   /// Removes this model from the gang. Only ever set on a summoned model of your own.
   final VoidCallback? onDismiss;
+
+  /// Violent Transformation: swaps this model to its other printed card. Only ever set on your own
+  /// models that have one.
+  final VoidCallback? onTransform;
 
   /// The tile's own death transition — colour draining to slate, skull growing in. Deliberately
   /// shorter than the beat _GangEntryList waits before carrying the body off, so the death has
@@ -683,6 +699,13 @@ class _ReadOnlyEntryTile extends StatelessWidget {
                         ],
                       ),
                     ),
+                    if (onTransform != null) ...[
+                      const SizedBox(width: 8),
+                      _TransformButton(
+                        otherFormName: entry.alternateName ?? '',
+                        onTap: onTransform!,
+                      ),
+                    ],
                     if (onDismiss != null) ...[
                       const SizedBox(width: 8),
                       _DismissButton(onTap: onDismiss!),
@@ -1045,6 +1068,41 @@ class _ActivateButton extends StatelessWidget {
     );
     if (onTap == null) return button;
     return GestureDetector(onTap: onTap, child: button);
+  }
+}
+
+/// Violent Transformation: swaps a model between its two printed cards (Yune Lobravym ⇄ The Beast
+/// Within). Only shown on your own models that actually have another form. The two forms share one
+/// entry — and so one set of HP/WP/CP — so nothing about the tile's stats moves when it is tapped;
+/// only the name, the cost line and the card behind it change.
+class _TransformButton extends StatelessWidget {
+  const _TransformButton({required this.otherFormName, required this.onTap});
+
+  /// The form being transformed *into*, so the tooltip names the destination rather than the
+  /// current state — the button reads as an action, not a status.
+  final String otherFormName;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: AppLocalizations.of(context).tooltipTransformInto(otherFormName),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.5),
+              width: 1.2,
+            ),
+          ),
+          child: const Icon(Icons.sync_alt, size: 18, color: Colors.white),
+        ),
+      ),
+    );
   }
 }
 

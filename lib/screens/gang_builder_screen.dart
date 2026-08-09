@@ -158,6 +158,20 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     }).toList();
   }
 
+  /// The profile behind a transforming model's other printed card (Violent Transformation), looked
+  /// up by the card identifier the server sends on the entry. Null for every ordinary model — and
+  /// also null if the catalog somehow lacks that card, which just hides the button rather than
+  /// breaking the tile. The other form is deliberately searched in the whole loaded set, not the
+  /// hireable one: The Beast Within is non-recruitable, so the Hire tab filters it out.
+  api.Profile? _otherFormProfile(api.ListEntry entry) {
+    final identifier = entry.alternateIdentifier;
+    if (identifier == null) return null;
+
+    return _profiles
+        .where((p) => p.cardReferences.any((c) => c.identifier == identifier))
+        .firstOrNull;
+  }
+
   void _recomputeVisibleProfiles() {
     // Runs through the same catalog index the Cards screen searches, so the Hire tab gets free text
     // over abilities/weapons/special rules and ANDed facet chips — not just a name substring. The
@@ -511,6 +525,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           ..upgradeSelected = false
           ..upgradeAvailable = false
           ..upgradeDucats = 0
+          // Likewise resolved server-side: the pairing that gives a model a second printed card
+          // (Violent Transformation) is known only to the server, so the "other form" pill appears
+          // a beat later, once the authoritative gang is adopted.
+          ..transformable = false
+          ..transformed = false
           ..mage = p.mage
           ..distinctDisciplinePerCopy = false
           ..pools = ListBuilder<api.SpellPool>()
@@ -533,6 +552,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       ..upgradeSelected = false
       ..upgradeAvailable = false
       ..upgradeDucats = 0
+      // Equipment is never a model, so it never has a second form.
+      ..transformable = false
+      ..transformed = false
       ..mage = false
       ..distinctDisciplinePerCopy = false
       ..pools = ListBuilder<api.SpellPool>()
@@ -1118,6 +1140,8 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       final tileName = profile != null
           ? (entryDisplayName[entry.id] ?? profile.name)
           : (equipmentItem?.name ?? entry.name);
+      // Violent Transformation: the profile behind this model's other printed card, if it has one.
+      final otherForm = _otherFormProfile(entry);
       return Padding(
         padding: EdgeInsets.only(bottom: last ? 0 : 8),
         child: _EntryTile(
@@ -1147,6 +1171,20 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           // A demoted flex Leader the player may crown instead (ambiguous multi-flex case).
           onPromote: entry.promotableLeader && entry.id > 0
               ? () => _promote(entry)
+              : null,
+          // Violent Transformation: opens the model's other card. Read-only — the gang holds the
+          // model as hired and its ducats never move, because the rule transforms it in play, not
+          // at hiring. The swap itself lives in the game screen.
+          onPreviewOtherForm: otherForm != null
+              ? () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CardViewerScreen(
+                      profiles: [otherForm],
+                      initialIndex: 0,
+                    ),
+                  ),
+                )
               : null,
         ),
       );
