@@ -124,6 +124,7 @@ api.ListEntry fakeListEntry({
   int upgradeDucats = 0,
   bool transformable = false,
   bool transformed = false,
+  String? identifier,
   String? alternateIdentifier,
   String? alternateName,
 }) => api.ListEntry(
@@ -149,6 +150,9 @@ api.ListEntry fakeListEntry({
     // (Yune Lobravym ⇄ The Beast Within).
     ..transformable = transformable
     ..transformed = transformed
+    // The card the model is currently showing. Left null by default, which sends the viewer down
+    // the entryId fallback — what every ordinary model does.
+    ..identifier = identifier
     ..alternateIdentifier = alternateIdentifier
     ..alternateName = alternateName
     ..mage = false

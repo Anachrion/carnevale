@@ -198,6 +198,34 @@ class _ReadOnlyGangBody extends StatelessWidget {
   /// has no state, so it is never dead and stays with the living.
   static bool _isDead(api.ListEntry entry) => entry.state?.dead ?? false;
 
+  /// The profile and card reference a tile should *show*, which is not always the one it was hired
+  /// as: a transformed model (Violent Transformation) stands on the table as its other card.
+  /// `entryId` deliberately keeps pointing at the hire — that is the row the gang actually owns and
+  /// paid for — so resolving by it opens Yune's card for The Beast Within. `identifier` is the card
+  /// the server says is active, so it decides, with `entryId` as the fallback for everything else
+  /// (equipment, and any entry from a server too old to send one).
+  static ({api.Profile? profile, int referenceId}) _shownCard(
+    api.ListEntry entry,
+    List<api.Profile> profiles,
+  ) {
+    final identifier = entry.identifier;
+    if (identifier != null) {
+      for (final profile in profiles) {
+        for (final reference in profile.cardReferences) {
+          if (reference.identifier == identifier) {
+            return (profile: profile, referenceId: reference.id);
+          }
+        }
+      }
+    }
+    return (
+      profile: profiles
+          .where((p) => p.cardReferenceIds.contains(entry.entryId))
+          .firstOrNull,
+      referenceId: entry.entryId,
+    );
+  }
+
   Widget _buildEntries(BuildContext context, Color factionColor) {
     // Casualties sink to the bottom: mid-game you act on the models still standing, so the living
     // gang stays together at the top instead of being punctuated by corpses. Order is otherwise
@@ -227,20 +255,17 @@ class _ReadOnlyGangBody extends StatelessWidget {
               e.entryType ==
               api.ListEntryEntryTypeEnum.catalogColonColonCardReference,
         )
-        .map(
-          (e) => (
-            entry: e,
-            profile: profiles
-                .where((p) => p.cardReferenceIds.contains(e.entryId))
-                .firstOrNull,
-          ),
-        )
+        .map((e) {
+          final shown = _shownCard(e, profiles);
+          return (entry: e, profile: shown.profile, referenceId: shown.referenceId);
+        })
         .where((pair) => pair.profile != null)
         .toList();
     final hiredProfiles = hired.map((pair) => pair.profile!).toList();
-    // Parallel to hiredProfiles: which illustration each entry was actually hired as, so the
-    // viewer opens A/B-pair models on the art the player picked rather than the profile's first.
-    final hiredReferenceIds = hired.map((pair) => pair.entry.entryId).toList();
+    // Parallel to hiredProfiles: which illustration each entry is showing — the one it was hired as,
+    // or its other form's if it has transformed — so the viewer opens A/B-pair models on the art the
+    // player picked rather than the profile's first.
+    final hiredReferenceIds = hired.map((pair) => pair.referenceId).toList();
     // Every giver whose grant is already on the board (its token id encodes the giver), so a mask
     // giver's button reads as consumed. Scanned once across the gang since a mask's token sits on its
     // target, not the giver.
@@ -259,9 +284,7 @@ class _ReadOnlyGangBody extends StatelessWidget {
         final profile =
             entry.entryType ==
                 api.ListEntryEntryTypeEnum.catalogColonColonCardReference
-            ? profiles
-                  .where((p) => p.cardReferenceIds.contains(entry.entryId))
-                  .firstOrNull
+            ? _shownCard(entry, profiles).profile
             : null;
         final equipmentItem =
             entry.entryType ==
