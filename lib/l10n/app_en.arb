@@ -234,6 +234,13 @@
   "@toastGangImported": {
     "placeholders": { "name": { "type": "String" } }
   },
+  "gameShareSetup": "Share setup",
+  "gameSetupShareMessage": "Let's play Carnevale: {url}",
+  "toastSetupLinkCopied": "Setup link copied",
+  "gameSetupFromLink": "Settings from a shared link",
+  "@gameSetupShareMessage": {
+    "placeholders": { "url": { "type": "String" } }
+  },
   "rolloffWonTitle": "You won the roll-off!",
   "rolloffChooseRole": "Choose your role:",
   "rolloffTitle": "Role roll-off",

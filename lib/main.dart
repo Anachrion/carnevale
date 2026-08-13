@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'models/game_setup.dart';
 import 'screens/game_home_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/reset_password_screen.dart';
@@ -108,6 +109,18 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
       _lastHandledAt = now;
       navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (_) => GameHomeScreen(initialJoinCode: code)),
+      );
+      return;
+    }
+    if (uri.path == GameSetup.path) {
+      // A shared setup with nothing in it is a bare /new-game: no reason to open a form the sender
+      // never filled, so it is left to the launcher like any other unhandled link.
+      final setup = GameSetup.fromUri(uri);
+      if (setup == null) return;
+      _lastHandledLink = uri;
+      _lastHandledAt = now;
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => GameHomeScreen(initialSetup: setup)),
       );
       return;
     }

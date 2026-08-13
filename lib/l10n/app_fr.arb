@@ -204,6 +204,13 @@
   "@toastGangImported": {
     "placeholders": { "name": { "type": "String" } }
   },
+  "gameShareSetup": "Partager la config",
+  "gameSetupShareMessage": "On joue à Carnevale : {url}",
+  "toastSetupLinkCopied": "Lien de configuration copié",
+  "gameSetupFromLink": "Réglages issus d'un lien partagé",
+  "@gameSetupShareMessage": {
+    "placeholders": { "url": { "type": "String" } }
+  },
   "rolloffWonTitle": "Vous avez gagné le jet !",
   "rolloffChooseRole": "Choisissez votre rôle :",
   "rolloffTitle": "Jet pour les rôles",

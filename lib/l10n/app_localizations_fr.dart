@@ -621,6 +621,20 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get gameShareSetup => 'Partager la config';
+
+  @override
+  String gameSetupShareMessage(String url) {
+    return 'On joue à Carnevale : $url';
+  }
+
+  @override
+  String get toastSetupLinkCopied => 'Lien de configuration copié';
+
+  @override
+  String get gameSetupFromLink => 'Réglages issus d\'un lien partagé';
+
+  @override
   String get rolloffWonTitle => 'Vous avez gagné le jet !';
 
   @override

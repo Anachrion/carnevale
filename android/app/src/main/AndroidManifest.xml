@@ -38,9 +38,9 @@
                  belong here — the sslip.io host is deliberately left out.
 
                  The data elements combine, so this claims {,www.}carnevale-app.com × {/join,
-                 /reset-password} — not a catch-all, which would swallow every other URL on the
-                 domain including the card pages. Query strings play no part in path matching, so
-                 "/join?code=…" matches "/join". Handled in lib/main.dart via app_links; the
+                 /reset-password, /new-game} — not a catch-all, which would swallow every other URL
+                 on the domain including the card pages. Query strings play no part in path matching,
+                 so "/join?code=…" matches "/join". Handled in lib/main.dart via app_links; the
                  activity is already singleTop, so a link arriving while the app runs is delivered
                  to the existing instance rather than starting a second one. -->
             <intent-filter android:autoVerify="true">
@@ -52,6 +52,7 @@
                 <data android:host="www.carnevale-app.com"/>
                 <data android:path="/join"/>
                 <data android:path="/reset-password"/>
+                <data android:path="/new-game"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

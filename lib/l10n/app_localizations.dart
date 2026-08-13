@@ -1184,6 +1184,30 @@ abstract class AppLocalizations {
   /// **'Imported {name}'**
   String toastGangImported(String name);
 
+  /// No description provided for @gameShareSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Share setup'**
+  String get gameShareSetup;
+
+  /// No description provided for @gameSetupShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s play Carnevale: {url}'**
+  String gameSetupShareMessage(String url);
+
+  /// No description provided for @toastSetupLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup link copied'**
+  String get toastSetupLinkCopied;
+
+  /// No description provided for @gameSetupFromLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings from a shared link'**
+  String get gameSetupFromLink;
+
   /// No description provided for @rolloffWonTitle.
   ///
   /// In en, this message translates to:
