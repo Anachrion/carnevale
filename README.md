@@ -66,6 +66,21 @@ flutter run \
 without an `X-Api-Key` header, so a build made without it gets 401 on every request. It is not
 per-user auth — that's the JWT the app obtains at sign-in.
 
+`SHARE_SITE_ORIGIN` is the odd one out: it sets the site that links handed to *other
+people* point at — a game-join link, a shared game setup — and it defaults to
+`https://carnevale-app.com` rather than to a local server. The settings above say where this
+build fetches from, so defaulting them to localhost is what makes `flutter run` work with no
+flags; a shared link is opened on someone else's phone, where `http://localhost:3000/join?code=…`
+resolves to nothing. Override it only for a deployment that serves its own copy of the app:
+
+```bash
+flutter run --dart-define=SHARE_SITE_ORIGIN=https://staging.example.com
+```
+
+Whatever you set must be a host the Android manifest claims as an App Link and that the
+backend serves the SPA at, or the links open a browser instead of the app (see "Enabling
+Android App Links" in the backend's `docs/DEPLOYMENT.md`).
+
 ### Development
 
 ```bash
