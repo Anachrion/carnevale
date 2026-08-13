@@ -1,7 +1,7 @@
 import 'package:built_value/serializer.dart';
 import 'package:carnevale/models/game_setup.dart';
 import 'package:carnevale/screens/game_home_screen.dart';
-import 'package:carnevale/services/api_client.dart';
+import 'package:carnevale/share_links.dart';
 import 'package:carnevale/services/auth_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:flutter/material.dart';
@@ -31,10 +31,10 @@ void main() {
       expect(back.boardSize, '4x4');
     });
 
-    test('points at the backend origin and the deep-linked path', () {
+    test('points at the public site and the deep-linked path', () {
       final uri = Uri.parse(const GameSetup(ducatLimit: 150).toUrl());
 
-      expect(uri.origin, ApiClient.origin);
+      expect(uri.origin, shareSiteOrigin);
       expect(uri.path, GameSetup.path);
       // Fields nobody set are absent rather than empty, so the recipient's form is only pre-filled
       // where a choice was actually made.

@@ -3,7 +3,8 @@ import 'package:carnevale/screens/game_session_screen.dart';
 import 'package:carnevale/services/auth_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:flutter/material.dart';
-import 'package:carnevale/services/api_client.dart';
+import 'package:carnevale/models/game_setup.dart';
+import 'package:carnevale/share_links.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -242,8 +243,23 @@ void main() {
   // The URL shape itself, asserted directly: QrImageView keeps its payload private, so the widget
   // test above can only prove a QR is shown, not what it encodes.
   test('joinUrlFor builds the path Rails routes and the manifest claims', () {
-    expect(joinUrlFor('XYZ789'), '${ApiClient.origin}/join?code=XYZ789');
+    expect(joinUrlFor('XYZ789'), '$shareSiteOrigin/join?code=XYZ789');
     expect(Uri.parse(joinUrlFor('ABC123')).path, '/join');
     expect(Uri.parse(joinUrlFor('ABC123')).queryParameters['code'], 'ABC123');
+  });
+
+  // What the emulator caught: built on ApiClient.origin, a dev build handed out
+  // "http://10.0.2.2:3000/join?code=…" — an address that means something only on the phone that
+  // produced it. A shared link has to be reachable from someone else's device, so it points at the
+  // public site over https whatever backend this build talks to.
+  test('shared links point at the public site, not at this build\'s backend', () {
+    for (final url in [joinUrlFor('XYZ789'), const GameSetup(ducatLimit: 200).toUrl()]) {
+      final uri = Uri.parse(url);
+      expect(uri.scheme, 'https', reason: url);
+      expect(uri.host, isNot(anyOf('localhost', '10.0.2.2')), reason: url);
+      expect(uri.hasPort, isFalse, reason: url);
+      // The hosts the Android manifest claims as App Links — anything else opens the browser.
+      expect(uri.host, anyOf('carnevale-app.com', 'www.carnevale-app.com'), reason: url);
+    }
   });
 }

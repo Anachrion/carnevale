@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import '../services/api_client.dart';
+import '../share_links.dart';
 
 /// A game's settings, agreed before anyone creates it (CARNEVALEB-74).
 ///
@@ -72,7 +72,7 @@ class GameSetup {
       'board': ?boardSize,
     };
     return Uri.parse(
-      '${ApiClient.origin}${GameSetup.path}',
+      '$shareSiteOrigin${GameSetup.path}',
     ).replace(queryParameters: query).toString();
   }
 
