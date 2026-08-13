@@ -34,6 +34,7 @@ import '../widgets/screen_header.dart';
 import '../widgets/status_views.dart';
 import 'account_screen.dart';
 import 'game_session_screen.dart';
+import 'qr_scanner_screen.dart';
 
 class GameHomeScreen extends StatefulWidget {
   const GameHomeScreen({super.key, this.initialJoinCode, this.initialSetup});
@@ -267,6 +268,20 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     return ScreenHeader(
       title: AppLocalizations.of(context).navGames,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      // Scanning an invitation off the host's screen, which is the whole point of the QR the lobby
+      // shows. Sits here rather than in the create/join sheet: it replaces reading a code out loud,
+      // so it has to be reachable before you have decided to join anything.
+      trailing: scanningSupported
+          ? IconButton(
+              icon: Icon(
+                Icons.qr_code_scanner,
+                color: context.accentColor,
+                size: 20,
+              ),
+              tooltip: AppLocalizations.of(context).navScan,
+              onPressed: () => scanAndOpen(context),
+            )
+          : null,
     );
   }
 

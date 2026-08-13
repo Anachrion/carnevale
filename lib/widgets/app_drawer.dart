@@ -23,6 +23,7 @@ import '../screens/account_screen.dart';
 import '../screens/cards_screen.dart';
 import '../screens/game_home_screen.dart';
 import '../screens/gangs_screen.dart';
+import '../screens/qr_scanner_screen.dart';
 import '../screens/rules_screen.dart';
 import '../screens/settings_screen.dart';
 
@@ -132,6 +133,18 @@ class AppDrawer extends StatelessWidget {
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.rules, const RulesScreen()),
                   ),
+                  // Not a section of the app but a way into three of them, so it never shows as
+                  // active: whatever is scanned decides where you land (CARNEVALEB-74).
+                  if (scanningSupported)
+                    _NavItem(
+                      label: l10n.navScan,
+                      active: false,
+                      accent: accent,
+                      onTap: () {
+                        Navigator.pop(context);
+                        scanAndOpen(context);
+                      },
+                    ),
                   _NavItem(
                     label: l10n.settingsTitle,
                     active: current == AppDrawerRoute.settings,

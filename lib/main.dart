@@ -21,8 +21,9 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'models/game_setup.dart';
+import 'models/scan_target.dart';
 import 'screens/game_home_screen.dart';
+import 'screens/gangs_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'services/auth_service.dart';
@@ -59,6 +60,39 @@ class CarnevaleApp extends StatefulWidget {
   State<CarnevaleApp> createState() => _CarnevaleAppState();
 }
 
+/// Opens whatever a link or a scan turned out to point at.
+///
+/// Shared by both doors so a destination behaves identically however it was reached. Navigation
+/// goes through [navigatorKey] rather than a passed context: a deep link arrives with no context at
+/// all, and the QR scanner's own context is about to be popped along with its screen.
+void openScanTarget(ScanTarget target) {
+  final navigator = navigatorKey.currentState;
+  if (navigator == null) return;
+  switch (target) {
+    case ResetPasswordTarget(:final token):
+      navigator.push(
+        MaterialPageRoute(builder: (_) => ResetPasswordScreen(token: token)),
+      );
+    case JoinGameTarget(:final code):
+      navigator.push(
+        MaterialPageRoute(builder: (_) => GameHomeScreen(initialJoinCode: code)),
+      );
+    case NewGameTarget(:final setup):
+      navigator.push(
+        MaterialPageRoute(builder: (_) => GameHomeScreen(initialSetup: setup)),
+      );
+    case GangTextTarget(:final text):
+      // A sheet, not a screen: the import flow already exists as one, and pushing the gangs list
+      // underneath first means backing out of the sheet lands somewhere sensible rather than on
+      // whatever the scanner happened to cover.
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => GangsScreen(initialImportText: text),
+        ),
+      );
+  }
+}
+
 class _CarnevaleAppState extends State<CarnevaleApp> {
   final _appLinks = AppLinks();
   Uri? _lastHandledLink;
@@ -92,38 +126,13 @@ class _CarnevaleAppState extends State<CarnevaleApp> {
         now.difference(_lastHandledAt!) < const Duration(seconds: 2)) {
       return;
     }
-    if (uri.path == '/reset-password') {
-      final token = uri.queryParameters['reset_password_token'];
-      if (token == null || token.isEmpty) return;
-      _lastHandledLink = uri;
-      _lastHandledAt = now;
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => ResetPasswordScreen(token: token)),
-      );
-      return;
-    }
-    if (uri.path == '/join') {
-      final code = uri.queryParameters['code'];
-      if (code == null || code.isEmpty) return;
-      _lastHandledLink = uri;
-      _lastHandledAt = now;
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => GameHomeScreen(initialJoinCode: code)),
-      );
-      return;
-    }
-    if (uri.path == GameSetup.path) {
-      // A shared setup with nothing in it is a bare /new-game: no reason to open a form the sender
-      // never filled, so it is left to the launcher like any other unhandled link.
-      final setup = GameSetup.fromUri(uri);
-      if (setup == null) return;
-      _lastHandledLink = uri;
-      _lastHandledAt = now;
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => GameHomeScreen(initialSetup: setup)),
-      );
-      return;
-    }
+    // An unrecognised link (including a bare /new-game carrying no settings) is left alone rather
+    // than opening an empty screen — same as any URL the app was never meant to handle.
+    final target = targetForUri(uri);
+    if (target == null) return;
+    _lastHandledLink = uri;
+    _lastHandledAt = now;
+    openScanTarget(target);
   }
 
   @override

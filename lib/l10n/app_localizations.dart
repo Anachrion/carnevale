@@ -1142,6 +1142,66 @@ abstract class AppLocalizations {
   /// **'Import a gang'**
   String get gangImportTitle;
 
+  /// No description provided for @scanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a code'**
+  String get scanTitle;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at a Carnevale QR code'**
+  String get scanHint;
+
+  /// No description provided for @scanUnrecognised.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is not a Carnevale code'**
+  String get scanUnrecognised;
+
+  /// No description provided for @scanNoPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is off. Turn it on for Carnevale in your device settings.'**
+  String get scanNoPermission;
+
+  /// No description provided for @scanUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no camera to scan with'**
+  String get scanUnsupported;
+
+  /// No description provided for @scanCameraFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera could not be started'**
+  String get scanCameraFailed;
+
+  /// No description provided for @navScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a code'**
+  String get navScan;
+
+  /// No description provided for @gangShowQr.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code'**
+  String get gangShowQr;
+
+  /// No description provided for @gangQrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to import'**
+  String get gangQrTitle;
+
+  /// No description provided for @gangQrTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'This gang is too long to fit in a readable QR code. Copy the text instead.'**
+  String get gangQrTooLong;
+
   /// No description provided for @gangImportHint.
   ///
   /// In en, this message translates to:

@@ -34,9 +34,13 @@ import '../widgets/screen_header.dart';
 import '../widgets/status_views.dart';
 import 'account_screen.dart';
 import 'gang_builder_screen.dart';
+import 'qr_scanner_screen.dart';
 
 class GangsScreen extends StatefulWidget {
-  const GangsScreen({super.key});
+  const GangsScreen({super.key, this.initialImportText});
+
+  /// Opens the import sheet pre-filled, for a gang that arrived by QR (CARNEVALEB-74).
+  final String? initialImportText;
 
   @override
   State<GangsScreen> createState() => _GangsScreenState();
@@ -69,6 +73,12 @@ class _GangsScreenState extends State<GangsScreen> {
       _refresh();
     } else {
       _load();
+    }
+    final scanned = widget.initialImportText;
+    if (scanned != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _showImportSheet(initialText: scanned),
+      );
     }
   }
 
@@ -159,8 +169,8 @@ class _GangsScreenState extends State<GangsScreen> {
   /// Builds a gang from pasted text (CARNEVALEB-74). Unlike create, this does not push into the
   /// builder: an imported gang already has its models, so it belongs in the list straight away —
   /// and the sheet has already shown anything the server could not resolve.
-  void _showImportSheet() async {
-    final gang = await showGangImportSheet(context);
+  void _showImportSheet({String? initialText}) async {
+    final gang = await showGangImportSheet(context, initialText: initialText);
     if (gang == null || !mounted) return;
     _upsertGang(gang);
     showAppToast(
@@ -210,6 +220,16 @@ class _GangsScreenState extends State<GangsScreen> {
                   AppLocalizations.of(context).gangCount(_gangs.length),
                   style: TextStyle(fontSize: 12, color: context.subtleTextColor),
                 ),
+                if (scanningSupported)
+                  IconButton(
+                    icon: Icon(
+                      Icons.qr_code_scanner,
+                      color: context.accentColor,
+                      size: 20,
+                    ),
+                    tooltip: AppLocalizations.of(context).navScan,
+                    onPressed: () => scanAndOpen(context),
+                  ),
                 IconButton(
                   icon: Icon(
                     Icons.file_download,
