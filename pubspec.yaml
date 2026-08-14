@@ -64,6 +64,11 @@ dependencies:
   qr_flutter: ^4.1.0
   package_info_plus: ^10.2.1
   url_launcher: ^6.3.2
+  # Reading a QR back (CARNEVALEB-74), the other half of qr_flutter above. Phone-only by intent:
+  # scanning wants a camera you point at a table, so every entry point is hidden behind !kIsWeb.
+  # The package still ships in the web bundle bin/release-web builds — it declares web support and
+  # compiles there — it is simply never reachable.
+  mobile_scanner: ^7.4.0
 
 dev_dependencies:
   flutter_test:

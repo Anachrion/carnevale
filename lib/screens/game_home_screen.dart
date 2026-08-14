@@ -16,9 +16,12 @@
 
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
+import '../models/game_setup.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../services/game_service.dart';
 import '../widgets/app_background.dart';
@@ -31,12 +34,16 @@ import '../widgets/screen_header.dart';
 import '../widgets/status_views.dart';
 import 'account_screen.dart';
 import 'game_session_screen.dart';
+import 'qr_scanner_screen.dart';
 
 class GameHomeScreen extends StatefulWidget {
-  const GameHomeScreen({super.key, this.initialJoinCode});
+  const GameHomeScreen({super.key, this.initialJoinCode, this.initialSetup});
 
   /// Pre-fills and opens the join sheet, e.g. when arriving from a `/join` deep link.
   final String? initialJoinCode;
+
+  /// Pre-fills and opens the create sheet, when arriving from a shared `/new-game` link.
+  final GameSetup? initialSetup;
 
   @override
   State<GameHomeScreen> createState() => _GameHomeScreenState();
@@ -76,6 +83,10 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     if (widget.initialJoinCode != null) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _showJoinSheet(prefill: widget.initialJoinCode),
+      );
+    } else if (widget.initialSetup != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _showCreateSheet(setup: widget.initialSetup),
       );
     }
   }
@@ -183,12 +194,13 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     }
   }
 
-  Future<void> _showCreateSheet() async {
+  Future<void> _showCreateSheet({GameSetup? setup}) async {
+    if (!mounted) return;
     final game = await showModalBottomSheet<api.Game>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _CreateGameSheet(),
+      builder: (_) => _CreateGameSheet(initialSetup: setup),
     );
     if (game != null && mounted) _openGame(game.id);
   }
@@ -256,6 +268,20 @@ class _GameHomeScreenState extends State<GameHomeScreen>
     return ScreenHeader(
       title: AppLocalizations.of(context).navGames,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      // Scanning an invitation off the host's screen, which is the whole point of the QR the lobby
+      // shows. Sits here rather than in the create/join sheet: it replaces reading a code out loud,
+      // so it has to be reachable before you have decided to join anything.
+      trailing: scanningSupported
+          ? IconButton(
+              icon: Icon(
+                Icons.qr_code_scanner,
+                color: context.accentColor,
+                size: 20,
+              ),
+              tooltip: AppLocalizations.of(context).navScan,
+              onPressed: () => scanAndOpen(context),
+            )
+          : null,
     );
   }
 
@@ -683,7 +709,11 @@ class _GameActionSheet extends StatelessWidget {
 }
 
 class _CreateGameSheet extends StatefulWidget {
-  const _CreateGameSheet();
+  const _CreateGameSheet({this.initialSetup});
+
+  /// Settings that arrived through a shared link (CARNEVALEB-74) — the other player chose them,
+  /// this player hosts. Null for a plain "new game".
+  final GameSetup? initialSetup;
 
   @override
   State<_CreateGameSheet> createState() => _CreateGameSheetState();
@@ -718,10 +748,25 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
     try {
       final scenarios = await _service.loadScenarios();
       if (!mounted) return;
+      final shared = widget.initialSetup;
       setState(() {
         _scenarios = scenarios;
-        _selected = scenarios.firstOrNull;
-        _ducatController.text = '${_selected?.ducats ?? ''}';
+        // A shared scenario is matched by name; an unknown one (renamed, or from a newer build)
+        // falls back to the default rather than leaving the form unusable.
+        _selected = shared?.scenarioName == null
+            ? scenarios.firstOrNull
+            : scenarios
+                      .where(
+                        (s) =>
+                            s.name.toLowerCase() ==
+                            shared!.scenarioName!.toLowerCase(),
+                      )
+                      .firstOrNull ??
+                  scenarios.firstOrNull;
+        _nameController.text = shared?.name ?? '';
+        // The shared limit wins over the scenario's default — that choice is the point of sharing.
+        _ducatController.text = '${shared?.ducatLimit ?? _selected?.ducats ?? ''}';
+        _boardSizeController.text = shared?.boardSize ?? '';
         _loading = false;
       });
     } catch (e) {
@@ -738,6 +783,33 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
       _selected = s;
       _ducatController.text = '${s.ducats}';
     });
+  }
+
+  /// The settings as they stand, ready to hand to whoever will host.
+  GameSetup _currentSetup() {
+    final name = _nameController.text.trim();
+    final board = _boardSizeController.text.trim();
+    return GameSetup(
+      scenarioName: _selected?.name,
+      name: name.isEmpty ? null : name,
+      ducatLimit: int.tryParse(_ducatController.text.trim()),
+      boardSize: board.isEmpty ? null : board,
+    );
+  }
+
+  Future<void> _shareSetup() async {
+    final l10n = AppLocalizations.of(context);
+    final url = _currentSetup().toUrl();
+    try {
+      await SharePlus.instance.share(
+        ShareParams(uri: Uri.parse(url), text: l10n.gameSetupShareMessage(url)),
+      );
+    } catch (_) {
+      // Nowhere to share to. Put it on the clipboard rather than reporting a dead end — same
+      // fallback as the lobby's share action.
+      await Clipboard.setData(ClipboardData(text: url));
+      if (mounted) showAppToast(context, l10n.toastSetupLinkCopied);
+    }
   }
 
   Future<void> _submit() async {
@@ -777,6 +849,26 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
         else if (_error != null)
           Text(_error!, style: TextStyle(color: context.dangerColor))
         else ...[
+          // Says why the form arrives filled in. Without it, a pre-filled sheet reads as leftover
+          // state from a previous game rather than the opponent's choices.
+          if (widget.initialSetup != null) ...[
+            Row(
+              children: [
+                Icon(Icons.link, size: 16, color: context.accentColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.gameSetupFromLink,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.subtleTextColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
           Text(
             l10n.gameScenarioLabel,
             style: TextStyle(
@@ -820,6 +912,34 @@ class _CreateGameSheetState extends State<_CreateGameSheet> {
             ),
           ),
           const SizedBox(height: 24),
+          // Sharing the settings without creating anything: the player who picked the scenario is
+          // not always the one who hosts, and this lets them hand over the choice rather than the
+          // game (CARNEVALEB-74). Secondary to Create, which stays the primary action.
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _selected == null || _saving ? null : _shareSetup,
+              icon: Icon(Icons.ios_share, size: 18, color: context.accentColor),
+              label: Text(
+                l10n.gameShareSetup,
+                style: GoogleFonts.cinzel(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: context.textColor,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: context.accentColor.withValues(alpha: 0.55),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

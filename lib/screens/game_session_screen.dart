@@ -24,7 +24,7 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../models/game.dart';
-import '../services/api_client.dart';
+import '../share_links.dart';
 import '../services/api_exception.dart';
 import '../services/game_service.dart';
 import '../services/gang_service.dart';
@@ -1348,10 +1348,10 @@ class _ActionButton extends StatelessWidget {
 /// path as a verified App Link, and main.dart reads the game out of `?code=` (CARNEVALEB-74). Moving
 /// any part of it breaks the link on every surface at once, silently — hence the test.
 ///
-/// Built from the host this build points at, so a dev build shares a dev link rather than quietly
-/// advertising production.
+/// Built on [shareSiteOrigin] rather than on the backend this build talks to: the link is for
+/// someone else's phone, where a dev host resolves to nothing.
 @visibleForTesting
-String joinUrlFor(String joinCode) => '${ApiClient.origin}/join?code=$joinCode';
+String joinUrlFor(String joinCode) => '$shareSiteOrigin/join?code=$joinCode';
 
 class _LobbyShareAction extends StatelessWidget {
   const _LobbyShareAction({

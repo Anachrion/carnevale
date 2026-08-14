@@ -582,6 +582,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gangImportTitle => 'Import a gang';
 
   @override
+  String get scanTitle => 'Scan a code';
+
+  @override
+  String get scanHint => 'Point the camera at a Carnevale QR code';
+
+  @override
+  String get scanUnrecognised => 'That code is not a Carnevale code';
+
+  @override
+  String get scanNoPermission =>
+      'Camera access is off. Turn it on for Carnevale in your device settings.';
+
+  @override
+  String get scanUnsupported => 'This device has no camera to scan with';
+
+  @override
+  String get scanCameraFailed => 'The camera could not be started';
+
+  @override
+  String get navScan => 'Scan a code';
+
+  @override
+  String get gangShowQr => 'QR code';
+
+  @override
+  String get gangQrTitle => 'Scan to import';
+
+  @override
+  String get gangQrTooLong =>
+      'This gang is too long to fit in a readable QR code. Copy the text instead.';
+
+  @override
   String get gangImportHint => 'Paste an exported gang here';
 
   @override
@@ -611,6 +643,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String toastGangImported(String name) {
     return 'Imported $name';
   }
+
+  @override
+  String get gameShareSetup => 'Share setup';
+
+  @override
+  String gameSetupShareMessage(String url) {
+    return 'Let\'s play Carnevale: $url';
+  }
+
+  @override
+  String get toastSetupLinkCopied => 'Setup link copied';
+
+  @override
+  String get gameSetupFromLink => 'Settings from a shared link';
 
   @override
   String get rolloffWonTitle => 'You won the roll-off!';

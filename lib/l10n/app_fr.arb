@@ -191,6 +191,16 @@
   "gangExportFailed": "Impossible d'exporter ce gang",
   "toastGangCopied": "Gang copié",
   "gangImportTitle": "Importer un gang",
+  "scanTitle": "Scanner un code",
+  "scanHint": "Visez un QR code Carnevale avec l'appareil photo",
+  "scanUnrecognised": "Ce code n'est pas un code Carnevale",
+  "scanNoPermission": "L'accès à l'appareil photo est désactivé. Activez-le pour Carnevale dans les réglages.",
+  "scanUnsupported": "Cet appareil n'a pas d'appareil photo pour scanner",
+  "scanCameraFailed": "L'appareil photo n'a pas pu démarrer",
+  "navScan": "Scanner un code",
+  "gangShowQr": "QR code",
+  "gangQrTitle": "Scanner pour importer",
+  "gangQrTooLong": "Ce gang est trop long pour tenir dans un QR code lisible. Copiez le texte à la place.",
   "gangImportHint": "Collez ici un gang exporté",
   "gangImportPaste": "Coller",
   "gangImportAction": "Importer",
@@ -203,6 +213,13 @@
   },
   "@toastGangImported": {
     "placeholders": { "name": { "type": "String" } }
+  },
+  "gameShareSetup": "Partager la config",
+  "gameSetupShareMessage": "On joue à Carnevale : {url}",
+  "toastSetupLinkCopied": "Lien de configuration copié",
+  "gameSetupFromLink": "Réglages issus d'un lien partagé",
+  "@gameSetupShareMessage": {
+    "placeholders": { "url": { "type": "String" } }
   },
   "rolloffWonTitle": "Vous avez gagné le jet !",
   "rolloffChooseRole": "Choisissez votre rôle :",

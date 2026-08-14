@@ -15,9 +15,12 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../app_colors.dart';
 import '../l10n/app_localizations.dart';
@@ -44,12 +47,19 @@ Future<void> showGangExportDialog(BuildContext context, int gangId) {
 
 /// Collects pasted text and imports it. Resolves to the gang that was created, or null if the user
 /// backed out — the caller adds it to its list rather than refetching.
-Future<api.ModelList?> showGangImportSheet(BuildContext context) {
+///
+/// [initialText] pre-fills the field, for a gang that arrived by QR rather than by paste. It is
+/// still shown for review instead of imported outright: the text is the thing being agreed to, and
+/// a scan is easy to aim at the wrong sheet of paper.
+Future<api.ModelList?> showGangImportSheet(
+  BuildContext context, {
+  String? initialText,
+}) {
   return showModalBottomSheet<api.ModelList>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => const _GangImportSheet(),
+    builder: (_) => _GangImportSheet(initialText: initialText),
   );
 }
 
@@ -64,8 +74,37 @@ class _GangExportDialog extends StatefulWidget {
   State<_GangExportDialog> createState() => _GangExportDialogState();
 }
 
+/// The largest gang we will put in a QR code, in bytes.
+///
+/// Measured rather than guessed (CARNEVALEB-74). At error-correction level L, 1,500 bytes needs a
+/// version-28 code — 129 modules — which still scans off a phone screen; the real gangs in the dev
+/// database run 96–266 bytes, or 57–65 modules, with room to spare. A pathological 20-model gang of
+/// maximum-length names reaches ~2,200 bytes and 153+ modules, where the code is dense enough that
+/// scanning becomes a fight. Past this the dialog says so and points at the text, which is the
+/// honest answer: the QR is a convenience, the text is the format.
+///
+/// Level L is deliberate. Error correction buys tolerance to physical damage — a creased print, a
+/// stained page — which a screen shown across a table is not exposed to. Spending it on capacity
+/// instead yields a coarser code for the same gang, and coarser is easier to read.
+@visibleForTesting
+const gangQrMaxBytes = 1500;
+
+/// What goes into the gang's QR code, or null when it would not scan.
+///
+/// The payload *is* the exported text, byte for byte — the same string Copy puts on the clipboard
+/// and the same one the import sheet parses. Nothing is wrapped around it, so a code that scans
+/// anywhere else yields something a person can read and paste. Extracted from the widget because
+/// QrImageView keeps its data private: without this, a test could only prove that some code was
+/// drawn, not that it carried the gang.
+@visibleForTesting
+String? gangQrPayload(String text) =>
+    utf8.encode(text).length > gangQrMaxBytes ? null : text;
+
 class _GangExportDialogState extends State<_GangExportDialog> {
   late final Future<String> _text = GangService().exportText(widget.gangId);
+
+  /// The dialog shows one thing at a time: the text, or the same text as a code.
+  bool _showQr = false;
 
   @override
   Widget build(BuildContext context) {
@@ -103,10 +142,21 @@ class _GangExportDialogState extends State<_GangExportDialog> {
                   ),
                 )
               else ...[
-                _TextPlate(text: snapshot.data!),
+                if (_showQr)
+                  _GangQrPlate(text: snapshot.data!)
+                else
+                  _TextPlate(text: snapshot.data!),
                 const SizedBox(height: 14),
                 Row(
                   children: [
+                    Expanded(
+                      child: _DialogButton(
+                        icon: _showQr ? Icons.notes : Icons.qr_code_2,
+                        label: _showQr ? l10n.gangExportTitle : l10n.gangShowQr,
+                        onTap: () => setState(() => _showQr = !_showQr),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: _DialogButton(
                         icon: Icons.content_copy,
@@ -156,14 +206,16 @@ class _GangExportDialogState extends State<_GangExportDialog> {
 // ── Import ───────────────────────────────────────────────────────────────────
 
 class _GangImportSheet extends StatefulWidget {
-  const _GangImportSheet();
+  const _GangImportSheet({this.initialText});
+
+  final String? initialText;
 
   @override
   State<_GangImportSheet> createState() => _GangImportSheetState();
 }
 
 class _GangImportSheetState extends State<_GangImportSheet> {
-  final _controller = TextEditingController();
+  late final _controller = TextEditingController(text: widget.initialText);
   bool _busy = false;
   String? _error;
   // Filled once the server has answered: what it could not resolve. Import succeeds partially by
@@ -352,6 +404,58 @@ class _WarningList extends StatelessWidget {
 /// The exported text on a tinted plate. Monospace and horizontally scrollable rather than wrapped:
 /// the format's indentation is what makes a model's spell selection readable, and re-wrapping long
 /// lines would break exactly the alignment that carries the meaning.
+/// The same gang as a scannable code, for handing it over across a table (CARNEVALEB-74).
+class _GangQrPlate extends StatelessWidget {
+  const _GangQrPlate({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final payload = gangQrPayload(text);
+    if (payload == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+        decoration: BoxDecoration(
+          color: context.accentColor.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: context.accentColor.withValues(alpha: 0.25)),
+        ),
+        child: Text(
+          l10n.gangQrTooLong,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 13, color: context.subtleTextColor),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        // Always on white, whatever the theme: a scanner needs the dark-on-light contrast the
+        // format assumes, and an inverted code reads as no code at all on many readers.
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: QrImageView(
+            data: payload,
+            size: 220,
+            backgroundColor: Colors.white,
+            errorCorrectionLevel: QrErrorCorrectLevel.L,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          l10n.gangQrTitle,
+          style: TextStyle(fontSize: 12, color: context.subtleTextColor),
+        ),
+      ],
+    );
+  }
+}
+
 class _TextPlate extends StatelessWidget {
   const _TextPlate({required this.text});
 

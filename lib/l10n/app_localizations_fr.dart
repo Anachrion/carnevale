@@ -590,6 +590,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get gangImportTitle => 'Importer un gang';
 
   @override
+  String get scanTitle => 'Scanner un code';
+
+  @override
+  String get scanHint => 'Visez un QR code Carnevale avec l\'appareil photo';
+
+  @override
+  String get scanUnrecognised => 'Ce code n\'est pas un code Carnevale';
+
+  @override
+  String get scanNoPermission =>
+      'L\'accès à l\'appareil photo est désactivé. Activez-le pour Carnevale dans les réglages.';
+
+  @override
+  String get scanUnsupported =>
+      'Cet appareil n\'a pas d\'appareil photo pour scanner';
+
+  @override
+  String get scanCameraFailed => 'L\'appareil photo n\'a pas pu démarrer';
+
+  @override
+  String get navScan => 'Scanner un code';
+
+  @override
+  String get gangShowQr => 'QR code';
+
+  @override
+  String get gangQrTitle => 'Scanner pour importer';
+
+  @override
+  String get gangQrTooLong =>
+      'Ce gang est trop long pour tenir dans un QR code lisible. Copiez le texte à la place.';
+
+  @override
   String get gangImportHint => 'Collez ici un gang exporté';
 
   @override
@@ -619,6 +652,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String toastGangImported(String name) {
     return '$name importé';
   }
+
+  @override
+  String get gameShareSetup => 'Partager la config';
+
+  @override
+  String gameSetupShareMessage(String url) {
+    return 'On joue à Carnevale : $url';
+  }
+
+  @override
+  String get toastSetupLinkCopied => 'Lien de configuration copié';
+
+  @override
+  String get gameSetupFromLink => 'Réglages issus d\'un lien partagé';
 
   @override
   String get rolloffWonTitle => 'Vous avez gagné le jet !';
