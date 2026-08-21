@@ -11,6 +11,12 @@ doc/AvailableGang.md
 doc/CardManifestEntry.md
 doc/CardReference.md
 doc/CardsApi.md
+doc/CollectionApi.md
+doc/CollectionBulkInput.md
+doc/CollectionBulkInputItemsInner.md
+doc/CollectionItem.md
+doc/CollectionItemInput.md
+doc/CollectionItemInputItem.md
 doc/CreateCableTicket201Response.md
 doc/CreateGameInput.md
 doc/DiscardAgendaInput.md
@@ -91,6 +97,7 @@ lib/carnevale_api.dart
 lib/src/api.dart
 lib/src/api/abilities_api.dart
 lib/src/api/cards_api.dart
+lib/src/api/collection_api.dart
 lib/src/api/equipment_api.dart
 lib/src/api/games_api.dart
 lib/src/api/list_entries_api.dart
@@ -115,6 +122,11 @@ lib/src/model/agenda_history_entry_agenda.dart
 lib/src/model/available_gang.dart
 lib/src/model/card_manifest_entry.dart
 lib/src/model/card_reference.dart
+lib/src/model/collection_bulk_input.dart
+lib/src/model/collection_bulk_input_items_inner.dart
+lib/src/model/collection_item.dart
+lib/src/model/collection_item_input.dart
+lib/src/model/collection_item_input_item.dart
 lib/src/model/create_cable_ticket201_response.dart
 lib/src/model/create_game_input.dart
 lib/src/model/date.dart
@@ -185,4 +197,9 @@ lib/src/model/validation_errors.dart
 lib/src/model/weapon.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/transform_entry_input_test.dart
+test/collection_api_test.dart
+test/collection_bulk_input_items_inner_test.dart
+test/collection_bulk_input_test.dart
+test/collection_item_input_item_test.dart
+test/collection_item_input_test.dart
+test/collection_item_test.dart

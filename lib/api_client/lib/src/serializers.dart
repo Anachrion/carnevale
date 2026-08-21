@@ -22,6 +22,11 @@ import 'package:carnevale_api/src/model/agenda_history_entry_agenda.dart';
 import 'package:carnevale_api/src/model/available_gang.dart';
 import 'package:carnevale_api/src/model/card_manifest_entry.dart';
 import 'package:carnevale_api/src/model/card_reference.dart';
+import 'package:carnevale_api/src/model/collection_bulk_input.dart';
+import 'package:carnevale_api/src/model/collection_bulk_input_items_inner.dart';
+import 'package:carnevale_api/src/model/collection_item.dart';
+import 'package:carnevale_api/src/model/collection_item_input.dart';
+import 'package:carnevale_api/src/model/collection_item_input_item.dart';
 import 'package:carnevale_api/src/model/create_cable_ticket201_response.dart';
 import 'package:carnevale_api/src/model/create_game_input.dart';
 import 'package:carnevale_api/src/model/discard_agenda_input.dart';
@@ -101,6 +106,11 @@ part 'serializers.g.dart';
   AvailableGang,
   CardManifestEntry,
   CardReference,
+  CollectionBulkInput,
+  CollectionBulkInputItemsInner,
+  CollectionItem,
+  CollectionItemInput,
+  CollectionItemInputItem,
   CreateCableTicket201Response,
   CreateGameInput,
   DiscardAgendaInput,
@@ -197,6 +207,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Profile)]),
         () => ListBuilder<Profile>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(CollectionItem)]),
+        () => ListBuilder<CollectionItem>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(ModelList)]),
