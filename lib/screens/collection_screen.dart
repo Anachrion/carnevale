@@ -54,6 +54,12 @@ class _CollectionScreenState extends State<CollectionScreen> {
   String? _error;
   int _tab = 0;
 
+  /// Shared by both tabs, unlike their search text and scroll position. Completing a faction is
+  /// the thing people actually track, and that question spans both sides of the screen: "what have
+  /// I got of the Guild" and "what am I still missing" are one train of thought. It also keeps the
+  /// counter above honest — it always describes the rows underneath it.
+  final Set<String> _factions = {};
+
   @override
   void initState() {
     super.initState();
@@ -97,6 +103,17 @@ class _CollectionScreenState extends State<CollectionScreen> {
       });
     }
   }
+
+  void _toggleFaction(String faction) {
+    setState(() {
+      if (!_factions.remove(faction)) _factions.add(faction);
+    });
+  }
+
+  /// The profiles the current faction picks admit — the denominator of everything in the panel.
+  List<api.Profile> get _scopedProfiles => _factions.isEmpty
+      ? _profiles
+      : _profiles.where((p) => _factions.contains(p.faction)).toList();
 
   void _selectTab(int tab) {
     setState(() => _tab = tab);
@@ -142,8 +159,18 @@ class _CollectionScreenState extends State<CollectionScreen> {
       controller: _pageController,
       onPageChanged: (page) => setState(() => _tab = page),
       children: [
-        CollectionTab(profiles: _profiles, owned: true),
-        CollectionTab(profiles: _profiles, owned: false),
+        CollectionTab(
+          profiles: _profiles,
+          owned: true,
+          factions: Set.of(_factions),
+          onToggleFaction: _toggleFaction,
+        ),
+        CollectionTab(
+          profiles: _profiles,
+          owned: false,
+          factions: Set.of(_factions),
+          onToggleFaction: _toggleFaction,
+        ),
       ],
     );
   }
@@ -156,8 +183,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
   /// Two different units, so they are never mixed inside one figure.
   Widget _buildProgress() {
     final l10n = AppLocalizations.of(context);
-    final totals = CollectionService().totals;
-    final ownedProfiles = CollectionService().ownedProfileCount;
+    final scoped = _scopedProfiles;
+    final scopedIds = scoped.map((p) => p.id).toList();
+    final totals = CollectionService().totalsFor(scopedIds);
+    final ownedProfiles = scopedIds.where(CollectionService().owns).length;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -171,7 +200,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 Text(
-                  l10n.collectionProgress(ownedProfiles, _profiles.length),
+                  l10n.collectionProgress(ownedProfiles, scoped.length),
                   style: GoogleFonts.cinzel(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,

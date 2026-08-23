@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:carnevale_api/carnevale_api.dart' as api;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -34,16 +37,29 @@ import '../widgets/profile_search.dart';
 /// a profile has to fall on, and in what the row's trailing control does — everything else (the
 /// search, the faction filter, the tile) is identical, and two near-copies would drift.
 ///
-/// Each instance keeps its own search text, faction picks and scroll position across a tab switch
+/// Each instance keeps its own search text and scroll position across a tab switch
 /// ([AutomaticKeepAliveClientMixin]), so flipping to "Add", finding a model and flipping back
-/// returns you exactly where you were.
+/// returns you exactly where you were. The faction picks are the exception — they belong to the
+/// screen, see [factions].
 class CollectionTab extends StatefulWidget {
-  const CollectionTab({super.key, required this.profiles, required this.owned});
+  const CollectionTab({
+    super.key,
+    required this.profiles,
+    required this.owned,
+    required this.factions,
+    required this.onToggleFaction,
+  });
 
   final List<api.Profile> profiles;
 
   /// True for the shelf, false for what is still missing from it.
   final bool owned;
+
+  /// Owned by the screen rather than by this tab, so the progress panel above always describes the
+  /// rows below it, and a faction stays picked when you flip between the two sides — "what have I
+  /// got of the Guild" and "what am I still missing" are one train of thought.
+  final Set<String> factions;
+  final ValueChanged<String> onToggleFaction;
 
   @override
   State<CollectionTab> createState() => _CollectionTabState();
@@ -51,14 +67,13 @@ class CollectionTab extends StatefulWidget {
 
 class _CollectionTabState extends State<CollectionTab>
     with ProfileSearchMixin, AutomaticKeepAliveClientMixin {
-  final Set<String> _factions = {};
   List<api.Profile> _results = const [];
 
   @override
   bool get wantKeepAlive => true;
 
   @override
-  Set<String> get searchFactions => _factions;
+  Set<String> get searchFactions => widget.factions;
 
   @override
   void onSearchChanged() => _results = _filtered();
@@ -83,6 +98,16 @@ class _CollectionTabState extends State<CollectionTab>
     if (mounted) setState(() => _results = _filtered());
   }
 
+  @override
+  void didUpdateWidget(CollectionTab old) {
+    super.didUpdateWidget(old);
+    // The faction picks live on the screen and arrive as a fresh set each build, so compare
+    // contents rather than identity; a change there has to re-run this tab's own search.
+    if (!setEquals(old.factions, widget.factions)) {
+      setState(() => _results = _filtered());
+    }
+  }
+
   /// The search, then the side of the shelf this tab shows. Deliberately not routed through
   /// [ProfileQuery.ownedIds]: that expresses "only these", and the Add tab needs the complement.
   List<api.Profile> _filtered() => ProfileService()
@@ -90,19 +115,30 @@ class _CollectionTabState extends State<CollectionTab>
       .where((p) => CollectionService().owns(p.id) == widget.owned)
       .toList();
 
-  void _toggleFaction(String faction) {
-    if (!_factions.remove(faction)) _factions.add(faction);
-    applySearch();
-  }
-
-  Future<void> _add(api.Profile profile) async {
+  /// Puts a first miniature on the shelf and opens the counter dialog on it, at once.
+  ///
+  /// Without that second step the row vanishes into the other tab the moment it is added, and
+  /// saying "it is built, and one of them is painted" means going to find it again — so the
+  /// natural follow-up is offered where the thought already is.
+  ///
+  /// The write is deliberately *not* awaited before the dialog opens. [CollectionService.setCount]
+  /// applies the new count locally before its first await, so the dialog already has the right
+  /// state to show; awaiting the round trip first only put a visible pause between the tap and the
+  /// dialog. A write that then fails rolls the count back — the open dialog follows it, since it
+  /// listens to the service — and says so.
+  void _add(api.Profile profile) {
     final l10n = AppLocalizations.of(context);
-    final ok = await CollectionService().setCount(
+    final pending = CollectionService().setCount(
       profile.id,
       CollectionCount.owned,
       1,
     );
-    if (!ok && mounted) showAppToast(context, l10n.collectionSaveFailed);
+    unawaited(
+      pending.then((ok) {
+        if (!ok && mounted) showAppToast(context, l10n.collectionSaveFailed);
+      }),
+    );
+    showCollectionDialog(context, profile);
   }
 
   @override
@@ -132,8 +168,8 @@ class _CollectionTabState extends State<CollectionTab>
                 Column(
                   children: [
                     FactionFilterRow(
-                      selected: _factions,
-                      onToggle: _toggleFaction,
+                      selected: widget.factions,
+                      onToggle: widget.onToggleFaction,
                     ),
                     if (!widget.owned) _buildAbsentCount(),
                     const SizedBox(height: 4),

@@ -20,6 +20,13 @@ void main() {
     fakeProfile(id: 1, name: 'Beggar', ducats: 6, keywords: const []),
     fakeProfile(id: 2, name: 'Gondolier', ducats: 11, keywords: const []),
     fakeProfile(id: 3, name: 'Baroni', ducats: 15, keywords: const ['Hero']),
+    fakeProfile(
+      id: 4,
+      name: 'Carrion',
+      faction: 'doctors',
+      ducats: 8,
+      keywords: const [],
+    ),
   ];
 
   setUp(() async {
@@ -33,6 +40,19 @@ void main() {
   tearDown(() async {
     await AuthService().logOut();
   });
+
+  /// The faction toggles are icons, so they are found by the asset each one draws.
+  Finder factionChip(String faction) => find
+      .ancestor(
+        of: find.byWidgetPredicate(
+          (w) =>
+              w is Image &&
+              w.image is AssetImage &&
+              (w.image as AssetImage).assetName.contains(faction),
+        ),
+        matching: find.byType(GestureDetector),
+      )
+      .first;
 
   Future<void> pumpScreen(WidgetTester tester) async {
     await tester.pumpWidget(localizedApp(home: const CollectionScreen()));
@@ -120,6 +140,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // The counter dialog opens on the model just added, so its state can be set without going to
+    // look for it again on the other tab.
+    expect(find.text('Painted'), findsOneWidget);
+    expect(find.text('Owned'), findsOneWidget);
+
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+
     // Gone from "Add"...
     expect(find.text('Gondolier'), findsNothing);
 
@@ -127,6 +155,70 @@ void main() {
     await tester.tap(find.text('My collection'));
     await tester.pumpAndSettle();
     expect(find.text('Gondolier'), findsOneWidget);
+  });
+
+  testWidgets('the dialog is not gated on the write reaching the server', (
+    tester,
+  ) async {
+    adapter.stub(
+      'GET',
+      '/collection',
+      listBody(<api.CollectionItem>[], itemType),
+    );
+    // PUT deliberately unstubbed: the write will fail. The dialog must still have opened.
+
+    await pumpScreen(tester);
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.descendant(
+        of: find
+            .ancestor(
+              of: find.text('Gondolier'),
+              matching: find.byType(GestureDetector),
+            )
+            .first,
+        matching: find.byIcon(Icons.add),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Painted'), findsOneWidget);
+    // ...and the failure rolled the count back underneath it, rather than leaving a phantom.
+    expect(CollectionService().owns(2), isFalse);
+
+    // Let the failure toast run its 1.8s life out, or it leaves a pending timer behind.
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('the counter follows the faction filter', (tester) async {
+    // One Guild model owned out of three, plus one Doctors model owned out of one.
+    adapter.stub(
+      'GET',
+      '/collection',
+      listBody([
+        fakeCollectionItem(profileId: 1, owned: 1),
+        fakeCollectionItem(profileId: 4, owned: 1),
+      ], itemType),
+    );
+
+    await pumpScreen(tester);
+
+    // Unfiltered, the whole catalogue is the denominator.
+    expect(find.text('2 / 4 profiles'), findsOneWidget);
+
+    await tester.tap(factionChip('doctors'));
+    await tester.pumpAndSettle();
+
+    // "Have I finished the Doctors?" — yes, and the counter says so.
+    expect(find.text('1 / 1 profiles'), findsOneWidget);
+
+    // The picks are shared, so the answer holds when you cross to the other side.
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 1 profiles'), findsOneWidget);
   });
 
   testWidgets('each tab keeps its own search across a switch', (tester) async {

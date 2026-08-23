@@ -34,8 +34,11 @@ import 'catalog_cache.dart';
 class CollectionEntry {
   const CollectionEntry({this.owned = 0, this.built = 0, this.painted = 0});
 
-  factory CollectionEntry.from(api.CollectionItem item) =>
-      CollectionEntry(owned: item.owned, built: item.built, painted: item.painted);
+  factory CollectionEntry.from(api.CollectionItem item) => CollectionEntry(
+    owned: item.owned,
+    built: item.built,
+    painted: item.painted,
+  );
 
   final int owned;
   final int built;
@@ -61,25 +64,57 @@ class CollectionEntry {
   CollectionEntry withCount(CollectionCount count, int value) {
     final target = value < 0 ? 0 : value;
     var next = switch (count) {
-      CollectionCount.owned => CollectionEntry(owned: target, built: built, painted: painted),
-      CollectionCount.built => CollectionEntry(owned: owned, built: target, painted: painted),
-      CollectionCount.painted => CollectionEntry(owned: owned, built: built, painted: target),
+      CollectionCount.owned => CollectionEntry(
+        owned: target,
+        built: built,
+        painted: painted,
+      ),
+      CollectionCount.built => CollectionEntry(
+        owned: owned,
+        built: target,
+        painted: painted,
+      ),
+      CollectionCount.painted => CollectionEntry(
+        owned: owned,
+        built: built,
+        painted: target,
+      ),
     };
     final raised = target > valueOf(count);
 
     if (next.painted > next.built) {
       next = raised && count == CollectionCount.painted
-          ? CollectionEntry(owned: next.owned, built: next.painted, painted: next.painted)
-          : CollectionEntry(owned: next.owned, built: next.built, painted: next.built);
+          ? CollectionEntry(
+              owned: next.owned,
+              built: next.painted,
+              painted: next.painted,
+            )
+          : CollectionEntry(
+              owned: next.owned,
+              built: next.built,
+              painted: next.built,
+            );
     }
     if (next.built > next.owned) {
       next = raised && count != CollectionCount.owned
-          ? CollectionEntry(owned: next.built, built: next.built, painted: next.painted)
-          : CollectionEntry(owned: next.owned, built: next.owned, painted: next.painted);
+          ? CollectionEntry(
+              owned: next.built,
+              built: next.built,
+              painted: next.painted,
+            )
+          : CollectionEntry(
+              owned: next.owned,
+              built: next.owned,
+              painted: next.painted,
+            );
     }
     // `built` may itself have just been pushed down to `owned`, taking it back under `painted`.
     return next.painted > next.built
-        ? CollectionEntry(owned: next.owned, built: next.built, painted: next.built)
+        ? CollectionEntry(
+            owned: next.owned,
+            built: next.built,
+            painted: next.built,
+          )
         : next;
   }
 
@@ -135,16 +170,25 @@ class CollectionService extends ChangeNotifier {
   /// answer while we don't know yet.
   Set<int> get ownedProfileIds => _items?.keys.toSet() ?? const {};
 
-  CollectionEntry entryFor(int profileId) => _items?[profileId] ?? CollectionEntry.none;
+  CollectionEntry entryFor(int profileId) =>
+      _items?[profileId] ?? CollectionEntry.none;
 
   bool owns(int profileId) => _items?.containsKey(profileId) ?? false;
 
   int get ownedProfileCount => _items?.length ?? 0;
 
-  /// Totals across the whole collection, for the progress panel.
-  ({int owned, int built, int painted}) get totals {
+  /// Totals across the whole collection.
+  ({int owned, int built, int painted}) get totals =>
+      totalsFor(_items?.keys ?? const <int>[]);
+
+  /// Totals across [profileIds] only — what the progress panel reads once a faction is picked,
+  /// since "have I finished the Guild?" is a question people actually ask and "have I collected
+  /// all 316 models?" is not.
+  ({int owned, int built, int painted}) totalsFor(Iterable<int> profileIds) {
     var owned = 0, built = 0, painted = 0;
-    for (final entry in _items?.values ?? const <CollectionEntry>[]) {
+    for (final id in profileIds) {
+      final entry = _items?[id];
+      if (entry == null) continue;
       owned += entry.owned;
       built += entry.built;
       painted += entry.painted;
@@ -161,8 +205,11 @@ class CollectionService extends ChangeNotifier {
           item.profileId: CollectionEntry.from(item),
       };
       notifyListeners();
-      await CatalogCache.save(_cacheKey, res.data ?? const <api.CollectionItem>[],
-          const FullType(api.CollectionItem));
+      await CatalogCache.save(
+        _cacheKey,
+        res.data ?? const <api.CollectionItem>[],
+        const FullType(api.CollectionItem),
+      );
     } on DioException catch (e) {
       // Offline: fall back to the last-loaded copy so the badges and the filter still work.
       final restored = await CatalogCache.restore<api.CollectionItem>(
@@ -170,7 +217,9 @@ class CollectionService extends ChangeNotifier {
         const FullType(api.CollectionItem),
       );
       if (restored == null) throw ApiException.from(e);
-      _items = { for (final item in restored) item.profileId: CollectionEntry.from(item) };
+      _items = {
+        for (final item in restored) item.profileId: CollectionEntry.from(item),
+      };
       notifyListeners();
     }
   }
@@ -193,10 +242,12 @@ class CollectionService extends ChangeNotifier {
     try {
       final res = await _client.collection.updateCollectionItem(
         profileId: profileId,
-        collectionItemInput: api.CollectionItemInput((b) => b
-          ..item.owned = next.owned
-          ..item.built = next.built
-          ..item.painted = next.painted),
+        collectionItemInput: api.CollectionItemInput(
+          (b) => b
+            ..item.owned = next.owned
+            ..item.built = next.built
+            ..item.painted = next.painted,
+        ),
       );
       final confirmed = res.data;
       if (confirmed != null) _apply(profileId, CollectionEntry.from(confirmed));
@@ -227,18 +278,16 @@ class CollectionService extends ChangeNotifier {
   Future<void> _persist() async {
     final items = _items;
     if (items == null) return;
-    await CatalogCache.save(
-      _cacheKey,
-      [
-        for (final e in items.entries)
-          api.CollectionItem((b) => b
+    await CatalogCache.save(_cacheKey, [
+      for (final e in items.entries)
+        api.CollectionItem(
+          (b) => b
             ..profileId = e.key
             ..owned = e.value.owned
             ..built = e.value.built
-            ..painted = e.value.painted),
-      ],
-      const FullType(api.CollectionItem),
-    );
+            ..painted = e.value.painted,
+        ),
+    ], const FullType(api.CollectionItem));
   }
 
   /// Drops the in-memory copy but keeps the cached one, so a test can exercise the cold-start
