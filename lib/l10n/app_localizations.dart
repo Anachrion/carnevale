@@ -2587,6 +2587,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save that change.'**
   String get collectionSaveFailed;
+
+  /// No description provided for @collectionGangTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This gang on my shelf'**
+  String get collectionGangTitle;
+
+  /// No description provided for @collectionGangTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 miniature} other{{count} miniatures}}'**
+  String collectionGangTotal(int count);
+
+  /// No description provided for @collectionGangUnpainted.
+  ///
+  /// In en, this message translates to:
+  /// **'Built, not yet painted'**
+  String get collectionGangUnpainted;
+
+  /// No description provided for @collectionGangBoxed.
+  ///
+  /// In en, this message translates to:
+  /// **'Still boxed'**
+  String get collectionGangBoxed;
+
+  /// No description provided for @collectionGangMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing'**
+  String get collectionGangMissing;
+
+  /// No description provided for @collectionGangShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You are 1 miniature short of fielding this gang} other{You are {count} miniatures short of fielding this gang}}'**
+  String collectionGangShort(int count);
+
+  /// No description provided for @collectionGangComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Every miniature in this gang is on your shelf.'**
+  String get collectionGangComplete;
+
+  /// No description provided for @collectionGangOwnedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{owned} of {hired}'**
+  String collectionGangOwnedOf(int owned, int hired);
+
+  /// No description provided for @collectionGangEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This gang has no models yet.'**
+  String get collectionGangEmpty;
 }
 
 class _AppLocalizationsDelegate

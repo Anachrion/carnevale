@@ -811,5 +811,38 @@
   },
   "collectionEmpty": "Nothing in your collection yet.",
   "collectionAllAdded": "Every model is already in your collection.",
-  "collectionSaveFailed": "Could not save that change."
+  "collectionSaveFailed": "Could not save that change.",
+  "collectionGangTitle": "This gang on my shelf",
+  "collectionGangTotal": "{count, plural, =1{1 miniature} other{{count} miniatures}}",
+  "@collectionGangTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionGangUnpainted": "Built, not yet painted",
+  "collectionGangBoxed": "Still boxed",
+  "collectionGangMissing": "Missing",
+  "collectionGangShort": "{count, plural, =1{You are 1 miniature short of fielding this gang} other{You are {count} miniatures short of fielding this gang}}",
+  "@collectionGangShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionGangComplete": "Every miniature in this gang is on your shelf.",
+  "collectionGangOwnedOf": "{owned} of {hired}",
+  "@collectionGangOwnedOf": {
+    "placeholders": {
+      "owned": {
+        "type": "int"
+      },
+      "hired": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionGangEmpty": "This gang has no models yet."
 }

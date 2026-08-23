@@ -23,6 +23,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
+import '../main.dart';
+import '../models/gang_collection_summary.dart';
 import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
@@ -41,6 +43,7 @@ import '../widgets/glass_panel.dart';
 import '../widgets/guarded_action.dart';
 import '../widgets/points_bar.dart';
 import '../widgets/collection_glyph.dart';
+import '../widgets/gang_collection_sheet.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
@@ -884,6 +887,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             ),
           ),
           const SizedBox(width: 4),
+          // Whether this gang can actually be put on the table with what the player owns
+          // (CARNEVALEB-76). Gang-level like the export beside it, so it keeps the same company.
+          if (authService.currentUser != null) _buildCollectionButton(),
           // Hands this gang over as plain text (CARNEVALEB-74) — the one action that belongs to the
           // gang as a whole rather than to a model, so it sits with the title rather than in the list.
           IconButton(
@@ -972,6 +978,44 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             );
           }).toList(),
         ),
+      ),
+    );
+  }
+
+  /// The way into the gang's collection summary, with a quiet red dot when something is missing.
+  ///
+  /// The dot is the whole point of putting it here rather than inside the sheet: the answer you
+  /// want at a glance while building is "is anything short?", and the detail is one tap away.
+  Widget _buildCollectionButton() {
+    final summary = GangCollectionSummary.of(
+      entries: _gang.entries,
+      profiles: _profiles,
+    );
+    return IconButton(
+      tooltip: AppLocalizations.of(context).collectionGangTitle,
+      onPressed: () => showGangCollectionSheet(
+        context,
+        entries: _gang.entries,
+        profiles: _profiles,
+      ),
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          CollectionGlyph.mark(color: context.accentColor, size: 20),
+          if (!summary.isComplete)
+            Positioned(
+              top: -2,
+              right: -3,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.dangerColor,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

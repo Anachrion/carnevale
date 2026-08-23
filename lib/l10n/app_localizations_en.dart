@@ -1429,4 +1429,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionSaveFailed => 'Could not save that change.';
+
+  @override
+  String get collectionGangTitle => 'This gang on my shelf';
+
+  @override
+  String collectionGangTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count miniatures',
+      one: '1 miniature',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionGangUnpainted => 'Built, not yet painted';
+
+  @override
+  String get collectionGangBoxed => 'Still boxed';
+
+  @override
+  String get collectionGangMissing => 'Missing';
+
+  @override
+  String collectionGangShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You are $count miniatures short of fielding this gang',
+      one: 'You are 1 miniature short of fielding this gang',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionGangComplete =>
+      'Every miniature in this gang is on your shelf.';
+
+  @override
+  String collectionGangOwnedOf(int owned, int hired) {
+    return '$owned of $hired';
+  }
+
+  @override
+  String get collectionGangEmpty => 'This gang has no models yet.';
 }

@@ -1445,4 +1445,50 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get collectionSaveFailed => 'Impossible d\'enregistrer ce changement.';
+
+  @override
+  String get collectionGangTitle => 'Ce gang dans ma collection';
+
+  @override
+  String collectionGangTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count figurines',
+      one: '1 figurine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionGangUnpainted => 'Montées, pas encore peintes';
+
+  @override
+  String get collectionGangBoxed => 'Encore en boîte';
+
+  @override
+  String get collectionGangMissing => 'Manquantes';
+
+  @override
+  String collectionGangShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il vous manque $count figurines pour aligner ce gang',
+      one: 'Il vous manque 1 figurine pour aligner ce gang',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionGangComplete =>
+      'Toutes les figurines de ce gang sont dans votre collection.';
+
+  @override
+  String collectionGangOwnedOf(int owned, int hired) {
+    return '$owned sur $hired';
+  }
+
+  @override
+  String get collectionGangEmpty => 'Ce gang n\'a pas encore de figurines.';
 }

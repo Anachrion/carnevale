@@ -442,5 +442,14 @@
   "collectionAbsentCount": "{count, plural, =1{1 figurine encore absente de votre collection} other{{count} figurines encore absentes de votre collection}}",
   "collectionEmpty": "Rien dans votre collection pour l'instant.",
   "collectionAllAdded": "Tous les modèles sont déjà dans votre collection.",
-  "collectionSaveFailed": "Impossible d'enregistrer ce changement."
+  "collectionSaveFailed": "Impossible d'enregistrer ce changement.",
+  "collectionGangTitle": "Ce gang dans ma collection",
+  "collectionGangTotal": "{count, plural, =1{1 figurine} other{{count} figurines}}",
+  "collectionGangUnpainted": "Montées, pas encore peintes",
+  "collectionGangBoxed": "Encore en boîte",
+  "collectionGangMissing": "Manquantes",
+  "collectionGangShort": "{count, plural, =1{Il vous manque 1 figurine pour aligner ce gang} other{Il vous manque {count} figurines pour aligner ce gang}}",
+  "collectionGangComplete": "Toutes les figurines de ce gang sont dans votre collection.",
+  "collectionGangOwnedOf": "{owned} sur {hired}",
+  "collectionGangEmpty": "Ce gang n'a pas encore de figurines."
 }
