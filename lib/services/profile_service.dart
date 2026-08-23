@@ -107,6 +107,11 @@ class ProfileService {
           !query.factions.contains(profile.faction)) {
         return false;
       }
+      // Cheapest discriminator when the collection filter is on, so it goes before the index
+      // lookup and the text sweep.
+      if (query.ownedIds != null && !query.ownedIds!.contains(profile.id)) {
+        return false;
+      }
       final index = _index[profile.id];
       if (index == null) return false;
       // Every picked facet must be present: two ability facets mean "has both".

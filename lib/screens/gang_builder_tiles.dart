@@ -500,6 +500,7 @@ class _HireCardTile extends StatelessWidget {
     required this.profile,
     required this.count,
     required this.isUnique,
+    required this.owned,
     required this.factionColor,
     required this.canAdd,
     required this.busy,
@@ -511,6 +512,11 @@ class _HireCardTile extends StatelessWidget {
   final api.Profile profile;
   final int count;
   final bool isUnique;
+
+  /// How many of this model the player owns (CARNEVALEB-76). Here the badge answers a different
+  /// question from the one it answers on the Cards screen — not "what state is it in?" but "have I
+  /// got enough?" — so a gang that hires more copies than the shelf holds shows the shortfall.
+  final int owned;
   final Color factionColor;
   final bool canAdd;
   final bool busy;
@@ -571,6 +577,28 @@ class _HireCardTile extends StatelessWidget {
                                   fontSize: 10,
                                   color: Colors.white.withValues(alpha: 0.65),
                                   fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                            if (owned > 0) ...[
+                              const SizedBox(width: 6),
+                              CollectionGlyph.mark(
+                                color: CollectionGlyph.tileColorFor(
+                                  CollectionState.painted,
+                                ),
+                                size: 15,
+                              ),
+                            ],
+                            // Only when the gang asks for more than the player owns: the number
+                            // that matters is the gap, and it should look like a problem.
+                            if (count > owned && owned >= 0 && count > 0) ...[
+                              const SizedBox(width: 3),
+                              Text(
+                                '$owned/$count',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.dangerColor,
                                 ),
                               ),
                             ],

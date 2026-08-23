@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'api_client.dart';
+import 'collection_service.dart';
 import 'api_exception.dart';
 import 'game_service.dart';
 import 'gang_service.dart';
@@ -377,6 +378,8 @@ class AuthService extends ChangeNotifier {
     // last one's lists.
     GangService().resetGangsCache();
     GameService().resetGamesCache();
+    // The collection is per-user too, and is persisted; drop both copies (CARNEVALEB-76).
+    await CollectionService().reset();
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _refreshTokenKey);
     await _storage.delete(key: _userKey);

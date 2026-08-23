@@ -1208,11 +1208,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardSwitchIllustration => 'Switch illustration';
 
   @override
-  String cardViewerHint(int current, int total) {
-    return '$current / $total  •  tap/←→ flip  •  swipe ↑↓ navigate';
-  }
-
-  @override
   String get cardAbilities => 'Abilities';
 
   @override
@@ -1373,4 +1368,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spellGrantedLower => 'granted';
+
+  @override
+  String get navCollection => 'Collection';
+
+  @override
+  String get collectionFilter => 'My collection';
+
+  @override
+  String get collectionOwned => 'Owned';
+
+  @override
+  String get collectionBuilt => 'Built';
+
+  @override
+  String get collectionPainted => 'Painted';
+
+  @override
+  String get collectionNestingHint =>
+      'A painted miniature is necessarily built: lowering a total trims the ones above it.';
+
+  @override
+  String get collectionTabMine => 'My collection';
+
+  @override
+  String get collectionTabAdd => 'Add';
+
+  @override
+  String get collectionSearchMine => 'Search my collection...';
+
+  @override
+  String get collectionSearchAdd => 'Add a miniature...';
+
+  @override
+  String collectionProgress(int owned, int total) {
+    return '$owned / $total profiles';
+  }
+
+  @override
+  String collectionProgressDetail(int miniatures, int painted) {
+    return '$miniatures miniatures, $painted painted';
+  }
+
+  @override
+  String collectionAbsentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count miniatures not in your collection yet',
+      one: '1 miniature not in your collection yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionEmpty => 'Nothing in your collection yet.';
+
+  @override
+  String get collectionAllAdded => 'Every model is already in your collection.';
+
+  @override
+  String get collectionSaveFailed => 'Could not save that change.';
 }

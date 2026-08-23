@@ -1,6 +1,5 @@
 {
   "@@locale": "fr",
-
   "settingsTitle": "Paramètres",
   "settingsLanguage": "Langue",
   "settingsLanguageSystem": "Langue de l'appareil",
@@ -47,7 +46,6 @@
   "aboutViewLicenses": "Licences",
   "aboutLegalese": "Carnevale est un jeu de figurines créé et publié par TT Combat, qui détient l'ensemble des droits de propriété intellectuelle associés, y compris le nom, les illustrations et les marques Carnevale. Nous n'en revendiquons aucune propriété. Ceci est une application compagnon indépendante et amateur — sans caractère officiel. Elle n'est ni affiliée à TT Combat ni approuvée par elle, et est utilisée avec son aimable autorisation ; elle est fournie gratuitement et n'est jamais vendue. Tous les noms, marques et illustrations demeurent la propriété de TT Combat et de leurs détenteurs respectifs.\n\n© 2026 Anachrion & Eldrim. Distribué sous licence publique générale GNU Affero, version 3 ou ultérieure.",
   "toastUsernameUpdated": "Nom d'utilisateur mis à jour !",
-
   "actionCancel": "Annuler",
   "actionClose": "Fermer",
   "actionDelete": "Supprimer",
@@ -64,13 +62,11 @@
   "actionJoin": "Rejoindre",
   "actionSelect": "Sélectionner",
   "actionDeselect": "Désélectionner",
-
   "navHome": "Accueil",
   "navCards": "Cartes",
   "navGangs": "Gangs",
   "navGames": "Parties",
   "navRules": "Règles",
-
   "fieldUsername": "Nom d'utilisateur",
   "fieldEmail": "E-mail",
   "fieldEmailOrUsername": "E-mail ou nom d'utilisateur",
@@ -78,21 +74,17 @@
   "fieldConfirmPassword": "Confirmer le mot de passe",
   "fieldNewPassword": "Nouveau mot de passe",
   "fieldConfirmNewPassword": "Confirmer le nouveau mot de passe",
-
   "validationRequired": "Requis",
   "validationEmailInvalid": "Saisissez une adresse e-mail valide",
   "validationPasswordTooShort": "Au moins 6 caractères",
   "validationPasswordMismatch": "Les mots de passe ne correspondent pas",
-
   "errorCouldNotReachServer": "Impossible de joindre le serveur",
   "errorGeneric": "Une erreur s'est produite. Veuillez réessayer.",
-
   "toastLoggedOut": "Déconnecté",
   "toastLoggedIn": "Connexion réussie !",
   "toastAccountCreated": "Compte créé !",
   "toastResetEmailSent": "E-mail de réinitialisation envoyé !",
   "toastPasswordReset": "Mot de passe réinitialisé ! Veuillez vous connecter.",
-
   "accountTitle": "Compte",
   "authForgotPassword": "Mot de passe oublié ?",
   "authResetPassword": "Réinitialiser le mot de passe",
@@ -100,13 +92,10 @@
   "authHaveAccount": "Vous avez déjà un compte ? ",
   "authNoAccount": "Pas encore de compte ? ",
   "resetPasswordBlurb": "Choisissez un nouveau mot de passe pour votre compte.",
-
   "drawerDarkTheme": "THÈME SOMBRE",
   "drawerLightTheme": "THÈME CLAIR",
-
   "deleteGangConfirm": "Supprimer « {name} » ?",
   "gangModelCount": "{count, plural, =0{Aucune figurine} =1{1 figurine} other{{count} figurines}}",
-
   "ducatsAmount": "{count} ducats",
   "attackerDefender": "Attaquant/Défenseur",
   "roleAttacker": "Attaquant",
@@ -114,7 +103,6 @@
   "youCap": "Vous",
   "youLower": "vous",
   "opponentLabel": "Adversaire",
-
   "agendaRuleCycle": "Cycle",
   "agendaRuleSecondary": "Secondaire",
   "agendaRuleDouble": "Double",
@@ -125,7 +113,6 @@
   "agendaRuleDoubleDesc": "En réalisant un agenda, vous pouvez le garder en jeu ; le réaliser à nouveau rapporte le double, sinon rien.",
   "agendaRuleSecretDesc": "Gardez vos agendas secrets de votre adversaire jusqu'à leur réalisation. Sans cette règle, tous les joueurs voient les agendas des autres.",
   "agendaRuleTotalDesc": "Vous devez réaliser tous vos agendas pour marquer leurs points de victoire.",
-
   "gamesTabActive": "En cours",
   "gamesTabArchived": "Archivées",
   "gamesLoginPrompt": "Connectez-vous pour créer ou rejoindre une partie",
@@ -162,7 +149,6 @@
   "gameJoinCode": "Code de la partie",
   "gameJoinFailed": "Impossible de rejoindre — vérifiez le code et réessayez.",
   "toastCouldNotOpenGang": "Impossible d'ouvrir ce gang.",
-
   "gameFallbackTitle": "Partie",
   "sessionViewGangs": "Voir les gangs",
   "sessionMyGang": "Mon gang",
@@ -183,7 +169,11 @@
   "toastJoinLinkCopied": "Lien copié",
   "toastShareFailed": "Impossible d'ouvrir le partage",
   "@lobbyShareMessage": {
-    "placeholders": { "url": { "type": "String" } }
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
   },
   "gangExportTitle": "Exporter le gang",
   "gangExportCopy": "Copier",
@@ -209,17 +199,29 @@
   "gangImportSkipped": "{count, plural, =1{1 ligne ignorée} other{{count} lignes ignorées}}",
   "toastGangImported": "{name} importé",
   "@gangImportSkipped": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "@toastGangImported": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "gameShareSetup": "Partager la config",
   "gameSetupShareMessage": "On joue à Carnevale : {url}",
   "toastSetupLinkCopied": "Lien de configuration copié",
   "gameSetupFromLink": "Réglages issus d'un lien partagé",
   "@gameSetupShareMessage": {
-    "placeholders": { "url": { "type": "String" } }
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
   },
   "rolloffWonTitle": "Vous avez gagné le jet !",
   "rolloffChooseRole": "Choisissez votre rôle :",
@@ -251,7 +253,6 @@
   "mulliganTitle": "Défausser et repiocher ?",
   "mulliganBody": "Défausser « {name} » comme irréalisable et piocher un remplaçant ? Votre adversaire le verra.",
   "actionDiscardRedraw": "Défausser et repiocher",
-
   "scoreTabLabel": "Score",
   "tooltipRewindTurn": "Reculer d'un tour",
   "tooltipAdvanceTurn": "Avancer d'un tour",
@@ -286,7 +287,6 @@
   "eventScored": "Marqué",
   "eventDiscarded": "Défaussé",
   "eventDrew": "Pioché",
-
   "gangsLoginPrompt": "Connectez-vous pour créer et gérer vos gangs",
   "gangCount": "{count, plural, =1{1 gang} other{{count} gangs}}",
   "gangDeleteTitle": "Supprimer le gang",
@@ -295,18 +295,15 @@
   "gangsRosterNoModels": "Aucune figurine engagée.",
   "gangViewerNoModels": "Aucune figurine engagée.",
   "gangBuilderNoModels": "Aucune figurine engagée",
-
   "gangCreateTitle": "Nouveau gang",
   "gangNameLabel": "Nom du gang",
   "gangPointLimit": "Limite de points",
   "gangFactionLabel": "Faction",
   "gangCreateButton": "Créer le gang",
-
   "toastActivationFailed": "Impossible de mettre à jour l'activation. Veuillez réessayer.",
   "toastSpellUpdateFailed": "Impossible de mettre à jour ce sort. Veuillez réessayer.",
   "toastRemoveModelFailed": "Impossible de retirer cette figurine. Veuillez réessayer.",
   "gangViewerLoadFailed": "Impossible de charger ce gang.",
-
   "labelFactionRule": "Règle de faction",
   "labelSummon": "Invoquer",
   "counterStunned": "Étourdi",
@@ -319,7 +316,6 @@
   "tooltipRemoveSummoned": "Retirer cette figurine invoquée",
   "tooltipTransformInto": "Se transformer en {name}",
   "tooltipEditCounters": "Modifier les marqueurs",
-
   "counterToggleFailed": "Impossible de mettre à jour le marqueur. Veuillez réessayer.",
   "transformFailed": "Impossible de transformer ce modèle. Veuillez réessayer.",
   "counterTapToToggle": "Appuyez sur un marqueur pour l'activer.",
@@ -363,7 +359,6 @@
   "summonFailed": "Impossible d'invoquer cette figurine. Veuillez réessayer.",
   "dismissTitle": "Retirer {name} ?",
   "dismissBody": "Cette figurine invoquée quitte la table. Ses blessures et ses marqueurs disparaissent avec elle.",
-
   "gangNoMentorChosen": "Aucun mentor choisi",
   "gangNoSpells": "Aucun sort",
   "labelSpells": "Sorts",
@@ -372,7 +367,6 @@
   "gangRoleLeader": "chef",
   "gangRoleHero": "héros",
   "gangHired": "Engagé",
-
   "gangTabList": "Liste",
   "gangTabHire": "Engager",
   "gangGoToHire": "Allez dans Engager pour ajouter des figurines",
@@ -384,21 +378,17 @@
   "sortRole": "Rôle",
   "sortName": "Nom",
   "sortCost": "Coût",
-
   "pointsBarSlashLimit": " / {limit} ducats",
   "pointsBarLeft": "{count} restants",
   "pointsBarOverBy": "−{count} restants",
-
   "cardsProfileCount": "{count, plural, =1{1 profil} other{{count} profils}}",
   "cardsNoProfiles": "Aucun profil trouvé.",
   "cardSwitchIllustration": "Changer d'illustration",
-  "cardViewerHint": "{current} / {total}  •  appuyer/←→ retourner  •  glisser ↑↓ naviguer",
   "cardAbilities": "Capacités",
   "cardAbilitiesLoadFailed": "Impossible de charger les capacités.",
   "cardNoAbilities": "Ce personnage n'a aucune capacité spéciale.",
   "cardCharacterAbilities": "Capacités de personnage",
   "cardWeaponAbilities": "Capacités d'arme",
-
   "rulesTitleUpper": "RÈGLES",
   "rulesAvailableOffline": "Disponible hors ligne",
   "rulesDownloadsOnOpen": "Se télécharge à la première ouverture",
@@ -412,18 +402,15 @@
   "rulesDownloadFailed": "Impossible de télécharger {title}",
   "rulesOpenFailed": "Impossible d'ouvrir {title}",
   "rulesDownloadingPercent": "Téléchargement — {percent} %",
-
   "apprMentor": "Mentor",
   "apprNoMentor": "Aucun mentor éligible — engagez d'abord un Héros avec le mot-clé Docteur.",
   "apprNoMentorSelected": "— Aucun mentor sélectionné —",
   "apprAbilityToCopy": "Capacité à copier",
   "apprMageAbility": "Mage — copie les Disciplines de sorts du mentor",
   "apprCopyNote": "La copie d'une compétence unique ou d'un profil d'arme n'est pas encore prise en charge — Mage est la seule capacité disponible ici.",
-
   "spellsButtonLabel": "Sorts · {cast}/{total} lancés",
   "spellsKnownTitle": "Sorts connus",
   "spellAllCantrips": "Tous les cantrips",
-
   "spellDeselectHint": "Désélectionnez un sort d'une autre Discipline pour choisir ici à la place.",
   "spellPoolTitle": "Réserve de sorts",
   "spellNoMentorSetup": "Aucun mentor choisi — configurez-en un via Apprentissage d'abord",
@@ -439,5 +426,21 @@
   "spellAlwaysKnown": "toujours connu",
   "spellGranted": "Accordés",
   "spellsPlural": "{count, plural, =1{1 sort} other{{count} sorts}}",
-  "spellGrantedLower": "accordé"
+  "spellGrantedLower": "accordé",
+  "navCollection": "Collection",
+  "collectionFilter": "Ma collection",
+  "collectionOwned": "Possédées",
+  "collectionBuilt": "Montées",
+  "collectionPainted": "Peintes",
+  "collectionNestingHint": "Une figurine peinte est forcément montée : baisser un total rabote ceux du dessus.",
+  "collectionTabMine": "Ma collection",
+  "collectionTabAdd": "Ajouter",
+  "collectionSearchMine": "Rechercher dans ma collection...",
+  "collectionSearchAdd": "Ajouter une figurine...",
+  "collectionProgress": "{owned} / {total} profils",
+  "collectionProgressDetail": "{miniatures} figurines, {painted} peintes",
+  "collectionAbsentCount": "{count, plural, =1{1 figurine encore absente de votre collection} other{{count} figurines encore absentes de votre collection}}",
+  "collectionEmpty": "Rien dans votre collection pour l'instant.",
+  "collectionAllAdded": "Tous les modèles sont déjà dans votre collection.",
+  "collectionSaveFailed": "Impossible d'enregistrer ce changement."
 }

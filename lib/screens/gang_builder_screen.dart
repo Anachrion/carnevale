@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import '../app_colors.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,7 @@ import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/idempotency.dart';
+import '../services/collection_service.dart';
 import '../services/profile_service.dart';
 import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
@@ -37,6 +40,7 @@ import '../widgets/faction_rule.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/guarded_action.dart';
 import '../widgets/points_bar.dart';
+import '../widgets/collection_glyph.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
@@ -221,11 +225,19 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   void initState() {
     super.initState();
     _gang = widget.gang;
+    // The hire tiles carry the collection mark and the shortfall, and the filter chip reads the
+    // same service — redraw whenever it moves (CARNEVALEB-76).
+    CollectionService().addListener(_onCollectionChanged);
     _loadData();
+  }
+
+  void _onCollectionChanged() {
+    if (mounted) applySearch();
   }
 
   @override
   void dispose() {
+    CollectionService().removeListener(_onCollectionChanged);
     disposeSearch();
     _hireScroll.dispose();
     _pageController.dispose();
@@ -352,6 +364,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       _error = null;
     });
     try {
+      // The collection only decorates the hire list, so it is fetched alongside and its failures
+      // swallowed: an unreachable collection must never keep the builder from opening.
+      unawaited(CollectionService().load().catchError((_) {}));
       final results = await Future.wait([
         ProfileService().search('', factions: {_gang.faction, 'gifted'}),
         EquipmentService().getAll(),
@@ -1289,11 +1304,13 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                 _entryCount(q) > 0,
           );
       final leaderSlotTaken = hardLeaderTaken || conditionalFlexBlocked;
+      final collected = CollectionService().entryFor(p.id);
       return _HireCardTile(
         key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,
         count: count,
         isUnique: isUnique,
+        owned: collected.owned,
         factionColor: factionColor,
         canAdd: !alreadyHiredUnique && !leaderSlotTaken,
         busy: false,
@@ -1481,6 +1498,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                   }),
                 ),
               ],
+              // Filters rather than sorts, so it sits at the opposite edge (same as Cards).
+              const Spacer(),
+              buildCollectionChip(),
             ],
           ),
         ],

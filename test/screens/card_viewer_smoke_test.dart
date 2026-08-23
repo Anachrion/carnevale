@@ -56,8 +56,9 @@ void main() {
     );
     await tester.pump();
 
-    // The page indicator reflects position/count (reached via the ProfileX front/back image getters).
-    expect(find.textContaining('1 / 2'), findsOneWidget);
+    // The pager is built over both profiles. (It used to be checked through the "1 / 2" position
+    // indicator, which went with the navigation hint in CARNEVALEB-76.)
+    expect(find.byType(PageView), findsOneWidget);
   });
 
   testWidgets('The abilities button sits at the bottom right and opens the sheet', (
@@ -79,7 +80,6 @@ void main() {
 
     final button = find.widgetWithText(TextButton, 'Abilities');
     final close = find.byIcon(Icons.close);
-    final hint = find.textContaining('flip');
     final screen = tester.getSize(find.byType(Scaffold));
 
     // Bottom right: below the close button it used to sit beside, and right of centre.
@@ -88,9 +88,9 @@ void main() {
       greaterThan(tester.getCenter(close).dy),
     );
     expect(tester.getCenter(button).dx, greaterThan(screen.width / 2));
-    // On the same line as the flip/swipe hint, which sits on the left.
-    expect(tester.getCenter(button).dy, closeTo(tester.getCenter(hint).dy, 1));
-    expect(tester.getCenter(hint).dx, lessThan(screen.width / 2));
+    // Still on the bottom bar: below the card, not floating in the middle of the screen. The
+    // collection button shares this row when someone is logged in; nobody is here.
+    expect(tester.getCenter(button).dy, greaterThan(screen.height * 0.75));
 
     // The button is laid out at its natural height rather than being squashed by its parent and
     // painted with its top and bottom edges clipped off.

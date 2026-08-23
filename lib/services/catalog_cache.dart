@@ -42,6 +42,17 @@ class CatalogCache {
     }
   }
 
+  /// Forgets a cached collection outright, rather than storing an empty one. Used on logout, where
+  /// "this account has nothing" and "no account has said anything" must not be confused.
+  static Future<void> clear(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(key);
+    } catch (e) {
+      debugPrint('Catalog cache clear ($key) failed: $e');
+    }
+  }
+
   static Future<List<T>?> restore<T>(String key, FullType itemType) async {
     try {
       final prefs = await SharedPreferences.getInstance();

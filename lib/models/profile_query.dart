@@ -60,6 +60,7 @@ class ProfileQuery {
     this.text = '',
     this.factions = const {},
     this.facets = const {},
+    this.ownedIds,
   });
 
   /// Free text, swept across the profile's name, keywords, abilities, weapons and special rules.
@@ -67,8 +68,14 @@ class ProfileQuery {
   final Set<String> factions;
   final Set<Facet> facets;
 
+  /// Narrows to the profiles the player owns at least one miniature of, or null when the
+  /// collection filter is off. Passed in rather than read from the service so [ProfileService]
+  /// stays a pure function of its arguments — and so an empty set means "owns nothing", which
+  /// correctly matches nothing, rather than being confused with "no filter".
+  final Set<int>? ownedIds;
+
   bool get isEmpty =>
-      text.trim().isEmpty && factions.isEmpty && facets.isEmpty;
+      text.trim().isEmpty && factions.isEmpty && facets.isEmpty && ownedIds == null;
 }
 
 /// A facet offered as you type, with the number of models in the catalog that carry it.

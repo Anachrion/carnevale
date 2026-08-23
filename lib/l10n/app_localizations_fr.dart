@@ -1222,11 +1222,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cardSwitchIllustration => 'Changer d\'illustration';
 
   @override
-  String cardViewerHint(int current, int total) {
-    return '$current / $total  •  appuyer/←→ retourner  •  glisser ↑↓ naviguer';
-  }
-
-  @override
   String get cardAbilities => 'Capacités';
 
   @override
@@ -1388,4 +1383,66 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get spellGrantedLower => 'accordé';
+
+  @override
+  String get navCollection => 'Collection';
+
+  @override
+  String get collectionFilter => 'Ma collection';
+
+  @override
+  String get collectionOwned => 'Possédées';
+
+  @override
+  String get collectionBuilt => 'Montées';
+
+  @override
+  String get collectionPainted => 'Peintes';
+
+  @override
+  String get collectionNestingHint =>
+      'Une figurine peinte est forcément montée : baisser un total rabote ceux du dessus.';
+
+  @override
+  String get collectionTabMine => 'Ma collection';
+
+  @override
+  String get collectionTabAdd => 'Ajouter';
+
+  @override
+  String get collectionSearchMine => 'Rechercher dans ma collection...';
+
+  @override
+  String get collectionSearchAdd => 'Ajouter une figurine...';
+
+  @override
+  String collectionProgress(int owned, int total) {
+    return '$owned / $total profils';
+  }
+
+  @override
+  String collectionProgressDetail(int miniatures, int painted) {
+    return '$miniatures figurines, $painted peintes';
+  }
+
+  @override
+  String collectionAbsentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count figurines encore absentes de votre collection',
+      one: '1 figurine encore absente de votre collection',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionEmpty => 'Rien dans votre collection pour l\'instant.';
+
+  @override
+  String get collectionAllAdded =>
+      'Tous les modèles sont déjà dans votre collection.';
+
+  @override
+  String get collectionSaveFailed => 'Impossible d\'enregistrer ce changement.';
 }

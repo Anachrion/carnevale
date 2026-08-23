@@ -14,13 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import '../app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../l10n/app_localizations.dart';
+import '../main.dart';
 import '../services/api_exception.dart';
+import '../services/collection_service.dart';
 import '../services/profile_service.dart';
+import '../widgets/collection_glyph.dart';
+import '../widgets/faction_filter_row.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/profile_search.dart';
@@ -93,13 +99,21 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
   @override
   void initState() {
     super.initState();
+    // The badges and the "my collection" chip both read the service, so redraw when it moves —
+    // a stepper tapped in the card viewer should be visible on this list when it pops back.
+    CollectionService().addListener(_onCollectionChanged);
     _load();
   }
 
   @override
   void dispose() {
+    CollectionService().removeListener(_onCollectionChanged);
     disposeSearch();
     super.dispose();
+  }
+
+  void _onCollectionChanged() {
+    if (mounted) applySearch();
   }
 
   Future<void> _load() async {
@@ -109,6 +123,11 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
     });
     try {
       await _service.loadAll();
+      // The collection is decoration on this screen, not its subject: a failure to fetch it must
+      // never keep the catalog from showing, so it is loaded alongside and its errors swallowed.
+      if (authService.currentUser != null) {
+        unawaited(CollectionService().load().catchError((_) {}));
+      }
       if (!mounted) return;
       setState(() => _loading = false);
       applySearch();
@@ -161,7 +180,10 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
                   children: [
                     Column(
                       children: [
-                        _buildFactionFilter(),
+                        FactionFilterRow(
+                          selected: _selectedFactions,
+                          onToggle: _toggleFaction,
+                        ),
                         _buildSortChips(),
                         const SizedBox(height: 8),
                         Expanded(child: _buildList()),
@@ -221,62 +243,14 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
           chip(l10n.sortName, _CardSort.name),
           const SizedBox(width: 6),
           chip(l10n.sortCost, _CardSort.cost),
+          // Pushed to the far edge: it filters rather than sorts, and the gap is what says so.
+          const Spacer(),
+          buildCollectionChip(),
         ],
       ),
     );
   }
 
-  /// The seven faction toggles, sized to fit the screen rather than scrolling. They used to be
-  /// fixed-width chips in a horizontal ListView, which overflowed on a narrow phone and pushed
-  /// Rashaar — the last one — off the edge, behind a sideways scroll nobody thinks to try on a
-  /// filter row. A filter you can't see is a filter you don't know you have, so they shrink
-  /// together instead, down to the point where all seven still fit.
-  Widget _buildFactionFilter() {
-    const factions = [
-      'guild',
-      'doctors',
-      'vatican',
-      'patricians',
-      'strigoi',
-      'gifted',
-      'rashaar',
-    ];
-    const gap = 8.0;
-    const padding = 16.0;
-    const maxDiameter = 48.0;
-    // Floor, so they stay a usable tap target. Seven of these plus the gaps need ~276px, which
-    // clears even the narrowest phones in circulation — so the row never overflows in practice.
-    const minDiameter = 28.0;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final available = constraints.maxWidth - padding * 2;
-        final diameter =
-            ((available - gap * (factions.length - 1)) / factions.length).clamp(
-              minDiameter,
-              maxDiameter,
-            );
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: padding),
-          child: SizedBox(
-            height: diameter + 12,
-            child: Row(
-              spacing: gap,
-              children: [
-                for (final faction in factions)
-                  _FactionIconChip(
-                    faction: faction,
-                    diameter: diameter,
-                    selected: _selectedFactions.contains(faction),
-                    onTap: () => _toggleFaction(faction),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildList() {
     if (_loading) {
@@ -306,49 +280,6 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
   }
 }
 
-class _FactionIconChip extends StatelessWidget {
-  const _FactionIconChip({
-    required this.faction,
-    required this.diameter,
-    required this.selected,
-    required this.onTap,
-  });
-  final String faction;
-
-  /// Set by the filter row, which divides the screen width across the seven factions so they all
-  /// stay visible. Spacing is the row's job, so the chip carries no margin of its own.
-  final double diameter;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = AppPalette.factionColors[faction] ?? context.accentColor;
-    final iconPath = AppPalette.factionIcons[faction]!;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: diameter,
-        height: diameter,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: AppPalette.factionIconGradient(
-            color,
-            opacity: selected ? 1 : 0.5,
-          ),
-        ),
-        // Scales with the chip, so the glyph keeps its proportions as the row tightens.
-        padding: EdgeInsets.all(diameter / 12),
-        child: Image.asset(
-          iconPath,
-          fit: BoxFit.contain,
-          color: selected ? Colors.white : Colors.white.withValues(alpha: 0.35),
-          colorBlendMode: BlendMode.srcIn,
-        ),
-      ),
-    );
-  }
-}
 
 class _ProfileTile extends StatelessWidget {
   const _ProfileTile({
@@ -421,6 +352,14 @@ class _ProfileTile extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Binary and quiet: owned at all, or nothing drawn. How many, and in what state,
+                // belongs to the collection screen — a browse list only answers yes or no.
+                if (CollectionService().owns(profile.id)) ...[
+                  CollectionGlyph.mark(
+                    color: CollectionGlyph.tileColorFor(CollectionState.painted),
+                  ),
+                  const SizedBox(width: 10),
+                ],
                 Text(
                   '${profile.ducats}',
                   style: GoogleFonts.cinzel(
