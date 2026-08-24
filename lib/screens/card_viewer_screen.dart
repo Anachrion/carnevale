@@ -21,6 +21,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import '../main.dart';
 import '../services/collection_service.dart';
 import '../widgets/collection_dialog.dart';
@@ -231,10 +232,10 @@ class _CardViewerScreenState extends State<CardViewerScreen>
   /// would double-count. Absent entirely when logged out, and quiet (just the label) when the
   /// player owns none of this model yet.
   Widget _buildCollectionButton() {
-    if (authService.currentUser == null) return const SizedBox.shrink();
+    if (!collectionLive) return const SizedBox.shrink();
     final profile = widget.profiles[_currentIndex];
     return ListenableBuilder(
-      listenable: CollectionService(),
+      listenable: Listenable.merge([CollectionService(), authService]),
       builder: (context, _) {
         final entry = CollectionService().entryFor(profile.id);
         final buckets = <(CollectionState, int)>[

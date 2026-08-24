@@ -32,11 +32,33 @@ class AuthUser {
     required this.id,
     required this.email,
     required this.username,
+    this.collectionEnabled = false,
+    this.collectionVisible = true,
   });
 
   final int id;
   final String email;
   final String username;
+
+  /// The Collection feature is switched on for this account (CARNEVALEB-76).
+  final bool collectionEnabled;
+
+  /// The Collection feature is offered at all — the home-screen entry and the menu item. Turning
+  /// this off hides everything the feature adds while remembering [collectionEnabled], so turning
+  /// it back on returns to the collection rather than to the introduction.
+  ///
+  /// Both live on the account rather than in local settings: someone who tracks a collection does
+  /// it the same way on every device they own.
+  final bool collectionVisible;
+
+  AuthUser copyWith({bool? collectionEnabled, bool? collectionVisible}) =>
+      AuthUser(
+        id: id,
+        email: email,
+        username: username,
+        collectionEnabled: collectionEnabled ?? this.collectionEnabled,
+        collectionVisible: collectionVisible ?? this.collectionVisible,
+      );
 }
 
 class AuthException implements Exception {
@@ -159,7 +181,10 @@ class AuthService extends ChangeNotifier {
       final token = _bearer(res.headers.value('authorization'));
       final refresh = res.data?['refresh_token'] as String?;
       final userMap = res.data?['user'] as Map<String, dynamic>?;
-      if (token == null || refresh == null || refresh.isEmpty || userMap == null) {
+      if (token == null ||
+          refresh == null ||
+          refresh.isEmpty ||
+          userMap == null) {
         throw AuthException(
           'Login succeeded but no session token was returned.',
         );
@@ -168,6 +193,8 @@ class AuthService extends ChangeNotifier {
         id: userMap['id'] as int,
         email: userMap['email'] as String,
         username: userMap['username'] as String,
+        collectionEnabled: userMap['collection_enabled'] as bool? ?? false,
+        collectionVisible: userMap['collection_visible'] as bool? ?? true,
       );
 
       _client.authToken = token;
@@ -291,6 +318,8 @@ class AuthService extends ChangeNotifier {
         id: userMap['id'] as int,
         email: userMap['email'] as String,
         username: userMap['username'] as String,
+        collectionEnabled: userMap['collection_enabled'] as bool? ?? false,
+        collectionVisible: userMap['collection_visible'] as bool? ?? true,
       );
 
       _client.authToken = accessToken;
@@ -318,18 +347,58 @@ class AuthService extends ChangeNotifier {
       if (user == null) {
         throw AuthException('The server returned no account details.');
       }
-      final authUser = AuthUser(
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      );
-      _currentUser = authUser;
-      await _storage.write(key: _userKey, value: _userToJson(authUser));
+      _currentUser = _authUserFrom(user);
+      await _storage.write(key: _userKey, value: _userToJson(_currentUser!));
       notifyListeners();
     } on DioException catch (e) {
       throw AuthException(parseAuthError(e));
     }
   }
+
+  /// Switches the Collection feature on or off for this account (CARNEVALEB-76).
+  ///
+  /// Optimistic: the flags flip locally and the screens redraw at once, with the write behind. A
+  /// failure puts the previous account back and reports false, so the caller can say so — the same
+  /// bargain the collection counters make.
+  Future<bool> setCollectionSettings({bool? enabled, bool? visible}) async {
+    final previous = _currentUser;
+    if (previous == null) return false;
+
+    _currentUser = previous.copyWith(
+      collectionEnabled: enabled,
+      collectionVisible: visible,
+    );
+    notifyListeners();
+
+    try {
+      final res = await _client.session.updateAccount(
+        updateAccountInput: api.UpdateAccountInput(
+          (b) => b
+            ..user = api.UpdateAccountInputUser((ub) {
+              if (enabled != null) ub.collectionEnabled = enabled;
+              if (visible != null) ub.collectionVisible = visible;
+            }).toBuilder(),
+        ),
+      );
+      final user = res.data?.user;
+      if (user != null) _currentUser = _authUserFrom(user);
+      await _storage.write(key: _userKey, value: _userToJson(_currentUser!));
+      notifyListeners();
+      return true;
+    } on DioException {
+      _currentUser = previous;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  AuthUser _authUserFrom(api.SessionUser user) => AuthUser(
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    collectionEnabled: user.collectionEnabled,
+    collectionVisible: user.collectionVisible,
+  );
 
   /// Signs this device out. Other devices the user is signed in on keep their sessions — see
   /// [logOutEverywhere] for the deliberate opposite.
@@ -406,8 +475,13 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  String _userToJson(AuthUser u) =>
-      json.encode({'id': u.id, 'email': u.email, 'username': u.username});
+  String _userToJson(AuthUser u) => json.encode({
+    'id': u.id,
+    'email': u.email,
+    'username': u.username,
+    'collection_enabled': u.collectionEnabled,
+    'collection_visible': u.collectionVisible,
+  });
 
   AuthUser _userFromJson(String raw) {
     final map = json.decode(raw) as Map<String, dynamic>;
@@ -415,6 +489,10 @@ class AuthService extends ChangeNotifier {
       id: map['id'] as int,
       email: map['email'] as String,
       username: map['username'] as String,
+      // Absent from anything written before CARNEVALEB-76: fall back to the server's own defaults
+      // rather than crashing on a session stored by an older build.
+      collectionEnabled: map['collection_enabled'] as bool? ?? false,
+      collectionVisible: map['collection_visible'] as bool? ?? true,
     );
   }
 

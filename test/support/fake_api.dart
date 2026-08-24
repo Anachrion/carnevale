@@ -111,14 +111,26 @@ String fakeJwt({Duration validFor = const Duration(hours: 1)}) {
 }
 
 /// Signs a user in against [adapter], for the screens that only show something to a logged-in
-/// player (the collection badge, its filter chip and its drawer entry).
+/// player (the collection badge, its filter chip and its menu entries).
+///
+/// The Collection switches default to *on*, unlike a real fresh account, because that is the state
+/// nearly every test about the feature wants to be in; the handful that exercise the gates
+/// themselves pass false explicitly.
 Future<void> signInFakeUser(
   FakeApiAdapter adapter, {
   int id = 1,
   String username = 'Eldrim',
+  bool collectionEnabled = true,
+  bool collectionVisible = true,
 }) async {
   adapter.stub('POST', '/login', {
-    'user': {'id': id, 'email': '$username@example.com', 'username': username},
+    'user': {
+      'id': id,
+      'email': '$username@example.com',
+      'username': username,
+      'collection_enabled': collectionEnabled,
+      'collection_visible': collectionVisible,
+    },
     'refresh_token': 'refresh-token',
   }, headers: {'authorization': 'Bearer ${fakeJwt()}'});
   await AuthService().logIn(login: username, password: 'password123');

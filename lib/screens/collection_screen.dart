@@ -21,17 +21,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../app_colors.dart';
+import '../collection_gate.dart';
+import '../main.dart';
 import '../l10n/app_localizations.dart';
 import '../services/api_exception.dart';
 import '../services/collection_service.dart';
 import '../services/profile_service.dart';
 import 'collection_tab.dart';
 import '../widgets/app_background.dart';
+import '../widgets/app_toast.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/collection_glyph.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/status_views.dart';
+import '../widgets/themed_dialog_card.dart';
 
 /// Managing the shelf: what the player owns, and what they could add (CARNEVALEB-76).
 ///
@@ -64,12 +68,17 @@ class _CollectionScreenState extends State<CollectionScreen> {
   void initState() {
     super.initState();
     CollectionService().addListener(_onCollectionChanged);
+    // ...and the account, which is what says whether the feature is live at all: without
+    // this, disabling from the header left the screen showing the collection it had just
+    // switched off, until you navigated away and back (CARNEVALEB-76).
+    authService.addListener(_onCollectionChanged);
     _load();
   }
 
   @override
   void dispose() {
     CollectionService().removeListener(_onCollectionChanged);
+    authService.removeListener(_onCollectionChanged);
     _pageController.dispose();
     super.dispose();
   }
@@ -136,16 +145,104 @@ class _CollectionScreenState extends State<CollectionScreen> {
             ScreenHeader(
               title: AppLocalizations.of(context).navCollection,
               onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+              trailing: collectionLive
+                  ? IconButton(
+                      tooltip: AppLocalizations.of(context).collectionDisable,
+                      icon: Icon(
+                        Icons.power_settings_new,
+                        size: 20,
+                        color: context.subtleTextColor,
+                      ),
+                      onPressed: _confirmDisable,
+                    )
+                  : null,
             ),
-            _buildProgress(),
-            const SizedBox(height: 12),
-            _buildTabBar(),
-            const SizedBox(height: 8),
-            Expanded(child: _buildBody()),
+            if (!collectionLive)
+              Expanded(child: _CollectionIntro(onActivate: _activate))
+            else ...[
+              _buildProgress(),
+              const SizedBox(height: 12),
+              _buildTabBar(),
+              const SizedBox(height: 8),
+              Expanded(child: _buildBody()),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _activate() async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await authService.setCollectionSettings(enabled: true);
+    if (!mounted) return;
+    if (!ok) {
+      showAppToast(context, l10n.collectionSaveFailed);
+      return;
+    }
+    // Nothing was fetched while the feature was off, so pull the shelf in now.
+    _load();
+  }
+
+  /// Switching off is confirmed, because from the outside it looks like it might throw the
+  /// collection away — so the dialog is mostly there to say that it does not.
+  Future<void> _confirmDisable() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => ThemedDialogCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.collectionDisable,
+              style: GoogleFonts.cinzel(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.collectionDisabledKept,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.45,
+                color: context.subtleTextColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: Text(
+                    l10n.actionCancel,
+                    style: GoogleFonts.cinzel(color: context.subtleTextColor),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: Text(
+                    l10n.collectionDisableConfirm,
+                    style: GoogleFonts.cinzel(
+                      fontWeight: FontWeight.w700,
+                      color: context.dangerColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final ok = await authService.setCollectionSettings(enabled: false);
+    if (!ok && mounted) showAppToast(context, l10n.collectionSaveFailed);
   }
 
   Widget _buildBody() {
@@ -336,6 +433,98 @@ class _CompositionBar extends StatelessWidget {
                       ),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+/// What the Collection feature is, and the button that switches it on.
+///
+/// This is the whole screen until the account asks for the feature — nothing else about it appears
+/// anywhere in the app until then, so this page has to introduce it from nothing.
+class _CollectionIntro extends StatelessWidget {
+  const _CollectionIntro({required this.onActivate});
+
+  final Future<void> Function() onActivate;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final signedIn = authService.currentUser != null;
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+        child: GlassPanel(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/images/collection_icon.png',
+                  width: 72,
+                  height: 72,
+                  color: context.accentColor,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                l10n.collectionIntroTitle,
+                style: GoogleFonts.cinzel(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: context.textColor,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.collectionIntroBody,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: context.subtleTextColor,
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (signedIn)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onActivate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.accentColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      l10n.collectionIntroActivate,
+                      style: GoogleFonts.cinzel(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  l10n.collectionIntroSignIn,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.45,
+                    color: context.accentColor,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

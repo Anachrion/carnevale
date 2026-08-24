@@ -2641,6 +2641,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This gang has no models yet.'**
   String get collectionGangEmpty;
+
+  /// No description provided for @collectionIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track what you own'**
+  String get collectionIntroTitle;
+
+  /// No description provided for @collectionIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark which models are on your shelf, how many are assembled and how many are painted. The catalogue and the gang builder then show what you have, and a gang tells you whether you can put it on the table.'**
+  String get collectionIntroBody;
+
+  /// No description provided for @collectionIntroActivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get collectionIntroActivate;
+
+  /// No description provided for @collectionIntroSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use your collection — it follows your account, not this device.'**
+  String get collectionIntroSignIn;
+
+  /// No description provided for @collectionDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable collection'**
+  String get collectionDisable;
+
+  /// No description provided for @collectionDisabledKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Your collection is kept. Switching it back on brings it straight back.'**
+  String get collectionDisabledKept;
+
+  /// No description provided for @collectionDisableConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get collectionDisableConfirm;
+
+  /// No description provided for @settingsCollectionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection available'**
+  String get settingsCollectionAvailable;
 }
 
 class _AppLocalizationsDelegate

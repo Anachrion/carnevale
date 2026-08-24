@@ -1491,4 +1491,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get collectionGangEmpty => 'Ce gang n\'a pas encore de figurines.';
+
+  @override
+  String get collectionIntroTitle => 'Suivez ce que vous possédez';
+
+  @override
+  String get collectionIntroBody =>
+      'Marquez les modèles présents sur votre étagère, combien sont montés et combien sont peints. Le catalogue et le gang builder affichent alors ce que vous avez, et un gang vous dit si vous pouvez l\'aligner sur la table.';
+
+  @override
+  String get collectionIntroActivate => 'Activer';
+
+  @override
+  String get collectionIntroSignIn =>
+      'Connectez-vous pour utiliser votre collection — elle suit votre compte, pas cet appareil.';
+
+  @override
+  String get collectionDisable => 'Désactiver la collection';
+
+  @override
+  String get collectionDisabledKept =>
+      'Votre collection est conservée. La réactiver la ramène telle quelle.';
+
+  @override
+  String get collectionDisableConfirm => 'Désactiver';
+
+  @override
+  String get settingsCollectionAvailable => 'Collection disponible';
 }

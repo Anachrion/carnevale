@@ -18,8 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import '../l10n/app_localizations.dart';
-import '../main.dart';
 import '../models/profile_query.dart';
 import '../services/collection_service.dart';
 import '../services/profile_service.dart';
@@ -309,7 +309,7 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
   /// inert control would be worse than no control. Shaped exactly like a [SortChip] so it reads as
   /// part of the same row, but pushed to the far edge by its callers — it filters, it does not sort.
   Widget buildCollectionChip() {
-    if (authService.currentUser == null) return const SizedBox.shrink();
+    if (!collectionLive) return const SizedBox.shrink();
     final accent = context.accentColor;
     final on = collectionOnly;
     return GestureDetector(

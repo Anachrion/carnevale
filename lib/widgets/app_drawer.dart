@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../screens/account_screen.dart';
@@ -116,9 +117,10 @@ class AppDrawer extends StatelessWidget {
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.cards, const CardsScreen()),
                   ),
-                  // Only for signed-in players: the collection lives on the account, so there is
-                  // nothing behind this entry for a visitor (CARNEVALEB-76).
-                  if (authService.currentUser != null)
+                  // Only when the account offers it: the collection lives on the account, so
+                  // there is nothing behind this entry for a visitor, and the Settings switch can
+                  // take it away for someone who does not want it (CARNEVALEB-76).
+                  if (collectionOffered)
                     _NavItem(
                       label: l10n.navCollection,
                       active: current == AppDrawerRoute.collection,

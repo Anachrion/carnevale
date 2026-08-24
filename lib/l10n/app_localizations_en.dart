@@ -1475,4 +1475,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionGangEmpty => 'This gang has no models yet.';
+
+  @override
+  String get collectionIntroTitle => 'Track what you own';
+
+  @override
+  String get collectionIntroBody =>
+      'Mark which models are on your shelf, how many are assembled and how many are painted. The catalogue and the gang builder then show what you have, and a gang tells you whether you can put it on the table.';
+
+  @override
+  String get collectionIntroActivate => 'Enable';
+
+  @override
+  String get collectionIntroSignIn =>
+      'Sign in to use your collection — it follows your account, not this device.';
+
+  @override
+  String get collectionDisable => 'Disable collection';
+
+  @override
+  String get collectionDisabledKept =>
+      'Your collection is kept. Switching it back on brings it straight back.';
+
+  @override
+  String get collectionDisableConfirm => 'Disable';
+
+  @override
+  String get settingsCollectionAvailable => 'Collection available';
 }

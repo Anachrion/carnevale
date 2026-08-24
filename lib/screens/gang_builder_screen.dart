@@ -17,6 +17,7 @@
 import 'dart:async';
 
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -231,6 +232,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     // The hire tiles carry the collection mark and the shortfall, and the filter chip reads the
     // same service — redraw whenever it moves (CARNEVALEB-76).
     CollectionService().addListener(_onCollectionChanged);
+    // ...and when the account switches the feature on or off, which is what decides
+    // whether any of it is drawn at all (CARNEVALEB-76).
+    authService.addListener(_onCollectionChanged);
     _loadData();
   }
 
@@ -241,6 +245,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   @override
   void dispose() {
     CollectionService().removeListener(_onCollectionChanged);
+    authService.removeListener(_onCollectionChanged);
     disposeSearch();
     _hireScroll.dispose();
     _pageController.dispose();
@@ -369,7 +374,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
     try {
       // The collection only decorates the hire list, so it is fetched alongside and its failures
       // swallowed: an unreachable collection must never keep the builder from opening.
-      unawaited(CollectionService().load().catchError((_) {}));
+      if (collectionLive) {
+        unawaited(CollectionService().load().catchError((_) {}));
+      }
       final results = await Future.wait([
         ProfileService().search('', factions: {_gang.faction, 'gifted'}),
         EquipmentService().getAll(),
@@ -889,7 +896,7 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
           const SizedBox(width: 4),
           // Whether this gang can actually be put on the table with what the player owns
           // (CARNEVALEB-76). Gang-level like the export beside it, so it keeps the same company.
-          if (authService.currentUser != null) _buildCollectionButton(),
+          if (collectionLive) _buildCollectionButton(),
           // Hands this gang over as plain text (CARNEVALEB-74) — the one action that belongs to the
           // gang as a whole rather than to a model, so it sits with the title rather than in the list.
           IconButton(
@@ -1348,7 +1355,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                 _entryCount(q) > 0,
           );
       final leaderSlotTaken = hardLeaderTaken || conditionalFlexBlocked;
-      final collected = CollectionService().entryFor(p.id);
+      final collected = collectionLive
+          ? CollectionService().entryFor(p.id)
+          : CollectionEntry.none;
       return _HireCardTile(
         key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,

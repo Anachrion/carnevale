@@ -213,7 +213,15 @@ void main() {
 
     // The exact body the backend returns from POST /signup: the created account, no credentials.
     const createdAccount = {
-      'user': {'id': 9, 'email': 'new@example.com', 'username': 'Neun'},
+      // A fresh account has the Collection feature off but offered, exactly as the backend
+      // returns it — the generated Account model requires both (CARNEVALEB-76).
+      'user': {
+        'id': 9,
+        'email': 'new@example.com',
+        'username': 'Neun',
+        'collection_enabled': false,
+        'collection_visible': true,
+      },
     };
 
     Future<void> signUp() => auth.signUp(

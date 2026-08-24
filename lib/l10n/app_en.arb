@@ -844,5 +844,13 @@
       }
     }
   },
-  "collectionGangEmpty": "This gang has no models yet."
+  "collectionGangEmpty": "This gang has no models yet.",
+  "collectionIntroTitle": "Track what you own",
+  "collectionIntroBody": "Mark which models are on your shelf, how many are assembled and how many are painted. The catalogue and the gang builder then show what you have, and a gang tells you whether you can put it on the table.",
+  "collectionIntroActivate": "Enable",
+  "collectionIntroSignIn": "Sign in to use your collection — it follows your account, not this device.",
+  "collectionDisable": "Disable collection",
+  "collectionDisabledKept": "Your collection is kept. Switching it back on brings it straight back.",
+  "collectionDisableConfirm": "Disable",
+  "settingsCollectionAvailable": "Collection available"
 }

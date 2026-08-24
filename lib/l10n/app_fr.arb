@@ -451,5 +451,13 @@
   "collectionGangShort": "{count, plural, =1{Il vous manque 1 figurine pour aligner ce gang} other{Il vous manque {count} figurines pour aligner ce gang}}",
   "collectionGangComplete": "Toutes les figurines de ce gang sont dans votre collection.",
   "collectionGangOwnedOf": "{owned} sur {hired}",
-  "collectionGangEmpty": "Ce gang n'a pas encore de figurines."
+  "collectionGangEmpty": "Ce gang n'a pas encore de figurines.",
+  "collectionIntroTitle": "Suivez ce que vous possédez",
+  "collectionIntroBody": "Marquez les modèles présents sur votre étagère, combien sont montés et combien sont peints. Le catalogue et le gang builder affichent alors ce que vous avez, et un gang vous dit si vous pouvez l'aligner sur la table.",
+  "collectionIntroActivate": "Activer",
+  "collectionIntroSignIn": "Connectez-vous pour utiliser votre collection — elle suit votre compte, pas cet appareil.",
+  "collectionDisable": "Désactiver la collection",
+  "collectionDisabledKept": "Votre collection est conservée. La réactiver la ramène telle quelle.",
+  "collectionDisableConfirm": "Désactiver",
+  "settingsCollectionAvailable": "Collection disponible"
 }

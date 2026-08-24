@@ -17,6 +17,7 @@
 import 'dart:async';
 
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
@@ -102,12 +103,16 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
     // The badges and the "my collection" chip both read the service, so redraw when it moves —
     // a stepper tapped in the card viewer should be visible on this list when it pops back.
     CollectionService().addListener(_onCollectionChanged);
+    // ...and when the account switches the feature on or off, which is what decides
+    // whether any of it is drawn at all (CARNEVALEB-76).
+    authService.addListener(_onCollectionChanged);
     _load();
   }
 
   @override
   void dispose() {
     CollectionService().removeListener(_onCollectionChanged);
+    authService.removeListener(_onCollectionChanged);
     disposeSearch();
     super.dispose();
   }
@@ -125,7 +130,7 @@ class _CardsScreenState extends State<CardsScreen> with ProfileSearchMixin {
       await _service.loadAll();
       // The collection is decoration on this screen, not its subject: a failure to fetch it must
       // never keep the catalog from showing, so it is loaded alongside and its errors swallowed.
-      if (authService.currentUser != null) {
+      if (collectionLive) {
         unawaited(CollectionService().load().catchError((_) {}));
       }
       if (!mounted) return;
@@ -354,7 +359,7 @@ class _ProfileTile extends StatelessWidget {
                 ),
                 // Binary and quiet: owned at all, or nothing drawn. How many, and in what state,
                 // belongs to the collection screen — a browse list only answers yes or no.
-                if (CollectionService().owns(profile.id)) ...[
+                if (collectionLive && CollectionService().owns(profile.id)) ...[
                   CollectionGlyph.mark(
                     color: CollectionGlyph.tileColorFor(CollectionState.painted),
                   ),
