@@ -13,6 +13,10 @@ class _$SessionUser extends SessionUser {
   final String email;
   @override
   final String username;
+  @override
+  final bool collectionEnabled;
+  @override
+  final bool collectionVisible;
 
   factory _$SessionUser([void Function(SessionUserBuilder)? updates]) =>
       (SessionUserBuilder()..update(updates))._build();
@@ -21,6 +25,8 @@ class _$SessionUser extends SessionUser {
     required this.id,
     required this.email,
     required this.username,
+    required this.collectionEnabled,
+    required this.collectionVisible,
   }) : super._();
   @override
   SessionUser rebuild(void Function(SessionUserBuilder) updates) =>
@@ -35,7 +41,9 @@ class _$SessionUser extends SessionUser {
     return other is SessionUser &&
         id == other.id &&
         email == other.email &&
-        username == other.username;
+        username == other.username &&
+        collectionEnabled == other.collectionEnabled &&
+        collectionVisible == other.collectionVisible;
   }
 
   @override
@@ -44,6 +52,8 @@ class _$SessionUser extends SessionUser {
     _$hash = $jc(_$hash, id.hashCode);
     _$hash = $jc(_$hash, email.hashCode);
     _$hash = $jc(_$hash, username.hashCode);
+    _$hash = $jc(_$hash, collectionEnabled.hashCode);
+    _$hash = $jc(_$hash, collectionVisible.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -53,7 +63,9 @@ class _$SessionUser extends SessionUser {
     return (newBuiltValueToStringHelper(r'SessionUser')
           ..add('id', id)
           ..add('email', email)
-          ..add('username', username))
+          ..add('username', username)
+          ..add('collectionEnabled', collectionEnabled)
+          ..add('collectionVisible', collectionVisible))
         .toString();
   }
 }
@@ -73,6 +85,16 @@ class SessionUserBuilder implements Builder<SessionUser, SessionUserBuilder> {
   String? get username => _$this._username;
   set username(String? username) => _$this._username = username;
 
+  bool? _collectionEnabled;
+  bool? get collectionEnabled => _$this._collectionEnabled;
+  set collectionEnabled(bool? collectionEnabled) =>
+      _$this._collectionEnabled = collectionEnabled;
+
+  bool? _collectionVisible;
+  bool? get collectionVisible => _$this._collectionVisible;
+  set collectionVisible(bool? collectionVisible) =>
+      _$this._collectionVisible = collectionVisible;
+
   SessionUserBuilder() {
     SessionUser._defaults(this);
   }
@@ -83,6 +105,8 @@ class SessionUserBuilder implements Builder<SessionUser, SessionUserBuilder> {
       _id = $v.id;
       _email = $v.email;
       _username = $v.username;
+      _collectionEnabled = $v.collectionEnabled;
+      _collectionVisible = $v.collectionVisible;
       _$v = null;
     }
     return this;
@@ -115,6 +139,16 @@ class SessionUserBuilder implements Builder<SessionUser, SessionUserBuilder> {
             username,
             r'SessionUser',
             'username',
+          ),
+          collectionEnabled: BuiltValueNullFieldError.checkNotNull(
+            collectionEnabled,
+            r'SessionUser',
+            'collectionEnabled',
+          ),
+          collectionVisible: BuiltValueNullFieldError.checkNotNull(
+            collectionVisible,
+            r'SessionUser',
+            'collectionVisible',
           ),
         );
     replace(_$result);

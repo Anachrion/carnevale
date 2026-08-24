@@ -14,6 +14,8 @@ part 'session_user.g.dart';
 /// * [id] 
 /// * [email] 
 /// * [username] 
+/// * [collectionEnabled] - Whether the player has switched the Collection feature on (CARNEVALEB-76). False until they do. 
+/// * [collectionVisible] - Whether the Collection feature is offered at all — the home-screen entry and the menu item. True by default; turning it off hides everything the feature adds, including the catalogue marks, while remembering `collection_enabled`. Both switches live on the account rather than in the client's local settings, so someone who tracks a collection finds it set up the same way on every device. 
 @BuiltValue()
 abstract class SessionUser implements Built<SessionUser, SessionUserBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -24,6 +26,14 @@ abstract class SessionUser implements Built<SessionUser, SessionUserBuilder> {
 
   @BuiltValueField(wireName: r'username')
   String get username;
+
+  /// Whether the player has switched the Collection feature on (CARNEVALEB-76). False until they do. 
+  @BuiltValueField(wireName: r'collection_enabled')
+  bool get collectionEnabled;
+
+  /// Whether the Collection feature is offered at all — the home-screen entry and the menu item. True by default; turning it off hides everything the feature adds, including the catalogue marks, while remembering `collection_enabled`. Both switches live on the account rather than in the client's local settings, so someone who tracks a collection finds it set up the same way on every device. 
+  @BuiltValueField(wireName: r'collection_visible')
+  bool get collectionVisible;
 
   SessionUser._();
 
@@ -62,6 +72,16 @@ class _$SessionUserSerializer implements PrimitiveSerializer<SessionUser> {
     yield serializers.serialize(
       object.username,
       specifiedType: const FullType(String),
+    );
+    yield r'collection_enabled';
+    yield serializers.serialize(
+      object.collectionEnabled,
+      specifiedType: const FullType(bool),
+    );
+    yield r'collection_visible';
+    yield serializers.serialize(
+      object.collectionVisible,
+      specifiedType: const FullType(bool),
     );
   }
 
@@ -106,6 +126,20 @@ class _$SessionUserSerializer implements PrimitiveSerializer<SessionUser> {
             specifiedType: const FullType(String),
           ) as String;
           result.username = valueDes;
+          break;
+        case r'collection_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.collectionEnabled = valueDes;
+          break;
+        case r'collection_visible':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.collectionVisible = valueDes;
           break;
         default:
           unhandled.add(key);

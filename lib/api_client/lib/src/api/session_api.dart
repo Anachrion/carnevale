@@ -728,7 +728,7 @@ class SessionApi {
     );
   }
 
-  /// Update the current user&#39;s username
+  /// Update the current user&#39;s account settings
   /// 
   ///
   /// Parameters:

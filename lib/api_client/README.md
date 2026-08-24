@@ -141,7 +141,7 @@ Class | Method | HTTP request | Description
 [*SessionApi*](doc/SessionApi.md) | [**refreshToken**](doc/SessionApi.md#refreshtoken) | **POST** /token | Exchange a refresh token for a fresh JWT
 [*SessionApi*](doc/SessionApi.md) | [**resetPassword**](doc/SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [*SessionApi*](doc/SessionApi.md) | [**signup**](doc/SessionApi.md#signup) | **POST** /signup | Register a new user
-[*SessionApi*](doc/SessionApi.md) | [**updateAccount**](doc/SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
+[*SessionApi*](doc/SessionApi.md) | [**updateAccount**](doc/SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s account settings
 [*SpellsApi*](doc/SpellsApi.md) | [**getSpells**](doc/SpellsApi.md#getspells) | **GET** /spells | List all spells, optionally filtered by Discipline
 
 
