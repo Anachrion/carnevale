@@ -12,10 +12,18 @@ part 'update_account_input_user.g.dart';
 ///
 /// Properties:
 /// * [username] 
+/// * [collectionEnabled] 
+/// * [collectionVisible] 
 @BuiltValue()
 abstract class UpdateAccountInputUser implements Built<UpdateAccountInputUser, UpdateAccountInputUserBuilder> {
   @BuiltValueField(wireName: r'username')
-  String get username;
+  String? get username;
+
+  @BuiltValueField(wireName: r'collection_enabled')
+  bool? get collectionEnabled;
+
+  @BuiltValueField(wireName: r'collection_visible')
+  bool? get collectionVisible;
 
   UpdateAccountInputUser._();
 
@@ -40,11 +48,27 @@ class _$UpdateAccountInputUserSerializer implements PrimitiveSerializer<UpdateAc
     UpdateAccountInputUser object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
-    yield r'username';
-    yield serializers.serialize(
-      object.username,
-      specifiedType: const FullType(String),
-    );
+    if (object.username != null) {
+      yield r'username';
+      yield serializers.serialize(
+        object.username,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.collectionEnabled != null) {
+      yield r'collection_enabled';
+      yield serializers.serialize(
+        object.collectionEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.collectionVisible != null) {
+      yield r'collection_visible';
+      yield serializers.serialize(
+        object.collectionVisible,
+        specifiedType: const FullType(bool),
+      );
+    }
   }
 
   @override
@@ -74,6 +98,20 @@ class _$UpdateAccountInputUserSerializer implements PrimitiveSerializer<UpdateAc
             specifiedType: const FullType(String),
           ) as String;
           result.username = valueDes;
+          break;
+        case r'collection_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.collectionEnabled = valueDes;
+          break;
+        case r'collection_visible':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.collectionVisible = valueDes;
           break;
         default:
           unhandled.add(key);

@@ -1222,11 +1222,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cardSwitchIllustration => 'Changer d\'illustration';
 
   @override
-  String cardViewerHint(int current, int total) {
-    return '$current / $total  •  appuyer/←→ retourner  •  glisser ↑↓ naviguer';
-  }
-
-  @override
   String get cardAbilities => 'Capacités';
 
   @override
@@ -1388,4 +1383,139 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get spellGrantedLower => 'accordé';
+
+  @override
+  String get navCollection => 'Collection';
+
+  @override
+  String get collectionFilter => 'Ma collection';
+
+  @override
+  String get collectionOwned => 'Possédées';
+
+  @override
+  String get collectionBuilt => 'Montées';
+
+  @override
+  String get collectionPainted => 'Peintes';
+
+  @override
+  String get collectionNestingHint =>
+      'Une figurine peinte est forcément montée : baisser un total rabote ceux du dessus.';
+
+  @override
+  String get collectionTabMine => 'Ma collection';
+
+  @override
+  String get collectionTabAdd => 'Ajouter';
+
+  @override
+  String get collectionSearchMine => 'Rechercher dans ma collection...';
+
+  @override
+  String get collectionSearchAdd => 'Ajouter une figurine...';
+
+  @override
+  String collectionProgress(int owned, int total) {
+    return '$owned / $total profils';
+  }
+
+  @override
+  String collectionProgressDetail(int miniatures, int painted) {
+    return '$miniatures figurines, $painted peintes';
+  }
+
+  @override
+  String collectionAbsentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count figurines encore absentes de votre collection',
+      one: '1 figurine encore absente de votre collection',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionEmpty => 'Rien dans votre collection pour l\'instant.';
+
+  @override
+  String get collectionAllAdded =>
+      'Tous les modèles sont déjà dans votre collection.';
+
+  @override
+  String get collectionSaveFailed => 'Impossible d\'enregistrer ce changement.';
+
+  @override
+  String get collectionGangTitle => 'Ce gang dans ma collection';
+
+  @override
+  String collectionGangTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count figurines',
+      one: '1 figurine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionGangUnpainted => 'Montées, pas encore peintes';
+
+  @override
+  String get collectionGangBoxed => 'Encore en boîte';
+
+  @override
+  String get collectionGangMissing => 'Manquantes';
+
+  @override
+  String collectionGangShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il vous manque $count figurines pour aligner ce gang',
+      one: 'Il vous manque 1 figurine pour aligner ce gang',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collectionGangComplete =>
+      'Toutes les figurines de ce gang sont dans votre collection.';
+
+  @override
+  String collectionGangOwnedOf(int owned, int hired) {
+    return '$owned sur $hired';
+  }
+
+  @override
+  String get collectionGangEmpty => 'Ce gang n\'a pas encore de figurines.';
+
+  @override
+  String get collectionIntroTitle => 'Suivez ce que vous possédez';
+
+  @override
+  String get collectionIntroBody =>
+      'Marquez les modèles présents sur votre étagère, combien sont montés et combien sont peints. Le catalogue et le gang builder affichent alors ce que vous avez, et un gang vous dit si vous pouvez l\'aligner sur la table.';
+
+  @override
+  String get collectionIntroActivate => 'Activer';
+
+  @override
+  String get collectionIntroSignIn =>
+      'Connectez-vous pour utiliser votre collection — elle suit votre compte, pas cet appareil.';
+
+  @override
+  String get collectionDisable => 'Désactiver la collection';
+
+  @override
+  String get collectionDisabledKept =>
+      'Votre collection est conservée. La réactiver la ramène telle quelle.';
+
+  @override
+  String get collectionDisableConfirm => 'Désactiver';
+
+  @override
+  String get settingsCollectionAvailable => 'Collection disponible';
 }

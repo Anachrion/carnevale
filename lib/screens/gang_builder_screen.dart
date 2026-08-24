@@ -14,17 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
+import '../main.dart';
+import '../models/gang_collection_summary.dart';
 import '../services/api_exception.dart';
 import '../services/equipment_service.dart';
 import '../services/gang_service.dart';
 import '../services/idempotency.dart';
+import '../services/collection_service.dart';
 import '../services/profile_service.dart';
 import '../services/spell_service.dart';
 import '../widgets/app_background.dart';
@@ -37,6 +43,8 @@ import '../widgets/faction_rule.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/guarded_action.dart';
 import '../widgets/points_bar.dart';
+import '../widgets/collection_glyph.dart';
+import '../widgets/gang_collection_sheet.dart';
 import '../widgets/profile_search.dart';
 import '../widgets/sort_chip.dart';
 import '../widgets/spell_chips.dart';
@@ -221,11 +229,23 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
   void initState() {
     super.initState();
     _gang = widget.gang;
+    // The hire tiles carry the collection mark and the shortfall, and the filter chip reads the
+    // same service — redraw whenever it moves (CARNEVALEB-76).
+    CollectionService().addListener(_onCollectionChanged);
+    // ...and when the account switches the feature on or off, which is what decides
+    // whether any of it is drawn at all (CARNEVALEB-76).
+    authService.addListener(_onCollectionChanged);
     _loadData();
+  }
+
+  void _onCollectionChanged() {
+    if (mounted) applySearch();
   }
 
   @override
   void dispose() {
+    CollectionService().removeListener(_onCollectionChanged);
+    authService.removeListener(_onCollectionChanged);
     disposeSearch();
     _hireScroll.dispose();
     _pageController.dispose();
@@ -352,6 +372,11 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
       _error = null;
     });
     try {
+      // The collection only decorates the hire list, so it is fetched alongside and its failures
+      // swallowed: an unreachable collection must never keep the builder from opening.
+      if (collectionLive) {
+        unawaited(CollectionService().load().catchError((_) {}));
+      }
       final results = await Future.wait([
         ProfileService().search('', factions: {_gang.faction, 'gifted'}),
         EquipmentService().getAll(),
@@ -869,6 +894,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             ),
           ),
           const SizedBox(width: 4),
+          // Whether this gang can actually be put on the table with what the player owns
+          // (CARNEVALEB-76). Gang-level like the export beside it, so it keeps the same company.
+          if (collectionLive) _buildCollectionButton(),
           // Hands this gang over as plain text (CARNEVALEB-74) — the one action that belongs to the
           // gang as a whole rather than to a model, so it sits with the title rather than in the list.
           IconButton(
@@ -957,6 +985,44 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
             );
           }).toList(),
         ),
+      ),
+    );
+  }
+
+  /// The way into the gang's collection summary, with a quiet red dot when something is missing.
+  ///
+  /// The dot is the whole point of putting it here rather than inside the sheet: the answer you
+  /// want at a glance while building is "is anything short?", and the detail is one tap away.
+  Widget _buildCollectionButton() {
+    final summary = GangCollectionSummary.of(
+      entries: _gang.entries,
+      profiles: _profiles,
+    );
+    return IconButton(
+      tooltip: AppLocalizations.of(context).collectionGangTitle,
+      onPressed: () => showGangCollectionSheet(
+        context,
+        entries: _gang.entries,
+        profiles: _profiles,
+      ),
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          CollectionGlyph.mark(color: context.accentColor, size: 20),
+          if (!summary.isComplete)
+            Positioned(
+              top: -2,
+              right: -3,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.dangerColor,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1289,11 +1355,15 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                 _entryCount(q) > 0,
           );
       final leaderSlotTaken = hardLeaderTaken || conditionalFlexBlocked;
+      final collected = collectionLive
+          ? CollectionService().entryFor(p.id)
+          : CollectionEntry.none;
       return _HireCardTile(
         key: _hireTileKeys.putIfAbsent(p.id, GlobalKey.new),
         profile: p,
         count: count,
         isUnique: isUnique,
+        owned: collected.owned,
         factionColor: factionColor,
         canAdd: !alreadyHiredUnique && !leaderSlotTaken,
         busy: false,
@@ -1481,6 +1551,9 @@ class _GangBuilderScreenState extends State<GangBuilderScreen>
                   }),
                 ),
               ],
+              // Filters rather than sorts, so it sits at the opposite edge (same as Cards).
+              const Spacer(),
+              buildCollectionChip(),
             ],
           ),
         ],

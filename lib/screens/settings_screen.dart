@@ -135,6 +135,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   // Web streams faces straight from the backend (browser cache), so there is no
                   // local cache to sync — this section is mobile only.
+                  // The Collection switch is an account setting (CARNEVALEB-76), so it says
+                  // nothing to a visitor — and it is the way back for anyone who has turned the
+                  // feature off. Deliberately *not* worded "Enable": that word belongs to the
+                  // introduction screen, which drives the other flag. This one only decides
+                  // whether the feature is offered at all.
+                  AnimatedBuilder(
+                    animation: authService,
+                    builder: (context, _) {
+                      final user = authService.currentUser;
+                      if (user == null) return const SizedBox.shrink();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 28),
+                          Text(
+                            l10n.navCollection,
+                            style: GoogleFonts.cinzel(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: context.accentColor,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SettingRow(
+                            label: l10n.settingsCollectionAvailable,
+                            child: _OptionPicker<bool>(
+                              value: user.collectionVisible,
+                              options: const [true, false],
+                              labelBuilder: (v) =>
+                                  v ? l10n.settingsOn : l10n.settingsOff,
+                              onChanged: (v) async {
+                                final ok = await authService
+                                    .setCollectionSettings(visible: v);
+                                if (!ok && context.mounted) {
+                                  showAppToast(
+                                    context,
+                                    l10n.collectionSaveFailed,
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                   if (!kIsWeb) ...[
                     const SizedBox(height: 28),
                     Text(

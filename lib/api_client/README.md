@@ -84,6 +84,9 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*AbilitiesApi*](doc/AbilitiesApi.md) | [**getAbilities**](doc/AbilitiesApi.md#getabilities) | **GET** /abilities | List all glossary abilities (character and weapon special rules)
 [*CardsApi*](doc/CardsApi.md) | [**getCardsManifest**](doc/CardsApi.md#getcardsmanifest) | **GET** /cards/manifest | Card image sync manifest (identifier, internal_version, download URLs)
+[*CollectionApi*](doc/CollectionApi.md) | [**getCollection**](doc/CollectionApi.md#getcollection) | **GET** /collection | The current player&#39;s collection
+[*CollectionApi*](doc/CollectionApi.md) | [**updateCollection**](doc/CollectionApi.md#updatecollection) | **PUT** /collection | Set the counts for several profiles at once
+[*CollectionApi*](doc/CollectionApi.md) | [**updateCollectionItem**](doc/CollectionApi.md#updatecollectionitem) | **PUT** /collection/{profile_id} | Set the counts for one profile
 [*EquipmentApi*](doc/EquipmentApi.md) | [**getEquipment**](doc/EquipmentApi.md#getequipment) | **GET** /equipment | List all equipment
 [*GamesApi*](doc/GamesApi.md) | [**advanceTurn**](doc/GamesApi.md#advanceturn) | **POST** /games/{id}/turns/advance | Advance the requesting player&#39;s turn cursor
 [*GamesApi*](doc/GamesApi.md) | [**archiveGame**](doc/GamesApi.md#archivegame) | **PATCH** /games/{id}/archive | Archive this game for the current user only
@@ -138,7 +141,7 @@ Class | Method | HTTP request | Description
 [*SessionApi*](doc/SessionApi.md) | [**refreshToken**](doc/SessionApi.md#refreshtoken) | **POST** /token | Exchange a refresh token for a fresh JWT
 [*SessionApi*](doc/SessionApi.md) | [**resetPassword**](doc/SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [*SessionApi*](doc/SessionApi.md) | [**signup**](doc/SessionApi.md#signup) | **POST** /signup | Register a new user
-[*SessionApi*](doc/SessionApi.md) | [**updateAccount**](doc/SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
+[*SessionApi*](doc/SessionApi.md) | [**updateAccount**](doc/SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s account settings
 [*SpellsApi*](doc/SpellsApi.md) | [**getSpells**](doc/SpellsApi.md#getspells) | **GET** /spells | List all spells, optionally filtered by Discipline
 
 
@@ -152,6 +155,11 @@ Class | Method | HTTP request | Description
  - [AvailableGang](doc/AvailableGang.md)
  - [CardManifestEntry](doc/CardManifestEntry.md)
  - [CardReference](doc/CardReference.md)
+ - [CollectionBulkInput](doc/CollectionBulkInput.md)
+ - [CollectionBulkInputItemsInner](doc/CollectionBulkInputItemsInner.md)
+ - [CollectionItem](doc/CollectionItem.md)
+ - [CollectionItemInput](doc/CollectionItemInput.md)
+ - [CollectionItemInputItem](doc/CollectionItemInputItem.md)
  - [CreateCableTicket201Response](doc/CreateCableTicket201Response.md)
  - [CreateGameInput](doc/CreateGameInput.md)
  - [DiscardAgendaInput](doc/DiscardAgendaInput.md)

@@ -21,6 +21,11 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import '../app_colors.dart';
+import '../collection_gate.dart';
+import '../main.dart';
+import '../services/collection_service.dart';
+import '../widgets/collection_dialog.dart';
+import '../widgets/collection_glyph.dart';
 import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/ability_service.dart';
@@ -220,6 +225,77 @@ class _CardViewerScreenState extends State<CardViewerScreen>
   /// Lays a card's front and back side by side, each scaled to fit its half of the viewport. Shown
   /// in place of the animated single face when [_showBothFaces] holds; tap/swipe-to-flip is dropped
   /// here since both faces are already visible. Padding clears the top buttons and bottom bar.
+  /// The current model's place in the collection, and the way into the counter dialog.
+  ///
+  /// Shows the breakdown rather than a bare label — one glance says "one painted, one built, one
+  /// still boxed" — using the *exclusive* buckets, since three cumulative numbers side by side
+  /// would double-count. Absent entirely when logged out, and quiet (just the label) when the
+  /// player owns none of this model yet.
+  Widget _buildCollectionButton() {
+    if (!collectionLive) return const SizedBox.shrink();
+    final profile = widget.profiles[_currentIndex];
+    return ListenableBuilder(
+      listenable: Listenable.merge([CollectionService(), authService]),
+      builder: (context, _) {
+        final entry = CollectionService().entryFor(profile.id);
+        final buckets = <(CollectionState, int)>[
+          (CollectionState.painted, entry.painted),
+          (CollectionState.built, entry.unpainted),
+          (CollectionState.boxed, entry.boxed),
+        ].where((bucket) => bucket.$2 > 0).toList();
+
+        return TextButton(
+          onPressed: () => showCollectionDialog(context, profile),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CollectionGlyph.mark(
+                color: entry.isEmpty
+                    ? Colors.white.withValues(alpha: 0.45)
+                    : CollectionGlyph.tileColorFor(CollectionState.painted),
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                AppLocalizations.of(context).navCollection,
+                style: const TextStyle(fontSize: 14, color: Colors.white),
+              ),
+              if (buckets.isNotEmpty) ...[
+                const SizedBox(width: 10),
+                Container(
+                  width: 1,
+                  height: 16,
+                  color: Colors.white.withValues(alpha: 0.25),
+                ),
+                for (final (state, count) in buckets) ...[
+                  const SizedBox(width: 8),
+                  CollectionGlyph(
+                    state: state,
+                    color: CollectionGlyph.tileColorFor(state),
+                    size: 15,
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                ],
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildDualFaces(int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 56, 16, 72),
@@ -373,18 +449,11 @@ class _CardViewerScreenState extends State<CardViewerScreen>
                     key: const Key('card-viewer-bottom-bar'),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
-                        child: Text(
-                          AppLocalizations.of(context).cardViewerHint(
-                            _currentIndex + 1,
-                            widget.profiles.length,
-                          ),
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.35),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
+                      // Was the "tap/<-> flip - swipe up/down navigate" hint. It already wrapped to
+                      // two lines at 35% opacity with half of it behind the card, and the gestures
+                      // it described are the ones people try first anyway. The room goes to the
+                      // collection button instead (CARNEVALEB-76).
+                      Flexible(child: _buildCollectionButton()),
                       TextButton.icon(
                         onPressed: _showAbilities,
                         icon: const Icon(Icons.info_outline, size: 20),

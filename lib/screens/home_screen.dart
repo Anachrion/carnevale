@@ -15,6 +15,8 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import '../app_colors.dart';
+import '../collection_gate.dart';
+import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
@@ -22,6 +24,7 @@ import '../widgets/app_background.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/glass_panel.dart';
 import 'cards_screen.dart';
+import 'collection_screen.dart';
 import 'game_home_screen.dart';
 import 'gangs_screen.dart';
 import 'rules_screen.dart';
@@ -70,73 +73,98 @@ class HomeScreen extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 24,
                                   ),
-                                  child: Column(
-                                    children: [
-                                      _MenuItem(
-                                        imagePath:
-                                            'assets/images/cards_icon.png',
-                                        title: l10n.navCards,
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const CardsScreen(),
+                                  // Rebuilt when the account switches Collection on or off, so
+                                  // the menu gains or loses its entry without an app restart.
+                                  child: ListenableBuilder(
+                                    listenable: authService,
+                                    builder: (context, _) => Column(
+                                      children: [
+                                        _MenuItem(
+                                          imagePath:
+                                              'assets/images/cards_icon.png',
+                                          title: l10n.navCards,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const CardsScreen(),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      _MenuItem(
-                                        imagePath:
-                                            'assets/images/list_icon.png',
-                                        imageScale: 1.2,
-                                        title: l10n.navGangs,
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const GangsScreen(),
+                                        const SizedBox(height: 12),
+                                        _MenuItem(
+                                          imagePath:
+                                              'assets/images/list_icon.png',
+                                          imageScale: 1.2,
+                                          title: l10n.navGangs,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const GangsScreen(),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      _MenuItem(
-                                        imagePath:
-                                            'assets/images/games_icon.png',
-                                        imageScale: 1.3,
-                                        title: l10n.navGames,
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const GameHomeScreen(),
+                                        // Offered only when the account asks for it — see
+                                        // collection_gate.dart (CARNEVALEB-76).
+                                        if (collectionOffered) ...[
+                                          const SizedBox(height: 12),
+                                          _MenuItem(
+                                            imagePath:
+                                                'assets/images/collection_icon.png',
+                                            title: l10n.navCollection,
+                                            onTap: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const CollectionScreen(),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                        const SizedBox(height: 12),
+                                        _MenuItem(
+                                          imagePath:
+                                              'assets/images/games_icon.png',
+                                          imageScale: 1.3,
+                                          title: l10n.navGames,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const GameHomeScreen(),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      _MenuItem(
-                                        imagePath:
-                                            'assets/images/book_icon.png',
-                                        title: l10n.navRules,
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const RulesScreen(),
+                                        const SizedBox(height: 12),
+                                        _MenuItem(
+                                          imagePath:
+                                              'assets/images/book_icon.png',
+                                          title: l10n.navRules,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const RulesScreen(),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      _MenuItem(
-                                        imagePath:
-                                            'assets/images/gear_icon.png',
-                                        imageScale: 1.2,
-                                        title: l10n.settingsTitle,
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const SettingsScreen(),
+                                        const SizedBox(height: 12),
+                                        _MenuItem(
+                                          imagePath:
+                                              'assets/images/gear_icon.png',
+                                          imageScale: 1.2,
+                                          title: l10n.settingsTitle,
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const SettingsScreen(),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

@@ -18,9 +18,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import '../l10n/app_localizations.dart';
 import '../models/profile_query.dart';
+import '../services/collection_service.dart';
 import '../services/profile_service.dart';
+import 'collection_glyph.dart';
 import 'glass_panel.dart';
 
 /// The catalog search shared by the Cards screen and the gang builder's Hire tab: free text swept
@@ -66,6 +69,11 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
   /// Exact filters picked from the autocomplete, ANDed together: Leader + Brave finds brave leaders.
   final Set<Facet> pickedFacets = {};
 
+  /// Whether the search is narrowed to the player's own collection (CARNEVALEB-76). Off by
+  /// default, and meaningless when logged out — [buildCollectionChip] renders nothing then, so a
+  /// signed-out player sees exactly the screen that existed before the feature.
+  bool collectionOnly = false;
+
   List<FacetSuggestion> _suggestions = const [];
 
   /// Index into [_suggestions] of the arrow-key selection, or -1 when nothing is selected yet
@@ -86,6 +94,7 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
     text: searchController.text,
     factions: searchFactions,
     facets: pickedFacets,
+    ownedIds: collectionOnly ? CollectionService().ownedProfileIds : null,
   );
 
   bool get hasSuggestions => _suggestions.isNotEmpty && searchFocusNode.hasFocus;
@@ -290,6 +299,52 @@ mixin ProfileSearchMixin<T extends StatefulWidget> on State<T> {
               },
             ),
           ),
+        ),
+      ),
+    );
+  }
+  /// The "my collection" toggle, for the screens that offer it (Cards and the Hire tab).
+  ///
+  /// Renders nothing at all when nobody is logged in: there is no collection to filter by, and an
+  /// inert control would be worse than no control. Shaped exactly like a [SortChip] so it reads as
+  /// part of the same row, but pushed to the far edge by its callers — it filters, it does not sort.
+  Widget buildCollectionChip() {
+    if (!collectionLive) return const SizedBox.shrink();
+    final accent = context.accentColor;
+    final on = collectionOnly;
+    return GestureDetector(
+      onTap: () {
+        collectionOnly = !collectionOnly;
+        applySearch();
+      },
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+        decoration: BoxDecoration(
+          color: on ? accent.withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: on ? accent : Colors.white.withValues(alpha: 0.4),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CollectionGlyph.mark(
+              color: on ? Colors.white : context.subtleTextColor,
+              size: 14,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              AppLocalizations.of(context).collectionFilter,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: on ? FontWeight.w700 : FontWeight.w500,
+                color: on ? Colors.white : context.subtleTextColor,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
         ),
       ),
     );

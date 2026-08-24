@@ -2234,12 +2234,6 @@ abstract class AppLocalizations {
   /// **'Switch illustration'**
   String get cardSwitchIllustration;
 
-  /// No description provided for @cardViewerHint.
-  ///
-  /// In en, this message translates to:
-  /// **'{current} / {total}  •  tap/←→ flip  •  swipe ↑↓ navigate'**
-  String cardViewerHint(int current, int total);
-
   /// No description provided for @cardAbilities.
   ///
   /// In en, this message translates to:
@@ -2497,6 +2491,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'granted'**
   String get spellGrantedLower;
+
+  /// No description provided for @navCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get navCollection;
+
+  /// No description provided for @collectionFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'My collection'**
+  String get collectionFilter;
+
+  /// No description provided for @collectionOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get collectionOwned;
+
+  /// No description provided for @collectionBuilt.
+  ///
+  /// In en, this message translates to:
+  /// **'Built'**
+  String get collectionBuilt;
+
+  /// No description provided for @collectionPainted.
+  ///
+  /// In en, this message translates to:
+  /// **'Painted'**
+  String get collectionPainted;
+
+  /// No description provided for @collectionNestingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A painted miniature is necessarily built: lowering a total trims the ones above it.'**
+  String get collectionNestingHint;
+
+  /// No description provided for @collectionTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My collection'**
+  String get collectionTabMine;
+
+  /// No description provided for @collectionTabAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get collectionTabAdd;
+
+  /// No description provided for @collectionSearchMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Search my collection...'**
+  String get collectionSearchMine;
+
+  /// No description provided for @collectionSearchAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a miniature...'**
+  String get collectionSearchAdd;
+
+  /// No description provided for @collectionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{owned} / {total} profiles'**
+  String collectionProgress(int owned, int total);
+
+  /// No description provided for @collectionProgressDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{miniatures} miniatures, {painted} painted'**
+  String collectionProgressDetail(int miniatures, int painted);
+
+  /// No description provided for @collectionAbsentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 miniature not in your collection yet} other{{count} miniatures not in your collection yet}}'**
+  String collectionAbsentCount(int count);
+
+  /// No description provided for @collectionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in your collection yet.'**
+  String get collectionEmpty;
+
+  /// No description provided for @collectionAllAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Every model is already in your collection.'**
+  String get collectionAllAdded;
+
+  /// No description provided for @collectionSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save that change.'**
+  String get collectionSaveFailed;
+
+  /// No description provided for @collectionGangTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This gang on my shelf'**
+  String get collectionGangTitle;
+
+  /// No description provided for @collectionGangTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 miniature} other{{count} miniatures}}'**
+  String collectionGangTotal(int count);
+
+  /// No description provided for @collectionGangUnpainted.
+  ///
+  /// In en, this message translates to:
+  /// **'Built, not yet painted'**
+  String get collectionGangUnpainted;
+
+  /// No description provided for @collectionGangBoxed.
+  ///
+  /// In en, this message translates to:
+  /// **'Still boxed'**
+  String get collectionGangBoxed;
+
+  /// No description provided for @collectionGangMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing'**
+  String get collectionGangMissing;
+
+  /// No description provided for @collectionGangShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You are 1 miniature short of fielding this gang} other{You are {count} miniatures short of fielding this gang}}'**
+  String collectionGangShort(int count);
+
+  /// No description provided for @collectionGangComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Every miniature in this gang is on your shelf.'**
+  String get collectionGangComplete;
+
+  /// No description provided for @collectionGangOwnedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{owned} of {hired}'**
+  String collectionGangOwnedOf(int owned, int hired);
+
+  /// No description provided for @collectionGangEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This gang has no models yet.'**
+  String get collectionGangEmpty;
+
+  /// No description provided for @collectionIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track what you own'**
+  String get collectionIntroTitle;
+
+  /// No description provided for @collectionIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark which models are on your shelf, how many are assembled and how many are painted. The catalogue and the gang builder then show what you have, and a gang tells you whether you can put it on the table.'**
+  String get collectionIntroBody;
+
+  /// No description provided for @collectionIntroActivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get collectionIntroActivate;
+
+  /// No description provided for @collectionIntroSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use your collection — it follows your account, not this device.'**
+  String get collectionIntroSignIn;
+
+  /// No description provided for @collectionDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable collection'**
+  String get collectionDisable;
+
+  /// No description provided for @collectionDisabledKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Your collection is kept. Switching it back on brings it straight back.'**
+  String get collectionDisabledKept;
+
+  /// No description provided for @collectionDisableConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get collectionDisableConfirm;
+
+  /// No description provided for @settingsCollectionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection available'**
+  String get settingsCollectionAvailable;
 }
 
 class _AppLocalizationsDelegate

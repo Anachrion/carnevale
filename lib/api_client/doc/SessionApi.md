@@ -17,7 +17,7 @@ Method | HTTP request | Description
 [**refreshToken**](SessionApi.md#refreshtoken) | **POST** /token | Exchange a refresh token for a fresh JWT
 [**resetPassword**](SessionApi.md#resetpassword) | **PATCH** /password | Set a new password using a reset token
 [**signup**](SessionApi.md#signup) | **POST** /signup | Register a new user
-[**updateAccount**](SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s username
+[**updateAccount**](SessionApi.md#updateaccount) | **PATCH** /account | Update the current user&#39;s account settings
 
 
 # **createCableTicket**
@@ -386,7 +386,7 @@ Name | Type | Description  | Notes
 # **updateAccount**
 > Account updateAccount(updateAccountInput)
 
-Update the current user's username
+Update the current user's account settings
 
 ### Example
 ```dart

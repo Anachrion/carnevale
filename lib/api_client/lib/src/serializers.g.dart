@@ -19,6 +19,11 @@ Serializers _$serializers =
           ..add(AvailableGang.serializer)
           ..add(CardManifestEntry.serializer)
           ..add(CardReference.serializer)
+          ..add(CollectionBulkInput.serializer)
+          ..add(CollectionBulkInputItemsInner.serializer)
+          ..add(CollectionItem.serializer)
+          ..add(CollectionItemInput.serializer)
+          ..add(CollectionItemInputItem.serializer)
           ..add(CreateCableTicket201Response.serializer)
           ..add(CreateGameInput.serializer)
           ..add(DiscardAgendaInput.serializer)
@@ -122,6 +127,12 @@ Serializers _$serializers =
               const FullType(CardManifestEntry),
             ]),
             () => ListBuilder<CardManifestEntry>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(CollectionBulkInputItemsInner),
+            ]),
+            () => ListBuilder<CollectionBulkInputItemsInner>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(GamePlayer)]),

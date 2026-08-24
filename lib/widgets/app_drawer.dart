@@ -17,17 +17,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
+import '../collection_gate.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../screens/account_screen.dart';
 import '../screens/cards_screen.dart';
+import '../screens/collection_screen.dart';
 import '../screens/game_home_screen.dart';
 import '../screens/gangs_screen.dart';
 import '../screens/qr_scanner_screen.dart';
 import '../screens/rules_screen.dart';
 import '../screens/settings_screen.dart';
 
-enum AppDrawerRoute { home, cards, gangs, game, rules, account, settings }
+enum AppDrawerRoute { home, cards, collection, gangs, game, rules, account, settings }
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key, required this.current});
@@ -115,6 +117,20 @@ class AppDrawer extends StatelessWidget {
                     accent: accent,
                     onTap: () => _navigate(context, AppDrawerRoute.cards, const CardsScreen()),
                   ),
+                  // Only when the account offers it: the collection lives on the account, so
+                  // there is nothing behind this entry for a visitor, and the Settings switch can
+                  // take it away for someone who does not want it (CARNEVALEB-76).
+                  if (collectionOffered)
+                    _NavItem(
+                      label: l10n.navCollection,
+                      active: current == AppDrawerRoute.collection,
+                      accent: accent,
+                      onTap: () => _navigate(
+                        context,
+                        AppDrawerRoute.collection,
+                        const CollectionScreen(),
+                      ),
+                    ),
                   _NavItem(
                     label: l10n.navGangs,
                     active: current == AppDrawerRoute.gangs,

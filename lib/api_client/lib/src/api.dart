@@ -11,6 +11,7 @@ import 'package:carnevale_api/src/auth/bearer_auth.dart';
 import 'package:carnevale_api/src/auth/oauth.dart';
 import 'package:carnevale_api/src/api/abilities_api.dart';
 import 'package:carnevale_api/src/api/cards_api.dart';
+import 'package:carnevale_api/src/api/collection_api.dart';
 import 'package:carnevale_api/src/api/equipment_api.dart';
 import 'package:carnevale_api/src/api/games_api.dart';
 import 'package:carnevale_api/src/api/list_entries_api.dart';
@@ -125,6 +126,12 @@ class CarnevaleApi {
   /// by doing that all interceptors will not be executed
   CardsApi getCardsApi() {
     return CardsApi(dio, serializers);
+  }
+
+  /// Get CollectionApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  CollectionApi getCollectionApi() {
+    return CollectionApi(dio, serializers);
   }
 
   /// Get EquipmentApi instance, base route and serializer can be overridden by a given but be careful,

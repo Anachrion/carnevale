@@ -66,7 +66,8 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
     }
-    expect(find.textContaining('13 / 30'), findsOneWidget);
+    // The viewer no longer prints its position (CARNEVALEB-76 took the navigation hint with it),
+    // so which card we ended on is proved below instead: the hire list centres exactly that one.
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();

@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "AppBar title of the settings screen; also the Settings nav entry"
@@ -32,12 +31,23 @@
   "settingsSyncCards": "Sync Cards",
   "settingsSyncCardsWithCount": "Sync Cards ({details})",
   "@settingsSyncCardsWithCount": {
-    "placeholders": { "details": { "type": "String" } }
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
   },
   "settingsSyncChecking": "Checking for updates…",
   "settingsSyncDownloading": "Downloading {done} / {total}",
   "@settingsSyncDownloading": {
-    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "settingsPrintBlurb": "Print-ready card sheets, one PDF per faction, updated whenever the cards change.",
   "settingsPrintButton": "Card Sheets (PDF)",
@@ -47,7 +57,11 @@
   "settingsSyncUpToDate": "All cards are already up to date",
   "settingsSyncedCount": "{count, plural, =1{Synced 1 card image} other{Synced {count} card images}}",
   "@settingsSyncedCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "settingsAbout": "ABOUT",
   "settingsAboutButton": "About Carnevale",
@@ -62,7 +76,6 @@
   "aboutViewLicenses": "View Licenses",
   "aboutLegalese": "Carnevale is a tabletop miniatures game created and published by TT Combat, which owns all associated intellectual property, including the Carnevale name, artwork, and trademarks. We claim no ownership of it. This is an independent, fan-made companion app — not an official product. It is not affiliated with or endorsed by TT Combat, and is used with their kind permission; it is provided free of charge and is never sold. All names, trademarks, and artwork remain the property of TT Combat and their respective owners.\n\n© 2026 Anachrion & Eldrim. Licensed under the GNU Affero General Public License, version 3 or later.",
   "toastUsernameUpdated": "Username updated!",
-
   "actionCancel": "Cancel",
   "actionClose": "Close",
   "actionDelete": "Delete",
@@ -79,13 +92,11 @@
   "actionJoin": "Join",
   "actionSelect": "Select",
   "actionDeselect": "Deselect",
-
   "navHome": "Home",
   "navCards": "Cards",
   "navGangs": "Gangs",
   "navGames": "Games",
   "navRules": "Rules",
-
   "fieldUsername": "Username",
   "fieldEmail": "Email",
   "fieldEmailOrUsername": "Email or Username",
@@ -96,21 +107,17 @@
   "fieldConfirmPassword": "Confirm Password",
   "fieldNewPassword": "New Password",
   "fieldConfirmNewPassword": "Confirm New Password",
-
   "validationRequired": "Required",
   "validationEmailInvalid": "Enter a valid email",
   "validationPasswordTooShort": "At least 6 characters",
   "validationPasswordMismatch": "Passwords do not match",
-
   "errorCouldNotReachServer": "Could not reach server",
   "errorGeneric": "Something went wrong. Please try again.",
-
   "toastLoggedOut": "Logged out",
   "toastLoggedIn": "Logged in successfully!",
   "toastAccountCreated": "Account created!",
   "toastResetEmailSent": "Password reset email sent!",
   "toastPasswordReset": "Password reset! Please log in.",
-
   "accountTitle": "Account",
   "authForgotPassword": "Forgot password?",
   "authResetPassword": "Reset Password",
@@ -118,28 +125,39 @@
   "authHaveAccount": "Already have an account? ",
   "authNoAccount": "Don't have an account yet? ",
   "resetPasswordBlurb": "Choose a new password for your account.",
-
   "drawerDarkTheme": "DARK THEME",
   "drawerLightTheme": "LIGHT THEME",
-
   "deleteGangConfirm": "Delete \"{name}\"?",
   "@deleteGangConfirm": {
-    "placeholders": { "name": { "type": "String", "example": "The Doctors" } }
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "The Doctors"
+      }
+    }
   },
   "gangModelCount": "{count, plural, =0{No models} =1{1 model} other{{count} models}}",
   "@gangModelCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "ducatsAmount": "{count} ducats",
-  "@ducatsAmount": { "placeholders": { "count": { "type": "int" } } },
+  "@ducatsAmount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "attackerDefender": "Attacker/Defender",
   "roleAttacker": "Attacker",
   "roleDefender": "Defender",
   "youCap": "You",
   "youLower": "you",
   "opponentLabel": "Opponent",
-
   "agendaRuleCycle": "Cycle",
   "agendaRuleSecondary": "Secondary",
   "agendaRuleDouble": "Double",
@@ -150,7 +168,6 @@
   "agendaRuleDoubleDesc": "On achieving an agenda you may keep it in play; achieving it again scores double, otherwise nothing.",
   "agendaRuleSecretDesc": "Keep your agendas secret from your opponent until achieved. Without this rule, all players can see each other's agendas.",
   "agendaRuleTotalDesc": "You must achieve all of your agendas to score their Victory Points.",
-
   "gamesTabActive": "Active",
   "gamesTabArchived": "Archived",
   "gamesLoginPrompt": "Log in to create or join a game",
@@ -165,9 +182,27 @@
   "toastGameDeleted": "Game deleted",
   "toastGameDeleteFailed": "Could not delete this game",
   "gameStatusCodeLine": "{status} · Code {code}",
-  "@gameStatusCodeLine": { "placeholders": { "status": { "type": "String" }, "code": { "type": "String" } } },
+  "@gameStatusCodeLine": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "gameVersus": "{p1} vs {p2}",
-  "@gameVersus": { "placeholders": { "p1": { "type": "String" }, "p2": { "type": "String" } } },
+  "@gameVersus": {
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      }
+    }
+  },
   "gameWaitingForOpponentInline": "waiting for an opponent",
   "tooltipDeleteGame": "Delete game",
   "tooltipRestoreGame": "Restore game",
@@ -176,7 +211,16 @@
   "gameDeleteTitle": "Delete Game",
   "gameDeleteBody": "Delete this game? You won't be able to see it again, even if your opponent still can.",
   "gamePlayerListLine": "{name}: {gang}",
-  "@gamePlayerListLine": { "placeholders": { "name": { "type": "String" }, "gang": { "type": "String" } } },
+  "@gamePlayerListLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "gang": {
+        "type": "String"
+      }
+    }
+  },
   "gameNoGangSelected": "No gang selected yet",
   "actionCreateGame": "Create Game",
   "actionJoinGame": "Join Game",
@@ -187,17 +231,31 @@
   "gameDucatLimit": "Ducat limit",
   "gameBoardSizeOverride": "Board size (optional override)",
   "gameScenarioMeta": "{ducats} ducats · {duration}",
-  "@gameScenarioMeta": { "placeholders": { "ducats": { "type": "int" }, "duration": { "type": "String" } } },
+  "@gameScenarioMeta": {
+    "placeholders": {
+      "ducats": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "gameJoinCode": "Join code",
   "gameJoinFailed": "Could not join — check the code and try again.",
   "toastCouldNotOpenGang": "Could not open that gang.",
-
   "gameFallbackTitle": "Game",
   "sessionViewGangs": "View gangs",
   "sessionMyGang": "My Gang",
   "deployTitle": "Deploy your gangs",
   "deployBodyWithWinner": "{name} won the deployment roll-off. Agree on deployment zones and place your miniatures at the table.",
-  "@deployBodyWithWinner": { "placeholders": { "name": { "type": "String" } } },
+  "@deployBodyWithWinner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "deployBodyNoWinner": "Agree on deployment zones and place your miniatures at the table.",
   "toastSessionLoadFailed": "Could not load this game.",
   "sessionExpired": "Your session expired. Please log in again.",
@@ -213,7 +271,11 @@
   "toastJoinLinkCopied": "Link copied",
   "toastShareFailed": "Could not open the share sheet",
   "@lobbyShareMessage": {
-    "placeholders": { "url": { "type": "String" } }
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
   },
   "gangExportTitle": "Export gang",
   "gangExportCopy": "Copy",
@@ -239,27 +301,51 @@
   "gangImportSkipped": "{count, plural, =1{1 line skipped} other{{count} lines skipped}}",
   "toastGangImported": "Imported {name}",
   "@gangImportSkipped": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "@toastGangImported": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "gameShareSetup": "Share setup",
   "gameSetupShareMessage": "Let's play Carnevale: {url}",
   "toastSetupLinkCopied": "Setup link copied",
   "gameSetupFromLink": "Settings from a shared link",
   "@gameSetupShareMessage": {
-    "placeholders": { "url": { "type": "String" } }
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
   },
   "rolloffWonTitle": "You won the roll-off!",
   "rolloffChooseRole": "Choose your role:",
   "rolloffTitle": "Role roll-off",
   "rolloffWaitingForWinner": "Waiting for {name} to choose a role...",
-  "@rolloffWaitingForWinner": { "placeholders": { "name": { "type": "String" } } },
+  "@rolloffWaitingForWinner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rolloffDetermining": "Determining who picks a role...",
   "gangPickTitle": "Pick your gang",
   "gangPickDucatLimit": "Ducat limit: {limit}",
-  "@gangPickDucatLimit": { "placeholders": { "limit": { "type": "int" } } },
+  "@gangPickDucatLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
   "gangPickNoGangs": "You have no gangs yet — build one now.",
   "gangPickBuildNew": "Build a new gang",
   "gangPickWaitingOpponent": "Waiting for the opponent to pick a gang...",
@@ -272,27 +358,65 @@
   "yourSpellsSubtitle": "Review each Mage's spells before confirming — Ready locks these in together with your Agendas.",
   "spellsNoMentor": "No mentor chosen yet",
   "spellsKnownCount": "{known}/{total} spells",
-  "@spellsKnownCount": { "placeholders": { "known": { "type": "int" }, "total": { "type": "int" } } },
+  "@spellsKnownCount": {
+    "placeholders": {
+      "known": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "yourAgendasTitle": "Your Agendas",
   "yourAgendasSubtitle": "Any agenda that is impossible or duplicated can be discarded and redrawn — agree with your opponent that it is unachievable.",
   "agendaConfirmBlurb": "Confirming locks in your Agendas and your Spells together for the rest of the game.",
   "actionReady": "Ready",
   "waitingOpponentReady": "Waiting for the opponent to be ready...",
   "agendaIndexName": "{index} - {name}",
-  "@agendaIndexName": { "placeholders": { "index": { "type": "int" }, "name": { "type": "String" } } },
+  "@agendaIndexName": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agendaUnachievableRedraw": "Unachievable — redraw",
   "discardedCount": "Discarded ({count})",
-  "@discardedCount": { "placeholders": { "count": { "type": "int" } } },
+  "@discardedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mulliganTitle": "Discard & redraw?",
   "mulliganBody": "Discard \"{name}\" as unachievable and draw a replacement? Your opponent will see this.",
-  "@mulliganBody": { "placeholders": { "name": { "type": "String" } } },
+  "@mulliganBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "actionDiscardRedraw": "Discard & redraw",
-
   "scoreTabLabel": "Score",
   "tooltipRewindTurn": "Rewind a turn",
   "tooltipAdvanceTurn": "Advance a turn",
   "turnOfTurns": "Turn {current} of {total}",
-  "@turnOfTurns": { "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } } },
+  "@turnOfTurns": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "vpLabel": "VP",
   "gameEnded": "You've ended the game.",
   "actionUndoKeepScoring": "Undo — keep scoring",
@@ -303,7 +427,13 @@
   "sectionDiscarded": "Discarded",
   "sectionInHand": "In hand",
   "opponentAgendasTitle": "{name}'s Agendas",
-  "@opponentAgendasTitle": { "placeholders": { "name": { "type": "String" } } },
+  "@opponentAgendasTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agendasHiddenSecret": "Hidden — this scenario has the Secret rule.",
   "actionScore": "Score",
   "actionDiscard": "Discard",
@@ -318,36 +448,50 @@
   "originLabelCommandPoint": "command point",
   "logYourLog": "Your log",
   "logPlayerLog": "{name}'s log",
-  "@logPlayerLog": { "placeholders": { "name": { "type": "String" } } },
+  "@logPlayerLog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "logSecretNote": "Only resolved agendas are shown (Secret scenario).",
   "logNoEvents": "No events yet.",
   "logTurnHeader": "TURN {turn}",
-  "@logTurnHeader": { "placeholders": { "turn": { "type": "int" } } },
+  "@logTurnHeader": {
+    "placeholders": {
+      "turn": {
+        "type": "int"
+      }
+    }
+  },
   "eventScored": "Scored",
   "eventDiscarded": "Discarded",
   "eventDrew": "Drew",
-
   "gangsLoginPrompt": "Log in to build and manage your gangs",
   "gangCount": "{count, plural, =1{1 gang} other{{count} gangs}}",
-  "@gangCount": { "placeholders": { "count": { "type": "int" } } },
+  "@gangCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "gangDeleteTitle": "Delete Gang",
   "gangsEmptyTitle": "No gangs yet",
   "gangsEmptySubtitle": "Tap + to create your first gang",
   "gangsRosterNoModels": "No models hired yet.",
   "gangViewerNoModels": "No models hired.",
   "gangBuilderNoModels": "No models hired yet",
-
   "gangCreateTitle": "New Gang",
   "gangNameLabel": "Gang name",
   "gangPointLimit": "Point limit",
   "gangFactionLabel": "Faction",
   "gangCreateButton": "Create Gang",
-
   "toastActivationFailed": "Could not update the activation. Please try again.",
   "toastSpellUpdateFailed": "Could not update that spell. Please try again.",
   "toastRemoveModelFailed": "Could not remove that model. Please try again.",
   "gangViewerLoadFailed": "Could not load this gang.",
-
   "labelFactionRule": "Faction Rule",
   "labelSummon": "Summon",
   "counterStunned": "Stunned",
@@ -361,10 +505,13 @@
   "tooltipTransformInto": "Transform into {name}",
   "@tooltipTransformInto": {
     "description": "Violent Transformation: swaps a model to its other printed card mid-game.",
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "tooltipEditCounters": "Edit counters",
-
   "transformFailed": "Could not transform that model. Please try again.",
   "counterToggleFailed": "Could not update the counter. Please try again.",
   "counterTapToToggle": "Tap a counter to toggle it.",
@@ -408,7 +555,11 @@
   "grantWornBy": "Worn by {name}",
   "@grantWornBy": {
     "description": "Header shown in the mask modal once the mask has been given, naming the model that now wears it.",
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "statUpdateReverted": "Couldn't save the change — reverted to the last synced value.",
   "@statUpdateReverted": {
@@ -423,9 +574,14 @@
   "summonNoModels": "No models found.",
   "summonFailed": "Could not summon that model. Please try again.",
   "dismissTitle": "Remove {name}?",
-  "@dismissTitle": { "placeholders": { "name": { "type": "String" } } },
+  "@dismissTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "dismissBody": "This summoned model leaves the board. Its wounds and counters go with it.",
-
   "gangNoMentorChosen": "No mentor chosen",
   "gangNoSpells": "No spells",
   "labelSpells": "Spells",
@@ -437,7 +593,6 @@
   "gangRoleLeader": "leader",
   "gangRoleHero": "hero",
   "gangHired": "Hired",
-
   "gangTabList": "List",
   "gangTabHire": "Hire",
   "gangGoToHire": "Go to Hire to add models",
@@ -449,26 +604,45 @@
   "sortRole": "Role",
   "sortName": "Name",
   "sortCost": "Cost",
-
   "pointsBarSlashLimit": " / {limit} ducats",
-  "@pointsBarSlashLimit": { "placeholders": { "limit": { "type": "int" } } },
+  "@pointsBarSlashLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
   "pointsBarLeft": "{count} left",
-  "@pointsBarLeft": { "placeholders": { "count": { "type": "int" } } },
+  "@pointsBarLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "pointsBarOverBy": "−{count} left",
-  "@pointsBarOverBy": { "placeholders": { "count": { "type": "int" } } },
-
+  "@pointsBarOverBy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "cardsProfileCount": "{count, plural, =1{1 profile} other{{count} profiles}}",
-  "@cardsProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@cardsProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "cardsNoProfiles": "No profiles found.",
   "cardSwitchIllustration": "Switch illustration",
-  "cardViewerHint": "{current} / {total}  •  tap/←→ flip  •  swipe ↑↓ navigate",
-  "@cardViewerHint": { "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } } },
   "cardAbilities": "Abilities",
   "cardAbilitiesLoadFailed": "Could not load abilities.",
   "cardNoAbilities": "This character has no special abilities.",
   "cardCharacterAbilities": "Character Abilities",
   "cardWeaponAbilities": "Weapon Abilities",
-
   "rulesTitleUpper": "RULES",
   "rulesAvailableOffline": "Available offline",
   "rulesDownloadsOnOpen": "Downloads on first open",
@@ -480,44 +654,203 @@
   "tooltipNextMatch": "Next match",
   "rulesMatchNone": "None",
   "rulesDownloadFailed": "Could not download {title}",
-  "@rulesDownloadFailed": { "placeholders": { "title": { "type": "String" } } },
+  "@rulesDownloadFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "rulesOpenFailed": "Could not open {title}",
-  "@rulesOpenFailed": { "placeholders": { "title": { "type": "String" } } },
+  "@rulesOpenFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "rulesDownloadingPercent": "Downloading — {percent}%",
-  "@rulesDownloadingPercent": { "placeholders": { "percent": { "type": "int" } } },
-
+  "@rulesDownloadingPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "apprMentor": "Mentor",
   "apprNoMentor": "No eligible mentor yet — hire a Hero with the Doctor keyword first.",
   "apprNoMentorSelected": "— No mentor selected —",
   "apprAbilityToCopy": "Ability to copy",
   "apprMageAbility": "Mage — copies the mentor's spell Disciplines",
   "apprCopyNote": "Copying a unique skill or weapon profile isn't supported yet — Mage is the only ability available here.",
-
   "spellsButtonLabel": "Spells · {cast}/{total} cast",
-  "@spellsButtonLabel": { "placeholders": { "cast": { "type": "int" }, "total": { "type": "int" } } },
+  "@spellsButtonLabel": {
+    "placeholders": {
+      "cast": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "spellsKnownTitle": "Known spells",
   "spellAllCantrips": "All cantrips",
-
   "spellDeselectHint": "Deselect a spell in another Discipline to pick here instead.",
   "spellPoolTitle": "Spell pool",
   "spellNoMentorSetup": "No mentor chosen — set one up via Apprenticeship first",
   "spellMentorLabel": "Mentor: {name}",
-  "@spellMentorLabel": { "placeholders": { "name": { "type": "String" } } },
+  "@spellMentorLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "spellUpToDisciplines": "up to {count} Disciplines at once",
-  "@spellUpToDisciplines": { "placeholders": { "count": { "type": "int" } } },
+  "@spellUpToDisciplines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "spellNoDisciplineChosen": "No Discipline chosen",
   "spellsSlashCount": "{count}/{total} spells",
-  "@spellsSlashCount": { "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } } },
+  "@spellsSlashCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "spellsKnownCountLong": "{known}/{total} spells known",
-  "@spellsKnownCountLong": { "placeholders": { "known": { "type": "int" }, "total": { "type": "int" } } },
+  "@spellsKnownCountLong": {
+    "placeholders": {
+      "known": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "spellCantripOnly": "Cantrip only",
   "spellDistinctPool": "Must be a different Discipline from this model's other pool.",
   "spellDistinctCopy": "Already chosen by another copy of this model in the gang.",
   "spellsAndDisciplines": "{spells}/{slots} spells known · {chosen}/{of} Disciplines chosen",
-  "@spellsAndDisciplines": { "placeholders": { "spells": { "type": "int" }, "slots": { "type": "int" }, "chosen": { "type": "int" }, "of": { "type": "int" } } },
+  "@spellsAndDisciplines": {
+    "placeholders": {
+      "spells": {
+        "type": "int"
+      },
+      "slots": {
+        "type": "int"
+      },
+      "chosen": {
+        "type": "int"
+      },
+      "of": {
+        "type": "int"
+      }
+    }
+  },
   "spellAlwaysKnown": "always known",
   "spellGranted": "Granted",
   "spellsPlural": "{count, plural, =1{1 spell} other{{count} spells}}",
-  "@spellsPlural": { "placeholders": { "count": { "type": "int" } } },
-  "spellGrantedLower": "granted"
+  "@spellsPlural": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spellGrantedLower": "granted",
+  "navCollection": "Collection",
+  "collectionFilter": "My collection",
+  "collectionOwned": "Owned",
+  "collectionBuilt": "Built",
+  "collectionPainted": "Painted",
+  "collectionNestingHint": "A painted miniature is necessarily built: lowering a total trims the ones above it.",
+  "collectionTabMine": "My collection",
+  "collectionTabAdd": "Add",
+  "collectionSearchMine": "Search my collection...",
+  "collectionSearchAdd": "Add a miniature...",
+  "collectionProgress": "{owned} / {total} profiles",
+  "@collectionProgress": {
+    "placeholders": {
+      "owned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionProgressDetail": "{miniatures} miniatures, {painted} painted",
+  "@collectionProgressDetail": {
+    "placeholders": {
+      "miniatures": {
+        "type": "int"
+      },
+      "painted": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionAbsentCount": "{count, plural, =1{1 miniature not in your collection yet} other{{count} miniatures not in your collection yet}}",
+  "@collectionAbsentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionEmpty": "Nothing in your collection yet.",
+  "collectionAllAdded": "Every model is already in your collection.",
+  "collectionSaveFailed": "Could not save that change.",
+  "collectionGangTitle": "This gang on my shelf",
+  "collectionGangTotal": "{count, plural, =1{1 miniature} other{{count} miniatures}}",
+  "@collectionGangTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionGangUnpainted": "Built, not yet painted",
+  "collectionGangBoxed": "Still boxed",
+  "collectionGangMissing": "Missing",
+  "collectionGangShort": "{count, plural, =1{You are 1 miniature short of fielding this gang} other{You are {count} miniatures short of fielding this gang}}",
+  "@collectionGangShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionGangComplete": "Every miniature in this gang is on your shelf.",
+  "collectionGangOwnedOf": "{owned} of {hired}",
+  "@collectionGangOwnedOf": {
+    "placeholders": {
+      "owned": {
+        "type": "int"
+      },
+      "hired": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionGangEmpty": "This gang has no models yet.",
+  "collectionIntroTitle": "Track what you own",
+  "collectionIntroBody": "Mark which models are on your shelf, how many are assembled and how many are painted. The catalogue and the gang builder then show what you have, and a gang tells you whether you can put it on the table.",
+  "collectionIntroActivate": "Enable",
+  "collectionIntroSignIn": "Sign in to use your collection — it follows your account, not this device.",
+  "collectionDisable": "Disable collection",
+  "collectionDisabledKept": "Your collection is kept. Switching it back on brings it straight back.",
+  "collectionDisableConfirm": "Disable",
+  "settingsCollectionAvailable": "Collection available"
 }

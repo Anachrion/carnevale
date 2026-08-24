@@ -4,8 +4,10 @@ import 'dart:typed_data';
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/serializer.dart';
 import 'package:carnevale/services/api_client.dart';
+import 'package:carnevale/services/auth_service.dart';
 import 'package:carnevale_api/carnevale_api.dart' as api;
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A Dio adapter that returns canned JSON per `METHOD /path`, so widget/service tests can drive the
@@ -70,6 +72,9 @@ class FakeApiAdapter implements HttpClientAdapter {
 /// widget test, hanging the load. An empty store is the right blank-slate default per test.
 FakeApiAdapter installFakeApi() {
   SharedPreferences.setMockInitialValues({});
+  // The session token lives in flutter_secure_storage, whose platform channel has no test
+  // implementation — anything that signs in or out throws MissingPluginException without this.
+  FlutterSecureStorage.setMockInitialValues({});
   final adapter = FakeApiAdapter();
   ApiClient().dio.httpClientAdapter = adapter;
   return adapter;
@@ -90,6 +95,59 @@ Object modelListBody(api.ModelList list) =>
 
 Object entryStateBody(api.EntryState state) =>
     _serialize(state, const FullType(api.EntryState));
+
+Object serializeItem(api.CollectionItem item) =>
+    _serialize(item, const FullType(api.CollectionItem));
+
+/// A JWT the app will accept: the header and payload are real base64url JSON, the signature is
+/// not — AuthService only ever reads the `exp` claim, never verifies it.
+String fakeJwt({Duration validFor = const Duration(hours: 1)}) {
+  String encode(Object o) =>
+      base64Url.encode(utf8.encode(json.encode(o))).replaceAll('=', '');
+  final payload = {
+    'exp': DateTime.now().add(validFor).millisecondsSinceEpoch ~/ 1000,
+  };
+  return '${encode({'alg': 'HS256'})}.${encode(payload)}.signature';
+}
+
+/// Signs a user in against [adapter], for the screens that only show something to a logged-in
+/// player (the collection badge, its filter chip and its menu entries).
+///
+/// The Collection switches default to *on*, unlike a real fresh account, because that is the state
+/// nearly every test about the feature wants to be in; the handful that exercise the gates
+/// themselves pass false explicitly.
+Future<void> signInFakeUser(
+  FakeApiAdapter adapter, {
+  int id = 1,
+  String username = 'Eldrim',
+  bool collectionEnabled = true,
+  bool collectionVisible = true,
+}) async {
+  adapter.stub('POST', '/login', {
+    'user': {
+      'id': id,
+      'email': '$username@example.com',
+      'username': username,
+      'collection_enabled': collectionEnabled,
+      'collection_visible': collectionVisible,
+    },
+    'refresh_token': 'refresh-token',
+  }, headers: {'authorization': 'Bearer ${fakeJwt()}'});
+  await AuthService().logIn(login: username, password: 'password123');
+}
+
+api.CollectionItem fakeCollectionItem({
+  int profileId = 1,
+  int owned = 1,
+  int built = 0,
+  int painted = 0,
+}) => api.CollectionItem(
+  (b) => b
+    ..profileId = profileId
+    ..owned = owned
+    ..built = built
+    ..painted = painted,
+);
 
 api.Equipment fakeEquipment({
   int id = 1,
