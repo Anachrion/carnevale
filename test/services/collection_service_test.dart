@@ -16,6 +16,8 @@ void main() {
   setUp(() async {
     fakeApi = installFakeApi();
     await CollectionService().reset();
+    // Les écritures sont débouncées en vrai ; ici on veut les voir partir tout de suite.
+    CollectionService.writeDelay = Duration.zero;
   });
 
   // These mirror spec/models/collection/item_spec.rb one case for one. The rule lives in two
@@ -245,6 +247,58 @@ void main() {
         expect(CollectionService().entryFor(7), CollectionEntry.none);
       },
     );
+  });
+
+  group('debounced writes', () {
+    // Mirrors what the in-game stat editor does: a burst of taps is one write, not one per tap.
+    test('a burst of taps collapses into a single request', () async {
+      CollectionService.writeDelay = const Duration(milliseconds: 40);
+      fakeApi.stub(
+        'GET',
+        '/collection',
+        listBody([fakeCollectionItem(profileId: 7, owned: 1)], _itemType),
+      );
+      await CollectionService().load();
+      fakeApi.stub(
+        'PUT',
+        '/collection/7',
+        serializeItem(fakeCollectionItem(profileId: 7, owned: 5)),
+      );
+      final before = fakeApi.requests.length;
+
+      Future<bool>? last;
+      for (var v = 2; v <= 5; v++) {
+        last = CollectionService().setCount(7, CollectionCount.owned, v);
+      }
+      // Shown immediately, before anything has been sent.
+      expect(CollectionService().entryFor(7).owned, 5);
+      expect(fakeApi.requests.length, before);
+
+      expect(await last, isTrue);
+      expect(fakeApi.requests.length - before, 1);
+      final sent = (fakeApi.requests.last.data as Map)['item'] as Map;
+      expect(sent, containsPair('owned', 5));
+    });
+
+    test('a failed burst rolls back to what the server last agreed to', () async {
+      CollectionService.writeDelay = const Duration(milliseconds: 40);
+      fakeApi.stub(
+        'GET',
+        '/collection',
+        listBody([fakeCollectionItem(profileId: 7, owned: 2)], _itemType),
+      );
+      await CollectionService().load();
+      // PUT unstubbed: the write fails.
+
+      Future<bool>? last;
+      for (var v = 3; v <= 6; v++) {
+        last = CollectionService().setCount(7, CollectionCount.owned, v);
+      }
+
+      expect(await last, isFalse);
+      // Back to 2 — not to 5, the value the second-to-last tap happened to leave behind.
+      expect(CollectionService().entryFor(7).owned, 2);
+    });
   });
 
   test('reset forgets the collection and its cached copy', () async {

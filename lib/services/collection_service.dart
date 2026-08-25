@@ -224,43 +224,88 @@ class CollectionService extends ChangeNotifier {
     }
   }
 
+  /// How long a burst of stepper taps is allowed to settle before it is written.
+  ///
+  /// Matches the in-game stat editor's debounce, which solves the same problem on the same kind of
+  /// control. Overridable so tests don't have to wait on a real clock.
+  @visibleForTesting
+  static Duration writeDelay = const Duration(milliseconds: 900);
+
+  /// Pending write per profile, and what to roll back to if it fails.
+  final Map<int, Timer> _timers = {};
+  final Map<int, CollectionEntry?> _rollback = {};
+  final Map<int, Completer<bool>> _pending = {};
+
   /// Moves one count for one profile, optimistically.
   ///
-  /// The new state is shown at once and the write follows; a failure puts the previous entry back
-  /// and reports false so the caller can say so. The request carries the whole settled entry rather
-  /// than the single count the user touched: the server would reach the same result from either,
-  /// but sending what we already decided to display keeps the two from disagreeing if the
-  /// normalisation rules ever drift apart.
-  Future<bool> setCount(int profileId, CollectionCount count, int value) async {
+  /// The new value is shown at once and the write follows once the taps stop. Holding a finger on
+  /// `+` used to fire one request per tap, which was both wasteful and racy: an early response
+  /// landing after a later one would put a stale count back on screen. So a burst now collapses
+  /// into a single write of the value it settled on, and the server's answer is adopted only if
+  /// nothing newer is waiting behind it.
+  ///
+  /// The returned future completes when that write does — true if it landed, false if it failed
+  /// and the counts were rolled back to the last acknowledged state. Every caller in a burst is
+  /// handed the same future, since they share the one write.
+  ///
+  /// The request carries the whole settled entry rather than the single count the user touched:
+  /// the server would reach the same result from either, but sending what we already decided to
+  /// display keeps the two from disagreeing if the normalisation rules ever drift apart.
+  Future<bool> setCount(int profileId, CollectionCount count, int value) {
     final items = _items;
-    if (items == null) return false;
+    if (items == null) return Future.value(false);
 
-    final previous = items[profileId];
-    final next = (previous ?? CollectionEntry.none).withCount(count, value);
-    _apply(profileId, next);
+    // Captured once per burst: the state the server last agreed to, not the intermediate value
+    // the previous tap happened to leave behind.
+    if (!_rollback.containsKey(profileId)) _rollback[profileId] = items[profileId];
+
+    _apply(profileId, (items[profileId] ?? CollectionEntry.none).withCount(count, value));
+
+    _timers[profileId]?.cancel();
+    final completer = _pending.putIfAbsent(profileId, Completer<bool>.new);
+    _timers[profileId] = Timer(writeDelay, () => _flush(profileId));
+    return completer.future;
+  }
+
+  Future<void> _flush(int profileId) async {
+    _timers.remove(profileId);
+    final completer = _pending.remove(profileId);
+    final rollback = _rollback.remove(profileId);
+    final items = _items;
+    if (items == null) {
+      completer?.complete(false);
+      return;
+    }
+    final target = items[profileId] ?? CollectionEntry.none;
 
     try {
       final res = await _client.collection.updateCollectionItem(
         profileId: profileId,
         collectionItemInput: api.CollectionItemInput(
           (b) => b
-            ..item.owned = next.owned
-            ..item.built = next.built
-            ..item.painted = next.painted,
+            ..item.owned = target.owned
+            ..item.built = target.built
+            ..item.painted = target.painted,
         ),
       );
       final confirmed = res.data;
-      if (confirmed != null) _apply(profileId, CollectionEntry.from(confirmed));
-      unawaited(_persist());
-      return true;
-    } on DioException {
-      if (previous == null) {
-        items.remove(profileId);
-      } else {
-        items[profileId] = previous;
+      // Only adopt the server's answer if no newer edit arrived while this was in flight —
+      // otherwise a slow response rewinds what the player has since tapped.
+      if (confirmed != null && !_pending.containsKey(profileId)) {
+        _apply(profileId, CollectionEntry.from(confirmed));
       }
-      notifyListeners();
-      return false;
+      unawaited(_persist());
+      completer?.complete(true);
+    } on DioException {
+      if (!_pending.containsKey(profileId)) {
+        if (rollback == null) {
+          items.remove(profileId);
+        } else {
+          items[profileId] = rollback;
+        }
+        notifyListeners();
+      }
+      completer?.complete(false);
     }
   }
 
@@ -301,6 +346,15 @@ class CollectionService extends ChangeNotifier {
   /// Drops the in-memory collection and the cached copy. Called on logout, so the next account
   /// never sees the last one's shelf.
   Future<void> reset() async {
+    for (final timer in _timers.values) {
+      timer.cancel();
+    }
+    _timers.clear();
+    _rollback.clear();
+    for (final completer in _pending.values) {
+      if (!completer.isCompleted) completer.complete(false);
+    }
+    _pending.clear();
     _items = null;
     notifyListeners();
     await CatalogCache.clear(_cacheKey);
