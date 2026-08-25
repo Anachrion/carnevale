@@ -60,6 +60,28 @@ existing file under `lib/` for the exact text). Generated files (`lib/api_client
 `*.g.dart`, `*.freezed.dart`) are intentionally left without headers — do not add
 them there.
 
+### Counters that persist: optimistic, debounced, rollback
+
+Any control a user can tap repeatedly — a stepper, a `+`/`-` pair, a counter — must
+not send one request per tap. Use the pattern already implemented in
+`_StatEditDialog` (`lib/screens/gang_viewer_dialogs.dart`) and
+`CollectionService.setCount` (`lib/services/collection_service.dart`):
+
+- **Show the new value immediately.** The screen never waits on the round trip.
+- **Debounce the write** (900 ms) so a burst of taps collapses into one request
+  carrying the value the burst settled on.
+- **Keep the last server-acknowledged value**, captured once per burst, and roll
+  back to *that* if the write fails — not to whatever the previous tap left behind.
+- **Adopt the server's answer only if nothing newer is pending.** Without this
+  guard, a slow response landing after a later edit rewinds what the user has
+  since tapped.
+
+The first two are about cost, the last two about correctness: one request per tap
+is not merely wasteful, it races with itself. Skip the pattern only where a tap is
+genuinely one-shot, or where the server must be told at once — `_StatEditDialog`
+writes without waiting when a model's HP reaches 0, because that triggers the
+server's death handling.
+
 ---
 
 ## Developer Certificate of Origin 1.1

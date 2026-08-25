@@ -34,6 +34,8 @@ void main() {
     ProfileService().reset();
     await CollectionService().reset();
     adapter.stub('GET', '/profiles', listBody(catalogue, profileType));
+    // Writes are debounced in real use; these tests want to see them land.
+    CollectionService.writeDelay = Duration.zero;
     await signInFakeUser(adapter);
   });
 
