@@ -1,0 +1,24 @@
+# dekit task for the Flutter web app — the same `flutter run` dev.sh wraps. This is a fragment,
+# loaded by a dekit.yaml one level up that mounts it at `front` next to the backend's tasks at
+# `back` (see README). `cwd: .` because a fragment task runs from the project root otherwise;
+# `mise exec` so it gets this repo's Flutter whichever shell started the runner.
+#
+# No fswatch here: dekit gives the task a real terminal, so focus it in the TUI (C-a) and press
+# R to hot restart, as in a plain `flutter run`. Set CHROME_EXECUTABLE to use another Chromium
+# browser such as Brave.
+tasks:
+  web:
+    cmd:
+      - mise
+      - exec
+      - --
+      - flutter
+      - run
+      - -d
+      - chrome
+      - --web-port=56569
+      # Stable browser profile, so the login survives restarts (see dev.sh).
+      - --web-browser-flag=--user-data-dir=/tmp/carnevale-chrome-dev
+    cwd: .
+    deps: [/back/web]
+    autostart: true

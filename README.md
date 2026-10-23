@@ -97,6 +97,12 @@ flutter test         # test suite
 ./dev.sh             # web dev server on http://localhost:56569
 ```
 
+To run the app together with the backend and its database in one TUI, use dekit with this repo's
+`dekit.tasks.yaml` — see "Running everything with dekit" in the
+[backend README](https://github.com/Anachrion/carnevale-backend#running-everything-with-dekit).
+`flutter run -d chrome` (and so `./dev.sh` and dekit) can drive another Chromium browser, such as
+Brave, through `CHROME_EXECUTABLE`.
+
 `lib/api_client/` is **generated** from the backend's OpenAPI schema by
 `scripts/generate_api.sh` — change the schema in the backend and regenerate, rather than editing
 those files by hand.
