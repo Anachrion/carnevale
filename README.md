@@ -45,13 +45,20 @@ sign back in — the server holds the state, so you resume exactly where you wer
 
 ## Getting started
 
-**Requirements:** the Flutter SDK, and a running backend (see the
+**Requirements:** [mise](https://mise.jdx.dev), and a running backend (see the
 [backend README](https://github.com/Anachrion/carnevale-backend) to bring one up locally).
 
+`mise.toml` pins the toolchain — Flutter, Java 17 for Android builds, and the OpenAPI generator
+CLI — and CI installs Flutter from the same file, so bump versions there.
+
 ```bash
+mise trust && mise install
 flutter pub get
 flutter run
 ```
+
+Your editor needs the Flutter SDK path: `mise where flutter` prints it (for VS Code, set
+`dart.flutterSdkPath`).
 
 By default the app talks to `localhost:3000`. Point it elsewhere with `--dart-define`:
 

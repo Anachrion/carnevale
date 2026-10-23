@@ -1,0 +1,9 @@
+# Local toolchain, and the single source of truth for tool versions: CI installs from this file too
+# (jdx/mise-action). Bump Flutter here, deliberately, rather than tracking whatever `stable` is.
+
+[tools]
+flutter = "3.47.7"
+java = "temurin-17" # Android build (android/app/build.gradle targets Java 17)
+# Provides `openapi-generator-cli` for scripts/generate_api.sh; the generator version itself is
+# pinned in openapitools.json. Needs the Java above.
+"npm:@openapitools/openapi-generator-cli" = "2"

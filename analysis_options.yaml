@@ -13,6 +13,10 @@ analyzer:
   exclude:
     # Auto-generated OpenAPI client; not meant to be hand-edited.
     - lib/api_client/**
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
 
 linter:
   # The lint rules applied to this project can be customized in the
