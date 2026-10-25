@@ -60,6 +60,13 @@ flutter run
 Your editor needs the Flutter SDK path: `mise where flutter` prints it (for VS Code, set
 `dart.flutterSdkPath`).
 
+Each target platform needs a bit more, outside mise (`flutter doctor` reports what is missing):
+
+- **Web:** a Chromium browser — Google Chrome, or another one (such as Brave) named by
+  `CHROME_EXECUTABLE`. `./dev.sh` also needs `fswatch` (`brew install fswatch`).
+- **Android:** the Android SDK, through Android Studio. `bin/publish-play` needs it too.
+- **iOS:** Xcode and CocoaPods (`brew install cocoapods`).
+
 By default the app talks to `localhost:3000`. Point it elsewhere with `--dart-define`:
 
 ```bash
